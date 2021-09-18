@@ -3,6 +3,7 @@
  - [Coding conventions](#coding-conventions)
  - [License](#license)
  - [Contact](#contact)
+
 This project is really huge and requires a lot of time so any help is welcome, from the smallest syntax correction to major changes.
 ## Origins
 The two main reasons that pushed me to create this project are: portability and client performance.
