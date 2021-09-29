@@ -1,5 +1,7 @@
 # Fast-Discord
 ![Fast-Discord image](doc/images/Fast-Discord.png)
+*For now it is very basic*
+
  - [Origins of this project](#origins)
  - [Coding conventions](#coding-conventions)
  - [License](#license)
