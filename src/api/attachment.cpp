@@ -4,7 +4,11 @@ namespace Api {
 
 Attachment::~Attachment()
 {
-    delete id, filename, contentType, url, proxyUrl;
+    delete id;
+    delete filename;
+    delete contentType;
+    delete url;
+    delete proxyUrl;
 }
 
 } // namespace Api

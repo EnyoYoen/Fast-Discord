@@ -4,7 +4,9 @@ namespace Api {
 
 Overwrite::~Overwrite()
 {
-    delete id, allow, deny;
+    delete id;
+    delete allow;
+    delete deny;
 }
 
 } // namespace Api

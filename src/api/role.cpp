@@ -4,12 +4,16 @@ namespace Api {
 
 RoleTags::~RoleTags()
 {
-    delete botId, integrationId;
+    delete botId;
+    delete integrationId;
 }
 
 Role::~Role()
 {
-    delete tags, id, name, permissions;
+    delete tags;
+    delete id;
+    delete name;
+    delete permissions;
 }
 
 } // namespace Api

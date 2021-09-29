@@ -4,12 +4,20 @@ namespace Api {
 
 StickerItem::~StickerItem()
 {
-    delete id, name;
+    delete id;
+    delete name;
 }
 
 Sticker::~Sticker()
 {
-    delete user, id, packId, name, description, tags, asset, guildId;
+    delete user;
+    delete id;
+    delete packId;
+    delete name;
+    delete description;
+    delete tags;
+    delete asset;
+    delete guildId;
 }
 
 } // namespace Api

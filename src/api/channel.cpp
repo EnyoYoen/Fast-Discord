@@ -11,12 +11,29 @@ namespace Api {
 
 Channel::~Channel()
 {
-    delete recipients, permissionOverwrites, member, threadMetadata, id, name, topic, icon, lastPinTimestamp, rtcRegion, permissions, guildId, lastMessageId, ownerId, applicationId, parentId;
+    delete recipients;
+    delete permissionOverwrites;
+    delete member;
+    delete threadMetadata;
+    delete id;
+    delete name;
+    delete topic;
+    delete icon;
+    delete lastPinTimestamp;
+    delete rtcRegion;
+    delete permissions;
+    delete guildId;
+    delete lastMessageId;
+    delete ownerId;
+    delete applicationId;
+    delete parentId;
 }
 
 ChannelMention::~ChannelMention()
 {
-    delete id, guilId, name;
+    delete id;
+    delete guilId;
+    delete name;
 }
 
 

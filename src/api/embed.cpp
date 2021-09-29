@@ -4,32 +4,52 @@ namespace Api {
 
 EmbedFooter::~EmbedFooter()
 {
-    delete text, iconUrl, proxyIconUrl;
+    delete text;
+    delete iconUrl;
+    delete proxyIconUrl;
 }
 
 EmbedProvider::~EmbedProvider()
 {
-    delete name, url;
+    delete name;
+    delete url;
 }
 
 EmbedAuthor::~EmbedAuthor()
 {
-    delete name, url, iconUrl, proxyIconUrl;
+    delete name;
+    delete url;
+    delete iconUrl;
+    delete proxyIconUrl;
 }
 
 EmbedField::~EmbedField()
 {
-    delete name, value;
+    delete name;
+    delete value;
 }
 
 EmbedTVI::~EmbedTVI()
 {
-    delete url, proxyUrl;
+    delete url;
+    delete proxyUrl;
 }
 
 Embed::~Embed()
 {
-    delete fields, footer, image, thumbnail, video, provider, author, author, title, type, description, url, timestamp;
+    delete fields;
+    delete footer;
+    delete image;
+    delete thumbnail;
+    delete video;
+    delete provider;
+    delete author;
+    delete author;
+    delete title;
+    delete type;
+    delete description;
+    delete url;
+    delete timestamp;
 }
 
 } // namespace Api

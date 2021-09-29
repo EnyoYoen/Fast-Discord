@@ -43,7 +43,7 @@ void Gateway::start()
         }
         catch (const std::exception& e) {}
     });
-    client.set_close_handler([&](web::websockets::client::websocket_close_status status, const utility::string_t& reason, const std::error_code& code)
+    client.set_close_handler([&](web::websockets::client::websocket_close_status/* status*/, const utility::string_t &/*reason*/, const std::error_code &/*code*/)
     {
         //Reconnect when the connection is closed
         if (connected) {
@@ -83,7 +83,7 @@ void Gateway::onMessage(const web::websockets::client::websocket_incoming_messag
     if (message.message_type() == web::websockets::client::websocket_message_type::binary_message) {
         Concurrency::streams::container_buffer<std::string> strbuf;
 
-        auto task = message.body().read_to_end(strbuf).then([strbuf](size_t bytesRead) {
+        auto task = message.body().read_to_end(strbuf).then([strbuf](size_t) {
             return strbuf.collection();
         });
 

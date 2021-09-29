@@ -4,12 +4,18 @@ namespace Api {
 
 TeamMember::~TeamMember()
 {
-    delete user, permissions, teamId;
+    delete user;
+    delete permissions;
+    delete teamId;
 }
 
 Team::~Team()
 {
-    delete members, icon, id, name, ownerUserId;
+    delete members;
+    delete icon;
+    delete id;
+    delete name;
+    delete ownerUserId;
 }
 
 } // namespace Api

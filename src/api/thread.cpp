@@ -9,7 +9,9 @@ ThreadMetadata::~ThreadMetadata()
 
 ThreadMember::~ThreadMember()
 {
-    delete joinTimestamp, id, userId;
+    delete joinTimestamp;
+    delete id;
+    delete userId;
 }
 
 } // namespace Api

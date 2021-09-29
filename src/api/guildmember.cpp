@@ -4,12 +4,21 @@ namespace Api {
 
 GuildMember::~GuildMember()
 {
-    delete user, roles, nick, joinedAt, premiumSince, permissions;
+    delete user;
+    delete roles;
+    delete nick;
+    delete joinedAt;
+    delete premiumSince;
+    delete permissions;
 }
 
 GuildMessageMember::~GuildMessageMember()
 {
-    delete roles, nick, joinedAt, premiumSince, permissions;
+    delete roles;
+    delete nick;
+    delete joinedAt;
+    delete premiumSince;
+    delete permissions;
 }
 
 } // namespace Api

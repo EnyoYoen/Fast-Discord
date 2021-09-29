@@ -35,7 +35,7 @@ size_t writeFile(void *contents, size_t size, size_t nmemb, FILE *stream)
     return written;
 }
 
-size_t noOutputFunction(void *buffer, size_t size, size_t nmemb, void *userp)
+size_t noOutputFunction(void *, size_t size, size_t nmemb, void *)
 {
     return size * nmemb;
 }

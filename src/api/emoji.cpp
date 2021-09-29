@@ -4,7 +4,10 @@ namespace Api {
 
 Emoji::~Emoji()
 {
-    delete user, roles, id, name;
+    delete user;
+    delete roles;
+    delete id;
+    delete name;
 }
 
 Reaction::~Reaction()

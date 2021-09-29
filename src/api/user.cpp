@@ -4,7 +4,12 @@ namespace Api {
 
 User::~User()
 {
-    delete username, discriminator, avatar, locale, email, id;
+    delete username;
+    delete discriminator;
+    delete avatar;
+    delete locale;
+    delete email;
+    delete id;
 }
 
 } // namespace Api
