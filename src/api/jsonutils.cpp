@@ -7,10 +7,10 @@ std::string *valueNoNull(const json& jsonObj, const std::string& key)
     try {
         json attribute = key == "" ? jsonObj : jsonObj.at(key);
         if (attribute.is_null())
-            return NULL;
+            return nullptr;
         return new std::string(attribute.get<std::string>());
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -26,7 +26,7 @@ std::vector<std::string> *getStringsFromJson(const json& jsonObj, const std::str
 
         return strings;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -54,7 +54,7 @@ User *getUserFromJson(const json& jsonObj, const std::string& key)
             jsonUser.value("verified"   , false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -70,7 +70,7 @@ std::vector<User> *getUsersFromJson(const json& jsonObj, const std::string& key)
 
         return recipients;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -87,7 +87,7 @@ Overwrite *getOverwriteFromJson(const json& jsonObj, const std::string& key)
             jsonOverwrite.value("type", -1)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -103,7 +103,7 @@ std::vector<Overwrite> *getOverwritesFromJson(const json& jsonObj, const std::st
 
         return overwrites;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -120,7 +120,7 @@ ThreadMember *getThreadMemberFromJson(const json& jsonObj, const std::string& ke
             jsonThreadMember.value("flags", -1)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -138,7 +138,7 @@ ThreadMetadata *getThreadMetadataFromJson(const json& jsonObj, const std::string
             jsonObj.value("locked"  , false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -179,7 +179,23 @@ Channel *getChannelFromJson(const json& jsonObj, const std::string& key)
             jsonChannel.value("nsfw", false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
+    }
+}
+
+std::vector<Channel> *getChannelsFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonChannels = key == "" ? jsonObj : jsonObj.at(key);
+        std::vector<Channel> *channels = new std::vector<Channel>;
+
+        for (unsigned int i = 0 ; i < jsonChannels.size() ; i++) {
+            channels->push_back(*getChannelFromJson(jsonChannels[i], ""));
+        }
+
+        return channels;
+    } catch(json::out_of_range& e) {
+        return nullptr;
     }
 }
 
@@ -197,7 +213,7 @@ TeamMember *getTeamMemberFromJson(const json& jsonObj, const std::string& key)
             jsonTeamMember.value("member_ship_state", -1)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -213,7 +229,7 @@ std::vector<TeamMember> *getTeamMembersFromJson(const json& jsonObj, const std::
 
         return teamMembers;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -231,7 +247,7 @@ Team *getTeamFromJson(const json& jsonObj, const std::string& key)
             valueNoNull(jsonTeam, "owner_user_id")
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -264,7 +280,7 @@ Application *getApplicationFromJson(const json& jsonObj, const std::string& key)
             jsonApplication.value("bot_require_code_grant", false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -279,7 +295,7 @@ MessageActivity *getMessageActivityFromJson(const json& jsonObj, const std::stri
             jsonMessageActivity.value("type", -1)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -301,7 +317,7 @@ GuildMessageMember *getGuildMessageMemberFromJson(const json& jsonObj, const std
             jsonGuildMessageMember.value("pending", false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -319,7 +335,7 @@ MessageInteraction *getMessageInteractionFromJson(const json& jsonObj, const std
             jsonMessageInteraction.value("type", -1)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -341,7 +357,7 @@ Emoji *getEmojiFromJson(const json& jsonObj, const std::string& key)
             jsonEmoji.value("available"    , false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -358,7 +374,7 @@ Reaction *getReactionFromJson(const json& jsonObj, const std::string& key)
             jsonReaction.value("me", false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -374,7 +390,7 @@ std::vector<Reaction> *getReactionsFromJson(const json& jsonObj, const std::stri
 
         return reactions;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -390,7 +406,7 @@ EmbedField *getEmbedFieldFromJson(const json& jsonObj, const std::string& key)
             jsonEmbedField.value("inline", false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -406,7 +422,7 @@ std::vector<EmbedField> *getEmbedFieldsFromJson(const json& jsonObj, const std::
 
         return embedFields;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -421,7 +437,7 @@ EmbedFooter *getEmbedFooterFromJson(const json& jsonObj, const std::string& key)
             valueNoNull(jsonEmbedFooter, "proxy_icon_url")
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -438,7 +454,7 @@ EmbedTVI *getEmbedTVIFromJson(const json& jsonObj, const std::string& key)
             jsonEmbedTVI.value("width" , -1)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -452,7 +468,7 @@ EmbedProvider *getEmbedProviderFromJson(const json& jsonObj, const std::string& 
             valueNoNull(jsonEmbedProvider, "url" )
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -468,7 +484,7 @@ EmbedAuthor *getEmbedAuthorFromJson(const json& jsonObj, const std::string& key)
             valueNoNull(jsonEmbedAuthor, "proxy_icon_url")
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -495,7 +511,7 @@ Embed *getEmbedFromJson(const json& jsonObj, const std::string& key)
             jsonEmbed.value("color", -1)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -511,7 +527,7 @@ std::vector<Embed> *getEmbedsFromJson(const json& jsonObj, const std::string& ke
 
         return embeds;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -532,7 +548,7 @@ Attachment *getAttachmentFromJson(const json& jsonObj, const std::string& key)
             jsonAttachment.value("width" , -1)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -548,7 +564,7 @@ std::vector<Attachment> *getAttachmentsFromJson(const json& jsonObj, const std::
 
         return attachments;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -565,7 +581,7 @@ ChannelMention *getChannelMentionFromJson(const json& jsonObj, const std::string
             jsonChannelMention.value("type", -1)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -581,7 +597,7 @@ std::vector<ChannelMention> *getChannelMentionsFromJson(const json& jsonObj, con
 
         return channelMentions;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -600,7 +616,7 @@ SelectOption *getSelectOptionFromJson(const json& jsonObj, const std::string& ke
             jsonSelectOption.value("default", false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -616,11 +632,11 @@ std::vector<SelectOption> *getSelectOptionsFromJson(const json& jsonObj, const s
 
         return selectOptions;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
-MessageComponent *getMessageComponentFromJsonNR(const json& jsonObj, const std::string& key)
+MessageComponent *getPartialMessageComponentFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonMessageComponent = key == "" ? jsonObj : jsonObj.at(key);
@@ -628,7 +644,7 @@ MessageComponent *getMessageComponentFromJsonNR(const json& jsonObj, const std::
         return new MessageComponent {
             getEmojiFromJson(jsonMessageComponent, "emoji"),
             getSelectOptionsFromJson(jsonMessageComponent, "components"),
-            NULL,
+            nullptr,
 
             valueNoNull(jsonMessageComponent, "custom_id"  ),
             valueNoNull(jsonMessageComponent, "label"      ),
@@ -643,7 +659,7 @@ MessageComponent *getMessageComponentFromJsonNR(const json& jsonObj, const std::
             jsonMessageComponent.value("disabled", false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -654,12 +670,12 @@ std::vector<MessageComponent> *getMessageComponentsFromJson(const json& jsonObj,
         std::vector<MessageComponent> *messageComponents = new std::vector<MessageComponent>;
 
         for (unsigned int i = 0 ; i < jsonMessageComponents.size() ; i++) {
-            messageComponents->push_back(*getMessageComponentFromJsonNR(jsonMessageComponents[i], ""));
+            messageComponents->push_back(*getPartialMessageComponentFromJson(jsonMessageComponents[i], ""));
         }
 
         return messageComponents;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -675,7 +691,7 @@ StickerItem *getStickerItemFromJson(const json& jsonObj, const std::string& key)
             jsonStickerItem.value("format_type", -1)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -691,7 +707,7 @@ std::vector<StickerItem> *getStickerItemsFromJson(const json& jsonObj, const std
 
         return stickerItems;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -718,7 +734,7 @@ Sticker *getStickerFromJson(const json& jsonObj, const std::string& key)
             jsonSticker.value("available", false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -734,11 +750,11 @@ std::vector<Sticker> *getStickersFromJson(const json& jsonObj, const std::string
 
         return stickers;
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
-Message *getMessageFromJsonNR(const json& jsonObj, const std::string& key)
+Message *getPartialMessageFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonMessage = key == "" ? jsonObj : jsonObj.at(key);
@@ -748,12 +764,12 @@ Message *getMessageFromJsonNR(const json& jsonObj, const std::string& key)
             getUserFromJson(jsonMessage, "author"),
             getMessageActivityFromJson(jsonMessage, "activity"),
             getGuildMessageMemberFromJson(jsonMessage, "member"),
-            NULL,
+            nullptr,
             getChannelFromJson(jsonMessage, "thread"),
             getMessageInteractionFromJson(jsonMessage, "interaction"),
 
             getReactionsFromJson(jsonMessage, "reactions"),
-            NULL,
+            nullptr,
             getUsersFromJson(jsonMessage, "mentions"),
             getAttachmentsFromJson(jsonMessage, "attachments"),
             getChannelMentionsFromJson(jsonMessage, "mention_channels"),
@@ -783,7 +799,7 @@ Message *getMessageFromJsonNR(const json& jsonObj, const std::string& key)
             jsonMessage.value("mention_everyone", false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -797,12 +813,12 @@ Message *getMessageFromJson(const json& jsonObj, const std::string& key)
             getUserFromJson(jsonMessage, "author"),
             getMessageActivityFromJson(jsonMessage, "activity"),
             getGuildMessageMemberFromJson(jsonMessage, "member"),
-            getMessageFromJsonNR(jsonMessage, "referenced_message"),
+            getPartialMessageFromJson(jsonMessage, "referenced_message"),
             getChannelFromJson(jsonMessage, "thread"),
             getMessageInteractionFromJson(jsonMessage, "interaction"),
 
             getReactionsFromJson(jsonMessage, "reactions"),
-            NULL,
+            nullptr,
             getUsersFromJson(jsonMessage, "mentions"),
             getAttachmentsFromJson(jsonMessage, "attachments"),
             getChannelMentionsFromJson(jsonMessage, "mention_channels"),
@@ -831,7 +847,236 @@ Message *getMessageFromJson(const json& jsonObj, const std::string& key)
             jsonMessage.value("mention_everyone", false)
         };
     } catch(json::out_of_range& e) {
-        return NULL;
+        return nullptr;
+    }
+}
+
+GuildMember *getGuildMemberFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonGuildMember = key == "" ? jsonObj : jsonObj.at(key);
+
+        return new GuildMember {
+            getUserFromJson(jsonGuildMember, "user"),
+            getStringsFromJson(jsonGuildMember, "roles"),
+
+            valueNoNull(jsonGuildMember, "nick"         ),
+            valueNoNull(jsonGuildMember, "avatar"       ),
+            valueNoNull(jsonGuildMember, "joined_at"    ),
+            valueNoNull(jsonGuildMember, "premium_since"),
+            valueNoNull(jsonGuildMember, "permissions"  ),
+
+            jsonGuildMember.value("deaf"   , false),
+            jsonGuildMember.value("mute"   , false),
+            jsonGuildMember.value("pending", false)
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+std::vector<GuildMember> *getGuildMembersFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonGuildMembers = key == "" ? jsonObj : jsonObj.at(key);
+        std::vector<GuildMember> *guildMembers = new std::vector<GuildMember>;
+
+        for (unsigned int i = 0 ; i < jsonGuildMembers.size() ; i++) {
+            guildMembers->push_back(*getGuildMemberFromJson(jsonGuildMembers[i], ""));
+        }
+
+        return guildMembers;
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+VoiceState *getVoiceStateFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonVoiceState = key == "" ? jsonObj : jsonObj.at(key);
+
+        return new VoiceState {
+            getGuildMemberFromJson(jsonVoiceState, "member"),
+
+            valueNoNull(jsonVoiceState, "guild_id"                  ),
+            valueNoNull(jsonVoiceState, "channel_id"                ),
+            valueNoNull(jsonVoiceState, "user_id"                   ),
+            valueNoNull(jsonVoiceState, "session_id"                ),
+            valueNoNull(jsonVoiceState, "request_to_speak_timestamp"),
+
+            jsonVoiceState.value("deaf"       , false),
+            jsonVoiceState.value("mute"       , false),
+            jsonVoiceState.value("self_deaf"  , false),
+            jsonVoiceState.value("self_mute"  , false),
+            jsonVoiceState.value("self_stream", false),
+            jsonVoiceState.value("self_video" , false),
+            jsonVoiceState.value("suppress"   , false)
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+std::vector<VoiceState> *getVoiceStatesFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonVoiceStates = key == "" ? jsonObj : jsonObj.at(key);
+        std::vector<VoiceState> *voiceStates = new std::vector<VoiceState>;
+
+        for (unsigned int i = 0 ; i < jsonVoiceStates.size() ; i++) {
+            voiceStates->push_back(*getVoiceStateFromJson(jsonVoiceStates[i], ""));
+        }
+
+        return voiceStates;
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+WelcomeScreenChannel *getWelcomeScreenChannelFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonWelcomeScreenChannel = key == "" ? jsonObj : jsonObj.at(key);
+
+        return new WelcomeScreenChannel {
+            valueNoNull(jsonWelcomeScreenChannel, "channel_id" ),
+            valueNoNull(jsonWelcomeScreenChannel, "description"),
+            valueNoNull(jsonWelcomeScreenChannel, "emoji_id"   ),
+            valueNoNull(jsonWelcomeScreenChannel, "emoji_name" )
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+std::vector<WelcomeScreenChannel> *getWelcomeScreenChannelsFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonWelcomeScreenChannels = key == "" ? jsonObj : jsonObj.at(key);
+        std::vector<WelcomeScreenChannel> *welcomeScreenChannels = new std::vector<WelcomeScreenChannel>;
+
+        for (unsigned int i = 0 ; i < jsonWelcomeScreenChannels.size() ; i++) {
+            welcomeScreenChannels->push_back(*getWelcomeScreenChannelFromJson(jsonWelcomeScreenChannels[i], ""));
+        }
+
+        return welcomeScreenChannels;
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+WelcomeScreen *getWelcomeScreenFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonWelcomeScreen = key == "" ? jsonObj : jsonObj.at(key);
+
+        return new WelcomeScreen {
+            getWelcomeScreenChannelsFromJson(jsonWelcomeScreen, "welcome_channels"),
+
+            valueNoNull(jsonWelcomeScreen, "description")
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+StageInstance *getStageInstanceFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonStageInstance = key == "" ? jsonObj : jsonObj.at(key);
+
+        return new StageInstance {
+            valueNoNull(jsonStageInstance, "id"        ),
+            valueNoNull(jsonStageInstance, "guild_id"  ),
+            valueNoNull(jsonStageInstance, "channel_id"),
+            valueNoNull(jsonStageInstance, "topic"     ),
+
+            jsonStageInstance.value("privacy_level" , -1),
+
+            jsonStageInstance.value("discoverable_disabled" , false)
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+std::vector<StageInstance> *getStageInstancesFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonStageInstances = key == "" ? jsonObj : jsonObj.at(key);
+        std::vector<StageInstance> *stageInstances = new std::vector<StageInstance>;
+
+        for (unsigned int i = 0 ; i < jsonStageInstances.size() ; i++) {
+            stageInstances->push_back(*getStageInstanceFromJson(jsonStageInstances[i], ""));
+        }
+
+        return stageInstances;
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+Guild *getGuildFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonGuild = key == "" ? jsonObj : jsonObj.at(key);
+
+        return new Guild {
+            getWelcomeScreenFromJson(jsonGuild, "welcome_screen"),
+            getStringsFromJson(jsonGuild, "guild_features"),
+            getVoiceStatesFromJson(jsonGuild, "voice_states"),
+            getGuildMembersFromJson(jsonGuild, "members"),
+            getChannelsFromJson(jsonGuild, "channels"),
+            getChannelsFromJson(jsonGuild, "threads"),
+            nullptr,
+            getStageInstancesFromJson(jsonGuild, "stage_instances"),
+            getStickersFromJson(jsonGuild, "stickers"),
+
+            valueNoNull(jsonGuild, "id"                       ),
+            valueNoNull(jsonGuild, "name"                     ),
+            valueNoNull(jsonGuild, "icon"                     ),
+            valueNoNull(jsonGuild, "icon_hash"                ),
+            valueNoNull(jsonGuild, "splash"                   ),
+            valueNoNull(jsonGuild, "discovery_splash"         ),
+            valueNoNull(jsonGuild, "owner_id"                 ),
+            valueNoNull(jsonGuild, "permissions"              ),
+            valueNoNull(jsonGuild, "region"                   ),
+            valueNoNull(jsonGuild, "afk_channel_id"           ),
+            valueNoNull(jsonGuild, "widget_channel_id"        ),
+            valueNoNull(jsonGuild, "application_id"           ),
+            valueNoNull(jsonGuild, "system_channel_id"        ),
+            valueNoNull(jsonGuild, "rules_channel_id"         ),
+            valueNoNull(jsonGuild, "joined_at"                ),
+            valueNoNull(jsonGuild, "vanity_url_code"          ),
+            valueNoNull(jsonGuild, "description"              ),
+            valueNoNull(jsonGuild, "banner"                   ),
+            valueNoNull(jsonGuild, "preferred_locale"         ),
+            valueNoNull(jsonGuild, "public_updates_channel_id"),
+
+            jsonGuild.value("afk_timeout"                  , -1),
+            jsonGuild.value("verification_level"           , -1),
+            jsonGuild.value("default_message_notifications", -1),
+            jsonGuild.value("explicit_content_filter"      , -1),
+            jsonGuild.value("mfa_level"                    , -1),
+            jsonGuild.value("system_channel_flags"         , -1),
+            jsonGuild.value("member_count"                 , -1),
+            jsonGuild.value("max_presences"                , -1),
+            jsonGuild.value("max_members"                  , -1),
+            jsonGuild.value("premium_tier"                 , -1),
+            jsonGuild.value("premium_subscription_count"   , -1),
+            jsonGuild.value("max_video_channel_users"      , -1),
+            jsonGuild.value("approximate_member_count"     , -1),
+            jsonGuild.value("approximate_presence_count"   , -1),
+            jsonGuild.value("nsfw_level"                   , -1),
+
+            jsonGuild.value("owner"         , false),
+            jsonGuild.value("widget_enabled", false),
+            jsonGuild.value("large"         , false),
+            jsonGuild.value("unavailable"   , false)
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
     }
 }
 

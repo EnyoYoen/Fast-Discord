@@ -9,6 +9,8 @@
 #include "team.h"
 #include "application.h"
 #include "guildmember.h"
+#include "voice.h"
+#include "guild.h"
 
 #include "../../lib/nlohmann/json.hpp"
 
@@ -36,6 +38,7 @@ ThreadMember *getThreadMemberFromJson(const json& jsonObj, const std::string& ke
 ThreadMetadata *getThreadMetadataFromJson(const json& jsonObj, const std::string& key);
 
 Channel *getChannelFromJson(const json& jsonObj, const std::string& key);
+std::vector<Channel> *getChannelsFromJson(const json& jsonObj, const std::string& key);
 
 TeamMember *getTeamMemberFromJson(const json& jsonObj, const std::string& key);
 std::vector<TeamMember> *getTeamMembersFromJson(const json& jsonObj, const std::string& key);
@@ -71,6 +74,20 @@ MessageActivity *getMessageActivityFromJson(const json& jsonObj, const std::stri
 Message *getMessageFromJson(const json& jsonObj, const std::string& key);
 Message *getPartialMessageFromJson(const json& jsonObj, const std::string& key);
 
+GuildMember *getGuildMemberFromJson(const json& jsonObj, const std::string& key);
+std::vector<GuildMember> *getGuildMembersFromJson(const json& jsonObj, const std::string& key);
 
+VoiceState *getVoiceStateFromJson(const json& jsonObj, const std::string& key);
+std::vector<VoiceState> *getVoiceStatesFromJson(const json& jsonObj, const std::string& key);
+
+WelcomeScreenChannel *getWelcomeScreenChannelFromJson(const json& jsonObj, const std::string& key);
+std::vector<WelcomeScreenChannel> *getWelcomeScreenChannelsFromJson(const json& jsonObj, const std::string& key);
+
+WelcomeScreen *getWelcomeScreenFromJson(const json& jsonObj, const std::string& key);
+
+StageInstance *getStageInstanceFromJson(const json& jsonObj, const std::string& key);
+std::vector<StageInstance> *getStageInstancesFromJson(const json& jsonObj, const std::string& key);
+
+Guild *getGuildFromJson(const json& jsonObj, const std::string& key);
 
 } // namespace Api

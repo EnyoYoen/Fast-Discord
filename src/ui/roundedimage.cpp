@@ -17,7 +17,7 @@ RoundedImage::RoundedImage(const std::string& imagePath, int width, int height, 
     setPixmap(image);
 }
 
-void RoundedImage::paintEvent(QPaintEvent *event)
+void RoundedImage::paintEvent(QPaintEvent */*event*/)
 {
     QPainter p(this);
 
