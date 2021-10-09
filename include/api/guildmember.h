@@ -14,6 +14,7 @@ struct GuildMember
     User                     *user;
     std::vector<std::string> *roles;
     std::string              *nick;
+    std::string              *avatar;
     std::string              *joinedAt;
     std::string              *premiumSince;
     std::string              *permissions;

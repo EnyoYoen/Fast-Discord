@@ -39,6 +39,7 @@ SOURCES += \
     ../src/api/team.cpp \
     ../src/api/thread.cpp \
     ../src/api/user.cpp \
+    ../src/api/voice.cpp \
     ../src/main.cpp \
     ../src/ui/mainwindow.cpp \
     ../src/ui/messagearea.cpp \
@@ -66,6 +67,7 @@ HEADERS += \
     ../include/api/team.h \
     ../include/api/thread.h \
     ../include/api/user.h \
+    ../include/api/voice.h \
     ../include/token.h \
     ../include/ui/mainwindow.h \
     ../include/ui/messagearea.h \

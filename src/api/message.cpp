@@ -47,31 +47,8 @@ MessageComponent::~MessageComponent()
 
 Message::~Message()
 {
-    delete application;
-    delete author;
-    delete activity;
-    delete member;
-    delete referencedMessage;
-    delete thread;
-    delete interaction;
-    delete reactions;
-    delete embeds;
-    delete mentions;
-    delete attachments;
-    delete mentionChannels;
-    delete mentionRoles;
-    delete components;
-    delete stickerItems;
-    delete stickers;
-    delete id;
-    delete channelId;
-    delete guildId;
-    delete content;
-    delete timestamp;
-    delete editedTimestamp;
-    delete webhookId;
-    delete applicationId;
-    delete nonceStr;
+    //Putting delete for each field leads to a double free error, I don't know why
+    delete application, author, activity, member, referencedMessage, thread, interaction, reactions, embeds, mentions, attachments, mentionChannels, mentionRoles, components, stickerItems, stickers, id, channelId, guildId, content, timestamp, editedTimestamp, webhookId, applicationId, nonceStr;
 }
 
 std::string getFileNameFromPath(const std::string& filepath)

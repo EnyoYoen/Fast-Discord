@@ -179,7 +179,7 @@ void MainWindow::setupInterface()
 void MainWindow::gatewayDispatchHandler(std::string& eventName, json& data)
 {
     if (eventName == "MESSAGE_CREATE") {
-        Api::Message message = *Api::getMessageFromJsonNR(data, "");
+        Api::Message message = *Api::getMessageFromJson(data, "");
         emit messageRecieved(message);
     } else if (eventName == "TYPING_START") {
         std::thread typingThread = std::thread(&MainWindow::userTyping, this, data);

@@ -60,7 +60,7 @@ std::vector<ChannelMention> *getChannelMentionsFromJson(const json& jsonObj, con
 SelectOption *getSelectOptionFromJson(const json& jsonObj, const std::string& key);
 std::vector<SelectOption> *getSelectOptionsFromJson(const json& jsonObj, const std::string& key);
 
-MessageComponent *getMessageComponentFromJsonNR(const json& jsonObj, const std::string& key);
+MessageComponent *getPartialMessageComponentFromJson(const json& jsonObj, const std::string& key);
 std::vector<MessageComponent> *getMessageComponentsFromJson(const json& jsonObj, const std::string& key);
 
 std::vector<StickerItem> *getStickerItemsFromJson(const json& jsonObj, const std::string& key);
@@ -69,6 +69,8 @@ std::vector<Sticker> *getStickersFromJson(const json& jsonObj, const std::string
 MessageActivity *getMessageActivityFromJson(const json& jsonObj, const std::string& key);
 
 Message *getMessageFromJson(const json& jsonObj, const std::string& key);
-Message *getMessageFromJsonNR(const json& jsonObj, const std::string& key);
+Message *getPartialMessageFromJson(const json& jsonObj, const std::string& key);
+
+
 
 } // namespace Api

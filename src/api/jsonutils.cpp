@@ -370,7 +370,7 @@ std::vector<Reaction> *getReactionsFromJson(const json& jsonObj, const std::stri
 
         for (unsigned int i = 0 ; i < jsonReactions.size() ; i++) {
             reactions->push_back(*getReactionFromJson(jsonReactions[i], ""));
-        }https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-opcodes
+        }
 
         return reactions;
     } catch(json::out_of_range& e) {
