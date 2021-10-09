@@ -116,7 +116,7 @@ HEADERS += \
     ../lib/nlohmann/thirdparty/hedley/hedley_undef.hpp
 
 LIBS += \
-    -lcurl -lssl -lcrypto -lpthread -lcpprest -lz
+    -lcurl -lssl -lcrypto -lpthread -lcpprest -lz -lboost_filesystem
 
 INCLUDEPATH += "../lib/"
 

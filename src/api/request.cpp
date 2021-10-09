@@ -3,6 +3,7 @@
 #include "../../include/token.h"
 
 #include <curl/curl.h>
+#include <boost/filesystem.hpp>
 
 #include <cstring>
 #include <stdlib.h>
@@ -61,6 +62,7 @@ void _request(const std::string& url, const std::string& postDatas, MemoryStruct
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
         if (outputFile != "") {
+            if (!boost::filesystem::exists(boost::filesystem::path("cache/"))) boost::filesystem::create_directory(boost::filesystem::path("cache"));
             FILE *fp = fopen(outputFile.c_str(), "wb");
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFile);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
