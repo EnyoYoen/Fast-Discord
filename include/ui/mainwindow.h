@@ -24,19 +24,21 @@ class MainWindow : public QWidget
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    void setup();
 
 signals:
     void messageRecieved(Api::Message);
 
 private slots:
     void displayPrivateChannels();
+    void displayGuilds();
     void openChannel(Api::Channel& privateChannel);
+    void openGuild(Api::Guild& guild);
     void addMessage(const Api::Message& message);
     void sendMessage(const std::string& content);
     void sendTyping();
 
 private:
+    void setup();
     void setupInterface();
     void setupGateway(); //Creating and lauching the gateway
     void cleanRightColumn();
@@ -64,6 +66,9 @@ private:
     //Storing channels and messages that we already gathered
     std::vector<Api::Channel *> privateChannels;
     std::map<std::string, std::vector<Api::Message>> channelsMessages;
+
+    //Store guilds
+    std::vector<Api::Guild *> guilds;
 
     std::string currentOpenedChannel; //Current channel ID
     bool homePageShown;

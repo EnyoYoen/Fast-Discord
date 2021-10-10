@@ -51,8 +51,10 @@ std::vector<Channel *> getPrivateChannels()
     json jsonChannels = json::parse(response.memory);
 
     std::vector<Channel *> channels;
-    for (unsigned int i = 0 ; i < jsonChannels.size() ; i++) {
-        channels.push_back(getChannelFromJson(jsonChannels[i], std::string("")));
+    if (!jsonChannels.empty()) {
+        for (unsigned int i = 0 ; i < jsonChannels.size() ; i++) {
+            channels.push_back(getChannelFromJson(jsonChannels[i], std::string("")));
+        }
     }
 
     return channels;

@@ -96,4 +96,6 @@ struct Guild
     bool                        unavailable;
 };
 
+std::vector<Guild *> getGuilds();
+
 } // namespace Api

@@ -41,6 +41,7 @@ SOURCES += \
     ../src/api/user.cpp \
     ../src/api/voice.cpp \
     ../src/main.cpp \
+    ../src/ui/guildwidget.cpp \
     ../src/ui/mainwindow.cpp \
     ../src/ui/messagearea.cpp \
     ../src/ui/messagetextinput.cpp \
@@ -69,6 +70,7 @@ HEADERS += \
     ../include/api/user.h \
     ../include/api/voice.h \
     ../include/token.h \
+    ../include/ui/guildwidget.h \
     ../include/ui/mainwindow.h \
     ../include/ui/messagearea.h \
     ../include/ui/messagetextinput.h \
@@ -113,7 +115,8 @@ HEADERS += \
     ../lib/nlohmann/json_fwd.hpp \
     ../lib/nlohmann/ordered_map.hpp \
     ../lib/nlohmann/thirdparty/hedley/hedley.hpp \
-    ../lib/nlohmann/thirdparty/hedley/hedley_undef.hpp
+    ../lib/nlohmann/thirdparty/hedley/hedley_undef.hpp \
+    ../src/ui/guild.h
 
 LIBS += \
     -lcurl -lssl -lcrypto -lpthread -lcpprest -lz -lboost_filesystem

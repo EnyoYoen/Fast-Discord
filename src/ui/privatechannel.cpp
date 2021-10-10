@@ -17,7 +17,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, QWidget *pare
 {
     channel = const_cast<Api::Channel *>(&privateChannel);
 
-    this->setProperty("private-channel", true);
+    //this->setProperty("private-channel", true);
     this->setFixedSize(224, 44);
 
     std::string channelIconFileName;
@@ -63,9 +63,9 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, QWidget *pare
         if (channelIcon == nullptr) {
             channelIconFileName = "res/images/png/group-icon-asset1.png";
         } else {
-            channelIconFileName = *channelIcon;
+            channelIconFileName = *channelIcon + ".png";
             if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-                Api::requestFile("https://cdn.discordapp.com/channel-icons/" + *privateChannel.id + "/" + channelIconFileName + ".png", "cache/" + channelIconFileName);
+                Api::requestFile("https://cdn.discordapp.com/channel-icons/" + *privateChannel.id + "/" + channelIconFileName, "cache/" + channelIconFileName);
             }
             channelIconFileName = "cache/" + channelIconFileName;
         }

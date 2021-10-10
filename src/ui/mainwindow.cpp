@@ -1,5 +1,6 @@
 #include "../../include/ui/mainwindow.h"
 
+#include "../../include/ui/guildwidget.h"
 #include "../../include/ui/privatechannel.h"
 #include "../../include/ui/messagewidget.h"
 #include "../../include/ui/messagetextinput.h"
@@ -79,6 +80,11 @@ void MainWindow::openChannel(Api::Channel& channel)
     QObject::connect(textInput, SIGNAL(typing()), this, SLOT(sendTyping()));
 }
 
+void MainWindow::openGuild(Api::Guild& /*guild*/)
+{
+
+}
+
 void MainWindow::addMessage(const Api::Message& message)
 {
     if (*message.author->username != static_cast<std::string>("Enyo")) {
@@ -120,6 +126,17 @@ void MainWindow::displayPrivateChannels()
     }
 }
 
+void MainWindow::displayGuilds()
+{
+    guilds = Api::getGuilds();
+    for (size_t i = 0 ; i < guilds.size() ; i++) {
+        GuildWidget *guildWidget = new GuildWidget(*guilds[i]);
+        leftColumnLayout->insertWidget(i + 2, guildWidget);
+        leftColumnLayout->setAlignment(guildWidget, Qt::AlignHCenter);
+        QObject::connect(guildWidget, SIGNAL(leftClicked(Api::Guild&)), this, SLOT(openGuild(Api::Guild&)));
+    }
+}
+
 void MainWindow::setupInterface()
 {
     this->setGeometry(0, 0, 940, 728);
@@ -133,22 +150,33 @@ void MainWindow::setupInterface()
     middleColumn->setFixedWidth(240);
 
     leftColumnLayout = new QVBoxLayout();
-    leftColumnLayout->setEnabled(false);
     rightColumnLayout = new QVBoxLayout();
     rightColumn->setLayout(rightColumnLayout);
 
     home = new QGroupBox();
-    home->setGeometry(0, 0, 72, 74);
+    home->setFixedSize(48, 48);
     homeLayout = new QVBoxLayout();
     homeButton = new QPushButton(QIcon("res/images/svg/home-icon.svg"), QString(""));
-    homeButton->setGeometry(12, 8, 48, 48);
+    homeButton->setFixedSize(48, 48);
     homeButton->setIconSize(QSize(28, 28));
 
     homeLayout->addWidget(homeButton);
     homeLayout->setEnabled(false);
 
+    QWidget *guildSeparator = new QWidget();
+    guildSeparator->setFixedSize(32, 2);
+    guildSeparator->setStyleSheet("background-color: #444649;");
+
     home->setLayout(homeLayout);
     leftColumnLayout->addWidget(home);
+    leftColumnLayout->addWidget(guildSeparator);
+    leftColumnLayout->insertStretch(-1, 100);
+
+    leftColumnLayout->setAlignment(home, Qt::AlignHCenter);
+    leftColumnLayout->setAlignment(guildSeparator, Qt::AlignHCenter);
+
+    leftColumnLayout->setSpacing(6);
+    leftColumnLayout->setContentsMargins(0, 0, 0, 0);
     leftColumn->setLayout(leftColumnLayout);
 
     middleColumnLayout = new QVBoxLayout();
@@ -227,6 +255,7 @@ void MainWindow::setup()
     setupInterface();
     setupGateway();
     displayPrivateChannels();
+    displayGuilds();
 }
 
 } // namespace Ui
