@@ -1,3 +1,4 @@
+
 # Fast-Discord
 ![Fast-Discord image](doc/images/Fast-Discord.png)
 *For now it is very basic*
@@ -36,6 +37,41 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+## Build and Run
+### Dependencies
+- Qt5 (Widgets)
+- Boost (filesystem)
+- Libcurl
+- OpenSSL (Crypto)
+- Pthread
+- Cpprestsdk
+- Zlib
 
+### Install the dependencies
+**On Debian / Ubuntu :**
+```shell
+$ sudo apt-get install qt5-default libboost-filesystem-dev zlib1g libcurl-dev libssl-dev libcpprest-dev libpthread-stubs0-dev
+```
+
+**On Windows :**
+```shell
+> vcpkg install qt5 boost-filesystem zlib curl openssl cpprestsdk pthreads
+```
+
+**On MacOS :**
+```shell
+$ brew install qt5 boost zlib curl openssl cpprestsdk libpthread-stubs
+```
+
+You will also need CMake (Minimum version : 3.0)
+### Build
+In 'Fast-Discord/bin' folder :
+```shell
+cmake ..
+cmake --build .
+```
+### Run
+The executable is in the 'Fast-Discord/bin' folder ;)
 ## Contact
 Fast-Discord's discord server : *(COMING SOON)*
+
