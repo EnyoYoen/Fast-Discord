@@ -41,11 +41,11 @@ void MainWindow::openChannel(Api::Channel& channel)
     cleanRightColumn();
 
     std::string channelId = *channel.id;
-    std::vector<Api::Message> messages;
+    std::vector<Api::Message> *messages;
 
-    std::map<std::string, std::vector<Api::Message>>::iterator currentMessages = channelsMessages.find(channelId);
-    if (currentMessages == channelsMessages.end() or currentMessages->second.size() < 100) {
-        messages = Api::getMessages(channelId, 100 - currentMessages->second.size());
+    std::map<std::string, std::vector<Api::Message> *>::iterator currentMessages = channelsMessages.find(channelId);
+    if (currentMessages == channelsMessages.end() or currentMessages->second->size() < 100) {
+        messages = Api::Request::getMessages(channelId, 100 - currentMessages->second->size());
         channelsMessages[channelId] = messages;
     } else {
         messages = channelsMessages[channelId];
@@ -53,7 +53,7 @@ void MainWindow::openChannel(Api::Channel& channel)
 
     currentOpenedChannel = channelId;
 
-    messageArea = new MessageArea(messages);
+    messageArea = new MessageArea(*messages);
 
     QGroupBox *inputBox = new QGroupBox();
     QHBoxLayout *inputLayout = new QHBoxLayout();
@@ -91,9 +91,9 @@ void MainWindow::addMessage(const Api::Message& message)
         std::string channelId = *message.channelId;
         if (channelsMessages.find(channelId) == channelsMessages.end()) {
             std::vector<Api::Message> messageVector;
-            channelsMessages[channelId] = messageVector;
+            channelsMessages[channelId] = &messageVector;
         }
-        channelsMessages[channelId].push_back(message);
+        channelsMessages[channelId]->push_back(message);
 
         if (channelId == currentOpenedChannel) {
             messageArea->widget()->layout()->addWidget(new MessageWidget(message));
@@ -103,23 +103,23 @@ void MainWindow::addMessage(const Api::Message& message)
 
 void MainWindow::sendMessage(const std::string& content)
 {
-    Api::sendMessage(content, currentOpenedChannel);
+    Api::Request::sendMessage(content, currentOpenedChannel);
     Api::Message message = Api::Message {nullptr, new Api::User{ new std::string("Todo"), new std::string("0000"), new std::string(""), nullptr, nullptr, new std::string(""), -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, const_cast<std::string *>(&content), nullptr, nullptr, nullptr, nullptr, nullptr, -1, -1, -1, -1, false, false, false};
     messageArea->widget()->layout()->addWidget(new MessageWidget(message));
 }
 
 void MainWindow::sendTyping()
 {
-    Api::typing(currentOpenedChannel);
+    Api::Request::sendTyping(currentOpenedChannel);
 }
 
 void MainWindow::displayPrivateChannels()
 {
     if (!homePageShown) {
         homePageShown = true;
-        privateChannels = Api::getPrivateChannels();
-        for (unsigned int i = 0 ; i < privateChannels.size() ; i++) {
-            PrivateChannel *privateChannel = new PrivateChannel(*privateChannels[i]);
+        privateChannels = Api::Request::getPrivateChannels();
+        for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
+            PrivateChannel *privateChannel = new PrivateChannel(*(*privateChannels)[i]);
             middleColumnLayout->insertWidget(i, privateChannel);
             QObject::connect(privateChannel, SIGNAL(leftClicked(Api::Channel&)), this, SLOT(openChannel(Api::Channel&)));
         }
@@ -128,9 +128,9 @@ void MainWindow::displayPrivateChannels()
 
 void MainWindow::displayGuilds()
 {
-    guilds = Api::getGuilds();
-    for (size_t i = 0 ; i < guilds.size() ; i++) {
-        GuildWidget *guildWidget = new GuildWidget(*guilds[i]);
+    guilds = Api::Request::getGuilds();
+    for (size_t i = 0 ; i < guilds->size() ; i++) {
+        GuildWidget *guildWidget = new GuildWidget((*guilds)[i]);
         leftColumnLayout->insertWidget(i + 2, guildWidget);
         leftColumnLayout->setAlignment(guildWidget, Qt::AlignHCenter);
         QObject::connect(guildWidget, SIGNAL(leftClicked(Api::Guild&)), this, SLOT(openGuild(Api::Guild&)));
@@ -224,7 +224,7 @@ void MainWindow::userTyping(const json& data)
 
         Api::MemoryStruct response;
         std::string url = std::string("https://discord.com/api/v9/users/") + data.value("user_id", "");
-        Api::requestJson(url, "", &response, "", "");
+        Api::Request::requestJson(url, "", &response, "", "");
 
         std::string username = *Api::getUserFromJson(json::parse(response.memory), "")->username;
         long typingTimestamp = data.value("timestamp", -1);

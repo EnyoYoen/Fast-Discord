@@ -33,7 +33,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, QWidget *pare
         } else {
             channelIconFileName = *dmUser.id + (avatar->rfind("a_") == 0 ? ".gif" : ".webp");
             if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-                Api::requestFile("https://cdn.discordapp.com/avatars/" + *dmUser.id + "/" + *avatar, "cache/" + channelIconFileName);
+                Api::Request::requestFile("https://cdn.discordapp.com/avatars/" + *dmUser.id + "/" + *avatar, "cache/" + channelIconFileName);
             }
             channelIconFileName = "cache/" + channelIconFileName;
         }
@@ -65,7 +65,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, QWidget *pare
         } else {
             channelIconFileName = *channelIcon + ".png";
             if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-                Api::requestFile("https://cdn.discordapp.com/channel-icons/" + *privateChannel.id + "/" + channelIconFileName, "cache/" + channelIconFileName);
+                Api::Request::requestFile("https://cdn.discordapp.com/channel-icons/" + *privateChannel.id + "/" + channelIconFileName, "cache/" + channelIconFileName);
             }
             channelIconFileName = "cache/" + channelIconFileName;
         }

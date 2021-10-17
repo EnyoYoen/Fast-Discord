@@ -13,8 +13,7 @@ namespace Api {
 struct Channel
 {
         ~Channel();
-        std::vector<User> *getRecipients();
-
+        //Channel(const Channel &c);
         std::vector<User>      *recipients;
         std::vector<Overwrite> *permissionOverwrites;
         ThreadMember           *member;
@@ -52,7 +51,5 @@ struct ChannelMention
     std::string *name;
     int          type;
 };
-
-std::vector<Channel *> getPrivateChannels();
 
 } // namespace Api

@@ -2,7 +2,6 @@
 
 #include "../../include/api/request.h"
 #include "../../include/api/jsonutils.h"
-#include "../../include/token.h"
 
 #include <thread>
 #include <zlib.h>
@@ -15,15 +14,18 @@ Gateway::Gateway()
     seq = 0;
     connected = false;
     resuming = false;
+    token = Request::token;
 
     //Getting the websocket URL
     MemoryStruct response;
-    request(
+    Request::requestApi(
         "https://discord.com/api/v9/gateway",
         "",
         &response,
         "",
-        ""
+        "",
+        "",
+        false
     );
     url = json::parse(response.memory).value("url", "");
 }

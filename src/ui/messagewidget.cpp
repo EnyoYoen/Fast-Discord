@@ -25,7 +25,7 @@ MessageWidget::MessageWidget(const Api::Message& message, QWidget *parent) : QWi
     } else {
         avatarFileName = *author.id + (author.avatar->rfind("a_") == 0 ? ".gif" : ".webp");
         if (!std::ifstream(("cache/" + avatarFileName).c_str()).good()) {
-            Api::requestFile("https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, "cache/" + avatarFileName);
+            Api::Request::requestFile("https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, "cache/" + avatarFileName);
         }
         avatarFileName = "cache/" + avatarFileName;
     }

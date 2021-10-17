@@ -50,8 +50,8 @@ struct Guild
     std::vector<std::string>   *guildFeatures;
     std::vector<VoiceState>    *voiceStates;
     std::vector<GuildMember>   *members;
-    std::vector<Channel>       *channels;
-    std::vector<Channel>       *threads;
+    std::vector<Channel *>     *channels;
+    std::vector<Channel *>     *threads;
     void                       *presences; // TODO
     std::vector<StageInstance> *stageInstances;
     std::vector<Sticker>       *stickers;
@@ -95,7 +95,5 @@ struct Guild
     bool                        large;
     bool                        unavailable;
 };
-
-std::vector<Guild *> getGuilds();
 
 } // namespace Api

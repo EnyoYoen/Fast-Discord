@@ -183,14 +183,14 @@ Channel *getChannelFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<Channel> *getChannelsFromJson(const json& jsonObj, const std::string& key)
+std::vector<Channel *> *getChannelsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonChannels = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Channel> *channels = new std::vector<Channel>;
+        std::vector<Channel *> *channels = new std::vector<Channel *>;
 
         for (unsigned int i = 0 ; i < jsonChannels.size() ; i++) {
-            channels->push_back(*getChannelFromJson(jsonChannels[i], ""));
+            channels->push_back(getChannelFromJson(jsonChannels[i], ""));
         }
 
         return channels;
@@ -851,6 +851,22 @@ Message *getMessageFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
+std::vector<Message> *getMessagesFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonMessages = key == "" ? jsonObj : jsonObj.at(key);
+        std::vector<Message> *messages = new std::vector<Message>;
+
+        for (unsigned int i = 0 ; i < jsonMessages.size() ; i++) {
+            messages->push_back(*getMessageFromJson(jsonMessages[i], ""));
+        }
+
+        return messages;
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
 GuildMember *getGuildMemberFromJson(const json& jsonObj, const std::string& key)
 {
     try {
@@ -1075,6 +1091,22 @@ Guild *getGuildFromJson(const json& jsonObj, const std::string& key)
             jsonGuild.value("large"         , false),
             jsonGuild.value("unavailable"   , false)
         };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+std::vector<Guild> *getGuildsFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonGuilds = key == "" ? jsonObj : jsonObj.at(key);
+        std::vector<Guild> *guilds = new std::vector<Guild>;
+
+        for (unsigned int i = 0 ; i < jsonGuilds.size() ; i++) {
+            guilds->push_back(*getGuildFromJson(jsonGuilds[i], ""));
+        }
+
+        return guilds;
     } catch(json::out_of_range& e) {
         return nullptr;
     }

@@ -66,7 +66,7 @@ GuildWidget::GuildWidget(const Api::Guild& guildP, QWidget *parent) : QFrame(par
     } else {
         *guildIconFileName += ".png";
         if (!std::ifstream(("cache/" + *guildIconFileName).c_str()).good()) {
-            Api::requestFile("https://cdn.discordapp.com/icons/" + *guild.id + "/" + *guildIconFileName, "cache/" + *guildIconFileName);
+            Api::Request::requestFile("https://cdn.discordapp.com/icons/" + *guild.id + "/" + *guildIconFileName, "cache/" + *guildIconFileName);
         }
         *guildIconFileName = "cache/" + *guildIconFileName;
 

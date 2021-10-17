@@ -38,7 +38,7 @@ ThreadMember *getThreadMemberFromJson(const json& jsonObj, const std::string& ke
 ThreadMetadata *getThreadMetadataFromJson(const json& jsonObj, const std::string& key);
 
 Channel *getChannelFromJson(const json& jsonObj, const std::string& key);
-std::vector<Channel> *getChannelsFromJson(const json& jsonObj, const std::string& key);
+std::vector<Channel *> *getChannelsFromJson(const json& jsonObj, const std::string& key);
 
 TeamMember *getTeamMemberFromJson(const json& jsonObj, const std::string& key);
 std::vector<TeamMember> *getTeamMembersFromJson(const json& jsonObj, const std::string& key);
@@ -73,6 +73,7 @@ MessageActivity *getMessageActivityFromJson(const json& jsonObj, const std::stri
 
 Message *getMessageFromJson(const json& jsonObj, const std::string& key);
 Message *getPartialMessageFromJson(const json& jsonObj, const std::string& key);
+std::vector<Message> *getMessagesFromJson(const json& jsonObj, const std::string& key);
 
 GuildMember *getGuildMemberFromJson(const json& jsonObj, const std::string& key);
 std::vector<GuildMember> *getGuildMembersFromJson(const json& jsonObj, const std::string& key);
@@ -89,5 +90,6 @@ StageInstance *getStageInstanceFromJson(const json& jsonObj, const std::string& 
 std::vector<StageInstance> *getStageInstancesFromJson(const json& jsonObj, const std::string& key);
 
 Guild *getGuildFromJson(const json& jsonObj, const std::string& key);
+std::vector<Guild> *getGuildsFromJson(const json& jsonObj, const std::string& key);
 
 } // namespace Api

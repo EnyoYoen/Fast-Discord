@@ -64,11 +64,11 @@ private:
     Api::Gateway gw; //For the websocket connection
 
     //Storing channels and messages that we already gathered
-    std::vector<Api::Channel *> privateChannels;
-    std::map<std::string, std::vector<Api::Message>> channelsMessages;
+    std::vector<Api::Channel *> *privateChannels;
+    std::map<std::string, std::vector<Api::Message> *> channelsMessages;
 
     //Store guilds
-    std::vector<Api::Guild *> guilds;
+    std::vector<Api::Guild> *guilds;
 
     std::string currentOpenedChannel; //Current channel ID
     bool homePageShown;

@@ -1,10 +1,5 @@
 #include "../../include/api/guild.h"
 
-#include "../../include/api/jsonutils.h"
-#include "../../include/api/request.h"
-
-#include "../../lib/nlohmann/json.hpp"
-
 namespace Api {
 
 WelcomeScreenChannel::~WelcomeScreenChannel()
@@ -60,29 +55,6 @@ Guild::~Guild()
     delete banner;
     delete preferredLocale;
     delete publicUpdatesChannelId;
-}
-
-std::vector<Guild *> getGuilds()
-{
-    MemoryStruct response;
-
-    request(
-        "https://discord.com/api/v9/users/@me/guilds",
-        "",
-        &response,
-        "",
-        "");
-
-    json jsonGuilds = json::parse(response.memory);
-
-    std::vector<Guild *> guilds;
-    if (!jsonGuilds.empty()) {
-        for (unsigned int i = 0 ; i < jsonGuilds.size() ; i++) {
-            guilds.push_back(getGuildFromJson(jsonGuilds[i], std::string("")));
-        }
-    }
-
-    return guilds;
 }
 
 } // namespace Api

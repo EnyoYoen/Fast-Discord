@@ -1,16 +1,17 @@
 #include "../../include/api/request.h"
 
-#include "../../include/token.h"
+#include "../../include/api/jsonutils.h"
 
 #include <curl/curl.h>
 #include <boost/filesystem.hpp>
 
-#include <cstring>
 #include <stdlib.h>
 
 namespace Api {
 
-size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+std::string Request::token;
+
+size_t Request::writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
     size_t realsize = size * nmemb;
     MemoryStruct *mem = (MemoryStruct *)userp;
@@ -30,18 +31,18 @@ size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *user
     return realsize;
 }
 
-size_t writeFile(void *contents, size_t size, size_t nmemb, FILE *stream)
+size_t Request::writeFileCallback(void *contents, size_t size, size_t nmemb, FILE *stream)
 {
     size_t written = fwrite(contents, size, nmemb, stream);
     return written;
 }
 
-size_t noOutputFunction(void *, size_t size, size_t nmemb, void *)
+size_t Request::noOutputCallback(void *, size_t size, size_t nmemb, void *)
 {
     return size * nmemb;
 }
 
-void _request(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName, const std::string& outputFile, bool json)
+void Request::requestApi(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName, const std::string& outputFile, bool json)
 {
     CURL *curl;
     CURLcode res;
@@ -64,7 +65,7 @@ void _request(const std::string& url, const std::string& postDatas, MemoryStruct
         if (outputFile != "") {
             if (!boost::filesystem::exists(boost::filesystem::path("cache/"))) boost::filesystem::create_directory(boost::filesystem::path("cache"));
             FILE *fp = fopen(outputFile.c_str(), "wb");
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFile);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFileCallback);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
         } else {
             if (callbackStruct != nullptr) {
@@ -77,7 +78,7 @@ void _request(const std::string& url, const std::string& postDatas, MemoryStruct
                 /* we pass our 'chunk' struct to the callback function */
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, static_cast<void *>(callbackStruct));
             } else {
-                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, noOutputFunction);
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, noOutputCallback);
             }
         }
 
@@ -128,19 +129,144 @@ void _request(const std::string& url, const std::string& postDatas, MemoryStruct
     }
 }
 
-void request(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName)
+void Request::requestJson(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName)
 {
-    _request(url, postDatas, callbackStruct, customRequest, fileName, "", false);
+    requestApi(url, postDatas, callbackStruct, customRequest, fileName, "", true);
 }
 
-void requestJson(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName)
+void Request::requestFile(const std::string& url, const std::string& fileName)
 {
-    _request(url, postDatas, callbackStruct, customRequest, fileName, "", true);
+    requestApi(url, "", nullptr, "", "", fileName, false);
 }
 
-void requestFile(const std::string& url, const std::string& fileName)
+
+std::vector<Channel *> *Request::getPrivateChannels()
 {
-    _request(url, "", nullptr, "", "", fileName, false);
+    MemoryStruct response;
+
+    requestApi(
+        "https://discord.com/api/v9/users/@me/channels",
+        "",
+        &response,
+        "",
+        "",
+        "",
+        false);
+
+    return getChannelsFromJson(json::parse(response.memory), "");
+}
+
+std::vector<Guild> *Request::getGuilds()
+{
+    MemoryStruct response;
+
+    requestApi(
+        "https://discord.com/api/v9/users/@me/guilds",
+        "",
+        &response,
+        "",
+        "",
+        "",
+        false);
+
+    return getGuildsFromJson(json::parse(response.memory), "");
+}
+
+std::vector<Message> *Request::getMessages(const std::string& channelId, unsigned int limit)
+{
+    MemoryStruct response;
+
+    limit = limit >= 100 ? 100 : limit;
+
+    requestApi(
+        "https://discord.com/api/v9/channels/" + channelId + "/messages?limit=" + std::to_string(limit),
+        "",
+        &response,
+        "",
+        "",
+        "",
+        false);
+
+    return getMessagesFromJson(json::parse(response.memory), "");
+}
+
+void Request::setStatus(const std::string& status)
+{
+    requestApi(
+        "https://discord.com/api/v9/users/@me/settings",
+        "{\"status\":\"" + status + "\"}",
+        nullptr,
+        "PATCH",
+        "",
+        "",
+        false);
+}
+
+void Request::sendTyping(const std::string& channelId)
+{
+    requestApi("https://discord.com/api/v9/channels/" + channelId + "/typing",
+            " ",
+            nullptr,
+            "POST",
+            "",
+            "",
+            false);
+}
+
+void Request::sendMessage(const std::string& content, const std::string& channelId)
+{
+    requestJson("https://discord.com/api/v9/channels/" + channelId + "/messages",
+            "{\"content\":\"" + content + "\"}",
+            nullptr,
+            "",
+            "");
+}
+
+void Request::sendMessageWithFile(const std::string& content, const std::string& channelId, const std::string& filePath)
+{
+    requestApi("https://discord.com/api/v9/channels/" + channelId + "/messages",
+            "{\"content\":\"" + content + "\"}",
+            nullptr,
+            "",
+            filePath,
+            "",
+            false);
+}
+
+void Request::deleteMessage(const std::string& channelId, const std::string& messageId)
+{
+    requestApi(
+        "https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId,
+        "",
+        nullptr,
+        "DELETE",
+        "",
+        "",
+        false);
+}
+
+void Request::pinMessage(const std::string& channelId, const std::string& messageId)
+{
+    requestApi(
+        "https://discord.com/api/v9/channels/" + channelId + "/pins/" + messageId,
+        "",
+        nullptr,
+        "PUT",
+        "",
+        "",
+        false);
+}
+
+void Request::unpinMessage(const std::string& channelId, const std::string& messageId)
+{
+    requestApi(
+        "https://discord.com/api/v9/channels/" + channelId + "/pins/" + messageId,
+        "",
+        nullptr,
+        "PUT",
+        "",
+        "",
+        false);
 }
 
 } // namespace Api

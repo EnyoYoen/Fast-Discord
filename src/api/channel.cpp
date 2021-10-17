@@ -1,13 +1,36 @@
 #include "../../include/api/channel.h"
 
-#include "../../include/api/jsonutils.h"
-#include "../../include/api/request.h"
-
-#include "../../lib/nlohmann/json.hpp"
-
-using json = nlohmann::json;
-
 namespace Api {
+
+/*Channel::Channel(const Channel &c)
+{
+    recipients = c.recipients;
+    permissionOverwrites = c.permissionOverwrites;
+    member = c.member;
+    threadMetadata = c.threadMetadata;
+    id = c.id;
+    name = c.name;
+    topic = c.topic;
+    icon = c.icon;
+    lastPinTimestamp = c.lastPinTimestamp;
+    rtcRegion = c.rtcRegion;
+    permissions = c.permissions;
+    guildId = c.guildId;
+    lastMessageId = c.lastMessageId;
+    ownerId = c.ownerId;
+    applicationId = c.applicationId;
+    parentId = c.parentId;
+    type = c.type;
+    position = c.position;
+    bitrate = c.bitrate;
+    userLimit = c.userLimit;
+    rateLimitPerUser = c.rateLimitPerUser;
+    videoQualityMode = c.videoQualityMode;
+    messageCount = c.videoQualityMode;
+    memberCount = c.videoQualityMode;
+    defaultAutoArchiveDuration = c.videoQualityMode;
+    nsfw = c.videoQualityMode;
+}*/
 
 Channel::~Channel()
 {
@@ -34,30 +57,6 @@ ChannelMention::~ChannelMention()
     delete id;
     delete guilId;
     delete name;
-}
-
-
-std::vector<Channel *> getPrivateChannels()
-{
-    MemoryStruct response;
-
-    request(
-        "https://discord.com/api/v9/users/@me/channels",
-        "",
-        &response,
-        "",
-        "");
-
-    json jsonChannels = json::parse(response.memory);
-
-    std::vector<Channel *> channels;
-    if (!jsonChannels.empty()) {
-        for (unsigned int i = 0 ; i < jsonChannels.size() ; i++) {
-            channels.push_back(getChannelFromJson(jsonChannels[i], std::string("")));
-        }
-    }
-
-    return channels;
 }
 
 } // namespace Api

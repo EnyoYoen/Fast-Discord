@@ -34,7 +34,6 @@ SOURCES += \
     ../src/api/overwrite.cpp \
     ../src/api/request.cpp \
     ../src/api/role.cpp \
-    ../src/api/status.cpp \
     ../src/api/sticker.cpp \
     ../src/api/team.cpp \
     ../src/api/thread.cpp \
@@ -63,13 +62,11 @@ HEADERS += \
     ../include/api/overwrite.h \
     ../include/api/request.h \
     ../include/api/role.h \
-    ../include/api/status.h \
     ../include/api/sticker.h \
     ../include/api/team.h \
     ../include/api/thread.h \
     ../include/api/user.h \
     ../include/api/voice.h \
-    ../include/token.h \
     ../include/ui/guildwidget.h \
     ../include/ui/mainwindow.h \
     ../include/ui/messagearea.h \

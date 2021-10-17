@@ -10,6 +10,8 @@
 #include "embed.h"
 #include "sticker.h"
 
+#include <QObject>
+
 #include <string>
 
 namespace Api {
@@ -111,13 +113,6 @@ struct Message
     bool                           mentionEveryone;
 };
 
-void typing(const std::string& channelId);
-void sendMessage(const std::string& content, const std::string& channelId);
-void sendMessageWithFile(const std::string& content, const std::string& channelId, const std::string& filePath);
-std::vector<Message> getMessages(const std::string& channelId, unsigned int limit);
-void deleteMessage(const std::string& channelId, const std::string& messageId);
-
-void pinMessage(const std::string& channelId, const std::string& messageId);
-void unpinMessage(const std::string& channelId, const std::string& messageId);
-
 } // namespace Api
+
+Q_DECLARE_METATYPE(Api::Message);

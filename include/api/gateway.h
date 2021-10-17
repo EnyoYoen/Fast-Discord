@@ -35,6 +35,7 @@ private:
     std::function<void(std::string&, json&)> onDispatchHandler; //Function called when when the gateway recieve events
     std::string url; //websocket URL
     std::string sessionId;
+    std::string token;
     int heartbeatInterval;
     int seq;
     bool connected;
