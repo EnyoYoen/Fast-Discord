@@ -13,7 +13,6 @@ namespace Api {
 struct Channel
 {
         ~Channel();
-        //Channel(const Channel &c);
         std::vector<User>      *recipients;
         std::vector<Overwrite> *permissionOverwrites;
         ThreadMember           *member;

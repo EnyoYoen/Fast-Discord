@@ -2,36 +2,6 @@
 
 namespace Api {
 
-/*Channel::Channel(const Channel &c)
-{
-    recipients = c.recipients;
-    permissionOverwrites = c.permissionOverwrites;
-    member = c.member;
-    threadMetadata = c.threadMetadata;
-    id = c.id;
-    name = c.name;
-    topic = c.topic;
-    icon = c.icon;
-    lastPinTimestamp = c.lastPinTimestamp;
-    rtcRegion = c.rtcRegion;
-    permissions = c.permissions;
-    guildId = c.guildId;
-    lastMessageId = c.lastMessageId;
-    ownerId = c.ownerId;
-    applicationId = c.applicationId;
-    parentId = c.parentId;
-    type = c.type;
-    position = c.position;
-    bitrate = c.bitrate;
-    userLimit = c.userLimit;
-    rateLimitPerUser = c.rateLimitPerUser;
-    videoQualityMode = c.videoQualityMode;
-    messageCount = c.videoQualityMode;
-    memberCount = c.videoQualityMode;
-    defaultAutoArchiveDuration = c.videoQualityMode;
-    nsfw = c.videoQualityMode;
-}*/
-
 Channel::~Channel()
 {
     delete recipients;
