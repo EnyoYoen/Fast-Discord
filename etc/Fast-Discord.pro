@@ -112,8 +112,7 @@ HEADERS += \
     ../lib/nlohmann/json_fwd.hpp \
     ../lib/nlohmann/ordered_map.hpp \
     ../lib/nlohmann/thirdparty/hedley/hedley.hpp \
-    ../lib/nlohmann/thirdparty/hedley/hedley_undef.hpp \
-    ../src/ui/guild.h
+    ../lib/nlohmann/thirdparty/hedley/hedley_undef.hpp
 
 LIBS += \
     -lcurl -lssl -lcrypto -lpthread -lcpprest -lz -lboost_filesystem
