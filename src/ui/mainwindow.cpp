@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     setup();
 
     QObject::connect(homeButton, SIGNAL(clicked()), this, SLOT(displayPrivateChannels()));
-    QObject::connect(this, SIGNAL(messageRecieved(Api::Message)), this, SLOT(addMessage(const Api::Message&)));
+    QObject::connect(this, SIGNAL(messageRecieved(Api::Message)), this, SLOT(addMessage(Api::Message)));
 }
 
 void MainWindow::cleanRightColumn()
@@ -51,9 +51,9 @@ void MainWindow::openPrivateChannel(Api::Channel& channel)
     cleanRightColumn();
 
     std::string channelId = *channel.id;
-    std::vector<Api::Message> *messages;
+    std::vector<Api::Message *> *messages;
 
-    std::map<std::string, std::vector<Api::Message> *>::iterator currentMessages = channelsMessages.find(channelId);
+    std::map<std::string, std::vector<Api::Message *> *>::iterator currentMessages = channelsMessages.find(channelId);
     if (currentMessages == channelsMessages.end() or currentMessages->second->size() < 100) {
         messages = Api::Request::getMessages(channelId, 100 - currentMessages->second->size());
         channelsMessages[channelId] = messages;
@@ -102,9 +102,9 @@ void MainWindow::openGuildChannel(Api::Channel& channel)
         cleanRightColumn();
 
         std::string channelId = *channel.id;
-        std::vector<Api::Message> *messages;
+        std::vector<Api::Message *> *messages;
 
-        std::map<std::string, std::vector<Api::Message> *>::iterator currentMessages = channelsMessages.find(channelId);
+        std::map<std::string, std::vector<Api::Message *> *>::iterator currentMessages = channelsMessages.find(channelId);
         if (currentMessages == channelsMessages.end() or currentMessages->second->size() < 100) {
             messages = Api::Request::getMessages(channelId, 100 - currentMessages->second->size());
             channelsMessages[channelId] = messages;
@@ -183,15 +183,15 @@ void MainWindow::openGuild(Api::Guild& guild)
     middleColumnLayout->insertStretch(-1, 1);
 }
 
-void MainWindow::addMessage(const Api::Message& message)
+void MainWindow::addMessage(Api::Message message)
 {
     if (*message.author->username != static_cast<std::string>("Enyo")) {
         std::string channelId = *message.channelId;
         if (channelsMessages.find(channelId) == channelsMessages.end()) {
-            std::vector<Api::Message> messageVector;
+            std::vector<Api::Message *> messageVector;
             channelsMessages[channelId] = &messageVector;
         }
-        channelsMessages[channelId]->push_back(message);
+        channelsMessages[channelId]->push_back(&message);
 
         if (channelId == currentOpenedChannel) {
             messageArea->widget()->layout()->addWidget(new MessageWidget(message));
@@ -241,7 +241,7 @@ void MainWindow::setupInterface()
 
     mainLayout = new QHBoxLayout(this);
     leftColumn = new QGroupBox();
-    middleColumn = new QGroupBox();
+    middleColumn = new QScrollArea();
     rightColumn = new QGroupBox();
 
     leftColumn->setFixedWidth(72);
@@ -293,9 +293,9 @@ void MainWindow::setupInterface()
     this->setLayout(mainLayout);
 
     this->setStyleSheet("background-color: #202225;");
-    this->setStyleSheet("PrivateChannel { background-color: yellow }");
     leftColumn->setStyleSheet("background-color: #202225;");
-    middleColumn->setStyleSheet("background-color: #2f3136;");
+    middleColumn->setStyleSheet("background-color: #2f3136;"
+                                "border: none;");
     rightColumn->setStyleSheet("background-color: #36393f;");
     homeButton->setStyleSheet("background-color: #36393f;"
                               "border: none;"

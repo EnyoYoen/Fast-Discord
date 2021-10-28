@@ -26,8 +26,8 @@ struct WelcomeScreen
 {
     ~WelcomeScreen();
 
-    std::vector<WelcomeScreenChannel> *welcomeChannels;
-    std::string                       *description;
+    std::vector<WelcomeScreenChannel *> *welcomeChannels;
+    std::string                         *description;
 };
 
 struct StageInstance
@@ -46,54 +46,54 @@ struct Guild
 {
     ~Guild();
 
-    WelcomeScreen              *welcomeScreen;
-    std::vector<std::string>   *guildFeatures;
-    std::vector<VoiceState>    *voiceStates;
-    std::vector<GuildMember>   *members;
-    std::vector<Channel *>     *channels;
-    std::vector<Channel *>     *threads;
-    void                       *presences; // TODO
-    std::vector<StageInstance> *stageInstances;
-    std::vector<Sticker>       *stickers;
-    std::string                *id;
-    std::string                *name;
-    std::string                *icon;
-    std::string                *iconHash;
-    std::string                *splash;
-    std::string                *discoverySplash;
-    std::string                *ownerId;
-    std::string                *permissions;
-    std::string                *region;
-    std::string                *afkChannelId;
-    std::string                *widgetChannelId;
-    std::string                *applicationId;
-    std::string                *systemChannelId;
-    std::string                *rulesChannelId;
-    std::string                *joinedAt;
-    std::string                *vanityUrlCode;
-    std::string                *description;
-    std::string                *banner;
-    std::string                *preferredLocale;
-    std::string                *publicUpdatesChannelId;
-    int                         afkTimeout;
-    int                         verificationLevel;
-    int                         defaultMessageNotifications;
-    int                         explicitContentFilter;
-    int                         mfaLevel;
-    int                         systemChannelFlags;
-    int                         memberCount;
-    int                         maxPresences;
-    int                         maxMembers;
-    int                         premiumTier;
-    int                         premiumSubscriptionCount;
-    int                         maxVideoChannelUsers;
-    int                         approximateMemberCount;
-    int                         approximatePresenceCount;
-    int                         nsfwLevel;
-    bool                        owner;
-    bool                        widgetEnabled;
-    bool                        large;
-    bool                        unavailable;
+    WelcomeScreen                *welcomeScreen;
+    std::vector<std::string>     *guildFeatures;
+    std::vector<VoiceState *>    *voiceStates;
+    std::vector<GuildMember *>   *members;
+    std::vector<Channel *>       *channels;
+    std::vector<Channel *>       *threads;
+    void                         *presences; // TODO
+    std::vector<StageInstance *> *stageInstances;
+    std::vector<Sticker *>       *stickers;
+    std::string                  *id;
+    std::string                  *name;
+    std::string                  *icon;
+    std::string                  *iconHash;
+    std::string                  *splash;
+    std::string                  *discoverySplash;
+    std::string                  *ownerId;
+    std::string                  *permissions;
+    std::string                  *region;
+    std::string                  *afkChannelId;
+    std::string                  *widgetChannelId;
+    std::string                  *applicationId;
+    std::string                  *systemChannelId;
+    std::string                  *rulesChannelId;
+    std::string                  *joinedAt;
+    std::string                  *vanityUrlCode;
+    std::string                  *description;
+    std::string                  *banner;
+    std::string                  *preferredLocale;
+    std::string                  *publicUpdatesChannelId;
+    int                           afkTimeout;
+    int                           verificationLevel;
+    int                           defaultMessageNotifications;
+    int                           explicitContentFilter;
+    int                           mfaLevel;
+    int                           systemChannelFlags;
+    int                           memberCount;
+    int                           maxPresences;
+    int                           maxMembers;
+    int                           premiumTier;
+    int                           premiumSubscriptionCount;
+    int                           maxVideoChannelUsers;
+    int                           approximateMemberCount;
+    int                           approximatePresenceCount;
+    int                           nsfwLevel;
+    bool                          owner;
+    bool                          widgetEnabled;
+    bool                          large;
+    bool                          unavailable;
 };
 
 } // namespace Api

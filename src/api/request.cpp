@@ -188,7 +188,7 @@ std::vector<Channel *> *Request::getGuildChannels(const std::string& id)
     return getChannelsFromJson(json::parse(response.memory), "");
 }
 
-std::vector<Message> *Request::getMessages(const std::string& channelId, unsigned int limit)
+std::vector<Message *> *Request::getMessages(const std::string& channelId, unsigned int limit)
 {
     MemoryStruct response;
 

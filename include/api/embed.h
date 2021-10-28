@@ -60,19 +60,19 @@ struct Embed
 {
     ~Embed();
 
-    std::vector<EmbedField> *fields;
-    EmbedFooter             *footer;
-    EmbedImage              *image;
-    EmbedThumbnail          *thumbnail;
-    EmbedVideo              *video;
-    EmbedProvider           *provider;
-    EmbedAuthor             *author;
-    std::string             *title;
-    std::string             *type;
-    std::string             *description;
-    std::string             *url;
-    std::string             *timestamp;
-    int                      color;
+    std::vector<EmbedField *> *fields;
+    EmbedFooter               *footer;
+    EmbedImage                *image;
+    EmbedThumbnail            *thumbnail;
+    EmbedVideo                *video;
+    EmbedProvider             *provider;
+    EmbedAuthor               *author;
+    std::string               *title;
+    std::string               *type;
+    std::string               *description;
+    std::string               *url;
+    std::string               *timestamp;
+    int                        color;
 };
 
 } // namespace Api

@@ -8,13 +8,13 @@
 
 namespace Ui {
 
-MessageArea::MessageArea(const std::vector<Api::Message>& messages) : QScrollArea()
+MessageArea::MessageArea(const std::vector<Api::Message *>& messages) : QScrollArea()
 {
     QGroupBox *messageBox = new QGroupBox();
     QVBoxLayout *messageLayout = new QVBoxLayout();
 
     for (int i = messages.size() - 1; i >= 0 ; i--) {
-        messageLayout->addWidget(new MessageWidget(messages[i]));
+        messageLayout->addWidget(new MessageWidget(*messages[i]));
     }
 
     messageLayout->setSpacing(20);

@@ -23,11 +23,11 @@ struct Team
 {
     ~Team();
 
-    std::vector<TeamMember> *members;
-    std::string             *icon;
-    std::string             *id;
-    std::string             *name;
-    std::string             *ownerUserId;
+    std::vector<TeamMember *> *members;
+    std::string               *icon;
+    std::string               *id;
+    std::string               *name;
+    std::string               *ownerUserId;
 };
 
 } // namespace Api

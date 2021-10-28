@@ -58,14 +58,14 @@ User *getUserFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<User> *getUsersFromJson(const json& jsonObj, const std::string& key)
+std::vector<User *> *getUsersFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonRecipients = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<User> *recipients = new std::vector<User>;
+        std::vector<User *> *recipients = new std::vector<User *>;
 
         for (unsigned int i = 0 ; i < jsonRecipients.size() ; i++) {
-            recipients->push_back(*getUserFromJson(jsonRecipients[i], std::string("")));
+            recipients->push_back(getUserFromJson(jsonRecipients[i], std::string("")));
         }
 
         return recipients;
@@ -91,14 +91,14 @@ Overwrite *getOverwriteFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<Overwrite> *getOverwritesFromJson(const json& jsonObj, const std::string& key)
+std::vector<Overwrite *> *getOverwritesFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonOverwrites = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Overwrite> *overwrites = new std::vector<Overwrite>;
+        std::vector<Overwrite *> *overwrites = new std::vector<Overwrite *>;
 
         for (unsigned int i = 0 ; i < jsonOverwrites.size() ; i++) {
-            overwrites->push_back(*getOverwriteFromJson(jsonOverwrites[i], std::string("")));
+            overwrites->push_back(getOverwriteFromJson(jsonOverwrites[i], std::string("")));
         }
 
         return overwrites;
@@ -217,14 +217,14 @@ TeamMember *getTeamMemberFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<TeamMember> *getTeamMembersFromJson(const json& jsonObj, const std::string& key)
+std::vector<TeamMember *> *getTeamMembersFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonTeamMembers = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<TeamMember> *teamMembers = new std::vector<TeamMember>;
+        std::vector<TeamMember *> *teamMembers = new std::vector<TeamMember *>;
 
         for (unsigned int i = 0 ; i < jsonTeamMembers.size() ; i++) {
-            teamMembers->push_back(*getTeamMemberFromJson(jsonTeamMembers[i], std::string("")));
+            teamMembers->push_back(getTeamMemberFromJson(jsonTeamMembers[i], std::string("")));
         }
 
         return teamMembers;
@@ -378,14 +378,14 @@ Reaction *getReactionFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<Reaction> *getReactionsFromJson(const json& jsonObj, const std::string& key)
+std::vector<Reaction *> *getReactionsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonReactions = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Reaction> *reactions = new std::vector<Reaction>;
+        std::vector<Reaction *> *reactions = new std::vector<Reaction *>;
 
         for (unsigned int i = 0 ; i < jsonReactions.size() ; i++) {
-            reactions->push_back(*getReactionFromJson(jsonReactions[i], ""));
+            reactions->push_back(getReactionFromJson(jsonReactions[i], ""));
         }
 
         return reactions;
@@ -410,14 +410,14 @@ EmbedField *getEmbedFieldFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<EmbedField> *getEmbedFieldsFromJson(const json& jsonObj, const std::string& key)
+std::vector<EmbedField *> *getEmbedFieldsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonEmbedFields = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<EmbedField> *embedFields = new std::vector<EmbedField>;
+        std::vector<EmbedField *> *embedFields = new std::vector<EmbedField *>;
 
         for (unsigned int i = 0 ; i < jsonEmbedFields.size() ; i++) {
-            embedFields->push_back(*getEmbedFieldFromJson(jsonEmbedFields[i], ""));
+            embedFields->push_back(getEmbedFieldFromJson(jsonEmbedFields[i], ""));
         }
 
         return embedFields;
@@ -515,14 +515,14 @@ Embed *getEmbedFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<Embed> *getEmbedsFromJson(const json& jsonObj, const std::string& key)
+std::vector<Embed *> *getEmbedsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonEmbeds = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Embed> *embeds = new std::vector<Embed>;
+        std::vector<Embed *> *embeds = new std::vector<Embed *>;
 
         for (unsigned int i = 0 ; i < jsonEmbeds.size() ; i++) {
-            embeds->push_back(*getEmbedFromJson(jsonEmbeds[i], ""));
+            embeds->push_back(getEmbedFromJson(jsonEmbeds[i], ""));
         }
 
         return embeds;
@@ -552,14 +552,14 @@ Attachment *getAttachmentFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<Attachment> *getAttachmentsFromJson(const json& jsonObj, const std::string& key)
+std::vector<Attachment *> *getAttachmentsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonAttachments = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Attachment> *attachments = new std::vector<Attachment>;
+        std::vector<Attachment *> *attachments = new std::vector<Attachment *>;
 
         for (unsigned int i = 0 ; i < jsonAttachments.size() ; i++) {
-            attachments->push_back(*getAttachmentFromJson(jsonAttachments[i], ""));
+            attachments->push_back(getAttachmentFromJson(jsonAttachments[i], ""));
         }
 
         return attachments;
@@ -585,14 +585,14 @@ ChannelMention *getChannelMentionFromJson(const json& jsonObj, const std::string
     }
 }
 
-std::vector<ChannelMention> *getChannelMentionsFromJson(const json& jsonObj, const std::string& key)
+std::vector<ChannelMention *> *getChannelMentionsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonChannelMentions = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<ChannelMention> *channelMentions = new std::vector<ChannelMention>;
+        std::vector<ChannelMention *> *channelMentions = new std::vector<ChannelMention *>;
 
         for (unsigned int i = 0 ; i < jsonChannelMentions.size() ; i++) {
-            channelMentions->push_back(*getChannelMentionFromJson(jsonChannelMentions[i], ""));
+            channelMentions->push_back(getChannelMentionFromJson(jsonChannelMentions[i], ""));
         }
 
         return channelMentions;
@@ -620,14 +620,14 @@ SelectOption *getSelectOptionFromJson(const json& jsonObj, const std::string& ke
     }
 }
 
-std::vector<SelectOption> *getSelectOptionsFromJson(const json& jsonObj, const std::string& key)
+std::vector<SelectOption *> *getSelectOptionsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonSelectOptions = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<SelectOption> *selectOptions = new std::vector<SelectOption>;
+        std::vector<SelectOption *> *selectOptions = new std::vector<SelectOption *>;
 
         for (unsigned int i = 0 ; i < jsonSelectOptions.size() ; i++) {
-            selectOptions->push_back(*getSelectOptionFromJson(jsonSelectOptions[i], ""));
+            selectOptions->push_back(getSelectOptionFromJson(jsonSelectOptions[i], ""));
         }
 
         return selectOptions;
@@ -663,14 +663,14 @@ MessageComponent *getPartialMessageComponentFromJson(const json& jsonObj, const 
     }
 }
 
-std::vector<MessageComponent> *getMessageComponentsFromJson(const json& jsonObj, const std::string& key)
+std::vector<MessageComponent *> *getMessageComponentsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonMessageComponents = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<MessageComponent> *messageComponents = new std::vector<MessageComponent>;
+        std::vector<MessageComponent *> *messageComponents = new std::vector<MessageComponent *>;
 
         for (unsigned int i = 0 ; i < jsonMessageComponents.size() ; i++) {
-            messageComponents->push_back(*getPartialMessageComponentFromJson(jsonMessageComponents[i], ""));
+            messageComponents->push_back(getPartialMessageComponentFromJson(jsonMessageComponents[i], ""));
         }
 
         return messageComponents;
@@ -695,14 +695,14 @@ StickerItem *getStickerItemFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<StickerItem> *getStickerItemsFromJson(const json& jsonObj, const std::string& key)
+std::vector<StickerItem *> *getStickerItemsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonStickerItems = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<StickerItem> *stickerItems = new std::vector<StickerItem>;
+        std::vector<StickerItem *> *stickerItems = new std::vector<StickerItem *>;
 
         for (unsigned int i = 0 ; i < jsonStickerItems.size() ; i++) {
-            stickerItems->push_back(*getStickerItemFromJson(jsonStickerItems[i], ""));
+            stickerItems->push_back(getStickerItemFromJson(jsonStickerItems[i], ""));
         }
 
         return stickerItems;
@@ -738,14 +738,14 @@ Sticker *getStickerFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<Sticker> *getStickersFromJson(const json& jsonObj, const std::string& key)
+std::vector<Sticker *> *getStickersFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonStickers = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Sticker> *stickers = new std::vector<Sticker>;
+        std::vector<Sticker *> *stickers = new std::vector<Sticker *>;
 
         for (unsigned int i = 0 ; i < jsonStickers.size() ; i++) {
-            stickers->push_back(*getStickerFromJson(jsonStickers[i], ""));
+            stickers->push_back(getStickerFromJson(jsonStickers[i], ""));
         }
 
         return stickers;
@@ -851,14 +851,14 @@ Message *getMessageFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<Message> *getMessagesFromJson(const json& jsonObj, const std::string& key)
+std::vector<Message *> *getMessagesFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonMessages = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Message> *messages = new std::vector<Message>;
+        std::vector<Message *> *messages = new std::vector<Message *>;
 
         for (unsigned int i = 0 ; i < jsonMessages.size() ; i++) {
-            messages->push_back(*getMessageFromJson(jsonMessages[i], ""));
+            messages->push_back(getMessageFromJson(jsonMessages[i], ""));
         }
 
         return messages;
@@ -891,14 +891,14 @@ GuildMember *getGuildMemberFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<GuildMember> *getGuildMembersFromJson(const json& jsonObj, const std::string& key)
+std::vector<GuildMember *> *getGuildMembersFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonGuildMembers = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<GuildMember> *guildMembers = new std::vector<GuildMember>;
+        std::vector<GuildMember *> *guildMembers = new std::vector<GuildMember *>;
 
         for (unsigned int i = 0 ; i < jsonGuildMembers.size() ; i++) {
-            guildMembers->push_back(*getGuildMemberFromJson(jsonGuildMembers[i], ""));
+            guildMembers->push_back(getGuildMemberFromJson(jsonGuildMembers[i], ""));
         }
 
         return guildMembers;
@@ -934,14 +934,14 @@ VoiceState *getVoiceStateFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<VoiceState> *getVoiceStatesFromJson(const json& jsonObj, const std::string& key)
+std::vector<VoiceState *> *getVoiceStatesFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonVoiceStates = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<VoiceState> *voiceStates = new std::vector<VoiceState>;
+        std::vector<VoiceState *> *voiceStates = new std::vector<VoiceState *>;
 
         for (unsigned int i = 0 ; i < jsonVoiceStates.size() ; i++) {
-            voiceStates->push_back(*getVoiceStateFromJson(jsonVoiceStates[i], ""));
+            voiceStates->push_back(getVoiceStateFromJson(jsonVoiceStates[i], ""));
         }
 
         return voiceStates;
@@ -966,14 +966,14 @@ WelcomeScreenChannel *getWelcomeScreenChannelFromJson(const json& jsonObj, const
     }
 }
 
-std::vector<WelcomeScreenChannel> *getWelcomeScreenChannelsFromJson(const json& jsonObj, const std::string& key)
+std::vector<WelcomeScreenChannel *> *getWelcomeScreenChannelsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonWelcomeScreenChannels = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<WelcomeScreenChannel> *welcomeScreenChannels = new std::vector<WelcomeScreenChannel>;
+        std::vector<WelcomeScreenChannel *> *welcomeScreenChannels = new std::vector<WelcomeScreenChannel *>;
 
         for (unsigned int i = 0 ; i < jsonWelcomeScreenChannels.size() ; i++) {
-            welcomeScreenChannels->push_back(*getWelcomeScreenChannelFromJson(jsonWelcomeScreenChannels[i], ""));
+            welcomeScreenChannels->push_back(getWelcomeScreenChannelFromJson(jsonWelcomeScreenChannels[i], ""));
         }
 
         return welcomeScreenChannels;
@@ -1017,14 +1017,14 @@ StageInstance *getStageInstanceFromJson(const json& jsonObj, const std::string& 
     }
 }
 
-std::vector<StageInstance> *getStageInstancesFromJson(const json& jsonObj, const std::string& key)
+std::vector<StageInstance *> *getStageInstancesFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonStageInstances = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<StageInstance> *stageInstances = new std::vector<StageInstance>;
+        std::vector<StageInstance *> *stageInstances = new std::vector<StageInstance *>;
 
         for (unsigned int i = 0 ; i < jsonStageInstances.size() ; i++) {
-            stageInstances->push_back(*getStageInstanceFromJson(jsonStageInstances[i], ""));
+            stageInstances->push_back(getStageInstanceFromJson(jsonStageInstances[i], ""));
         }
 
         return stageInstances;

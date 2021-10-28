@@ -26,7 +26,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, QWidget *pare
     if (channelType == 1) {
         subtext = new QLabel("");
 
-        Api::User dmUser = (*privateChannel.recipients)[0];
+        Api::User dmUser = *(*privateChannel.recipients)[0];
         std::string *avatar = dmUser.avatar;
         if (avatar == nullptr) {
             channelIconFileName = "res/images/png/user-icon-asset.png";
@@ -39,7 +39,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, QWidget *pare
         }
         name = new QLabel((*dmUser.username).c_str());
     } else if (channelType == 3) {
-        std::vector<Api::User> recipients = *privateChannel.recipients;
+        std::vector<Api::User *> recipients = *privateChannel.recipients;
         int n_member = recipients.size();
         std::string str_member = " member";
 
@@ -51,7 +51,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, QWidget *pare
         std::string *channelName = privateChannel.name;
         if (channelName == nullptr) {
             if (recipients.size() == 1) {
-                name = new QLabel((*recipients[0].username).c_str());
+                name = new QLabel((*recipients[0]->username).c_str());
             } else {
                 name = new QLabel("No name");
             }

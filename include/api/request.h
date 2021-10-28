@@ -16,7 +16,7 @@ typedef struct
     size_t size;
 } MemoryStruct;
 
-//Class to request to the api
+//Class to request to the API
 class Request
 {
 public:
@@ -29,7 +29,7 @@ public:
     static std::vector<Guild *>   *getGuilds();
     static std::vector<Channel *> *getGuildChannels(const std::string& id);
     static std::vector<Channel *> *getPrivateChannels();
-    static std::vector<Message>   *getMessages(const std::string& channelId, unsigned int limit);
+    static std::vector<Message *> *getMessages(const std::string& channelId, unsigned int limit);
 
     static void setStatus(const std::string& status);
     static void sendTyping(const std::string& channelId);
