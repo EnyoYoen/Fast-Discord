@@ -4,6 +4,7 @@
 #include "../../include/ui/privatechannel.h"
 #include "../../include/ui/messagewidget.h"
 #include "../../include/ui/messagetextinput.h"
+#include "../../include/ui/guildchannelwidget.h"
 #include "../../include/api/request.h"
 
 #include <QInputDialog>
@@ -36,7 +37,16 @@ void MainWindow::cleanRightColumn()
         }
 }
 
-void MainWindow::openChannel(Api::Channel& channel)
+void MainWindow::cleanMiddleColumn()
+{
+        QLayoutItem *item;
+        while ((item = middleColumnLayout->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+}
+
+void MainWindow::openPrivateChannel(Api::Channel& channel)
 {
     cleanRightColumn();
 
@@ -55,6 +65,8 @@ void MainWindow::openChannel(Api::Channel& channel)
 
     messageArea = new MessageArea(*messages);
 
+    QWidget *messagesContainer = new QWidget();
+    QVBoxLayout *messagesLayout = new QVBoxLayout();
     QGroupBox *inputBox = new QGroupBox();
     QHBoxLayout *inputLayout = new QHBoxLayout();
     MessageTextInput *textInput = new MessageTextInput();
@@ -71,18 +83,104 @@ void MainWindow::openChannel(Api::Channel& channel)
     typingLabel->setStyleSheet("height: 24px;"
                                "color: #DCDDDE");
 
-    rightColumnLayout->addWidget(messageArea);
-    rightColumnLayout->addWidget(inputBox);
-    rightColumnLayout->addWidget(typingLabel);
-    rightColumnLayout->setSpacing(0);
+    messagesLayout->addWidget(messageArea);
+    messagesLayout->addWidget(inputBox);
+    messagesLayout->addWidget(typingLabel);
+    messagesLayout->setSpacing(0);
+    messagesLayout->setContentsMargins(0, 0, 0, 0);
+
+    messagesContainer->setLayout(messagesLayout);
+    rightColumnLayout->addWidget(messagesContainer);
 
     QObject::connect(textInput, SIGNAL(returnPressed(std::string)), this, SLOT(sendMessage(const std::string&)));
     QObject::connect(textInput, SIGNAL(typing()), this, SLOT(sendTyping()));
 }
 
-void MainWindow::openGuild(Api::Guild& /*guild*/)
+void MainWindow::openGuildChannel(Api::Channel& channel)
 {
+    if (channel.type != 2) {
+        cleanRightColumn();
 
+        std::string channelId = *channel.id;
+        std::vector<Api::Message> *messages;
+
+        std::map<std::string, std::vector<Api::Message> *>::iterator currentMessages = channelsMessages.find(channelId);
+        if (currentMessages == channelsMessages.end() or currentMessages->second->size() < 100) {
+            messages = Api::Request::getMessages(channelId, 100 - currentMessages->second->size());
+            channelsMessages[channelId] = messages;
+        } else {
+            messages = channelsMessages[channelId];
+        }
+
+        currentOpenedChannel = channelId;
+
+        messageArea = new MessageArea(*messages);
+
+        QWidget *messagesContainer = new QWidget();
+        QScrollArea *userList = new QScrollArea();
+        QVBoxLayout *userListLayout = new QVBoxLayout();
+        QVBoxLayout *messagesLayout = new QVBoxLayout();
+        QGroupBox *inputBox = new QGroupBox();
+        QHBoxLayout *inputLayout = new QHBoxLayout();
+        MessageTextInput *textInput = new MessageTextInput();
+
+        inputLayout->addWidget(textInput);
+        inputLayout->setSpacing(0);
+        inputBox->setLayout(inputLayout);
+        inputBox->setStyleSheet("background-color: #40444B;"
+                                "height: 44px;"
+                                "border-radius: 8px;");
+
+        typingLabel = new QLabel();
+        typingLabel->setText("");
+        typingLabel->setStyleSheet("height: 24px;"
+                                   "color: #DCDDDE");
+
+        messagesLayout->addWidget(messageArea);
+        messagesLayout->addWidget(inputBox);
+        messagesLayout->addWidget(typingLabel);
+        messagesLayout->setSpacing(0);
+        messagesLayout->setContentsMargins(0, 0, 0, 0);
+
+        messagesContainer->setLayout(messagesLayout);
+        userList->setLayout(userListLayout);
+
+        userList->setFixedWidth(240);
+        userList->setStyleSheet("border: none;"
+                                "background-color: #2F3136");
+
+        rightColumnLayout->addWidget(messagesContainer);
+        rightColumnLayout->addWidget(userList);
+
+        rightColumnLayout->setSpacing(0);
+        rightColumnLayout->setContentsMargins(0, 0, 0, 0);
+
+        QObject::connect(textInput, SIGNAL(returnPressed(std::string)), this, SLOT(sendMessage(const std::string&)));
+        QObject::connect(textInput, SIGNAL(typing()), this, SLOT(sendTyping()));
+    }
+}
+
+void MainWindow::openGuild(Api::Guild& guild)
+{
+    cleanMiddleColumn();
+    std::vector<Api::Channel *> channels = *Api::Request::getGuildChannels(*guild.id);
+
+    size_t channelsLen = channels.size();
+    for (size_t i = 0 ; i < channelsLen ; i++) {
+        if ((*channels[i]).type == 4) {
+            middleColumnLayout->addWidget(new GuildChannelWidget(*channels[i]));
+            for (size_t j = 0 ; j < channelsLen ; j++) {
+                if ((*channels[j]).parentId == nullptr) continue;
+                if (*(*channels[j]).parentId == *(*channels[i]).id) {
+                    GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[j]);
+                    QObject::connect(channelWidget, SIGNAL(leftClicked(Api::Channel&)), this, SLOT(openGuildChannel(Api::Channel&)));
+                    middleColumnLayout->addWidget(channelWidget);
+                }
+            }
+        }
+    }
+
+    middleColumnLayout->insertStretch(-1, 1);
 }
 
 void MainWindow::addMessage(const Api::Message& message)
@@ -121,7 +219,7 @@ void MainWindow::displayPrivateChannels()
         for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
             PrivateChannel *privateChannel = new PrivateChannel(*(*privateChannels)[i]);
             middleColumnLayout->insertWidget(i, privateChannel);
-            QObject::connect(privateChannel, SIGNAL(leftClicked(Api::Channel&)), this, SLOT(openChannel(Api::Channel&)));
+            QObject::connect(privateChannel, SIGNAL(leftClicked(Api::Channel&)), this, SLOT(openPrivateChannel(Api::Channel&)));
         }
     }
 }
@@ -130,7 +228,7 @@ void MainWindow::displayGuilds()
 {
     guilds = Api::Request::getGuilds();
     for (size_t i = 0 ; i < guilds->size() ; i++) {
-        GuildWidget *guildWidget = new GuildWidget((*guilds)[i]);
+        GuildWidget *guildWidget = new GuildWidget(*(*guilds)[i]);
         leftColumnLayout->insertWidget(i + 2, guildWidget);
         leftColumnLayout->setAlignment(guildWidget, Qt::AlignHCenter);
         QObject::connect(guildWidget, SIGNAL(leftClicked(Api::Guild&)), this, SLOT(openGuild(Api::Guild&)));
@@ -150,7 +248,7 @@ void MainWindow::setupInterface()
     middleColumn->setFixedWidth(240);
 
     leftColumnLayout = new QVBoxLayout();
-    rightColumnLayout = new QVBoxLayout();
+    rightColumnLayout = new QHBoxLayout();
     rightColumn->setLayout(rightColumnLayout);
 
     home = new QGroupBox();
@@ -217,7 +315,7 @@ void MainWindow::gatewayDispatchHandler(std::string& eventName, json& data)
 
 void MainWindow::userTyping(const json& data)
 {
-    // TODO : it's showing typing only for the current opened channel, other typing events are not showed
+    // TODO : it's showing typing only for the current opened channel, other typing events are ignored
     std::string channelId = data.value("channel_id", "");
     if (currentOpenedChannel == channelId) {
         time_t currentTimestamp = std::time(nullptr);
@@ -233,7 +331,7 @@ void MainWindow::userTyping(const json& data)
         if (text != "") {
             size_t index = (text.find(" is typing") != std::string::npos) ? text.find(" is typing") : text.find(" are typing");
             text.resize(text.size() - index);
-            text += username + " are typing";
+            text += " " + username + " are typing";
         } else {
             text = username + " is typing";
         }

@@ -26,9 +26,10 @@ public:
     static void requestJson(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName);
     static void requestFile(const std::string& url, const std::string& fileName);
 
+    static std::vector<Guild *>   *getGuilds();
+    static std::vector<Channel *> *getGuildChannels(const std::string& id);
     static std::vector<Channel *> *getPrivateChannels();
-    static std::vector<Guild>   *getGuilds();
-    static std::vector<Message> *getMessages(const std::string& channelId, unsigned int limit);
+    static std::vector<Message>   *getMessages(const std::string& channelId, unsigned int limit);
 
     static void setStatus(const std::string& status);
     static void sendTyping(const std::string& channelId);

@@ -11,12 +11,15 @@
 
 #include <fstream>
 #include <string>
+#include <iostream>
 
 namespace Ui {
 
 GuildWidget::GuildWidget(const Api::Guild& guildP, QWidget *parent) : QFrame(parent)
 {
     guild = Api::Guild(guildP);
+
+    setMouseTracking(true);
 
     //this->setProperty("guild", true);
     setFixedSize(48, 48);
@@ -79,7 +82,7 @@ GuildWidget::GuildWidget(const Api::Guild& guildP, QWidget *parent) : QFrame(par
 
     setStyleSheet("border-radius: 24px;"
                   "color: #DCDDDE;"
-                  "background-color: #36393F");
+                  "background-color: #36393F;");
 }
 
 void GuildWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -88,6 +91,30 @@ void GuildWidget::mouseReleaseEvent(QMouseEvent *event)
         emit leftClicked(guild);
     } else if (event->button() == Qt::RightButton) {
         emit rightClicked(guild);
+    }
+}
+
+void GuildWidget::mousePressEvent(QMouseEvent *)
+{
+    setStyleSheet("background-color: #5865F2;"
+                  "color: #FFF;"
+                  "border-radius: 16px;");
+    clicked = true;
+}
+
+void GuildWidget::enterEvent(QEvent *)
+{
+    setStyleSheet("background-color: #5865F2;"
+                  "color: #FFF;"
+                  "border-radius: 16px;");
+}
+
+void GuildWidget::leaveEvent(QEvent *)
+{
+    if (!clicked) {
+        setStyleSheet("border-radius: 24px;"
+                      "color: #DCDDDE;"
+                      "background-color: #36393F;");
     }
 }
 

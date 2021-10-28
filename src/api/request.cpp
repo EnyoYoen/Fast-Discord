@@ -19,7 +19,7 @@ size_t Request::writeMemoryCallback(void *contents, size_t size, size_t nmemb, v
     char *ptr = static_cast<char *>(realloc(mem->memory, mem->size + realsize + 1));
     if (ptr == nullptr) {
         /* out of memory! */
-        printf("Not enough memory (realloc returned nullptr)\nMemory size : %lu\nMemory to allocate : %lu\n", mem->size, realsize);
+        printf("Not enough memory (realloc returned NULL)\nMemory size : %lu\nMemory to allocate : %lu\n", mem->size, realsize);
         return 0;
     }
 
@@ -156,7 +156,7 @@ std::vector<Channel *> *Request::getPrivateChannels()
     return getChannelsFromJson(json::parse(response.memory), "");
 }
 
-std::vector<Guild> *Request::getGuilds()
+std::vector<Guild *> *Request::getGuilds()
 {
     MemoryStruct response;
 
@@ -170,6 +170,22 @@ std::vector<Guild> *Request::getGuilds()
         false);
 
     return getGuildsFromJson(json::parse(response.memory), "");
+}
+
+std::vector<Channel *> *Request::getGuildChannels(const std::string& id)
+{
+    MemoryStruct response;
+
+    requestApi(
+        "https://discord.com/api/v9/guilds/" + id + "/channels",
+        "",
+        &response,
+        "",
+        "",
+        "",
+        false);
+
+    return getChannelsFromJson(json::parse(response.memory), "");
 }
 
 std::vector<Message> *Request::getMessages(const std::string& channelId, unsigned int limit)

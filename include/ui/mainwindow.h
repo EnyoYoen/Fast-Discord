@@ -31,7 +31,8 @@ signals:
 private slots:
     void displayPrivateChannels();
     void displayGuilds();
-    void openChannel(Api::Channel& privateChannel);
+    void openPrivateChannel(Api::Channel& channel);
+    void openGuildChannel(Api::Channel& channel);
     void openGuild(Api::Guild& guild);
     void addMessage(const Api::Message& message);
     void sendMessage(const std::string& content);
@@ -42,6 +43,7 @@ private:
     void setupInterface();
     void setupGateway(); //Creating and lauching the gateway
     void cleanRightColumn();
+    void cleanMiddleColumn();
     void gatewayDispatchHandler(std::string& eventName, json& data); //Event handler for the gateway
     void userTyping(const json& data); //Used when we recieve TYPING_START event from the gateway
 
@@ -52,7 +54,7 @@ private:
     QGroupBox   *rightColumn;
     QVBoxLayout *leftColumnLayout;
     QVBoxLayout *middleColumnLayout;
-    QVBoxLayout *rightColumnLayout;
+    QHBoxLayout *rightColumnLayout;
     QScrollArea *leftScrollArea;
     QWidget     *leftScrollAreaContent;
     QGroupBox   *home;
@@ -68,7 +70,7 @@ private:
     std::map<std::string, std::vector<Api::Message> *> channelsMessages;
 
     //Store guilds
-    std::vector<Api::Guild> *guilds;
+    std::vector<Api::Guild *> *guilds;
 
     std::string currentOpenedChannel; //Current channel ID
     bool homePageShown;

@@ -90,6 +90,6 @@ StageInstance *getStageInstanceFromJson(const json& jsonObj, const std::string& 
 std::vector<StageInstance> *getStageInstancesFromJson(const json& jsonObj, const std::string& key);
 
 Guild *getGuildFromJson(const json& jsonObj, const std::string& key);
-std::vector<Guild> *getGuildsFromJson(const json& jsonObj, const std::string& key);
+std::vector<Guild *> *getGuildsFromJson(const json& jsonObj, const std::string& key);
 
 } // namespace Api

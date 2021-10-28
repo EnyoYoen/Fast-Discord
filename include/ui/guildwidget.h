@@ -21,11 +21,15 @@ signals:
 
 private:
     void mouseReleaseEvent(QMouseEvent *event) override;
+    void mousePressEvent (QMouseEvent *) override;
+    void enterEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
 
     Api::Guild   guild;
     RoundedImage *icon;
     QVBoxLayout  *layout;
     QLabel       *textIcon;
+    bool         clicked;
 };
 
 } // namespace Ui

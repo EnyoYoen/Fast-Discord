@@ -40,6 +40,7 @@ SOURCES += \
     ../src/api/user.cpp \
     ../src/api/voice.cpp \
     ../src/main.cpp \
+    ../src/ui/guildchannelwidget.cpp \
     ../src/ui/guildwidget.cpp \
     ../src/ui/mainwindow.cpp \
     ../src/ui/messagearea.cpp \
@@ -67,6 +68,7 @@ HEADERS += \
     ../include/api/thread.h \
     ../include/api/user.h \
     ../include/api/voice.h \
+    ../include/ui/guildchannelwidget.h \
     ../include/ui/guildwidget.h \
     ../include/ui/mainwindow.h \
     ../include/ui/messagearea.h \

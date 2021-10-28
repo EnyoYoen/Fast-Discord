@@ -41,7 +41,7 @@ MessageWidget::MessageWidget(const Api::Message& message, QWidget *parent) : QWi
     content->setWordWrap(true);
     content->setStyleSheet("color: #dcddde");
 
-    dataLayout->setSpacing(0);
+    dataLayout->setSpacing(6);
     dataLayout->setContentsMargins(0, 0, 0, 0);
     dataLayout->addWidget(name);
     dataLayout->addWidget(content);

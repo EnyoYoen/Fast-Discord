@@ -1096,14 +1096,14 @@ Guild *getGuildFromJson(const json& jsonObj, const std::string& key)
     }
 }
 
-std::vector<Guild> *getGuildsFromJson(const json& jsonObj, const std::string& key)
+std::vector<Guild *> *getGuildsFromJson(const json& jsonObj, const std::string& key)
 {
     try {
         json jsonGuilds = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Guild> *guilds = new std::vector<Guild>;
+        std::vector<Guild *> *guilds = new std::vector<Guild *>;
 
         for (unsigned int i = 0 ; i < jsonGuilds.size() ; i++) {
-            guilds->push_back(*getGuildFromJson(jsonGuilds[i], ""));
+            guilds->push_back(getGuildFromJson(jsonGuilds[i], ""));
         }
 
         return guilds;
