@@ -7,29 +7,31 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
+#include <string>
+
 namespace Ui {
 
 class GuildWidget : public QFrame
 {
     Q_OBJECT
 public:
-    GuildWidget(const Api::Guild& guildP, QWidget *parent = nullptr);
+    GuildWidget(const Api::Guild& guildP, unsigned int idp, QWidget *parent = nullptr);
+    void unclicked();
 
 signals:
-    void leftClicked(Api::Guild&);
+    void leftClicked(Api::Guild&, unsigned int);
     void rightClicked(Api::Guild&);
 
 private:
     void mouseReleaseEvent(QMouseEvent *event) override;
-    void mousePressEvent (QMouseEvent *) override;
+    void mousePressEvent(QMouseEvent *) override;
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
 
-    Api::Guild   guild;
     RoundedImage *icon;
-    QVBoxLayout  *layout;
-    QLabel       *textIcon;
-    bool         clicked;
+    Api::Guild   guild;
+    unsigned int id;
+    bool clicked;
 };
 
 } // namespace Ui

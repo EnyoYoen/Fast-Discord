@@ -7,17 +7,18 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QString>
+#include <QGridLayout>
 
 #include <fstream>
 #include <string>
 
 namespace Ui {
 
-PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, QWidget *parent) : QWidget(parent)
+PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int idp, QWidget *parent) : QWidget(parent)
 {
+    id = idp;
     channel = const_cast<Api::Channel *>(&privateChannel);
 
-    //this->setProperty("private-channel", true);
     this->setFixedSize(224, 44);
 
     std::string channelIconFileName;
@@ -76,7 +77,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, QWidget *pare
 
     icon = new RoundedImage(channelIconFileName, 32, 32, 16);
 
-    layout = new QGridLayout();
+    QGridLayout *layout = new QGridLayout();
     layout->addWidget(icon, 0, 0, 2, 2);
     layout->addWidget(name, 0, 1);
     layout->addWidget(subtext, 1, 1);
@@ -88,12 +89,46 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, QWidget *pare
                         "color: #8E9297;");
 }
 
+void PrivateChannel::unclicked()
+{
+    if (clicked) {
+        clicked = false;
+        setStyleSheet("background-color: none;"
+                      "border-radius: 4px;"
+                      "color: #8E9297;");
+    }
+}
+
 void PrivateChannel::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        emit leftClicked(*channel);
+        emit leftClicked(*channel, id);
     } else if (event->button() == Qt::RightButton) {
         emit rightClicked(*channel);
+    }
+}
+
+void PrivateChannel::mousePressEvent(QMouseEvent *)
+{
+    setStyleSheet("color: #FFF;"
+                  "border-radius: 4px;"
+                  "background-color: #393D43");
+    clicked = true;
+}
+
+void PrivateChannel::enterEvent(QEvent *)
+{
+    setStyleSheet("color: #DCDDDE;"
+                  "border-radius: 4px;"
+                  "background-color: #35373D");
+}
+
+void PrivateChannel::leaveEvent(QEvent *)
+{
+    if (!clicked) {
+        setStyleSheet("background-color: none;"
+                      "border-radius: 4px;"
+                      "color: #8E9297;");
     }
 }
 

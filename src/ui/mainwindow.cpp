@@ -1,10 +1,7 @@
 #include "../../include/ui/mainwindow.h"
 
-#include "../../include/ui/guildwidget.h"
-#include "../../include/ui/privatechannel.h"
 #include "../../include/ui/messagewidget.h"
 #include "../../include/ui/messagetextinput.h"
-#include "../../include/ui/guildchannelwidget.h"
 #include "../../include/api/request.h"
 
 #include <QInputDialog>
@@ -24,31 +21,27 @@ MainWindow::MainWindow(QWidget *parent)
     homePageShown = false;
     setup();
 
-    QObject::connect(homeButton, SIGNAL(clicked()), this, SLOT(displayPrivateChannels()));
     QObject::connect(this, SIGNAL(messageRecieved(Api::Message)), this, SLOT(addMessage(Api::Message)));
 }
 
 void MainWindow::cleanRightColumn()
 {
-        QLayoutItem *item;
-        while ((item = rightColumnLayout->takeAt(0)) != nullptr) {
-            delete item->widget();
-            delete item;
-        }
+    QLayoutItem *item;
+    while ((item = rightColumnLayout->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
 }
 
-void MainWindow::cleanMiddleColumn()
-{
-        QLayoutItem *item;
-        while ((item = middleColumnLayout->takeAt(0)) != nullptr) {
-            delete item->widget();
-            delete item;
-        }
-}
-
-void MainWindow::openPrivateChannel(Api::Channel& channel)
+void MainWindow::openPrivateChannel(Api::Channel& channel, unsigned int id)
 {
     cleanRightColumn();
+
+    for (size_t i = 0 ; i < privateChannelWidgets.size() ; i++) {
+        if (i != id) {
+            privateChannelWidgets[i]->unclicked();
+        }
+    }
 
     std::string channelId = *channel.id;
     std::vector<Api::Message *> *messages;
@@ -96,8 +89,14 @@ void MainWindow::openPrivateChannel(Api::Channel& channel)
     QObject::connect(textInput, SIGNAL(typing()), this, SLOT(sendTyping()));
 }
 
-void MainWindow::openGuildChannel(Api::Channel& channel)
+void MainWindow::openGuildChannel(Api::Channel& channel, unsigned int id)
 {
+    for (size_t i = 0 ; i < guildChannelWidgets.size() ; i++) {
+        if (i != id) {
+            guildChannelWidgets[i]->unclicked();
+        }
+    }
+
     if (channel.type != 2) {
         cleanRightColumn();
 
@@ -160,27 +159,55 @@ void MainWindow::openGuildChannel(Api::Channel& channel)
     }
 }
 
-void MainWindow::openGuild(Api::Guild& guild)
+void MainWindow::openGuild(Api::Guild& guild, unsigned int id)
 {
-    cleanMiddleColumn();
+    cleanRightColumn();
+
+    homePageShown = false;
+    homeButton->unclicked();
+    guildChannelWidgets.clear();
+
+    for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
+        if (i != id) {
+            guildWidgets[i]->unclicked();
+        }
+    }
+
+    middleColumn->takeWidget();
+    QWidget *guildChannelList = new QWidget();
+    QVBoxLayout *guildChannelListLayout = new QVBoxLayout();
+
     std::vector<Api::Channel *> channels = *Api::Request::getGuildChannels(*guild.id);
 
     size_t channelsLen = channels.size();
+    unsigned int count;
     for (size_t i = 0 ; i < channelsLen ; i++) {
         if ((*channels[i]).type == 4) {
-            middleColumnLayout->addWidget(new GuildChannelWidget(*channels[i]));
+            GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[i], count);
+            guildChannelListLayout->addWidget(channelWidget);
+            guildChannelWidgets.push_back(channelWidget);
+            count++;
             for (size_t j = 0 ; j < channelsLen ; j++) {
                 if ((*channels[j]).parentId == nullptr) continue;
                 if (*(*channels[j]).parentId == *(*channels[i]).id) {
-                    GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[j]);
-                    QObject::connect(channelWidget, SIGNAL(leftClicked(Api::Channel&)), this, SLOT(openGuildChannel(Api::Channel&)));
-                    middleColumnLayout->addWidget(channelWidget);
+                    GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[j], count);
+                    count++;
+                    guildChannelWidgets.push_back(channelWidget);
+                    QObject::connect(channelWidget, SIGNAL(leftClicked(Api::Channel&, unsigned int)), this, SLOT(openGuildChannel(Api::Channel&, unsigned int)));
+                    guildChannelListLayout->addWidget(channelWidget);
                 }
             }
         }
     }
 
-    middleColumnLayout->insertStretch(-1, 1);
+    guildChannelListLayout->insertStretch(-1, 1);
+    guildChannelList->setLayout(guildChannelListLayout);
+    middleColumn->setWidget(guildChannelList);
+
+    middleColumn->setStyleSheet("* {background-color: #2f3136; border: none;}"
+                                "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
+                                "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
+                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
 }
 
 void MainWindow::addMessage(Api::Message message)
@@ -214,13 +241,29 @@ void MainWindow::sendTyping()
 void MainWindow::displayPrivateChannels()
 {
     if (!homePageShown) {
+        cleanRightColumn();
+
         homePageShown = true;
-        privateChannels = Api::Request::getPrivateChannels();
-        for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
-            PrivateChannel *privateChannel = new PrivateChannel(*(*privateChannels)[i]);
-            middleColumnLayout->insertWidget(i, privateChannel);
-            QObject::connect(privateChannel, SIGNAL(leftClicked(Api::Channel&)), this, SLOT(openPrivateChannel(Api::Channel&)));
+
+        for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
+            guildWidgets[i]->unclicked();
         }
+
+        privateChannels = Api::Request::getPrivateChannels();
+
+        QWidget *privateChannelList = new QWidget();
+        QVBoxLayout *privateChannelListLayout = new QVBoxLayout();
+
+        for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
+            PrivateChannel *privateChannel = new PrivateChannel(*(*privateChannels)[i], i);
+            privateChannelWidgets.push_back(privateChannel);
+            privateChannelListLayout->insertWidget(i, privateChannel);
+            QObject::connect(privateChannel, SIGNAL(leftClicked(Api::Channel&, unsigned int)), this, SLOT(openPrivateChannel(Api::Channel&, unsigned int)));
+        }
+
+        privateChannelListLayout->insertStretch(-1, 1);
+        privateChannelList->setLayout(privateChannelListLayout);
+        middleColumn->setWidget(privateChannelList);
     }
 }
 
@@ -228,10 +271,11 @@ void MainWindow::displayGuilds()
 {
     guilds = Api::Request::getGuilds();
     for (size_t i = 0 ; i < guilds->size() ; i++) {
-        GuildWidget *guildWidget = new GuildWidget(*(*guilds)[i]);
+        GuildWidget *guildWidget = new GuildWidget(*(*guilds)[i], i);
+        guildWidgets.push_back(guildWidget);
         leftColumnLayout->insertWidget(i + 2, guildWidget);
         leftColumnLayout->setAlignment(guildWidget, Qt::AlignHCenter);
-        QObject::connect(guildWidget, SIGNAL(leftClicked(Api::Guild&)), this, SLOT(openGuild(Api::Guild&)));
+        QObject::connect(guildWidget, SIGNAL(leftClicked(Api::Guild&, unsigned int)), this, SLOT(openGuild(Api::Guild&, unsigned int)));
     }
 }
 
@@ -254,9 +298,8 @@ void MainWindow::setupInterface()
     home = new QGroupBox();
     home->setFixedSize(48, 48);
     homeLayout = new QVBoxLayout();
-    homeButton = new QPushButton(QIcon("res/images/svg/home-icon.svg"), QString(""));
+    homeButton = new HomeButton();
     homeButton->setFixedSize(48, 48);
-    homeButton->setIconSize(QSize(28, 28));
 
     homeLayout->addWidget(homeButton);
     homeLayout->setEnabled(false);
@@ -277,11 +320,7 @@ void MainWindow::setupInterface()
     leftColumnLayout->setContentsMargins(0, 0, 0, 0);
     leftColumn->setLayout(leftColumnLayout);
 
-    middleColumnLayout = new QVBoxLayout();
-    middleColumnLayout->setSpacing(0);
-    middleColumnLayout->setContentsMargins(0, 0, 0, 0);
-    middleColumnLayout->insertStretch(-1, 1);
-    middleColumn->setLayout(middleColumnLayout);
+    middleColumn->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     mainLayout->addWidget(leftColumn);
     mainLayout->addWidget(middleColumn);
@@ -297,9 +336,8 @@ void MainWindow::setupInterface()
     middleColumn->setStyleSheet("background-color: #2f3136;"
                                 "border: none;");
     rightColumn->setStyleSheet("background-color: #36393f;");
-    homeButton->setStyleSheet("background-color: #36393f;"
-                              "border: none;"
-                              "border-radius: 24px;");
+
+    QObject::connect(homeButton, SIGNAL(clicked()), this, SLOT(displayPrivateChannels()));
 }
 
 void MainWindow::gatewayDispatchHandler(std::string& eventName, json& data)

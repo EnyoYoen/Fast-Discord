@@ -1,6 +1,10 @@
 #pragma once
 
 #include "messagearea.h"
+#include "guildwidget.h"
+#include "privatechannel.h"
+#include "homebutton.h"
+#include "guildchannelwidget.h"
 #include "../api/channel.h"
 #include "../api/message.h"
 #include "../api/gateway.h"
@@ -11,7 +15,6 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QScrollArea>
-#include <QPushButton>
 
 #include <string>
 #include <vector>
@@ -31,9 +34,9 @@ signals:
 private slots:
     void displayPrivateChannels();
     void displayGuilds();
-    void openPrivateChannel(Api::Channel& channel);
-    void openGuildChannel(Api::Channel& channel);
-    void openGuild(Api::Guild& guild);
+    void openPrivateChannel(Api::Channel& channel, unsigned int);
+    void openGuildChannel(Api::Channel& channel, unsigned int);
+    void openGuild(Api::Guild& guild, unsigned int);
     void addMessage(Api::Message message);
     void sendMessage(const std::string& content);
     void sendTyping();
@@ -53,13 +56,12 @@ private:
     QScrollArea *middleColumn;
     QGroupBox   *rightColumn;
     QVBoxLayout *leftColumnLayout;
-    QVBoxLayout *middleColumnLayout;
     QHBoxLayout *rightColumnLayout;
     QScrollArea *leftScrollArea;
     QWidget     *leftScrollAreaContent;
     QGroupBox   *home;
     QVBoxLayout *homeLayout;
-    QPushButton *homeButton;
+    HomeButton  *homeButton;
     MessageArea *messageArea;
     QLabel      *typingLabel;
 
@@ -67,10 +69,13 @@ private:
 
     //Storing channels and messages that we already gathered
     std::vector<Api::Channel *> *privateChannels;
+    std::vector<PrivateChannel *> privateChannelWidgets;
     std::map<std::string, std::vector<Api::Message *> *> channelsMessages;
 
     //Store guilds
-    std::vector<Api::Guild *> *guilds;
+    std::vector<Api::Guild *>        *guilds;
+    std::vector<GuildWidget *>        guildWidgets;
+    std::vector<GuildChannelWidget *> guildChannelWidgets;
 
     std::string currentOpenedChannel; //Current channel ID
     bool homePageShown;

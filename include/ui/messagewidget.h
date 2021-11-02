@@ -14,8 +14,6 @@ class MessageWidget : public QWidget
 public:
     MessageWidget(const Api::Message& message, QWidget *parent = nullptr);
 
-/*signals:*/
-
 private:
     QLabel *content;
     QLabel *name;

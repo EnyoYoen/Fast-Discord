@@ -42,6 +42,7 @@ SOURCES += \
     ../src/main.cpp \
     ../src/ui/guildchannelwidget.cpp \
     ../src/ui/guildwidget.cpp \
+    ../src/ui/homebutton.cpp \
     ../src/ui/mainwindow.cpp \
     ../src/ui/messagearea.cpp \
     ../src/ui/messagetextinput.cpp \
@@ -70,6 +71,7 @@ HEADERS += \
     ../include/api/voice.h \
     ../include/ui/guildchannelwidget.h \
     ../include/ui/guildwidget.h \
+    ../include/ui/homebutton.h \
     ../include/ui/mainwindow.h \
     ../include/ui/messagearea.h \
     ../include/ui/messagetextinput.h \

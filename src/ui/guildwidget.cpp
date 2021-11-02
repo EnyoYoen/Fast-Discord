@@ -11,20 +11,23 @@
 
 #include <fstream>
 #include <string>
-#include <iostream>
 
 namespace Ui {
 
-GuildWidget::GuildWidget(const Api::Guild& guildP, QWidget *parent) : QFrame(parent)
+GuildWidget::GuildWidget(const Api::Guild& guildP, unsigned int idp, QWidget *parent) : QFrame(parent)
 {
+    clicked = false;
+    id = idp;
     guild = Api::Guild(guildP);
 
     setMouseTracking(true);
-
-    //this->setProperty("guild", true);
     setFixedSize(48, 48);
 
-    layout = new QVBoxLayout();
+    QVBoxLayout *layout = new QVBoxLayout();
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setAlignment(Qt::AlignCenter);
+    setLayout(layout);
 
     std::string *guildIconFileName = guild.icon;
     if (guildIconFileName == nullptr) {
@@ -63,9 +66,12 @@ GuildWidget::GuildWidget(const Api::Guild& guildP, QWidget *parent) : QFrame(par
             if (!nonLetterFound) iconText += firstLetter;
         }
 
-        textIcon = new QLabel(iconText.c_str());
-        layout->addWidget(textIcon);
+        layout->addWidget(new QLabel(iconText.c_str()));
+        icon = nullptr;
 
+        setStyleSheet("border-radius: 24px;"
+                      "color: #DCDDDE;"
+                      "background-color: #36393F;");
     } else {
         *guildIconFileName += ".png";
         if (!std::ifstream(("cache/" + *guildIconFileName).c_str()).good()) {
@@ -76,45 +82,44 @@ GuildWidget::GuildWidget(const Api::Guild& guildP, QWidget *parent) : QFrame(par
         icon = new RoundedImage(*guildIconFileName, 48, 48, 24);
         layout->addWidget(icon);
     }
-
-    layout->setSpacing(0);
-    setLayout(layout);
-
-    setStyleSheet("border-radius: 24px;"
-                  "color: #DCDDDE;"
-                  "background-color: #36393F;");
 }
 
 void GuildWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        emit leftClicked(guild);
+        emit leftClicked(guild, id);
     } else if (event->button() == Qt::RightButton) {
         emit rightClicked(guild);
     }
 }
 
+void GuildWidget::unclicked()
+{
+    if (clicked && !icon) {
+        clicked = false;
+        setStyleSheet("border-radius: 24px; color: #DCDDDE; background-color: #36393F;");
+    }
+}
+
 void GuildWidget::mousePressEvent(QMouseEvent *)
 {
-    setStyleSheet("background-color: #5865F2;"
-                  "color: #FFF;"
-                  "border-radius: 16px;");
-    clicked = true;
+    if (!clicked && !icon) {
+        setStyleSheet("background-color: #5865F2; color: #FFF; border-radius: 16px;");
+        clicked = true;
+    }
 }
 
 void GuildWidget::enterEvent(QEvent *)
 {
-    setStyleSheet("background-color: #5865F2;"
-                  "color: #FFF;"
-                  "border-radius: 16px;");
+    if (!clicked && !icon) {
+        setStyleSheet("background-color: #5865F2; color: #FFF; border-radius: 16px;");
+    }
 }
 
 void GuildWidget::leaveEvent(QEvent *)
 {
-    if (!clicked) {
-        setStyleSheet("border-radius: 24px;"
-                      "color: #DCDDDE;"
-                      "background-color: #36393F;");
+    if (!clicked && !icon) {
+        setStyleSheet("border-radius: 24px; color: #DCDDDE; background-color: #36393F;");
     }
 }
 

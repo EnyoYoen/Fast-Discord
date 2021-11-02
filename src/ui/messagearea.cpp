@@ -28,10 +28,10 @@ MessageArea::MessageArea(const std::vector<Api::Message *>& messages) : QScrollA
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
-void MessageArea::showEvent(QShowEvent */*event*/)
+void MessageArea::showEvent(QShowEvent *)
 {
     QScrollBar *vsb = verticalScrollBar();
-    vsb->setValue(vsb->maximum()); // TODO : Not Scrolled to the very end, idk why
+    vsb->setValue(vsb->maximum());
 }
 
 } // namespace Ui
