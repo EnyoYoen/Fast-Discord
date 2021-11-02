@@ -50,7 +50,7 @@ SOFTWARE.
 ### Install the dependencies
 **On Debian / Ubuntu :**
 ```shell
-$ sudo apt-get install qt5-default libboost-filesystem-dev zlib1g libcurl-dev libssl-dev libcpprest-dev libpthread-stubs0-dev
+$ sudo apt-get install qt5-default libboost-filesystem-dev zlib1g libcurl4-openssl-dev libssl-dev libcpprest-dev libpthread-stubs0-dev
 ```
 
 **On Windows (with [vcpkg](https://github.com/microsoft/vcpkg/#quick-start-windows)) :**
