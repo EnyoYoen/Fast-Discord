@@ -54,7 +54,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int 
             if (recipients.size() == 1) {
                 name = new QLabel((*recipients[0]->username).c_str());
             } else {
-                name = new QLabel("No name");
+                name = new QLabel("Unnamed");
             }
         } else {
             name = new QLabel(channelName->c_str());
@@ -110,17 +110,21 @@ void PrivateChannel::mouseReleaseEvent(QMouseEvent *event)
 
 void PrivateChannel::mousePressEvent(QMouseEvent *)
 {
-    setStyleSheet("color: #FFF;"
-                  "border-radius: 4px;"
-                  "background-color: #393D43");
-    clicked = true;
+    if (!clicked) {
+        setStyleSheet("color: #FFF;"
+                      "border-radius: 4px;"
+                      "background-color: #393D43");
+        clicked = true;
+    }
 }
 
 void PrivateChannel::enterEvent(QEvent *)
 {
-    setStyleSheet("color: #DCDDDE;"
-                  "border-radius: 4px;"
-                  "background-color: #35373D");
+    if (!clicked) {
+        setStyleSheet("color: #DCDDDE;"
+                      "border-radius: 4px;"
+                      "background-color: #35373D");
+    }
 }
 
 void PrivateChannel::leaveEvent(QEvent *)

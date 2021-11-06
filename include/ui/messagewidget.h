@@ -12,13 +12,15 @@ class MessageWidget : public QWidget
 {
     Q_OBJECT
 public:
-    MessageWidget(const Api::Message& message, QWidget *parent = nullptr);
+    MessageWidget(const Api::Message& message, bool isFirst, bool separatorBefore, QWidget *parent = nullptr);
 
 private:
-    QLabel *content;
-    QLabel *name;
-    QLabel *date;
-    RoundedImage *avatar;
+    void enterEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
+
+    QString hoveredTimestamp;
+    QLabel *timestampLabel;
+    bool isFirst;
 
 };
 

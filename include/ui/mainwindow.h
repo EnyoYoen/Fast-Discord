@@ -52,14 +52,14 @@ private:
 
     //All the widget that need to be accessed from different functions
     QHBoxLayout *mainLayout;
-    QGroupBox   *leftColumn;
+    QScrollArea   *leftColumn;
     QScrollArea *middleColumn;
-    QGroupBox   *rightColumn;
+    QWidget     *rightColumn;
     QVBoxLayout *leftColumnLayout;
     QHBoxLayout *rightColumnLayout;
     QScrollArea *leftScrollArea;
     QWidget     *leftScrollAreaContent;
-    QGroupBox   *home;
+    QWidget     *home;
     QVBoxLayout *homeLayout;
     HomeButton  *homeButton;
     MessageArea *messageArea;

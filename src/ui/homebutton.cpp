@@ -7,6 +7,7 @@ namespace Ui {
 
 HomeButton::HomeButton(QWidget *parent) : QLabel(parent)
 {
+    setContentsMargins(0, 12, 0, 0);
     clic = true;
     setStyleSheet("background-color: #5865F2;"
                   "border: none;"

@@ -45,6 +45,7 @@ SOURCES += \
     ../src/ui/homebutton.cpp \
     ../src/ui/mainwindow.cpp \
     ../src/ui/messagearea.cpp \
+    ../src/ui/messageseparator.cpp \
     ../src/ui/messagetextinput.cpp \
     ../src/ui/messagewidget.cpp \
     ../src/ui/privatechannel.cpp \
@@ -74,6 +75,7 @@ HEADERS += \
     ../include/ui/homebutton.h \
     ../include/ui/mainwindow.h \
     ../include/ui/messagearea.h \
+    ../include/ui/messageseparator.h \
     ../include/ui/messagetextinput.h \
     ../include/ui/messagewidget.h \
     ../include/ui/privatechannel.h \

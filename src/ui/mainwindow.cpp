@@ -8,6 +8,7 @@
 #include <QScrollBar>
 #include <QLineEdit>
 #include <QIcon>
+#include <QDateTime>
 
 #include <ctime>
 #include <thread>
@@ -15,8 +16,7 @@
 
 namespace Ui {
 
-MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent)
+MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 {
     homePageShown = false;
     setup();
@@ -84,6 +84,7 @@ void MainWindow::openPrivateChannel(Api::Channel& channel, unsigned int id)
 
     messagesContainer->setLayout(messagesLayout);
     rightColumnLayout->addWidget(messagesContainer);
+    rightColumnLayout->setContentsMargins(0, 0, 0, 0);
 
     QObject::connect(textInput, SIGNAL(returnPressed(std::string)), this, SLOT(sendMessage(const std::string&)));
     QObject::connect(textInput, SIGNAL(typing()), this, SLOT(sendTyping()));
@@ -212,25 +213,25 @@ void MainWindow::openGuild(Api::Guild& guild, unsigned int id)
 
 void MainWindow::addMessage(Api::Message message)
 {
-    if (*message.author->username != static_cast<std::string>("Enyo")) {
-        std::string channelId = *message.channelId;
-        if (channelsMessages.find(channelId) == channelsMessages.end()) {
-            std::vector<Api::Message *> messageVector;
-            channelsMessages[channelId] = &messageVector;
-        }
-        channelsMessages[channelId]->push_back(&message);
+    std::string channelId = *message.channelId;
+    if (channelsMessages.find(channelId) == channelsMessages.end()) {
+        std::vector<Api::Message *> messageVector;
+        channelsMessages[channelId] = &messageVector;
+    }
+    channelsMessages[channelId]->push_back(&message);
 
-        if (channelId == currentOpenedChannel) {
-            messageArea->widget()->layout()->addWidget(new MessageWidget(message));
-        }
+    if (channelId == currentOpenedChannel) {
+        std::vector<Api::Message *> channelMessages = *channelsMessages[currentOpenedChannel];
+        messageArea->addMessage(message, *(*channelsMessages[currentOpenedChannel])[0]);
     }
 }
 
 void MainWindow::sendMessage(const std::string& content)
 {
     Api::Request::sendMessage(content, currentOpenedChannel);
-    Api::Message message = Api::Message {nullptr, new Api::User{ new std::string("Todo"), new std::string("0000"), new std::string(""), nullptr, nullptr, new std::string(""), -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, const_cast<std::string *>(&content), nullptr, nullptr, nullptr, nullptr, nullptr, -1, -1, -1, -1, false, false, false};
-    messageArea->widget()->layout()->addWidget(new MessageWidget(message));
+    std::string isoDate = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
+    Api::Message newMessage = Api::Message {nullptr, new Api::User{ new std::string("Todo"), new std::string("0000"), new std::string(""), nullptr, nullptr, new std::string(""), -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, const_cast<std::string *>(&content), &isoDate, nullptr, nullptr, nullptr, nullptr, -1, -1, -1, -1, false, false, false};
+    messageArea->addMessage(newMessage, *(*channelsMessages[currentOpenedChannel])[0]);
 }
 
 void MainWindow::sendTyping()
@@ -284,7 +285,7 @@ void MainWindow::setupInterface()
     this->setGeometry(0, 0, 940, 728);
 
     mainLayout = new QHBoxLayout(this);
-    leftColumn = new QGroupBox();
+    leftColumn = new QScrollArea();
     middleColumn = new QScrollArea();
     rightColumn = new QGroupBox();
 
@@ -331,11 +332,14 @@ void MainWindow::setupInterface()
 
     this->setLayout(mainLayout);
 
-    this->setStyleSheet("background-color: #202225;");
-    leftColumn->setStyleSheet("background-color: #202225;");
-    middleColumn->setStyleSheet("background-color: #2f3136;"
+    this->setStyleSheet("background-color: #202225;"
+                        "padding: 0px;"
+                        "border: none;");
+    leftColumn->setStyleSheet("background-color: #202225;"
+                              "border: none;");
+    middleColumn->setStyleSheet("background-color: #2F3136;"
                                 "border: none;");
-    rightColumn->setStyleSheet("background-color: #36393f;");
+    rightColumn->setStyleSheet("background-color: #36393F;");
 
     QObject::connect(homeButton, SIGNAL(clicked()), this, SLOT(displayPrivateChannels()));
 }
