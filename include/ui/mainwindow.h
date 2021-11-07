@@ -8,6 +8,7 @@
 #include "../api/channel.h"
 #include "../api/message.h"
 #include "../api/gateway.h"
+#include "../api/client.h"
 #include "../api/jsonutils.h"
 
 #include <QWidget>
@@ -52,20 +53,24 @@ private:
 
     //All the widget that need to be accessed from different functions
     QHBoxLayout *mainLayout;
-    QScrollArea   *leftColumn;
-    QScrollArea *middleColumn;
+    QScrollArea *leftColumn;
+    QWidget     *middleColumn;
     QWidget     *rightColumn;
     QVBoxLayout *leftColumnLayout;
+    QVBoxLayout *middleColumnLayout;
     QHBoxLayout *rightColumnLayout;
     QScrollArea *leftScrollArea;
     QWidget     *leftScrollAreaContent;
     QWidget     *home;
     QVBoxLayout *homeLayout;
     HomeButton  *homeButton;
+    QScrollArea *middleChannelList;
     MessageArea *messageArea;
     QLabel      *typingLabel;
 
     Api::Gateway gw; //For the websocket connection
+    Api::Client *client;
+    Api::ClientSettings *clientSettings;
 
     //Storing channels and messages that we already gathered
     std::vector<Api::Channel *> *privateChannels;

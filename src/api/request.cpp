@@ -206,6 +206,38 @@ std::vector<Message *> *Request::getMessages(const std::string& channelId, unsig
     return getMessagesFromJson(json::parse(response.memory), "");
 }
 
+Client *Request::getClient()
+{
+    MemoryStruct response;
+
+    requestApi(
+        "https://discord.com/api/v9/users/@me",
+        "",
+        &response,
+        "",
+        "",
+        "",
+        false);
+
+    return getClientFromJson(json::parse(response.memory), "");
+}
+
+ClientSettings *Request::getClientSettings()
+{
+    MemoryStruct response;
+
+    requestApi(
+        "https://discord.com/api/v9/users/@me/settings",
+        "",
+        &response,
+        "",
+        "",
+        "",
+        false);
+
+    return getClientSettingsFromJson(json::parse(response.memory), "");
+}
+
 void Request::setStatus(const std::string& status)
 {
     requestApi(

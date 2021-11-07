@@ -3,6 +3,7 @@
 #include "channel.h"
 #include "guild.h"
 #include "message.h"
+#include "client.h"
 
 #include <string>
 #include <vector>
@@ -30,6 +31,8 @@ public:
     static std::vector<Channel *> *getGuildChannels(const std::string& id);
     static std::vector<Channel *> *getPrivateChannels();
     static std::vector<Message *> *getMessages(const std::string& channelId, unsigned int limit);
+    static Client                 *getClient();
+    static ClientSettings         *getClientSettings();
 
     static void setStatus(const std::string& status);
     static void sendTyping(const std::string& channelId);

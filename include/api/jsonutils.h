@@ -11,6 +11,7 @@
 #include "guildmember.h"
 #include "voice.h"
 #include "guild.h"
+#include "client.h"
 
 #include "../../lib/nlohmann/json.hpp"
 
@@ -91,5 +92,16 @@ std::vector<StageInstance *> *getStageInstancesFromJson(const json& jsonObj, con
 
 Guild *getGuildFromJson(const json& jsonObj, const std::string& key);
 std::vector<Guild *> *getGuildsFromJson(const json& jsonObj, const std::string& key);
+
+CustomStatus *getCustomStatusFromJson(const json& jsonObj, const std::string& key);
+
+FriendSourceFlags *getFriendSourceFlagsFromJson(const json& jsonObj, const std::string& key);
+
+GuildFolder *getGuildFolderFromJson(const json& jsonObj, const std::string& key);
+std::vector<GuildFolder *> *getGuildFoldersFromJson(const json& jsonObj, const std::string& key);
+
+ClientSettings *getClientSettingsFromJson(const json& jsonObj, const std::string& key);
+
+Client *getClientFromJson(const json& jsonObj, const std::string& key);
 
 } // namespace Api

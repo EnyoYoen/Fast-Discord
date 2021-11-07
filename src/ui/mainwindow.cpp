@@ -18,10 +18,7 @@ namespace Ui {
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 {
-    homePageShown = false;
     setup();
-
-    QObject::connect(this, SIGNAL(messageRecieved(Api::Message)), this, SLOT(addMessage(Api::Message)));
 }
 
 void MainWindow::cleanRightColumn()
@@ -47,8 +44,8 @@ void MainWindow::openPrivateChannel(Api::Channel& channel, unsigned int id)
     std::vector<Api::Message *> *messages;
 
     std::map<std::string, std::vector<Api::Message *> *>::iterator currentMessages = channelsMessages.find(channelId);
-    if (currentMessages == channelsMessages.end() or currentMessages->second->size() < 100) {
-        messages = Api::Request::getMessages(channelId, 100 - currentMessages->second->size());
+    if (currentMessages == channelsMessages.end() or currentMessages->second->size() < 50) {
+        messages = Api::Request::getMessages(channelId, 50 - currentMessages->second->size());
         channelsMessages[channelId] = messages;
     } else {
         messages = channelsMessages[channelId];
@@ -105,8 +102,8 @@ void MainWindow::openGuildChannel(Api::Channel& channel, unsigned int id)
         std::vector<Api::Message *> *messages;
 
         std::map<std::string, std::vector<Api::Message *> *>::iterator currentMessages = channelsMessages.find(channelId);
-        if (currentMessages == channelsMessages.end() or currentMessages->second->size() < 100) {
-            messages = Api::Request::getMessages(channelId, 100 - currentMessages->second->size());
+        if (currentMessages == channelsMessages.end() or currentMessages->second->size() < 50) {
+            messages = Api::Request::getMessages(channelId, 50 - currentMessages->second->size());
             channelsMessages[channelId] = messages;
         } else {
             messages = channelsMessages[channelId];
@@ -174,7 +171,7 @@ void MainWindow::openGuild(Api::Guild& guild, unsigned int id)
         }
     }
 
-    middleColumn->takeWidget();
+    middleChannelList->takeWidget();
     QWidget *guildChannelList = new QWidget();
     QVBoxLayout *guildChannelListLayout = new QVBoxLayout();
 
@@ -203,12 +200,12 @@ void MainWindow::openGuild(Api::Guild& guild, unsigned int id)
 
     guildChannelListLayout->insertStretch(-1, 1);
     guildChannelList->setLayout(guildChannelListLayout);
-    middleColumn->setWidget(guildChannelList);
+    middleChannelList->setWidget(guildChannelList);
 
-    middleColumn->setStyleSheet("* {background-color: #2f3136; border: none;}"
-                                "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
-                                "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
-                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
+    middleChannelList->setStyleSheet("* {background-color: #2f3136; border: none;}"
+                                     "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
+                                     "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
+                                     "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
 }
 
 void MainWindow::addMessage(Api::Message message)
@@ -229,8 +226,8 @@ void MainWindow::addMessage(Api::Message message)
 void MainWindow::sendMessage(const std::string& content)
 {
     Api::Request::sendMessage(content, currentOpenedChannel);
-    std::string isoDate = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
-    Api::Message newMessage = Api::Message {nullptr, new Api::User{ new std::string("Todo"), new std::string("0000"), new std::string(""), nullptr, nullptr, new std::string(""), -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, const_cast<std::string *>(&content), &isoDate, nullptr, nullptr, nullptr, nullptr, -1, -1, -1, -1, false, false, false};
+    std::string messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
+    Api::Message newMessage = Api::Message {nullptr, new Api::User{client->username, nullptr, client->avatar, nullptr, nullptr, client->id, -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, const_cast<std::string *>(&content), &messageTimestamp, nullptr, nullptr, nullptr, nullptr, -1, -1, -1, -1, false, false, false};
     messageArea->addMessage(newMessage, *(*channelsMessages[currentOpenedChannel])[0]);
 }
 
@@ -264,7 +261,7 @@ void MainWindow::displayPrivateChannels()
 
         privateChannelListLayout->insertStretch(-1, 1);
         privateChannelList->setLayout(privateChannelListLayout);
-        middleColumn->setWidget(privateChannelList);
+        middleChannelList->setWidget(privateChannelList);
     }
 }
 
@@ -282,11 +279,13 @@ void MainWindow::displayGuilds()
 
 void MainWindow::setupInterface()
 {
+    homePageShown = false;
+
     this->setGeometry(0, 0, 940, 728);
 
     mainLayout = new QHBoxLayout(this);
     leftColumn = new QScrollArea();
-    middleColumn = new QScrollArea();
+    middleColumn = new QWidget();
     rightColumn = new QGroupBox();
 
     leftColumn->setFixedWidth(72);
@@ -321,7 +320,53 @@ void MainWindow::setupInterface()
     leftColumnLayout->setContentsMargins(0, 0, 0, 0);
     leftColumn->setLayout(leftColumnLayout);
 
-    middleColumn->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    middleColumnLayout = new QVBoxLayout();
+    middleChannelList = new QScrollArea();
+    QWidget *userMenu = new QWidget();
+
+    middleChannelList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QHBoxLayout *userMenuLayout = new QHBoxLayout();
+
+    std::string channelIconFileName;
+    if (client->avatar == nullptr) {
+        channelIconFileName = "res/images/png/user-icon-asset.png";
+    } else {
+        channelIconFileName = *client->id + (client->avatar->rfind("a_") == 0 ? ".gif" : ".webp");
+        if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
+            Api::Request::requestFile("https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, "cache/" + channelIconFileName);
+        }
+        channelIconFileName = "cache/" + channelIconFileName;
+    }
+
+    QWidget *userInfos = new QWidget();
+    QVBoxLayout *userInfosLayout = new QVBoxLayout();
+    QLabel *name = new QLabel((*client->username).c_str());
+    name->setFixedSize(84, 18);
+    name->setStyleSheet("color: #DCDDDE;");
+    QLabel *discriminator = new QLabel(("#" + *client->discriminator).c_str());
+    discriminator->setFixedSize(84, 13);
+    discriminator->setStyleSheet("color: #B9BBBE;");
+    userInfosLayout->addWidget(name);
+    userInfosLayout->addWidget(discriminator);
+    userInfosLayout->setContentsMargins(0, 10, 0, 10);
+    userInfos->setLayout(userInfosLayout);
+
+    userMenuLayout->addWidget(new RoundedImage(channelIconFileName, 32, 32, 16));
+    userMenuLayout->addWidget(userInfos);
+    userMenuLayout->setContentsMargins(8, 0, 8, 0);
+
+    userMenu->setFixedHeight(53);
+    userMenu->setLayout(userMenuLayout);
+    userMenu->setStyleSheet("background-color: #292B2F");
+
+    middleColumnLayout->addWidget(middleChannelList);
+    middleColumnLayout->addWidget(userMenu);
+    middleColumnLayout->setContentsMargins(2, 0, 0, 0);
+
+    middleColumn->setLayout(middleColumnLayout);
+
 
     mainLayout->addWidget(leftColumn);
     mainLayout->addWidget(middleColumn);
@@ -342,6 +387,7 @@ void MainWindow::setupInterface()
     rightColumn->setStyleSheet("background-color: #36393F;");
 
     QObject::connect(homeButton, SIGNAL(clicked()), this, SLOT(displayPrivateChannels()));
+    QObject::connect(this, SIGNAL(messageRecieved(Api::Message)), this, SLOT(addMessage(Api::Message)));
 }
 
 void MainWindow::gatewayDispatchHandler(std::string& eventName, json& data)
@@ -392,6 +438,9 @@ void MainWindow::setupGateway()
 
 void MainWindow::setup()
 {
+    client = Api::Request::getClient();
+    clientSettings = Api::Request::getClientSettings();
+
     setupInterface();
     setupGateway();
     displayPrivateChannels();

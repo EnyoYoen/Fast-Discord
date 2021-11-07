@@ -24,6 +24,7 @@ SOURCES += \
     ../src/api/application.cpp \
     ../src/api/attachment.cpp \
     ../src/api/channel.cpp \
+    ../src/api/client.cpp \
     ../src/api/embed.cpp \
     ../src/api/emoji.cpp \
     ../src/api/gateway.cpp \
@@ -55,6 +56,7 @@ HEADERS += \
     ../include/api/application.h \
     ../include/api/attachment.h \
     ../include/api/channel.h \
+    ../include/api/client.h \
     ../include/api/embed.h \
     ../include/api/emoji.h \
     ../include/api/gateway.h \

@@ -1112,4 +1112,152 @@ std::vector<Guild *> *getGuildsFromJson(const json& jsonObj, const std::string& 
     }
 }
 
+CustomStatus *getCustomStatusFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonCustomStatus = key == "" ? jsonObj : jsonObj.at(key);
+
+        if (jsonCustomStatus.is_null()) return nullptr;
+
+        return new CustomStatus {
+            valueNoNull(jsonCustomStatus, "text"     ),
+            valueNoNull(jsonCustomStatus, "expiresAt"),
+            valueNoNull(jsonCustomStatus, "emojiName"),
+            valueNoNull(jsonCustomStatus, "emojiId"  )
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+FriendSourceFlags *getFriendSourceFlagsFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonFriendSourceFlags = key == "" ? jsonObj : jsonObj.at(key);
+
+        return new FriendSourceFlags {
+            jsonFriendSourceFlags.value("all"           , false),
+            jsonFriendSourceFlags.value("mutual_friends", false),
+            jsonFriendSourceFlags.value("mutual_guilds" , false)
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+GuildFolder *getGuildFolderFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonGuildFolder = key == "" ? jsonObj : jsonObj.at(key);
+
+        return new GuildFolder {
+            getStringsFromJson(jsonGuildFolder, "guild_ids"),
+
+            valueNoNull(jsonGuildFolder, "name"),
+
+            jsonGuildFolder.value("id" , -1),
+            //jsonGuildFolder.value("color" , -1)
+            -1
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+std::vector<GuildFolder *> *getGuildFoldersFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonGuildFolders = key == "" ? jsonObj : jsonObj.at(key);
+        std::vector<GuildFolder *> *guildFolders = new std::vector<GuildFolder *>;
+
+        for (unsigned int i = 0 ; i < jsonGuildFolders.size() ; i++) {
+            guildFolders->push_back(getGuildFolderFromJson(jsonGuildFolders[i], ""));
+        }
+
+        return guildFolders;
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+ClientSettings *getClientSettingsFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonClientSettings = key == "" ? jsonObj : jsonObj.at(key);
+
+        return new ClientSettings {
+            getCustomStatusFromJson(jsonClientSettings, "custom_status"),
+            getFriendSourceFlagsFromJson(jsonClientSettings, "friend_source_flags"),
+            getGuildFoldersFromJson(jsonClientSettings, "guild_folders"),
+            getStringsFromJson(jsonClientSettings, "guild_positions"),
+            getStringsFromJson(jsonClientSettings, "restricted_guilds"),
+
+            valueNoNull(jsonClientSettings, "locale"),
+            valueNoNull(jsonClientSettings, "status"),
+            valueNoNull(jsonClientSettings, "theme"),
+
+            jsonClientSettings.value("afk_timeout"            , -1),
+            jsonClientSettings.value("animate_stickers"       , -1),
+            jsonClientSettings.value("explicit_content_filter", -1),
+            jsonClientSettings.value("friend_discovery_flags" , -1),
+            jsonClientSettings.value("timezone_offset"        , -1),
+
+            jsonClientSettings.value("allow_accessibility_detection"   , false),
+            jsonClientSettings.value("animate_emoji"                   , false),
+            jsonClientSettings.value("contact_sync_enabled"            , false),
+            jsonClientSettings.value("convert_emoticons"               , false),
+            jsonClientSettings.value("default_guilds_restricted"       , false),
+            jsonClientSettings.value("detect_platform_accounts"        , false),
+            jsonClientSettings.value("developer_mode"                  , false),
+            jsonClientSettings.value("disable_games_tab"               , false),
+            jsonClientSettings.value("enable_tts_command"              , false),
+            jsonClientSettings.value("gif_auto_play"                   , false),
+            jsonClientSettings.value("inline_attachment_media"         , false),
+            jsonClientSettings.value("inline_embed_media"              , false),
+            jsonClientSettings.value("message_display_compact"         , false),
+            jsonClientSettings.value("native_phone_integration_enabled", false),
+            jsonClientSettings.value("render_embeds"                   , false),
+            jsonClientSettings.value("render_reactions"                , false),
+            jsonClientSettings.value("show_current_game"               , false),
+            jsonClientSettings.value("stream_notifications_enabled"    , false),
+            jsonClientSettings.value("view_nsfw_guilds"                , false)
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
+Client *getClientFromJson(const json& jsonObj, const std::string& key)
+{
+    try {
+        json jsonClient = key == "" ? jsonObj : jsonObj.at(key);
+
+        return new Client {
+            valueNoNull(jsonClient, "id"           ),
+            valueNoNull(jsonClient, "username"     ),
+            valueNoNull(jsonClient, "avatar"       ),
+            valueNoNull(jsonClient, "discriminator"),
+            valueNoNull(jsonClient, "banner"       ),
+            valueNoNull(jsonClient, "bio"          ),
+            valueNoNull(jsonClient, "locale"       ),
+            valueNoNull(jsonClient, "email"        ),
+            valueNoNull(jsonClient, "phone"        ),
+
+            jsonClient.value("public_flags"   , -1),
+            jsonClient.value("flags"          , -1),
+            jsonClient.value("purchased_flags", -1),
+            //jsonClient.value("banner_color"   , -1),
+            //jsonClient.value("accent_color"   , -1),
+            -1,
+            -1,
+
+            jsonClient.value("nsfw_allowed", false),
+            jsonClient.value("mfa_enabled" , false),
+            jsonClient.value("verified"    , false)
+        };
+    } catch(json::out_of_range& e) {
+        return nullptr;
+    }
+}
+
 } // namespace Api
