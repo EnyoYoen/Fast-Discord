@@ -73,4 +73,4 @@ cmake --build .
 ### Run
 The executable is in the 'Fast-Discord/bin' folder ;)
 ## Contact
-Fast-Discord's discord server : *(COMING SOON)*
+Fast-Discord's discord server : https://discord.gg/DezBvjrGve
