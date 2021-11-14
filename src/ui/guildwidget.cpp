@@ -51,10 +51,11 @@ GuildWidget::GuildWidget(const Api::Guild& guildP, unsigned int idp, QWidget *pa
             nonLetterFound = false;
 
             for (size_t j = 0 ; j < actualSplit.length() ; j++) {
-                if (!(actualSplit[j] > 'a' && actualSplit[j] < 'z') && !(actualSplit[j] > 'A' && actualSplit[j] < 'Z')) {
+                if (!(actualSplit[j] >= 'a' && actualSplit[j] <= 'z') && !(actualSplit[j] >= 'A' && actualSplit[j] <= 'Z')) {
                     iconText += firstLetter + actualSplit[j];
-                    if (j != actualSplit.length()) nameSplit.insert(nameSplit.begin() + i + 1, actualSplit.substr(j + 1, actualSplit.length()));
-                    i--;
+                    if (j != actualSplit.length() && actualSplit.length() > 1) {
+                        nameSplit.insert(nameSplit.begin() + i + 1, actualSplit.substr(j + 1, actualSplit.length()));
+                    }
                     nonLetterFound = true;
                     break;
                 } else if (!firstLetterFound) {

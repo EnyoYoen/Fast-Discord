@@ -6,10 +6,14 @@
 #include <boost/filesystem.hpp>
 
 #include <stdlib.h>
+#include <ctime>
+#include <chrono>
+#include <thread>
 
 namespace Api {
 
 std::string Request::token;
+double Request::rateLimitEnd = 0;
 
 size_t Request::writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -44,6 +48,12 @@ size_t Request::noOutputCallback(void *, size_t size, size_t nmemb, void *)
 
 void Request::requestApi(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName, const std::string& outputFile, bool json)
 {
+    if (rateLimitEnd != 0) {
+        double sleepDuration = rateLimitEnd - std::time(0);
+        if (sleepDuration > 0) std::this_thread::sleep_for(std::chrono::duration<double>(sleepDuration));
+        rateLimitEnd = 0;
+    }
+
     CURL *curl;
     CURLcode res;
 
@@ -112,6 +122,9 @@ void Request::requestApi(const std::string& url, const std::string& postDatas, M
             curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
         }
 
+        long httpCode = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
         /* get it! */
         res = curl_easy_perform(curl);
 
@@ -125,6 +138,13 @@ void Request::requestApi(const std::string& url, const std::string& postDatas, M
 
         if (fileName != "") {
             curl_mime_free(form);
+        }
+
+        if (httpCode == 429) {
+            rateLimitEnd = std::time(0) + json::parse(callbackStruct->memory).value("retry_after", double(0));
+            free(callbackStruct->memory);
+            callbackStruct->size = 0;
+            requestApi(url, postDatas, callbackStruct, customRequest, fileName,outputFile, json);
         }
     }
 }
@@ -192,7 +212,7 @@ std::vector<Message *> *Request::getMessages(const std::string& channelId, unsig
 {
     MemoryStruct response;
 
-    limit = limit >= 100 ? 100 : limit;
+    limit = limit >= 50 ? 50 : limit;
 
     requestApi(
         "https://discord.com/api/v9/channels/" + channelId + "/messages?limit=" + std::to_string(limit),

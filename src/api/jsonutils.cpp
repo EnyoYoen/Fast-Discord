@@ -1155,7 +1155,7 @@ GuildFolder *getGuildFolderFromJson(const json& jsonObj, const std::string& key)
 
             valueNoNull(jsonGuildFolder, "name"),
 
-            jsonGuildFolder.value("id" , -1),
+            jsonGuildFolder.at("id").is_null() ? -1 : jsonGuildFolder.value("id" , -1),
             //jsonGuildFolder.value("color" , -1)
             -1
         };

@@ -5,6 +5,8 @@
 #include "message.h"
 #include "client.h"
 
+#include <QBoxLayout>
+
 #include <string>
 #include <vector>
 #include <cstddef>
@@ -26,6 +28,7 @@ public:
     static void requestApi(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName, const std::string& outputFile, bool json);
     static void requestJson(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName);
     static void requestFile(const std::string& url, const std::string& fileName);
+    static void requestImage(const std::string& url, const std::string& fileName, QBoxLayout *layout);
 
     static std::vector<Guild *>   *getGuilds();
     static std::vector<Channel *> *getGuildChannels(const std::string& id);
@@ -43,6 +46,8 @@ public:
     static void unpinMessage(const std::string& channelId, const std::string& messageId);
 
 private:
+    static double rateLimitEnd;
+
     Request();
 
     static size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
