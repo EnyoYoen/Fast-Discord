@@ -1,4 +1,4 @@
-#include "../../include/ui/guildchannelwidget.h"
+#include "ui/guildchannelwidget.h"
 
 namespace Ui {
 

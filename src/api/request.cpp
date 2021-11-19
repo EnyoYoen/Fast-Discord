@@ -1,6 +1,6 @@
-#include "../../include/api/request.h"
+#include "api/request.h"
 
-#include "../../include/api/jsonutils.h"
+#include "api/jsonutils.h"
 
 #include <curl/curl.h>
 #include <boost/filesystem.hpp>
@@ -12,17 +12,18 @@
 
 namespace Api {
 
-std::string Request::token;
-double Request::rateLimitEnd = 0;
+std::string Request::token;       // Authorization token
+double Request::rateLimitEnd = 0; // No rate limit for now
 
+// Store the data recieved
 size_t Request::writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
     size_t realsize = size * nmemb;
-    MemoryStruct *mem = (MemoryStruct *)userp;
+    MemoryStruct *mem = (MemoryStruct *)userp; // MemoryStruct that we passed, to store the data
 
     char *ptr = static_cast<char *>(realloc(mem->memory, mem->size + realsize + 1));
     if (ptr == nullptr) {
-        /* out of memory! */
+        /* out of memory */
         printf("Not enough memory (realloc returned NULL)\nMemory size : %lu\nMemory to allocate : %lu\n", mem->size, realsize);
         return 0;
     }
@@ -35,12 +36,14 @@ size_t Request::writeMemoryCallback(void *contents, size_t size, size_t nmemb, v
     return realsize;
 }
 
+// Store data in a file
 size_t Request::writeFileCallback(void *contents, size_t size, size_t nmemb, FILE *stream)
 {
     size_t written = fwrite(contents, size, nmemb, stream);
     return written;
 }
 
+// If we don't need the response
 size_t Request::noOutputCallback(void *, size_t size, size_t nmemb, void *)
 {
     return size * nmemb;
@@ -48,44 +51,48 @@ size_t Request::noOutputCallback(void *, size_t size, size_t nmemb, void *)
 
 void Request::requestApi(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName, const std::string& outputFile, bool json)
 {
-    if (rateLimitEnd != 0) {
-        double sleepDuration = rateLimitEnd - std::time(0);
+    // Very basic rate limit checker
+    if (rateLimitEnd != 0) { // We were rate limited
+        double sleepDuration = rateLimitEnd - std::time(0); // Time to sleep
+        
+        // We are currently rate limited 
         if (sleepDuration > 0) std::this_thread::sleep_for(std::chrono::duration<double>(sleepDuration));
-        rateLimitEnd = 0;
+        rateLimitEnd = 0; // Reset rate limit
     }
 
     CURL *curl;
     CURLcode res;
 
-    /* init the curl session */
+    /* Init the curl session */
     curl = curl_easy_init();
     if (curl) {
         curl_mime *form = nullptr;
 
-        /* set our custom set of headers */
+        /* Set our custom set of headers */
         curl_slist *headers = curl_slist_append(nullptr, ("Authorization: " + token).c_str());
         if (json) {
             headers = curl_slist_append(headers, "content-type: application/json");
         }
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-        /* specify URL to get */
+        /* Specify URL to get */
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
         if (outputFile != "") {
+            // If cache directory is not created, create it
             if (!boost::filesystem::exists(boost::filesystem::path("cache/"))) boost::filesystem::create_directory(boost::filesystem::path("cache"));
             FILE *fp = fopen(outputFile.c_str(), "wb");
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFileCallback);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
         } else {
             if (callbackStruct != nullptr) {
-                callbackStruct->memory = static_cast<char *>(malloc(1));  /* will be grown as needed by the realloc above */
-                callbackStruct->size = 0;    /* no data at this point */
+                callbackStruct->memory = static_cast<char *>(malloc(1));  /* Will be grown as needed by the realloc above */
+                callbackStruct->size = 0;    /* No data at this point */
 
-                /* send all data to this function  */
+                /* Send all data to this function  */
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
 
-                /* we pass our 'chunk' struct to the callback function */
+                /* We pass our 'chunk' struct to the callback function */
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, static_cast<void *>(callbackStruct));
             } else {
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, noOutputCallback);
@@ -93,10 +100,12 @@ void Request::requestApi(const std::string& url, const std::string& postDatas, M
         }
 
         if (postDatas != "") {
+            // Set POST data
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postDatas.c_str());
         }
 
         if (customRequest != "") {
+            // Set custom request
             curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, customRequest.c_str());
         }
 
@@ -125,25 +134,30 @@ void Request::requestApi(const std::string& url, const std::string& postDatas, M
         long httpCode = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
-        /* get it! */
+        /* Get it */
         res = curl_easy_perform(curl);
 
-        /* check for errors */
+        /* Check for errors */
         if (res != CURLE_OK) {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         }
 
-        /* cleanup curl stuff */
+        /* Cleanup cURL stuff */
         curl_easy_cleanup(curl);
 
         if (fileName != "") {
             curl_mime_free(form);
         }
 
-        if (httpCode == 429) {
+        if (httpCode == 429) { // We are rate limited
+            // Set the end of the rate limit
             rateLimitEnd = std::time(0) + json::parse(callbackStruct->memory).value("retry_after", double(0));
+
+            // Reset our MemoryStruct
             free(callbackStruct->memory);
             callbackStruct->size = 0;
+
+            // Redo the request
             requestApi(url, postDatas, callbackStruct, customRequest, fileName,outputFile, json);
         }
     }
@@ -159,6 +173,9 @@ void Request::requestFile(const std::string& url, const std::string& fileName)
     requestApi(url, "", nullptr, "", "", fileName, false);
 }
 
+//void Request::requestImage(const std::string& url, const std::string& fileName, QBoxLayout *layout); // TODO not implemented yet
+
+// Functions that request the API to retrieve data
 
 std::vector<Channel *> *Request::getPrivateChannels()
 {
@@ -173,7 +190,9 @@ std::vector<Channel *> *Request::getPrivateChannels()
         "",
         false);
 
-    return getChannelsFromJson(json::parse(response.memory), "");
+    std::vector<Channel *> *channels;
+    unmarshalMultiple<Channel>(json::parse(response.memory), "", &channels);
+    return channels;
 }
 
 std::vector<Guild *> *Request::getGuilds()
@@ -189,7 +208,9 @@ std::vector<Guild *> *Request::getGuilds()
         "",
         false);
 
-    return getGuildsFromJson(json::parse(response.memory), "");
+    std::vector<Guild *> *guilds;
+    unmarshalMultiple<Guild>(json::parse(response.memory), "", &guilds);
+    return guilds;
 }
 
 std::vector<Channel *> *Request::getGuildChannels(const std::string& id)
@@ -205,7 +226,9 @@ std::vector<Channel *> *Request::getGuildChannels(const std::string& id)
         "",
         false);
 
-    return getChannelsFromJson(json::parse(response.memory), "");
+    std::vector<Channel *> *channels;
+    unmarshalMultiple<Channel>(json::parse(response.memory), "", &channels);
+    return channels;
 }
 
 std::vector<Message *> *Request::getMessages(const std::string& channelId, unsigned int limit)
@@ -223,7 +246,9 @@ std::vector<Message *> *Request::getMessages(const std::string& channelId, unsig
         "",
         false);
 
-    return getMessagesFromJson(json::parse(response.memory), "");
+    std::vector<Message *> *messages;
+    unmarshalMultiple<Message>(json::parse(response.memory), "", &messages);
+    return messages;
 }
 
 Client *Request::getClient()
@@ -239,7 +264,9 @@ Client *Request::getClient()
         "",
         false);
 
-    return getClientFromJson(json::parse(response.memory), "");
+    Client *client;
+    unmarshal<Client>(json::parse(response.memory), "", &client);
+    return client;
 }
 
 ClientSettings *Request::getClientSettings()
@@ -255,8 +282,12 @@ ClientSettings *Request::getClientSettings()
         "",
         false);
 
-    return getClientSettingsFromJson(json::parse(response.memory), "");
+    ClientSettings *clientSettings;
+    unmarshal<ClientSettings>(json::parse(response.memory), "", &clientSettings);
+    return clientSettings;
 }
+
+// Functions that request the API to send data
 
 void Request::setStatus(const std::string& status)
 {

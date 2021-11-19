@@ -41,6 +41,7 @@ struct Channel
         bool                      nsfw;
 };
 
+//https://discord.com/developers/docs/resources/channel#channel-mention-object
 struct ChannelMention
 {
     ~ChannelMention();

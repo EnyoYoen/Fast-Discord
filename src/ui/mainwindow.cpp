@@ -1,8 +1,8 @@
-#include "../../include/ui/mainwindow.h"
+#include "ui/mainwindow.h"
 
-#include "../../include/ui/messagewidget.h"
-#include "../../include/ui/messagetextinput.h"
-#include "../../include/api/request.h"
+#include "ui/messagewidget.h"
+#include "ui/messagetextinput.h"
+#include "api/request.h"
 
 #include <QInputDialog>
 #include <QScrollBar>
@@ -393,8 +393,9 @@ void MainWindow::setupInterface()
 void MainWindow::gatewayDispatchHandler(std::string& eventName, json& data)
 {
     if (eventName == "MESSAGE_CREATE") {
-        Api::Message message = *Api::getMessageFromJson(data, "");
-        emit messageRecieved(message);
+        Api::Message *message;
+        Api::unmarshal<Api::Message>(data, "", &message);
+        emit messageRecieved(*message);
     } else if (eventName == "TYPING_START") {
         std::thread typingThread = std::thread(&MainWindow::userTyping, this, data);
         typingThread.detach();
@@ -412,7 +413,9 @@ void MainWindow::userTyping(const json& data)
         std::string url = std::string("https://discord.com/api/v9/users/") + data.value("user_id", "");
         Api::Request::requestJson(url, "", &response, "", "");
 
-        std::string username = *Api::getUserFromJson(json::parse(response.memory), "")->username;
+        Api::User *user;
+        Api::unmarshal<Api::User>(json::parse(response.memory), "", &user);
+        std::string username = *(*user).username;
         long typingTimestamp = data.value("timestamp", -1);
         std::string text = typingLabel->text().toUtf8().constData();
 
@@ -438,6 +441,8 @@ void MainWindow::setupGateway()
 
 void MainWindow::setup()
 {
+    Api::Request::token = QInputDialog::getText(nullptr, "Token", "Enter your Discord token", QLineEdit::Normal, QString(), nullptr).toUtf8().constData();
+
     client = Api::Request::getClient();
     clientSettings = Api::Request::getClientSettings();
 

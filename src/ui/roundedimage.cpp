@@ -1,4 +1,4 @@
-#include "../../include/ui/roundedimage.h"
+#include "ui/roundedimage.h"
 
 #include <QPainter>
 

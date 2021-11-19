@@ -1,4 +1,4 @@
-#include "../../include/api/thread.h"
+#include "api/thread.h"
 
 namespace Api {
 

@@ -1,4 +1,4 @@
-#include "../../include/api/guildmember.h"
+#include "api/guildmember.h"
 
 namespace Api {
 

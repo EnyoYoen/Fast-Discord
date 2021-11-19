@@ -6,6 +6,7 @@
 
 namespace Api {
 
+//https://discord.com/developers/docs/resources/voice#voice-state-object
 struct VoiceState
 {
     ~VoiceState();

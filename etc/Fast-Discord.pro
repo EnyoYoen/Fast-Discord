@@ -126,6 +126,7 @@ LIBS += \
     -lcurl -lssl -lcrypto -lpthread -lcpprest -lz -lboost_filesystem
 
 INCLUDEPATH += "../lib/"
+INCLUDEPATH += "../include/"
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

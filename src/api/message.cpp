@@ -1,4 +1,4 @@
-#include "../../include/api/message.h"
+#include "api/message.h"
 
 namespace Api {
 

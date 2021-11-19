@@ -1,7 +1,7 @@
-#include "../../include/ui/guildwidget.h"
+#include "ui/guildwidget.h"
 
-#include "../../include/api/request.h"
-#include "../../include/api/guild.h"
+#include "api/request.h"
+#include "api/guild.h"
 
 #include <QPixmap>
 #include <QBitmap>

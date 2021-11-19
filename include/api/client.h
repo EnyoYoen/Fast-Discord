@@ -5,6 +5,8 @@
 
 namespace Api {
 
+//https://luna.gitlab.io/discord-unofficial-docs/user_settings.html#get-users-me-settings
+
 struct CustomStatus
 {
     ~CustomStatus();

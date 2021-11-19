@@ -1,4 +1,4 @@
-#include "../../include/ui/homebutton.h"
+#include "ui/homebutton.h"
 
 #include <QPixmap>
 #include <QMouseEvent>

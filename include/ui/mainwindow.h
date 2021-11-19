@@ -5,11 +5,11 @@
 #include "privatechannel.h"
 #include "homebutton.h"
 #include "guildchannelwidget.h"
-#include "../api/channel.h"
-#include "../api/message.h"
-#include "../api/gateway.h"
-#include "../api/client.h"
-#include "../api/jsonutils.h"
+#include "api/channel.h"
+#include "api/message.h"
+#include "api/gateway.h"
+#include "api/client.h"
+#include "api/jsonutils.h"
 
 #include <QWidget>
 #include <QGroupBox>

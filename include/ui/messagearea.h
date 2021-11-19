@@ -1,7 +1,7 @@
 #pragma once
 
 #include "messagewidget.h"
-#include "../../include/api/message.h"
+#include "api/message.h"
 
 #include <QShowEvent>
 #include <QScrollArea>

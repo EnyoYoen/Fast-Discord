@@ -1,4 +1,4 @@
-#include "../../include/api/channel.h"
+#include "api/channel.h"
 
 namespace Api {
 

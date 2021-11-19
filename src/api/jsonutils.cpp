@@ -1,1263 +1,931 @@
-#include "../../include/api/jsonutils.h"
+#include "api/jsonutils.h"
+
+#include "api/message.h"
+#include "api/attachment.h"
+#include "api/user.h"
+#include "api/overwrite.h"
+#include "api/channel.h"
+#include "api/thread.h"
+#include "api/team.h"
+#include "api/application.h"
+#include "api/guildmember.h"
+#include "api/voice.h"
+#include "api/guild.h"
+#include "api/client.h"
+
+#include <string>
 
 namespace Api {
 
-std::string *valueNoNull(const json& jsonObj, const std::string& key)
+// Get a std::string at the specified key, or nullptr if there's nothing
+std::string *valueNoNull(json jsonObj, const std::string& key)
 {
     try {
-        json attribute = key == "" ? jsonObj : jsonObj.at(key);
+        // Getting the JSON object at 'key', if not empty
+        json attribute = key == static_cast<std::string>("") ? jsonObj : jsonObj.at(key);
         if (attribute.is_null())
-            return nullptr;
+            return nullptr; // The attribute at the key specified is null
         return new std::string(attribute.get<std::string>());
-    } catch(json::out_of_range& e) {
-        return nullptr;
+    } catch(std::exception&) {
+        return nullptr; // There is nothing at the key specified
     }
 }
 
-std::vector<std::string> *getStringsFromJson(const json& jsonObj, const std::string& key)
+std::vector<std::string> *getStringsFromJson(json jsonObj, const std::string& key)
 {
     try {
-        json jsonstrings = key == "" ? jsonObj : jsonObj.at(key);
+        // Getting the JSON object at 'key', if not empty
+        json jsonstrings = key == static_cast<std::string>("") ? jsonObj : jsonObj.at(key);
         std::vector<std::string> *strings = new std::vector<std::string>;
 
+        // Filling the vector
         for (unsigned int i = 0 ; i < jsonstrings.size() ; i++) {
             strings->push_back(*valueNoNull(jsonstrings[i], ""));
         }
 
         return strings;
-    } catch(json::out_of_range& e) {
-        return nullptr;
+    } catch(std::exception& e) {
+        return nullptr; // There is nothing at the key specified
     }
 }
 
+// All the specialization of 'unmarshalObj'
 
-User *getUserFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<User>(json jsonObj, User **object)
 {
-    try {
-        json jsonUser = key == "" ? jsonObj : jsonObj.at(key);
+    *object = new User {
+        valueNoNull(jsonObj, "username"     ),
+        valueNoNull(jsonObj, "discriminator"),
+        valueNoNull(jsonObj, "avatar"       ),
+        valueNoNull(jsonObj, "locale"       ),
+        valueNoNull(jsonObj, "email"        ),
+        valueNoNull(jsonObj, "id"           ),
 
-        return new User {
-            valueNoNull(jsonUser, "username"     ),
-            valueNoNull(jsonUser, "discriminator"),
-            valueNoNull(jsonUser, "avatar"       ),
-            valueNoNull(jsonUser, "locale"       ),
-            valueNoNull(jsonUser, "email"        ),
-            valueNoNull(jsonUser, "id"           ),
+        jsonObj.value("flags"       , -1),
+        jsonObj.value("premium_type", -1),
+        jsonObj.value("public_flags", -1),
 
-            jsonUser.value("flags"       , -1),
-            jsonUser.value("premium_type", -1),
-            jsonUser.value("public_flags", -1),
-
-            jsonUser.value("bot"        , false),
-            jsonUser.value("system"     , false),
-            jsonUser.value("mfa_enabled", false),
-            jsonUser.value("verified"   , false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("bot"        , false),
+        jsonObj.value("system"     , false),
+        jsonObj.value("mfa_enabled", false),
+        jsonObj.value("verified"   , false)
+    };
 }
 
-std::vector<User *> *getUsersFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Overwrite>(json jsonObj, Overwrite **object)
 {
-    try {
-        json jsonRecipients = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<User *> *recipients = new std::vector<User *>;
+    *object = new Overwrite {
+        valueNoNull(jsonObj, "id"   ),
+        valueNoNull(jsonObj, "allow"),
+        valueNoNull(jsonObj, "deny" ),
 
-        for (unsigned int i = 0 ; i < jsonRecipients.size() ; i++) {
-            recipients->push_back(getUserFromJson(jsonRecipients[i], std::string("")));
-        }
-
-        return recipients;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("type", -1)
+    };
 }
 
-Overwrite *getOverwriteFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<ThreadMember>(json jsonObj, ThreadMember **object)
 {
-    try {
-        json jsonOverwrite = key == "" ? jsonObj : jsonObj.at(key);
+    *object = new ThreadMember {
+        valueNoNull(jsonObj, "join_timestamp"),
+        valueNoNull(jsonObj, "id"            ),
+        valueNoNull(jsonObj, "user_id"       ),
 
-        return new Overwrite {
-            valueNoNull(jsonOverwrite, "id"   ),
-            valueNoNull(jsonOverwrite, "allow"),
-            valueNoNull(jsonOverwrite, "deny" ),
-
-            jsonOverwrite.value("type", -1)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("flags", -1)
+    };
 }
 
-std::vector<Overwrite *> *getOverwritesFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<ThreadMetadata>(json jsonObj, ThreadMetadata **object)
 {
-    try {
-        json jsonOverwrites = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Overwrite *> *overwrites = new std::vector<Overwrite *>;
+    *object = new ThreadMetadata {
+        valueNoNull(jsonObj, "archive_timestamp"),
 
-        for (unsigned int i = 0 ; i < jsonOverwrites.size() ; i++) {
-            overwrites->push_back(getOverwriteFromJson(jsonOverwrites[i], std::string("")));
-        }
+        jsonObj.value("auto_archive_duration", -1),
 
-        return overwrites;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("archived", false),
+        jsonObj.value("locked"  , false)
+    };
 }
 
-ThreadMember *getThreadMemberFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Channel>(json jsonObj, Channel **object)
 {
-    try {
-        json jsonThreadMember = key == "" ? jsonObj : jsonObj.at(key);
+    std::vector<User *> *recipients = new std::vector<User *>;
+    std::vector<Overwrite *> *permissionOverwrites = new std::vector<Overwrite *>;
+    ThreadMember *member = new ThreadMember;
+    ThreadMetadata *threadMetadata = new ThreadMetadata;
 
-        return new ThreadMember {
-            valueNoNull(jsonThreadMember, "join_timestamp"),
-            valueNoNull(jsonThreadMember, "id"            ),
-            valueNoNull(jsonThreadMember, "user_id"       ),
+    unmarshalMultiple<User>(jsonObj, "recipients", &recipients);
+    unmarshalMultiple<Overwrite>(jsonObj, "permission_overwrites", &permissionOverwrites);
+    unmarshal<ThreadMember>(jsonObj, "member", &member);
+    unmarshal<ThreadMetadata>(jsonObj, "thread_metadata", &threadMetadata);
 
-            jsonThreadMember.value("flags", -1)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new Channel {
+        recipients,
+        permissionOverwrites,
+        member,
+        threadMetadata,
+        valueNoNull(jsonObj, "id"                ),
+        valueNoNull(jsonObj, "name"              ),
+        valueNoNull(jsonObj, "topic"             ),
+        valueNoNull(jsonObj, "icon"              ),
+        valueNoNull(jsonObj, "last_pin_timestamp"),
+        valueNoNull(jsonObj, "rtc_region"        ),
+        valueNoNull(jsonObj, "permissions"       ),
+        valueNoNull(jsonObj, "guild_id"          ),
+        valueNoNull(jsonObj, "last_message_id"   ),
+        valueNoNull(jsonObj, "owner_id"          ),
+        valueNoNull(jsonObj, "application_id"    ),
+        valueNoNull(jsonObj, "parent_id"         ),
+
+        jsonObj.value("type"                         , -1),
+        jsonObj.value("position"                     , -1),
+        jsonObj.value("bitrate"                      , -1),
+        jsonObj.value("user_limit"                   , -1),
+        jsonObj.value("rate_limit_per_user"          , -1),
+        jsonObj.value("video_quality_mode"           , -1),
+        jsonObj.value("message_count"                , -1),
+        jsonObj.value("member_count"                 , -1),
+        jsonObj.value("default_auto_archive_duration", -1),
+
+        jsonObj.value("nsfw", false)
+    };
 }
 
-ThreadMetadata *getThreadMetadataFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<TeamMember>(json jsonObj, TeamMember **object)
 {
-    try {
-        json jsonThreadMetadata = key == "" ? jsonObj : jsonObj.at(key);
+    User *user = new User;
 
-        return new ThreadMetadata {
-            valueNoNull(jsonThreadMetadata, "archive_timestamp"),
+    unmarshal<User>(jsonObj, "user", &user);
 
-            jsonThreadMetadata.value("auto_archive_duration", -1),
+    *object = new TeamMember {
+        user,
+        getStringsFromJson(jsonObj, "permissions"),
 
-            jsonThreadMetadata.value("archived", false),
-            jsonObj.value("locked"  , false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        valueNoNull(jsonObj, "team_id"),
+
+        jsonObj.value("member_ship_state", -1)
+    };
 }
 
-Channel *getChannelFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Team>(json jsonObj, Team **object)
 {
-    try {
-        json jsonChannel = key == "" ? jsonObj : jsonObj.at(key);
+    std::vector<TeamMember *> *members = new std::vector<TeamMember *>;
 
-        return new Channel {
-            getUsersFromJson(jsonChannel, "recipients"),
-            getOverwritesFromJson(jsonChannel, "permission_overwrites"),
-            getThreadMemberFromJson(jsonChannel, "member"),
-            getThreadMetadataFromJson(jsonChannel, "thread_metadata"),
+    unmarshalMultiple<TeamMember>(jsonObj, "members", &members);
 
-            valueNoNull(jsonChannel, "id"                ),
-            valueNoNull(jsonChannel, "name"              ),
-            valueNoNull(jsonChannel, "topic"             ),
-            valueNoNull(jsonChannel, "icon"              ),
-            valueNoNull(jsonChannel, "last_pin_timestamp"),
-            valueNoNull(jsonChannel, "rtc_region"        ),
-            valueNoNull(jsonChannel, "permissions"       ),
-            valueNoNull(jsonChannel, "guild_id"          ),
-            valueNoNull(jsonChannel, "last_message_id"   ),
-            valueNoNull(jsonChannel, "owner_id"          ),
-            valueNoNull(jsonChannel, "application_id"    ),
-            valueNoNull(jsonChannel, "parent_id"         ),
-
-            jsonChannel.value("type"                         , -1),
-            jsonChannel.value("position"                     , -1),
-            jsonChannel.value("bitrate"                      , -1),
-            jsonChannel.value("user_limit"                   , -1),
-            jsonChannel.value("rate_limit_per_user"          , -1),
-            jsonChannel.value("video_quality_mode"           , -1),
-            jsonChannel.value("message_count"                , -1),
-            jsonChannel.value("member_count"                 , -1),
-            jsonChannel.value("default_auto_archive_duration", -1),
-
-            jsonChannel.value("nsfw", false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new Team {
+        members,
+        valueNoNull(jsonObj, "icon"         ),
+        valueNoNull(jsonObj, "id"           ),
+        valueNoNull(jsonObj, "name"         ),
+        valueNoNull(jsonObj, "owner_user_id")
+    };
 }
 
-std::vector<Channel *> *getChannelsFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Application>(json jsonObj, Application **object)
 {
-    try {
-        json jsonChannels = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Channel *> *channels = new std::vector<Channel *>;
+    User *owner = new User;
+    Team *team = new Team;
 
-        for (unsigned int i = 0 ; i < jsonChannels.size() ; i++) {
-            channels->push_back(getChannelFromJson(jsonChannels[i], ""));
-        }
+    unmarshal<User>(jsonObj, "owner", &owner);
+    unmarshal<Team>(jsonObj, "team", &team);
 
-        return channels;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new Application {
+        owner,
+        team,
+        getStringsFromJson(jsonObj, "rpc_origins"),
+
+        valueNoNull(jsonObj, "id"                  ),
+        valueNoNull(jsonObj, "name"                ),
+        valueNoNull(jsonObj, "icon"                ),
+        valueNoNull(jsonObj, "description"         ),
+        valueNoNull(jsonObj, "terms_of_service_url"),
+        valueNoNull(jsonObj, "privacy_policy_url"  ),
+        valueNoNull(jsonObj, "summary"             ),
+        valueNoNull(jsonObj, "verify_key"          ),
+        valueNoNull(jsonObj, "guild_id"            ),
+        valueNoNull(jsonObj, "primary_sku_id"      ),
+        valueNoNull(jsonObj, "slug"                ),
+        valueNoNull(jsonObj, "cover_image"         ),
+
+        jsonObj.value("flags", -1),
+
+        jsonObj.value("bot_public"            , false),
+        jsonObj.value("bot_require_code_grant", false)
+    };
 }
 
-TeamMember *getTeamMemberFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<MessageActivity>(json jsonObj, MessageActivity **object)
 {
-    try {
-        json jsonTeamMember = key == "" ? jsonObj : jsonObj.at(key);
+    *object = new MessageActivity {
+        valueNoNull(jsonObj, "party_id"),
 
-        return new TeamMember {
-            getUserFromJson(jsonTeamMember, "user"),
-            getStringsFromJson(jsonTeamMember, "permissions"),
-
-            valueNoNull(jsonTeamMember, "team_id"),
-
-            jsonTeamMember.value("member_ship_state", -1)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("type", -1)
+    };
 }
 
-std::vector<TeamMember *> *getTeamMembersFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<GuildMessageMember>(json jsonObj, GuildMessageMember **object)
 {
-    try {
-        json jsonTeamMembers = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<TeamMember *> *teamMembers = new std::vector<TeamMember *>;
+    *object = new GuildMessageMember {
+        getStringsFromJson(jsonObj, "roles"),
 
-        for (unsigned int i = 0 ; i < jsonTeamMembers.size() ; i++) {
-            teamMembers->push_back(getTeamMemberFromJson(jsonTeamMembers[i], std::string("")));
-        }
+        valueNoNull(jsonObj, "nick"         ),
+        valueNoNull(jsonObj, "joined_at"    ),
+        valueNoNull(jsonObj, "premium_since"),
+        valueNoNull(jsonObj, "permissions"  ),
 
-        return teamMembers;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("deaf"   , false),
+        jsonObj.value("mute"   , false),
+        jsonObj.value("pending", false)
+    };
 }
 
-Team *getTeamFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<MessageInteraction>(json jsonObj, MessageInteraction **object)
 {
-    try {
-        json jsonTeam = key == "" ? jsonObj : jsonObj.at(key);
+    User *user = new User;
 
-        return new Team {
-            getTeamMembersFromJson(jsonTeam, "members"),
+    unmarshal<User>(jsonObj, "user", &user);
 
-            valueNoNull(jsonTeam, "icon"         ),
-            valueNoNull(jsonTeam, "id"           ),
-            valueNoNull(jsonTeam, "name"         ),
-            valueNoNull(jsonTeam, "owner_user_id")
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new MessageInteraction {
+        user,
+
+        valueNoNull(jsonObj, "id"  ),
+        valueNoNull(jsonObj, "name"),
+
+        jsonObj.value("type", -1)
+    };
 }
 
-Application *getApplicationFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Emoji>(json jsonObj, Emoji **object)
 {
-    try {
-        json jsonApplication = key == "" ? jsonObj : jsonObj.at(key);
+    User *user = new User;
 
-        return new Application {
-            getUserFromJson(jsonApplication, "owner"),
-            getTeamFromJson(jsonApplication, "team"),
-            getStringsFromJson(jsonApplication, "rpc_origins"),
+    unmarshal<User>(jsonObj, "user", &user);
 
-            valueNoNull(jsonApplication, "id"                  ),
-            valueNoNull(jsonApplication, "name"                ),
-            valueNoNull(jsonApplication, "icon"                ),
-            valueNoNull(jsonApplication, "description"         ),
-            valueNoNull(jsonApplication, "terms_of_service_url"),
-            valueNoNull(jsonApplication, "privacy_policy_url"  ),
-            valueNoNull(jsonApplication, "summary"             ),
-            valueNoNull(jsonApplication, "verify_key"          ),
-            valueNoNull(jsonApplication, "guild_id"            ),
-            valueNoNull(jsonApplication, "primary_sku_id"      ),
-            valueNoNull(jsonApplication, "slug"                ),
-            valueNoNull(jsonApplication, "cover_image"         ),
+    *object = new Emoji {
+        user,
+        getStringsFromJson(jsonObj, "roles"),
 
-            jsonApplication.value("flags", -1),
+        valueNoNull(jsonObj, "id"),
+        valueNoNull(jsonObj, "name"),
 
-            jsonApplication.value("bot_public"            , false),
-            jsonApplication.value("bot_require_code_grant", false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("requireColons", false),
+        jsonObj.value("managed"      , false),
+        jsonObj.value("animated"     , false),
+        jsonObj.value("available"    , false)
+    };
 }
 
-MessageActivity *getMessageActivityFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Reaction>(json jsonObj, Reaction **object)
 {
-    try {
-        json jsonMessageActivity = key == "" ? jsonObj : jsonObj.at(key);
+    Emoji *emoji = new Emoji;
 
-        return new MessageActivity {
-            valueNoNull(jsonMessageActivity, "party_id"),
+    unmarshal<Emoji>(jsonObj, "emoji", &emoji);
 
-            jsonMessageActivity.value("type", -1)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new Reaction {
+        emoji,
+
+        jsonObj.value("count", -1),
+
+        jsonObj.value("me", false)
+    };
 }
 
-GuildMessageMember *getGuildMessageMemberFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<EmbedField>(json jsonObj, EmbedField **object)
 {
-    try {
-        json jsonGuildMessageMember = key == "" ? jsonObj : jsonObj.at(key);
+    *object = new EmbedField {
+        valueNoNull(jsonObj, "name"),
+        valueNoNull(jsonObj, "value"),
 
-        return new GuildMessageMember {
-            getStringsFromJson(jsonGuildMessageMember, "roles"),
-
-            valueNoNull(jsonGuildMessageMember, "nick"         ),
-            valueNoNull(jsonGuildMessageMember, "joined_at"    ),
-            valueNoNull(jsonGuildMessageMember, "premium_since"),
-            valueNoNull(jsonGuildMessageMember, "permissions"  ),
-
-            jsonGuildMessageMember.value("deaf"   , false),
-            jsonGuildMessageMember.value("mute"   , false),
-            jsonGuildMessageMember.value("pending", false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("inline", false)
+    };
 }
 
-MessageInteraction *getMessageInteractionFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<EmbedFooter>(json jsonObj, EmbedFooter **object)
 {
-    try {
-        json jsonMessageInteraction = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new MessageInteraction {
-            getUserFromJson(jsonMessageInteraction, "user"),
-
-            valueNoNull(jsonMessageInteraction, "id"  ),
-            valueNoNull(jsonMessageInteraction, "name"),
-
-            jsonMessageInteraction.value("type", -1)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new EmbedFooter {
+        valueNoNull(jsonObj, "text"          ),
+        valueNoNull(jsonObj, "icon_url"      ),
+        valueNoNull(jsonObj, "proxy_icon_url")
+    };
 }
 
-Emoji *getEmojiFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<EmbedTVI>(json jsonObj, EmbedTVI **object)
 {
-    try {
-        json jsonEmoji = key == "" ? jsonObj : jsonObj.at(key);
+    *object = new EmbedTVI {
+        valueNoNull(jsonObj, "url"      ),
+        valueNoNull(jsonObj, "proxy_url"),
 
-        return new Emoji {
-            getUserFromJson(jsonEmoji, "user"),
-            getStringsFromJson(jsonEmoji, "roles"),
-
-            valueNoNull(jsonEmoji, "id"),
-            valueNoNull(jsonEmoji, "name"),
-
-            jsonEmoji.value("requireColons", false),
-            jsonEmoji.value("managed"      , false),
-            jsonEmoji.value("animated"     , false),
-            jsonEmoji.value("available"    , false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("height", -1),
+        jsonObj.value("width" , -1)
+    };
 }
 
-Reaction *getReactionFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<EmbedProvider>(json jsonObj, EmbedProvider **object)
 {
-    try {
-        json jsonReaction = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new Reaction {
-            getEmojiFromJson(jsonReaction, "emoji"),
-
-            jsonReaction.value("count", -1),
-
-            jsonReaction.value("me", false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new EmbedProvider {
+        valueNoNull(jsonObj, "name"),
+        valueNoNull(jsonObj, "url" )
+    };
 }
 
-std::vector<Reaction *> *getReactionsFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<EmbedAuthor>(json jsonObj, EmbedAuthor **object)
 {
-    try {
-        json jsonReactions = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Reaction *> *reactions = new std::vector<Reaction *>;
-
-        for (unsigned int i = 0 ; i < jsonReactions.size() ; i++) {
-            reactions->push_back(getReactionFromJson(jsonReactions[i], ""));
-        }
-
-        return reactions;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new EmbedAuthor {
+        valueNoNull(jsonObj, "name"          ),
+        valueNoNull(jsonObj, "url"           ),
+        valueNoNull(jsonObj, "icon_url"      ),
+        valueNoNull(jsonObj, "proxy_icon_url")
+    };
 }
 
-EmbedField *getEmbedFieldFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Embed>(json jsonObj, Embed **object)
 {
-    try {
-        json jsonEmbedField = key == "" ? jsonObj : jsonObj.at(key);
+    std::vector<EmbedField *> *fields = new std::vector<EmbedField *>;
+    EmbedFooter *footer = new EmbedFooter;
+    EmbedTVI *image = new EmbedTVI;
+    EmbedTVI *thumbnail = new EmbedTVI;
+    EmbedTVI *video = new EmbedTVI;
+    EmbedProvider *provider = new EmbedProvider;
+    EmbedAuthor *author = new EmbedAuthor;
 
-        return new EmbedField {
-            valueNoNull(jsonEmbedField, "name"),
-            valueNoNull(jsonEmbedField, "value"),
+    unmarshalMultiple<EmbedField>(jsonObj, "fields", &fields);
+    unmarshal<EmbedFooter>(jsonObj, "footer", &footer);
+    unmarshal<EmbedTVI>(jsonObj, "image", &image);
+    unmarshal<EmbedTVI>(jsonObj, "thumbnail", &thumbnail);
+    unmarshal<EmbedTVI>(jsonObj, "video", &video);
+    unmarshal<EmbedProvider>(jsonObj, "provider", &provider);
+    unmarshal<EmbedAuthor>(jsonObj, "author", &author);
 
-            jsonEmbedField.value("inline", false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new Embed {
+        fields,
+        footer,
+        image,
+        thumbnail,
+        video,
+        provider,
+        author,
+
+        valueNoNull(jsonObj, "title"      ),
+        valueNoNull(jsonObj, "type"       ),
+        valueNoNull(jsonObj, "description"),
+        valueNoNull(jsonObj, "url"        ),
+        valueNoNull(jsonObj, "timestamp"  ),
+
+        jsonObj.value("color", -1)
+    };
 }
 
-std::vector<EmbedField *> *getEmbedFieldsFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Attachment>(json jsonObj, Attachment **object)
 {
-    try {
-        json jsonEmbedFields = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<EmbedField *> *embedFields = new std::vector<EmbedField *>;
+    *object = new Attachment {
+        valueNoNull(jsonObj, "id"          ),
+        valueNoNull(jsonObj, "filename"    ),
+        valueNoNull(jsonObj, "content_type"),
+        valueNoNull(jsonObj, "url"         ),
+        valueNoNull(jsonObj, "proxy_url"   ),
 
-        for (unsigned int i = 0 ; i < jsonEmbedFields.size() ; i++) {
-            embedFields->push_back(getEmbedFieldFromJson(jsonEmbedFields[i], ""));
-        }
-
-        return embedFields;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("size"  , -1),
+        jsonObj.value("height", -1),
+        jsonObj.value("width" , -1)
+    };
 }
 
-EmbedFooter *getEmbedFooterFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<ChannelMention>(json jsonObj, ChannelMention **object)
 {
-    try {
-        json jsonEmbedFooter = key == "" ? jsonObj : jsonObj.at(key);
+    *object = new ChannelMention {
+        valueNoNull(jsonObj, "id"      ),
+        valueNoNull(jsonObj, "guild_id"),
+        valueNoNull(jsonObj, "name"    ),
 
-        return new EmbedFooter {
-            valueNoNull(jsonEmbedFooter, "text"          ),
-            valueNoNull(jsonEmbedFooter, "icon_url"      ),
-            valueNoNull(jsonEmbedFooter, "proxy_icon_url")
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("type", -1)
+    };
 }
 
-EmbedTVI *getEmbedTVIFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<SelectOption>(json jsonObj, SelectOption **object)
 {
-    try {
-        json jsonEmbedTVI = key == "" ? jsonObj : jsonObj.at(key);
+    Emoji *emoji = new Emoji;
 
-        return new EmbedTVI {
-            valueNoNull(jsonEmbedTVI, "url"      ),
-            valueNoNull(jsonEmbedTVI, "proxy_url"),
+    unmarshal<Emoji>(jsonObj, "emoji", &emoji);
 
-            jsonEmbedTVI.value("height", -1),
-            jsonEmbedTVI.value("width" , -1)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new SelectOption {
+        emoji,
+
+        valueNoNull(jsonObj, "label"      ),
+        valueNoNull(jsonObj, "value"      ),
+        valueNoNull(jsonObj, "description"),
+
+        jsonObj.value("default", false)
+    };
 }
 
-EmbedProvider *getEmbedProviderFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<MessageComponent>(json jsonObj, MessageComponent **object)
 {
-    try {
-        json jsonEmbedProvider = key == "" ? jsonObj : jsonObj.at(key);
+    Emoji *emoji = new Emoji;
+    std::vector<SelectOption *> *components = new std::vector<SelectOption *>;
 
-        return new EmbedProvider {
-            valueNoNull(jsonEmbedProvider, "name"),
-            valueNoNull(jsonEmbedProvider, "url" )
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    unmarshal<Emoji>(jsonObj, "emoji", &emoji);
+    unmarshalMultiple<SelectOption>(jsonObj, "components", &components);
+
+    *object = new MessageComponent {
+        emoji,
+        components,
+        nullptr,
+
+        valueNoNull(jsonObj, "custom_id"  ),
+        valueNoNull(jsonObj, "label"      ),
+        valueNoNull(jsonObj, "url"        ),
+        valueNoNull(jsonObj, "placeholder"),
+
+        jsonObj.value("type"      , -1),
+        jsonObj.value("style"     , -1),
+        jsonObj.value("min_values", -1),
+        jsonObj.value("max_values", -1),
+
+        jsonObj.value("disabled", false)
+    };
 }
 
-EmbedAuthor *getEmbedAuthorFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<StickerItem>(json jsonObj, StickerItem **object)
 {
-    try {
-        json jsonEmbedAuthor = key == "" ? jsonObj : jsonObj.at(key);
+    *object = new StickerItem {
+        valueNoNull(jsonObj, "id"  ),
+        valueNoNull(jsonObj, "name"),
 
-        return new EmbedAuthor {
-            valueNoNull(jsonEmbedAuthor, "name"          ),
-            valueNoNull(jsonEmbedAuthor, "url"           ),
-            valueNoNull(jsonEmbedAuthor, "icon_url"      ),
-            valueNoNull(jsonEmbedAuthor, "proxy_icon_url")
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("format_type", -1)
+    };
 }
 
-Embed *getEmbedFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Sticker>(json jsonObj, Sticker **object)
 {
-    try {
-        json jsonEmbed = key == "" ? jsonObj : jsonObj.at(key);
+    User *user = new User;
 
-        return new Embed {
-            getEmbedFieldsFromJson(jsonEmbed, "fields"),
-            getEmbedFooterFromJson(jsonEmbed, "footer"),
-            getEmbedTVIFromJson(jsonEmbed, "image"),
-            getEmbedTVIFromJson(jsonEmbed, "thumbnail"),
-            getEmbedTVIFromJson(jsonEmbed, "video"),
-            getEmbedProviderFromJson(jsonEmbed, "provider"),
-            getEmbedAuthorFromJson(jsonEmbed, "author"),
+    unmarshal<User>(jsonObj, "user", &user),
 
-            valueNoNull(jsonEmbed, "title"      ),
-            valueNoNull(jsonEmbed, "type"       ),
-            valueNoNull(jsonEmbed, "description"),
-            valueNoNull(jsonEmbed, "url"        ),
-            valueNoNull(jsonEmbed, "timestamp"  ),
+    *object = new Sticker {
+        user,
 
-            jsonEmbed.value("color", -1)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        valueNoNull(jsonObj, "id"         ),
+        valueNoNull(jsonObj, "pack_id"    ),
+        valueNoNull(jsonObj, "name"       ),
+        valueNoNull(jsonObj, "description"),
+        valueNoNull(jsonObj, "tags"       ),
+        valueNoNull(jsonObj, "asset"      ),
+        valueNoNull(jsonObj, "guild_id"   ),
+
+        jsonObj.value("type"       , -1),
+        jsonObj.value("format_type", -1),
+        jsonObj.value("sort_value" , -1),
+
+        jsonObj.value("available", false)
+    };
 }
 
-std::vector<Embed *> *getEmbedsFromJson(const json& jsonObj, const std::string& key)
+Message *getPartialMessage(json jsonObj, const std::string& key)
 {
+    Application *application = new Application;
+    User *author = new User;
+    MessageActivity *activity = new MessageActivity;
+    GuildMessageMember *member = new GuildMessageMember;
+    Channel *thread = new Channel;
+    MessageInteraction *interaction = new MessageInteraction;
+    std::vector<Reaction *> *reactions = new std::vector<Reaction *>;
+    std::vector<User *> *mentions = new std::vector<User *>;
+    std::vector<Attachment *> *attachments = new std::vector<Attachment *>;
+    std::vector<ChannelMention *> *mentionChannels = new std::vector<ChannelMention *>;
+    std::vector<MessageComponent *> *components = new std::vector<MessageComponent *>;
+    std::vector<StickerItem *> *stickerItems = new std::vector<StickerItem *>;
+    std::vector<Sticker *> *stickers = new std::vector<Sticker *>;
+
+    unmarshal<Application>(jsonObj, "application", &application);
+    unmarshal<User>(jsonObj, "author", &author);
+    unmarshal<MessageActivity>(jsonObj, "activity", &activity);
+    unmarshal<GuildMessageMember>(jsonObj, "member", &member);
+    unmarshal<Channel>(jsonObj, "thread", &thread);
+    unmarshal<MessageInteraction>(jsonObj, "interaction", &interaction);
+    unmarshalMultiple<Reaction>(jsonObj, "reactions", &reactions);
+    unmarshalMultiple<User>(jsonObj, "mentions", &mentions);
+    unmarshalMultiple<Attachment>(jsonObj, "attachments", &attachments);
+    unmarshalMultiple<ChannelMention>(jsonObj, "mention_channels", &mentionChannels);
+    unmarshalMultiple<MessageComponent>(jsonObj, "components", &components);
+    unmarshalMultiple<StickerItem>(jsonObj, "sticker_items", &stickerItems);
+    unmarshalMultiple<Sticker>(jsonObj, "stickers", &stickers);
+
     try {
-        json jsonEmbeds = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Embed *> *embeds = new std::vector<Embed *>;
-
-        for (unsigned int i = 0 ; i < jsonEmbeds.size() ; i++) {
-            embeds->push_back(getEmbedFromJson(jsonEmbeds[i], ""));
-        }
-
-        return embeds;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-Attachment *getAttachmentFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonAttachment = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new Attachment {
-            valueNoNull(jsonAttachment, "id"          ),
-            valueNoNull(jsonAttachment, "filename"    ),
-            valueNoNull(jsonAttachment, "content_type"),
-            valueNoNull(jsonAttachment, "url"         ),
-            valueNoNull(jsonAttachment, "proxy_url"   ),
-
-            jsonAttachment.value("size"  , -1),
-            jsonAttachment.value("height", -1),
-            jsonAttachment.value("width" , -1)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-std::vector<Attachment *> *getAttachmentsFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonAttachments = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Attachment *> *attachments = new std::vector<Attachment *>;
-
-        for (unsigned int i = 0 ; i < jsonAttachments.size() ; i++) {
-            attachments->push_back(getAttachmentFromJson(jsonAttachments[i], ""));
-        }
-
-        return attachments;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-ChannelMention *getChannelMentionFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonChannelMention = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new ChannelMention {
-            valueNoNull(jsonChannelMention, "id"      ),
-            valueNoNull(jsonChannelMention, "guild_id"),
-            valueNoNull(jsonChannelMention, "name"    ),
-
-            jsonChannelMention.value("type", -1)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-std::vector<ChannelMention *> *getChannelMentionsFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonChannelMentions = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<ChannelMention *> *channelMentions = new std::vector<ChannelMention *>;
-
-        for (unsigned int i = 0 ; i < jsonChannelMentions.size() ; i++) {
-            channelMentions->push_back(getChannelMentionFromJson(jsonChannelMentions[i], ""));
-        }
-
-        return channelMentions;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-SelectOption *getSelectOptionFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonSelectOption = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new SelectOption {
-            getEmojiFromJson(jsonSelectOption, "emoji"),
-
-            valueNoNull(jsonSelectOption, "label"      ),
-            valueNoNull(jsonSelectOption, "value"      ),
-            valueNoNull(jsonSelectOption, "description"),
-
-            jsonSelectOption.value("default", false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-std::vector<SelectOption *> *getSelectOptionsFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonSelectOptions = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<SelectOption *> *selectOptions = new std::vector<SelectOption *>;
-
-        for (unsigned int i = 0 ; i < jsonSelectOptions.size() ; i++) {
-            selectOptions->push_back(getSelectOptionFromJson(jsonSelectOptions[i], ""));
-        }
-
-        return selectOptions;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-MessageComponent *getPartialMessageComponentFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonMessageComponent = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new MessageComponent {
-            getEmojiFromJson(jsonMessageComponent, "emoji"),
-            getSelectOptionsFromJson(jsonMessageComponent, "components"),
-            nullptr,
-
-            valueNoNull(jsonMessageComponent, "custom_id"  ),
-            valueNoNull(jsonMessageComponent, "label"      ),
-            valueNoNull(jsonMessageComponent, "url"        ),
-            valueNoNull(jsonMessageComponent, "placeholder"),
-
-            jsonMessageComponent.value("type"      , -1),
-            jsonMessageComponent.value("style"     , -1),
-            jsonMessageComponent.value("min_values", -1),
-            jsonMessageComponent.value("max_values", -1),
-
-            jsonMessageComponent.value("disabled", false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-std::vector<MessageComponent *> *getMessageComponentsFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonMessageComponents = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<MessageComponent *> *messageComponents = new std::vector<MessageComponent *>;
-
-        for (unsigned int i = 0 ; i < jsonMessageComponents.size() ; i++) {
-            messageComponents->push_back(getPartialMessageComponentFromJson(jsonMessageComponents[i], ""));
-        }
-
-        return messageComponents;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-StickerItem *getStickerItemFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonStickerItem = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new StickerItem {
-            valueNoNull(jsonStickerItem, "id"  ),
-            valueNoNull(jsonStickerItem, "name"),
-
-            jsonStickerItem.value("format_type", -1)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-std::vector<StickerItem *> *getStickerItemsFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonStickerItems = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<StickerItem *> *stickerItems = new std::vector<StickerItem *>;
-
-        for (unsigned int i = 0 ; i < jsonStickerItems.size() ; i++) {
-            stickerItems->push_back(getStickerItemFromJson(jsonStickerItems[i], ""));
-        }
-
-        return stickerItems;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-Sticker *getStickerFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonSticker = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new Sticker {
-            getUserFromJson(jsonSticker, "user"),
-
-            valueNoNull(jsonSticker, "id"         ),
-            valueNoNull(jsonSticker, "pack_id"    ),
-            valueNoNull(jsonSticker, "name"       ),
-            valueNoNull(jsonSticker, "description"),
-            valueNoNull(jsonSticker, "tags"       ),
-            valueNoNull(jsonSticker, "asset"      ),
-            valueNoNull(jsonSticker, "guild_id"   ),
-
-            jsonSticker.value("type"       , -1),
-            jsonSticker.value("format_type", -1),
-            jsonSticker.value("sort_value" , -1),
-
-            jsonSticker.value("available", false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-std::vector<Sticker *> *getStickersFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonStickers = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Sticker *> *stickers = new std::vector<Sticker *>;
-
-        for (unsigned int i = 0 ; i < jsonStickers.size() ; i++) {
-            stickers->push_back(getStickerFromJson(jsonStickers[i], ""));
-        }
-
-        return stickers;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-Message *getPartialMessageFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonMessage = key == "" ? jsonObj : jsonObj.at(key);
+        jsonObj = key == static_cast<std::string>("") ? jsonObj : jsonObj.at(key);
 
         return new Message {
-            getApplicationFromJson(jsonMessage, "application"),
-            getUserFromJson(jsonMessage, "author"),
-            getMessageActivityFromJson(jsonMessage, "activity"),
-            getGuildMessageMemberFromJson(jsonMessage, "member"),
+            application,
+            author,
+            activity,
+            member,
             nullptr,
-            getChannelFromJson(jsonMessage, "thread"),
-            getMessageInteractionFromJson(jsonMessage, "interaction"),
+            thread,
+            interaction,
 
-            getReactionsFromJson(jsonMessage, "reactions"),
+            reactions,
             nullptr,
-            getUsersFromJson(jsonMessage, "mentions"),
-            getAttachmentsFromJson(jsonMessage, "attachments"),
-            getChannelMentionsFromJson(jsonMessage, "mention_channels"),
-            getStringsFromJson(jsonMessage, "mention_roles"),
-            getMessageComponentsFromJson(jsonMessage, "components"),
-            getStickerItemsFromJson(jsonMessage, "sticker_items"),
-            getStickersFromJson(jsonMessage, "stickers"),
+            mentions,
+            attachments,
+            mentionChannels,
+            getStringsFromJson(jsonObj, "mention_roles"),
+            components,
+            stickerItems,
+            stickers,
 
-            valueNoNull(jsonMessage, "id"              ),
-            valueNoNull(jsonMessage, "channel_id"      ),
-            valueNoNull(jsonMessage, "guild_id"        ),
-            valueNoNull(jsonMessage, "content"         ),
-            valueNoNull(jsonMessage, "timestamp"       ),
-            valueNoNull(jsonMessage, "edited_timestamp"),
-            valueNoNull(jsonMessage, "webhook_id"      ),
-            valueNoNull(jsonMessage, "application_id"  ),
-            valueNoNull(jsonMessage, "nonce"           ),
+            valueNoNull(jsonObj, "id"              ),
+            valueNoNull(jsonObj, "channel_id"      ),
+            valueNoNull(jsonObj, "guild_id"        ),
+            valueNoNull(jsonObj, "content"         ),
+            valueNoNull(jsonObj, "timestamp"       ),
+            valueNoNull(jsonObj, "edited_timestamp"),
+            valueNoNull(jsonObj, "webhook_id"      ),
+            valueNoNull(jsonObj, "application_id"  ),
+            valueNoNull(jsonObj, "nonce"           ),
 
-            //jsonMessage.value("nonce"              , -1),
-            -1,
-            jsonMessage.value("author_public_flags", -1),
-            jsonMessage.value("type"               , -1),
-            jsonMessage.value("flags"              , -1),
+            jsonObj.value("nonce"              , -1),
+            jsonObj.value("author_public_flags", -1),
+            jsonObj.value("type"               , -1),
+            jsonObj.value("flags"              , -1),
 
-            jsonMessage.value("tts"             , false),
-            jsonMessage.value("pinned"          , false),
-            jsonMessage.value("mention_everyone", false)
+            jsonObj.value("tts"             , false),
+            jsonObj.value("pinned"          , false),
+            jsonObj.value("mention_everyone", false)
         };
     } catch(json::out_of_range& e) {
         return nullptr;
     }
 }
 
-Message *getMessageFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Message>(json jsonObj, Message **object)
 {
-    try {
-        json jsonMessage = key == "" ? jsonObj : jsonObj.at(key);
+    Application *application = new Application;
+    User *author = new User;
+    MessageActivity *activity = new MessageActivity;
+    GuildMessageMember *member = new GuildMessageMember;
+    Channel *thread = new Channel;
+    MessageInteraction *interaction = new MessageInteraction;
+    std::vector<Reaction *> *reactions = new std::vector<Reaction *>;
+    std::vector<User *> *mentions = new std::vector<User *>;
+    std::vector<Attachment *> *attachments = new std::vector<Attachment *>;
+    std::vector<ChannelMention *> *mentionChannels = new std::vector<ChannelMention *>;
+    std::vector<MessageComponent *> *components = new std::vector<MessageComponent *>;
+    std::vector<StickerItem *> *stickerItems = new std::vector<StickerItem *>;
+    std::vector<Sticker *> *stickers = new std::vector<Sticker *>;
 
-        return new Message {
-            getApplicationFromJson(jsonMessage, "application"),
-            getUserFromJson(jsonMessage, "author"),
-            getMessageActivityFromJson(jsonMessage, "activity"),
-            getGuildMessageMemberFromJson(jsonMessage, "member"),
-            getPartialMessageFromJson(jsonMessage, "referenced_message"),
-            getChannelFromJson(jsonMessage, "thread"),
-            getMessageInteractionFromJson(jsonMessage, "interaction"),
+    unmarshal<Application>(jsonObj, "application", &application);
+    unmarshal<User>(jsonObj, "author", &author);
+    unmarshal<MessageActivity>(jsonObj, "activity", &activity);
+    unmarshal<GuildMessageMember>(jsonObj, "member", &member);
+    unmarshal<Channel>(jsonObj, "thread", &thread);
+    unmarshal<MessageInteraction>(jsonObj, "interaction", &interaction);
+    unmarshalMultiple<Reaction>(jsonObj, "reactions", &reactions);
+    unmarshalMultiple<User>(jsonObj, "mentions", &mentions);
+    unmarshalMultiple<Attachment>(jsonObj, "attachments", &attachments);
+    unmarshalMultiple<ChannelMention>(jsonObj, "mention_channels", &mentionChannels);
+    unmarshalMultiple<MessageComponent>(jsonObj, "components", &components);
+    unmarshalMultiple<StickerItem>(jsonObj, "sticker_items", &stickerItems);
+    unmarshalMultiple<Sticker>(jsonObj, "stickers", &stickers);
 
-            getReactionsFromJson(jsonMessage, "reactions"),
-            nullptr,
-            getUsersFromJson(jsonMessage, "mentions"),
-            getAttachmentsFromJson(jsonMessage, "attachments"),
-            getChannelMentionsFromJson(jsonMessage, "mention_channels"),
-            getStringsFromJson(jsonMessage, "mention_roles"),
-            getMessageComponentsFromJson(jsonMessage, "components"),
-            getStickerItemsFromJson(jsonMessage, "sticker_items"),
-            getStickersFromJson(jsonMessage, "stickers"),
+    *object = new Message {
+        application,
+        author,
+        activity,
+        member,
+        getPartialMessage(jsonObj, "referenced_message"),
+        thread,
+        interaction,
 
-            valueNoNull(jsonMessage, "id"              ),
-            valueNoNull(jsonMessage, "channel_id"      ),
-            valueNoNull(jsonMessage, "guild_id"        ),
-            valueNoNull(jsonMessage, "content"         ),
-            valueNoNull(jsonMessage, "timestamp"       ),
-            valueNoNull(jsonMessage, "edited_timestamp"),
-            valueNoNull(jsonMessage, "webhook_id"      ),
-            valueNoNull(jsonMessage, "application_id"  ),
-            valueNoNull(jsonMessage, "nonce"           ),
+        reactions,
+        nullptr,
+        mentions,
+        attachments,
+        mentionChannels,
+        getStringsFromJson(jsonObj, "mention_roles"),
+        components,
+        stickerItems,
+        stickers,
 
-            jsonMessage.value("nonce"              , -1),
-            jsonMessage.value("author_public_flags", -1),
-            jsonMessage.value("type"               , -1),
-            jsonMessage.value("flags"              , -1),
+        valueNoNull(jsonObj, "id"              ),
+        valueNoNull(jsonObj, "channel_id"      ),
+        valueNoNull(jsonObj, "guild_id"        ),
+        valueNoNull(jsonObj, "content"         ),
+        valueNoNull(jsonObj, "timestamp"       ),
+        valueNoNull(jsonObj, "edited_timestamp"),
+        valueNoNull(jsonObj, "webhook_id"      ),
+        valueNoNull(jsonObj, "application_id"  ),
+        valueNoNull(jsonObj, "nonce"           ),
 
-            jsonMessage.value("tts"             , false),
-            jsonMessage.value("pinned"          , false),
-            jsonMessage.value("mention_everyone", false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("nonce"              , -1),
+        jsonObj.value("author_public_flags", -1),
+        jsonObj.value("type"               , -1),
+        jsonObj.value("flags"              , -1),
+
+        jsonObj.value("tts"             , false),
+        jsonObj.value("pinned"          , false),
+        jsonObj.value("mention_everyone", false)
+    };
 }
 
-std::vector<Message *> *getMessagesFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<GuildMember>(json jsonObj, GuildMember **object)
 {
-    try {
-        json jsonMessages = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Message *> *messages = new std::vector<Message *>;
+    User *user = new User;
 
-        for (unsigned int i = 0 ; i < jsonMessages.size() ; i++) {
-            messages->push_back(getMessageFromJson(jsonMessages[i], ""));
-        }
+    unmarshal<User>(jsonObj, "user", &user);
 
-        return messages;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new GuildMember {
+        user,
+        getStringsFromJson(jsonObj, "roles"),
+
+        valueNoNull(jsonObj, "nick"         ),
+        valueNoNull(jsonObj, "avatar"       ),
+        valueNoNull(jsonObj, "joined_at"    ),
+        valueNoNull(jsonObj, "premium_since"),
+        valueNoNull(jsonObj, "permissions"  ),
+
+        jsonObj.value("deaf"   , false),
+        jsonObj.value("mute"   , false),
+        jsonObj.value("pending", false)
+    };
 }
 
-GuildMember *getGuildMemberFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<VoiceState>(json jsonObj, VoiceState **object)
 {
-    try {
-        json jsonGuildMember = key == "" ? jsonObj : jsonObj.at(key);
+    GuildMember *member = new GuildMember;
 
-        return new GuildMember {
-            getUserFromJson(jsonGuildMember, "user"),
-            getStringsFromJson(jsonGuildMember, "roles"),
+    unmarshal<GuildMember>(jsonObj, "member", &member);
 
-            valueNoNull(jsonGuildMember, "nick"         ),
-            valueNoNull(jsonGuildMember, "avatar"       ),
-            valueNoNull(jsonGuildMember, "joined_at"    ),
-            valueNoNull(jsonGuildMember, "premium_since"),
-            valueNoNull(jsonGuildMember, "permissions"  ),
+    *object = new VoiceState {
+        member,
 
-            jsonGuildMember.value("deaf"   , false),
-            jsonGuildMember.value("mute"   , false),
-            jsonGuildMember.value("pending", false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        valueNoNull(jsonObj, "guild_id"                  ),
+        valueNoNull(jsonObj, "channel_id"                ),
+        valueNoNull(jsonObj, "user_id"                   ),
+        valueNoNull(jsonObj, "session_id"                ),
+        valueNoNull(jsonObj, "request_to_speak_timestamp"),
+
+        jsonObj.value("deaf"       , false),
+        jsonObj.value("mute"       , false),
+        jsonObj.value("self_deaf"  , false),
+        jsonObj.value("self_mute"  , false),
+        jsonObj.value("self_stream", false),
+        jsonObj.value("self_video" , false),
+        jsonObj.value("suppress"   , false)
+    };
 }
 
-std::vector<GuildMember *> *getGuildMembersFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<WelcomeScreenChannel>(json jsonObj, WelcomeScreenChannel **object)
 {
-    try {
-        json jsonGuildMembers = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<GuildMember *> *guildMembers = new std::vector<GuildMember *>;
-
-        for (unsigned int i = 0 ; i < jsonGuildMembers.size() ; i++) {
-            guildMembers->push_back(getGuildMemberFromJson(jsonGuildMembers[i], ""));
-        }
-
-        return guildMembers;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new WelcomeScreenChannel {
+        valueNoNull(jsonObj, "channel_id" ),
+        valueNoNull(jsonObj, "description"),
+        valueNoNull(jsonObj, "emoji_id"   ),
+        valueNoNull(jsonObj, "emoji_name" )
+    };
 }
 
-VoiceState *getVoiceStateFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<WelcomeScreen>(json jsonObj, WelcomeScreen **object)
 {
-    try {
-        json jsonVoiceState = key == "" ? jsonObj : jsonObj.at(key);
+    std::vector<WelcomeScreenChannel *> *welcomeChannels = new std::vector<WelcomeScreenChannel *>;
 
-        return new VoiceState {
-            getGuildMemberFromJson(jsonVoiceState, "member"),
+    unmarshalMultiple<WelcomeScreenChannel>(jsonObj, "welcome_channels", &welcomeChannels);
 
-            valueNoNull(jsonVoiceState, "guild_id"                  ),
-            valueNoNull(jsonVoiceState, "channel_id"                ),
-            valueNoNull(jsonVoiceState, "user_id"                   ),
-            valueNoNull(jsonVoiceState, "session_id"                ),
-            valueNoNull(jsonVoiceState, "request_to_speak_timestamp"),
+    *object = new WelcomeScreen {
+        welcomeChannels,
 
-            jsonVoiceState.value("deaf"       , false),
-            jsonVoiceState.value("mute"       , false),
-            jsonVoiceState.value("self_deaf"  , false),
-            jsonVoiceState.value("self_mute"  , false),
-            jsonVoiceState.value("self_stream", false),
-            jsonVoiceState.value("self_video" , false),
-            jsonVoiceState.value("suppress"   , false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        valueNoNull(jsonObj, "description")
+    };
 }
 
-std::vector<VoiceState *> *getVoiceStatesFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<StageInstance>(json jsonObj, StageInstance **object)
 {
-    try {
-        json jsonVoiceStates = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<VoiceState *> *voiceStates = new std::vector<VoiceState *>;
+    *object = new StageInstance {
+        valueNoNull(jsonObj, "id"        ),
+        valueNoNull(jsonObj, "guild_id"  ),
+        valueNoNull(jsonObj, "channel_id"),
+        valueNoNull(jsonObj, "topic"     ),
 
-        for (unsigned int i = 0 ; i < jsonVoiceStates.size() ; i++) {
-            voiceStates->push_back(getVoiceStateFromJson(jsonVoiceStates[i], ""));
-        }
+        jsonObj.value("privacy_level" , -1),
 
-        return voiceStates;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("discoverable_disabled" , false)
+    };
 }
 
-WelcomeScreenChannel *getWelcomeScreenChannelFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Guild>(json jsonObj, Guild **object)
 {
-    try {
-        json jsonWelcomeScreenChannel = key == "" ? jsonObj : jsonObj.at(key);
+    WelcomeScreen *welcomeScreen = new WelcomeScreen;
+    std::vector<VoiceState *> *voiceStates = new std::vector<VoiceState *>;
+    std::vector<GuildMember *> *members = new std::vector<GuildMember *>;
+    std::vector<Channel *> *channels = new std::vector<Channel *>;
+    std::vector<Channel *> *threads = new std::vector<Channel *>;
+    std::vector<StageInstance *> *stageInstances = new std::vector<StageInstance *>;
+    std::vector<Sticker *> *stickers = new std::vector<Sticker *>;
 
-        return new WelcomeScreenChannel {
-            valueNoNull(jsonWelcomeScreenChannel, "channel_id" ),
-            valueNoNull(jsonWelcomeScreenChannel, "description"),
-            valueNoNull(jsonWelcomeScreenChannel, "emoji_id"   ),
-            valueNoNull(jsonWelcomeScreenChannel, "emoji_name" )
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    unmarshal<WelcomeScreen>(jsonObj, "welcome_screen", &welcomeScreen);
+    unmarshalMultiple<VoiceState>(jsonObj, "voice_states", &voiceStates);
+    unmarshalMultiple<GuildMember>(jsonObj, "members", &members);
+    unmarshalMultiple<Channel>(jsonObj, "channels", &channels);
+    unmarshalMultiple<Channel>(jsonObj, "threads", &threads);
+    unmarshalMultiple<StageInstance>(jsonObj, "stage_instances", &stageInstances);
+    unmarshalMultiple<Sticker>(jsonObj, "stickers", &stickers);
+
+    *object = new Guild {
+        welcomeScreen,
+        getStringsFromJson(jsonObj, "guild_features"),
+        voiceStates,
+        members,
+        channels,
+        threads,
+        nullptr,
+        stageInstances,
+        stickers,
+
+        valueNoNull(jsonObj, "id"                       ),
+        valueNoNull(jsonObj, "name"                     ),
+        valueNoNull(jsonObj, "icon"                     ),
+        valueNoNull(jsonObj, "icon_hash"                ),
+        valueNoNull(jsonObj, "splash"                   ),
+        valueNoNull(jsonObj, "discovery_splash"         ),
+        valueNoNull(jsonObj, "owner_id"                 ),
+        valueNoNull(jsonObj, "permissions"              ),
+        valueNoNull(jsonObj, "region"                   ),
+        valueNoNull(jsonObj, "afk_channel_id"           ),
+        valueNoNull(jsonObj, "widget_channel_id"        ),
+        valueNoNull(jsonObj, "application_id"           ),
+        valueNoNull(jsonObj, "system_channel_id"        ),
+        valueNoNull(jsonObj, "rules_channel_id"         ),
+        valueNoNull(jsonObj, "joined_at"                ),
+        valueNoNull(jsonObj, "vanity_url_code"          ),
+        valueNoNull(jsonObj, "description"              ),
+        valueNoNull(jsonObj, "banner"                   ),
+        valueNoNull(jsonObj, "preferred_locale"         ),
+        valueNoNull(jsonObj, "public_updates_channel_id"),
+
+        jsonObj.value("afk_timeout"                  , -1),
+        jsonObj.value("verification_level"           , -1),
+        jsonObj.value("default_message_notifications", -1),
+        jsonObj.value("explicit_content_filter"      , -1),
+        jsonObj.value("mfa_level"                    , -1),
+        jsonObj.value("system_channel_flags"         , -1),
+        jsonObj.value("member_count"                 , -1),
+        jsonObj.value("max_presences"                , -1),
+        jsonObj.value("max_members"                  , -1),
+        jsonObj.value("premium_tier"                 , -1),
+        jsonObj.value("premium_subscription_count"   , -1),
+        jsonObj.value("max_video_channel_users"      , -1),
+        jsonObj.value("approximate_member_count"     , -1),
+        jsonObj.value("approximate_presence_count"   , -1),
+        jsonObj.value("nsfw_level"                   , -1),
+
+        jsonObj.value("owner"         , false),
+        jsonObj.value("widget_enabled", false),
+        jsonObj.value("large"         , false),
+        jsonObj.value("unavailable"   , false)
+    };
 }
 
-std::vector<WelcomeScreenChannel *> *getWelcomeScreenChannelsFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<CustomStatus>(json jsonObj, CustomStatus **object)
 {
-    try {
-        json jsonWelcomeScreenChannels = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<WelcomeScreenChannel *> *welcomeScreenChannels = new std::vector<WelcomeScreenChannel *>;
-
-        for (unsigned int i = 0 ; i < jsonWelcomeScreenChannels.size() ; i++) {
-            welcomeScreenChannels->push_back(getWelcomeScreenChannelFromJson(jsonWelcomeScreenChannels[i], ""));
-        }
-
-        return welcomeScreenChannels;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new CustomStatus {
+        valueNoNull(jsonObj, "text"     ),
+        valueNoNull(jsonObj, "expiresAt"),
+        valueNoNull(jsonObj, "emojiName"),
+        valueNoNull(jsonObj, "emojiId"  )
+    };
 }
 
-WelcomeScreen *getWelcomeScreenFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<FriendSourceFlags>(json jsonObj, FriendSourceFlags **object)
 {
-    try {
-        json jsonWelcomeScreen = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new WelcomeScreen {
-            getWelcomeScreenChannelsFromJson(jsonWelcomeScreen, "welcome_channels"),
-
-            valueNoNull(jsonWelcomeScreen, "description")
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new FriendSourceFlags {
+        jsonObj.value("all"           , false),
+        jsonObj.value("mutual_friends", false),
+        jsonObj.value("mutual_guilds" , false)
+    };
 }
 
-StageInstance *getStageInstanceFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<GuildFolder>(json jsonObj, GuildFolder **object)
 {
-    try {
-        json jsonStageInstance = key == "" ? jsonObj : jsonObj.at(key);
+    *object = new GuildFolder {
+        getStringsFromJson(jsonObj, "guild_ids"),
 
-        return new StageInstance {
-            valueNoNull(jsonStageInstance, "id"        ),
-            valueNoNull(jsonStageInstance, "guild_id"  ),
-            valueNoNull(jsonStageInstance, "channel_id"),
-            valueNoNull(jsonStageInstance, "topic"     ),
+        valueNoNull(jsonObj, "name"),
 
-            jsonStageInstance.value("privacy_level" , -1),
-
-            jsonStageInstance.value("discoverable_disabled" , false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.at("id").is_null() ? -1 : jsonObj.value("id" , -1),
+        //jsonObj.value("color" , -1)
+        -1
+    };
 }
 
-std::vector<StageInstance *> *getStageInstancesFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<ClientSettings>(json jsonObj, ClientSettings **object)
 {
-    try {
-        json jsonStageInstances = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<StageInstance *> *stageInstances = new std::vector<StageInstance *>;
+    CustomStatus *customStatus = new CustomStatus;
+    FriendSourceFlags *friendSourceFlags = new FriendSourceFlags;
+    std::vector<GuildFolder *> *guildFolders = new std::vector<GuildFolder *>;
 
-        for (unsigned int i = 0 ; i < jsonStageInstances.size() ; i++) {
-            stageInstances->push_back(getStageInstanceFromJson(jsonStageInstances[i], ""));
-        }
+    unmarshal<CustomStatus>(jsonObj, "custom_status", &customStatus);
+    unmarshal<FriendSourceFlags>(jsonObj, "friend_source_flags", &friendSourceFlags);
+    unmarshalMultiple<GuildFolder>(jsonObj, "guild_folders", &guildFolders);
 
-        return stageInstances;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+    *object = new ClientSettings {
+        customStatus,
+        friendSourceFlags,
+        guildFolders,
+        getStringsFromJson(jsonObj, "guild_positions"),
+        getStringsFromJson(jsonObj, "restricted_guilds"),
+
+        valueNoNull(jsonObj, "locale"),
+        valueNoNull(jsonObj, "status"),
+        valueNoNull(jsonObj, "theme"),
+
+        jsonObj.value("afk_timeout"            , -1),
+        jsonObj.value("animate_stickers"       , -1),
+        jsonObj.value("explicit_content_filter", -1),
+        jsonObj.value("friend_discovery_flags" , -1),
+        jsonObj.value("timezone_offset"        , -1),
+
+        jsonObj.value("allow_accessibility_detection"   , false),
+        jsonObj.value("animate_emoji"                   , false),
+        jsonObj.value("contact_sync_enabled"            , false),
+        jsonObj.value("convert_emoticons"               , false),
+        jsonObj.value("default_guilds_restricted"       , false),
+        jsonObj.value("detect_platform_accounts"        , false),
+        jsonObj.value("developer_mode"                  , false),
+        jsonObj.value("disable_games_tab"               , false),
+        jsonObj.value("enable_tts_command"              , false),
+        jsonObj.value("gif_auto_play"                   , false),
+        jsonObj.value("inline_attachment_media"         , false),
+        jsonObj.value("inline_embed_media"              , false),
+        jsonObj.value("message_display_compact"         , false),
+        jsonObj.value("native_phone_integration_enabled", false),
+        jsonObj.value("render_embeds"                   , false),
+        jsonObj.value("render_reactions"                , false),
+        jsonObj.value("show_current_game"               , false),
+        jsonObj.value("stream_notifications_enabled"    , false),
+        jsonObj.value("view_nsfw_guilds"                , false)
+    };
 }
 
-Guild *getGuildFromJson(const json& jsonObj, const std::string& key)
+template <>
+void unmarshalObj<Client>(json jsonObj, Client **object)
 {
-    try {
-        json jsonGuild = key == "" ? jsonObj : jsonObj.at(key);
+    *object = new Client {
+        valueNoNull(jsonObj, "id"           ),
+        valueNoNull(jsonObj, "username"     ),
+        valueNoNull(jsonObj, "avatar"       ),
+        valueNoNull(jsonObj, "discriminator"),
+        valueNoNull(jsonObj, "banner"       ),
+        valueNoNull(jsonObj, "bio"          ),
+        valueNoNull(jsonObj, "locale"       ),
+        valueNoNull(jsonObj, "email"        ),
+        valueNoNull(jsonObj, "phone"        ),
 
-        return new Guild {
-            getWelcomeScreenFromJson(jsonGuild, "welcome_screen"),
-            getStringsFromJson(jsonGuild, "guild_features"),
-            getVoiceStatesFromJson(jsonGuild, "voice_states"),
-            getGuildMembersFromJson(jsonGuild, "members"),
-            getChannelsFromJson(jsonGuild, "channels"),
-            getChannelsFromJson(jsonGuild, "threads"),
-            nullptr,
-            getStageInstancesFromJson(jsonGuild, "stage_instances"),
-            getStickersFromJson(jsonGuild, "stickers"),
+        jsonObj.value("public_flags"   , -1),
+        jsonObj.value("flags"          , -1),
+        jsonObj.value("purchased_flags", -1),
+        //jsonObj.value("banner_color"   , -1),
+        //jsonObj.value("accent_color"   , -1),
+        -1,
+        -1,
 
-            valueNoNull(jsonGuild, "id"                       ),
-            valueNoNull(jsonGuild, "name"                     ),
-            valueNoNull(jsonGuild, "icon"                     ),
-            valueNoNull(jsonGuild, "icon_hash"                ),
-            valueNoNull(jsonGuild, "splash"                   ),
-            valueNoNull(jsonGuild, "discovery_splash"         ),
-            valueNoNull(jsonGuild, "owner_id"                 ),
-            valueNoNull(jsonGuild, "permissions"              ),
-            valueNoNull(jsonGuild, "region"                   ),
-            valueNoNull(jsonGuild, "afk_channel_id"           ),
-            valueNoNull(jsonGuild, "widget_channel_id"        ),
-            valueNoNull(jsonGuild, "application_id"           ),
-            valueNoNull(jsonGuild, "system_channel_id"        ),
-            valueNoNull(jsonGuild, "rules_channel_id"         ),
-            valueNoNull(jsonGuild, "joined_at"                ),
-            valueNoNull(jsonGuild, "vanity_url_code"          ),
-            valueNoNull(jsonGuild, "description"              ),
-            valueNoNull(jsonGuild, "banner"                   ),
-            valueNoNull(jsonGuild, "preferred_locale"         ),
-            valueNoNull(jsonGuild, "public_updates_channel_id"),
-
-            jsonGuild.value("afk_timeout"                  , -1),
-            jsonGuild.value("verification_level"           , -1),
-            jsonGuild.value("default_message_notifications", -1),
-            jsonGuild.value("explicit_content_filter"      , -1),
-            jsonGuild.value("mfa_level"                    , -1),
-            jsonGuild.value("system_channel_flags"         , -1),
-            jsonGuild.value("member_count"                 , -1),
-            jsonGuild.value("max_presences"                , -1),
-            jsonGuild.value("max_members"                  , -1),
-            jsonGuild.value("premium_tier"                 , -1),
-            jsonGuild.value("premium_subscription_count"   , -1),
-            jsonGuild.value("max_video_channel_users"      , -1),
-            jsonGuild.value("approximate_member_count"     , -1),
-            jsonGuild.value("approximate_presence_count"   , -1),
-            jsonGuild.value("nsfw_level"                   , -1),
-
-            jsonGuild.value("owner"         , false),
-            jsonGuild.value("widget_enabled", false),
-            jsonGuild.value("large"         , false),
-            jsonGuild.value("unavailable"   , false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-std::vector<Guild *> *getGuildsFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonGuilds = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<Guild *> *guilds = new std::vector<Guild *>;
-
-        for (unsigned int i = 0 ; i < jsonGuilds.size() ; i++) {
-            guilds->push_back(getGuildFromJson(jsonGuilds[i], ""));
-        }
-
-        return guilds;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-CustomStatus *getCustomStatusFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonCustomStatus = key == "" ? jsonObj : jsonObj.at(key);
-
-        if (jsonCustomStatus.is_null()) return nullptr;
-
-        return new CustomStatus {
-            valueNoNull(jsonCustomStatus, "text"     ),
-            valueNoNull(jsonCustomStatus, "expiresAt"),
-            valueNoNull(jsonCustomStatus, "emojiName"),
-            valueNoNull(jsonCustomStatus, "emojiId"  )
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-FriendSourceFlags *getFriendSourceFlagsFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonFriendSourceFlags = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new FriendSourceFlags {
-            jsonFriendSourceFlags.value("all"           , false),
-            jsonFriendSourceFlags.value("mutual_friends", false),
-            jsonFriendSourceFlags.value("mutual_guilds" , false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-GuildFolder *getGuildFolderFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonGuildFolder = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new GuildFolder {
-            getStringsFromJson(jsonGuildFolder, "guild_ids"),
-
-            valueNoNull(jsonGuildFolder, "name"),
-
-            jsonGuildFolder.at("id").is_null() ? -1 : jsonGuildFolder.value("id" , -1),
-            //jsonGuildFolder.value("color" , -1)
-            -1
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-std::vector<GuildFolder *> *getGuildFoldersFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonGuildFolders = key == "" ? jsonObj : jsonObj.at(key);
-        std::vector<GuildFolder *> *guildFolders = new std::vector<GuildFolder *>;
-
-        for (unsigned int i = 0 ; i < jsonGuildFolders.size() ; i++) {
-            guildFolders->push_back(getGuildFolderFromJson(jsonGuildFolders[i], ""));
-        }
-
-        return guildFolders;
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-ClientSettings *getClientSettingsFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonClientSettings = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new ClientSettings {
-            getCustomStatusFromJson(jsonClientSettings, "custom_status"),
-            getFriendSourceFlagsFromJson(jsonClientSettings, "friend_source_flags"),
-            getGuildFoldersFromJson(jsonClientSettings, "guild_folders"),
-            getStringsFromJson(jsonClientSettings, "guild_positions"),
-            getStringsFromJson(jsonClientSettings, "restricted_guilds"),
-
-            valueNoNull(jsonClientSettings, "locale"),
-            valueNoNull(jsonClientSettings, "status"),
-            valueNoNull(jsonClientSettings, "theme"),
-
-            jsonClientSettings.value("afk_timeout"            , -1),
-            jsonClientSettings.value("animate_stickers"       , -1),
-            jsonClientSettings.value("explicit_content_filter", -1),
-            jsonClientSettings.value("friend_discovery_flags" , -1),
-            jsonClientSettings.value("timezone_offset"        , -1),
-
-            jsonClientSettings.value("allow_accessibility_detection"   , false),
-            jsonClientSettings.value("animate_emoji"                   , false),
-            jsonClientSettings.value("contact_sync_enabled"            , false),
-            jsonClientSettings.value("convert_emoticons"               , false),
-            jsonClientSettings.value("default_guilds_restricted"       , false),
-            jsonClientSettings.value("detect_platform_accounts"        , false),
-            jsonClientSettings.value("developer_mode"                  , false),
-            jsonClientSettings.value("disable_games_tab"               , false),
-            jsonClientSettings.value("enable_tts_command"              , false),
-            jsonClientSettings.value("gif_auto_play"                   , false),
-            jsonClientSettings.value("inline_attachment_media"         , false),
-            jsonClientSettings.value("inline_embed_media"              , false),
-            jsonClientSettings.value("message_display_compact"         , false),
-            jsonClientSettings.value("native_phone_integration_enabled", false),
-            jsonClientSettings.value("render_embeds"                   , false),
-            jsonClientSettings.value("render_reactions"                , false),
-            jsonClientSettings.value("show_current_game"               , false),
-            jsonClientSettings.value("stream_notifications_enabled"    , false),
-            jsonClientSettings.value("view_nsfw_guilds"                , false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
-}
-
-Client *getClientFromJson(const json& jsonObj, const std::string& key)
-{
-    try {
-        json jsonClient = key == "" ? jsonObj : jsonObj.at(key);
-
-        return new Client {
-            valueNoNull(jsonClient, "id"           ),
-            valueNoNull(jsonClient, "username"     ),
-            valueNoNull(jsonClient, "avatar"       ),
-            valueNoNull(jsonClient, "discriminator"),
-            valueNoNull(jsonClient, "banner"       ),
-            valueNoNull(jsonClient, "bio"          ),
-            valueNoNull(jsonClient, "locale"       ),
-            valueNoNull(jsonClient, "email"        ),
-            valueNoNull(jsonClient, "phone"        ),
-
-            jsonClient.value("public_flags"   , -1),
-            jsonClient.value("flags"          , -1),
-            jsonClient.value("purchased_flags", -1),
-            //jsonClient.value("banner_color"   , -1),
-            //jsonClient.value("accent_color"   , -1),
-            -1,
-            -1,
-
-            jsonClient.value("nsfw_allowed", false),
-            jsonClient.value("mfa_enabled" , false),
-            jsonClient.value("verified"    , false)
-        };
-    } catch(json::out_of_range& e) {
-        return nullptr;
-    }
+        jsonObj.value("nsfw_allowed", false),
+        jsonObj.value("mfa_enabled" , false),
+        jsonObj.value("verified"    , false)
+    };
 }
 
 } // namespace Api

@@ -1,7 +1,7 @@
-#include "../../include/ui/messagewidget.h"
+#include "ui/messagewidget.h"
 
-#include "../../include/api/request.h"
-#include "../../include/api/jsonutils.h"
+#include "api/request.h"
+#include "api/jsonutils.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>

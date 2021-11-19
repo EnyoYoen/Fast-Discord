@@ -1,107 +1,54 @@
 #pragma once
 
-#include "message.h"
-#include "attachment.h"
-#include "user.h"
-#include "overwrite.h"
-#include "channel.h"
-#include "thread.h"
-#include "team.h"
-#include "application.h"
-#include "guildmember.h"
-#include "voice.h"
-#include "guild.h"
-#include "client.h"
+#include "nlohmann/json.hpp"
 
-#include "../../lib/nlohmann/json.hpp"
-
-#include <string>
 #include <vector>
 
 using json = nlohmann::json;
 
 namespace Api {
 
-//Get the string value of a json object but handle exception if the value is null
-std::string *valueNoNull(const json& jsonObj, const std::string& key, const std::string& defaultValue);
+// Template function that we specialize with all Discord's API JSON objects that we can recieve, to unmarshal them
+template <typename T>
+void unmarshalObj(json jsonObj, T **object);
 
+// Unmarshal a JSON object
+template <typename T>
+bool unmarshal(json jsonObj, const std::string& key, T **object)
+{
+    try {
+        // Getting the JSON object at 'key', if not empty
+        jsonObj = key == static_cast<std::string>("") ? jsonObj : jsonObj.at(key);
 
-//All the functions used to get an object from a json object
+        unmarshalObj<T>(jsonObj, object); // Unmarshal the object
+        return true; // Everything's all right, no exceptions
+    } catch(std::exception&) {
+        *object = nullptr;
+        return false; // There was an error
+    }
+}
 
-User *getUserFromJson(const json& jsonObj, const std::string& key);
-std::vector<User *> *getUsersFromJson(const json& jsonObj, const std::string& key);
+// Unmarshal arrays of JSON objects
+template <typename T>
+bool unmarshalMultiple(json jsonObjs, const std::string& key, std::vector<T *> **objects)
+{
+    try {
+        // Getting the JSON object at 'key', if not empty
+        jsonObjs = key == static_cast<std::string>("") ? jsonObjs : jsonObjs.at(key);
+        *objects = new std::vector<T *>;
 
-Overwrite *getOverwriteFromJson(const json& jsonObj, const std::string& key);
-std::vector<Overwrite *> *getOverwritesFromJson(const json& jsonObj, const std::string& key);
+        for (unsigned int i = 0 ; i < jsonObjs.size() ; i++) {
+            T *object;
+            if (unmarshal<T>(jsonObjs[i], "", &object) == false) return false;
+                // There was an exception
+            (*objects)->push_back(object);
+        }
 
-ThreadMember *getThreadMemberFromJson(const json& jsonObj, const std::string& key);
-
-ThreadMetadata *getThreadMetadataFromJson(const json& jsonObj, const std::string& key);
-
-Channel *getChannelFromJson(const json& jsonObj, const std::string& key);
-std::vector<Channel *> *getChannelsFromJson(const json& jsonObj, const std::string& key);
-
-TeamMember *getTeamMemberFromJson(const json& jsonObj, const std::string& key);
-std::vector<TeamMember *> *getTeamMembersFromJson(const json& jsonObj, const std::string& key);
-
-Team *getTeamFromJson(const json& jsonObj, const std::string& key);
-
-GuildMessageMember *getGuildMessageMemberFromJson(const json& jsonObj, const std::string& key);
-
-MessageInteraction *getMessageInteractionFromJson(const json& jsonObj, const std::string& key);
-
-Emoji *getEmojiFromJson(const json& jsonObj, const std::string& key);
-
-Reaction *getReactionFromJson(const json& jsonObj, const std::string& key);
-std::vector<Reaction *> *getReactionsFromJson(const json& jsonObj, const std::string& key);
-
-Attachment *getAttachmentFromJson(const json& jsonObj, const std::string& key);
-std::vector<Attachment *> *getAttachmentsFromJson(const json& jsonObj, const std::string& key);
-
-ChannelMention *getChannelMentionFromJson(const json& jsonObj, const std::string& key);
-std::vector<ChannelMention *> *getChannelMentionsFromJson(const json& jsonObj, const std::string& key);
-
-SelectOption *getSelectOptionFromJson(const json& jsonObj, const std::string& key);
-std::vector<SelectOption *> *getSelectOptionsFromJson(const json& jsonObj, const std::string& key);
-
-MessageComponent *getPartialMessageComponentFromJson(const json& jsonObj, const std::string& key);
-std::vector<MessageComponent *> *getMessageComponentsFromJson(const json& jsonObj, const std::string& key);
-
-std::vector<StickerItem *> *getStickerItemsFromJson(const json& jsonObj, const std::string& key);
-std::vector<Sticker *> *getStickersFromJson(const json& jsonObj, const std::string& key);
-
-MessageActivity *getMessageActivityFromJson(const json& jsonObj, const std::string& key);
-
-Message *getMessageFromJson(const json& jsonObj, const std::string& key);
-Message *getPartialMessageFromJson(const json& jsonObj, const std::string& key);
-std::vector<Message *> *getMessagesFromJson(const json& jsonObj, const std::string& key);
-
-GuildMember *getGuildMemberFromJson(const json& jsonObj, const std::string& key);
-std::vector<GuildMember *> *getGuildMembersFromJson(const json& jsonObj, const std::string& key);
-
-VoiceState *getVoiceStateFromJson(const json& jsonObj, const std::string& key);
-std::vector<VoiceState *> *getVoiceStatesFromJson(const json& jsonObj, const std::string& key);
-
-WelcomeScreenChannel *getWelcomeScreenChannelFromJson(const json& jsonObj, const std::string& key);
-std::vector<WelcomeScreenChannel *> *getWelcomeScreenChannelsFromJson(const json& jsonObj, const std::string& key);
-
-WelcomeScreen *getWelcomeScreenFromJson(const json& jsonObj, const std::string& key);
-
-StageInstance *getStageInstanceFromJson(const json& jsonObj, const std::string& key);
-std::vector<StageInstance *> *getStageInstancesFromJson(const json& jsonObj, const std::string& key);
-
-Guild *getGuildFromJson(const json& jsonObj, const std::string& key);
-std::vector<Guild *> *getGuildsFromJson(const json& jsonObj, const std::string& key);
-
-CustomStatus *getCustomStatusFromJson(const json& jsonObj, const std::string& key);
-
-FriendSourceFlags *getFriendSourceFlagsFromJson(const json& jsonObj, const std::string& key);
-
-GuildFolder *getGuildFolderFromJson(const json& jsonObj, const std::string& key);
-std::vector<GuildFolder *> *getGuildFoldersFromJson(const json& jsonObj, const std::string& key);
-
-ClientSettings *getClientSettingsFromJson(const json& jsonObj, const std::string& key);
-
-Client *getClientFromJson(const json& jsonObj, const std::string& key);
+        return true;
+    } catch(std::exception&) {
+        *objects = nullptr;
+        return false; // There is nothing at the key specified
+    }
+}
 
 } // namespace Api

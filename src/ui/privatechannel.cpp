@@ -1,6 +1,6 @@
-#include "../../include/ui/privatechannel.h"
+#include "ui/privatechannel.h"
 
-#include "../../include/api/request.h"
+#include "api/request.h"
 
 #include <QPixmap>
 #include <QBitmap>

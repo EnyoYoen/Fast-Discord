@@ -1,4 +1,4 @@
-#include "../../include/api/sticker.h"
+#include "api/sticker.h"
 
 namespace Api {
 

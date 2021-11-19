@@ -1,4 +1,4 @@
-#include "../../include/api/emoji.h"
+#include "api/emoji.h"
 
 namespace Api {
 

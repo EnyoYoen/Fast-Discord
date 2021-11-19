@@ -12,6 +12,8 @@
 
 namespace Api {
 
+//https://discord.com/developers/docs/resources/guild
+
 struct WelcomeScreenChannel
 {
     ~WelcomeScreenChannel();

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "roundedimage.h"
-#include "../api/message.h"
+#include "api/message.h"
 
 #include <QWidget>
 #include <QLabel>

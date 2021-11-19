@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../api/channel.h"
+#include "api/channel.h"
 
 #include <QWidget>
 #include <QPixmap>

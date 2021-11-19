@@ -23,13 +23,17 @@ typedef struct
 class Request
 {
 public:
-    static std::string token;
+    static std::string token; // Authorization token
 
+    // Function that request the API
     static void requestApi(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName, const std::string& outputFile, bool json);
+
+    // Functions that use requestApi withh less parameters
     static void requestJson(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName);
     static void requestFile(const std::string& url, const std::string& fileName);
     static void requestImage(const std::string& url, const std::string& fileName, QBoxLayout *layout);
 
+    // Functions that request the API to retrieve data
     static std::vector<Guild *>   *getGuilds();
     static std::vector<Channel *> *getGuildChannels(const std::string& id);
     static std::vector<Channel *> *getPrivateChannels();
@@ -37,6 +41,7 @@ public:
     static Client                 *getClient();
     static ClientSettings         *getClientSettings();
 
+    // Functions that request the API to send data
     static void setStatus(const std::string& status);
     static void sendTyping(const std::string& channelId);
     static void sendMessage(const std::string& content, const std::string& channelId);
@@ -46,10 +51,11 @@ public:
     static void unpinMessage(const std::string& channelId, const std::string& messageId);
 
 private:
-    static double rateLimitEnd;
+    static double rateLimitEnd; // Unix time that represents the moment of the end of the rate limit
 
-    Request();
+    Request(); // You can't create objects of this class
 
+    // Functions used by libcurl to process recieved data
     static size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
     static size_t writeFileCallback(void *contents, size_t size, size_t nmemb, FILE *stream);
     static size_t noOutputCallback(void *, size_t size, size_t nmemb, void *);

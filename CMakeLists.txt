@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(lib/)
+include_directories(include/)
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Boost COMPONENTS filesystem REQUIRED)

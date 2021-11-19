@@ -7,6 +7,7 @@
 
 namespace Api {
 
+//https://discord.com/developers/docs/resources/guild#guild-member-object
 struct GuildMember
 {
     ~GuildMember();

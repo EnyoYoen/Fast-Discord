@@ -1,7 +1,7 @@
-#include "../../include/ui/messagearea.h"
+#include "ui/messagearea.h"
 
-#include "../../include/ui/messagewidget.h"
-#include "../../include/ui/messageseparator.h"
+#include "ui/messagewidget.h"
+#include "ui/messageseparator.h"
 
 #include <QScrollBar>
 #include <QGroupBox>

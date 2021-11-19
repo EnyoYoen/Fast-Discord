@@ -1,4 +1,4 @@
-#include "../../include/ui/messageseparator.h"
+#include "ui/messageseparator.h"
 
 #include <QHBoxLayout>
 #include <QLabel>

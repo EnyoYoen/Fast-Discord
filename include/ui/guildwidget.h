@@ -1,7 +1,7 @@
 #pragma once
 
 #include "roundedimage.h"
-#include "../api/guild.h"
+#include "api/guild.h"
 
 #include <QFrame>
 #include <QLabel>

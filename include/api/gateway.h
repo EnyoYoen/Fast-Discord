@@ -10,13 +10,29 @@ using json = nlohmann::json;
 
 namespace Api {
 
+//https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-opcodes
+enum Opcodes {
+    Dispatch,
+    Heartbeat,
+    Identify,
+    PresenceUpdate,
+    VoiceStateUpdate,
+    Resume,
+    Reconnect,
+    RequestGuildMembers,
+    InvalidSession,
+    Hello,
+    HeartbeatACK
+};
+
 //https://discord.com/developers/docs/topics/gateway
 class Gateway
 {
 public:
     Gateway();
     void start();
-    void onDispatch(std::function<void(std::string&, json&)> callback); //Set the callback function called when the gateway recieve events
+    void onDispatch(std::function<void(std::string&, json&)> callback);
+        //Sets the callback function called when the gateway recieve events
 
 private:
     void send(int op, const std::string& data);
@@ -31,8 +47,9 @@ private:
                           //Internal function used to process some messages
     void connect();       //Connect to the gateway
 
-    web::websockets::client::websocket_callback_client client;  //websocket client
-    std::function<void(std::string&, json&)> onDispatchHandler; //Function called when when the gateway recieve events
+    web::websockets::client::websocket_callback_client client; //websocket client
+    std::function<void(std::string&, json&)> onDispatchHandler;
+         //Function called when when the gateway recieve events
     std::string url; //websocket URL
     std::string sessionId;
     std::string token;
