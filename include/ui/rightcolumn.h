@@ -1,0 +1,4 @@
+#ifndef RIGHTCOLUMN_H
+#define RIGHTCOLUMN_H
+
+#endif // RIGHTCOLUMN_H

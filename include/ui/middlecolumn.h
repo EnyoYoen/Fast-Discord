@@ -1,0 +1,4 @@
+#ifndef MIDDLECOLUMN_H
+#define MIDDLECOLUMN_H
+
+#endif // MIDDLECOLUMN_H
