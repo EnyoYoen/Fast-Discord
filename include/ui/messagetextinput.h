@@ -5,6 +5,7 @@
 
 namespace Ui {
 
+// The input to send messages
 class MessageTextInput : public QPlainTextEdit
 {
     Q_OBJECT
@@ -18,7 +19,7 @@ signals:
 private:
     void keyPressEvent(QKeyEvent *event) override;
 
-    time_t lastTypingTimestamp;
+    time_t lastTypingTimestamp; // The timestamp of the last typing
 };
 
 } // namespace Ui

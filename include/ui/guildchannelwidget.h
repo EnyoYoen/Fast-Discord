@@ -12,12 +12,13 @@
 
 namespace Ui {
 
+// A widget to show guild channels (in the middle column)
 class GuildChannelWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit GuildChannelWidget(const Api::Channel& guildChannel, unsigned int idp, QWidget *parent = nullptr);
-    void unclicked();
+    explicit GuildChannelWidget(const Api::Channel& guildChannel, unsigned int idp, QWidget *parent);
+    void unclicked(); // Reset the stylesheet of the widget
 
 signals:
     void leftClicked(Api::Channel&, unsigned int);
@@ -29,14 +30,18 @@ private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
 
+    // All the main widgets
     Api::Channel channel;
     QHBoxLayout  *layout;
     QLabel       *icon;
     QLabel       *name;
+
+    // Different stylesheets when the widget is clicked or the mouse is hover
     char         *hoverStyleSheet;
     char         *clickedStyleSheet;
-    unsigned int id;
-    bool         clicked;
+
+    unsigned int id;      // The id that we assign to the widget
+    bool         clicked; // If the widget is clicked
 };
 
 } // namespace Ui

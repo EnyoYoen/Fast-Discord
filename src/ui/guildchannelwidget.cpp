@@ -2,36 +2,40 @@
 
 namespace Ui {
 
-GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, unsigned int idp, QWidget *parent) : QWidget(parent)
+GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, unsigned int idp, QWidget *parent)
+    : QWidget(parent)
 {
-    clicked = false;
+    // Attributes initialization
     id = idp;
     channel = guildChannel;
-    setFixedSize(232, 34);
+    clicked = false;
 
+    //  Determine the icon of this channel with its type
     std::string iconName;
     switch (channel.type) {
-    case 0:
-        iconName = "1";
+    case Api::GuildText:
+        iconName = "0";
         break;
-    case 2:
+    case Api::GuildVoice:
         iconName = "2";
         break;
-    case 4:
-        iconName = "7";
-        break;
-    case 5:
+    case Api::GuildCategory:
         iconName = "4";
         break;
-    case 6:
+    case Api::GuildNews:
+        iconName = "5";
+        break;
+    case Api::GuildStore:
         iconName = "5";
         break;
     default:
-        iconName = "1";
+        iconName = "0";
         break;
     }
 
-    if (channel.type == 4) {
+    // Set the different stylesheets
+    if (channel.type == Api::GuildCategory) {
+        // It is a category, there is no stylesheet
         hoverStyleSheet = clickedStyleSheet = (char *)"color: #FFF;";
     } else {
         hoverStyleSheet = (char *)"color: #DCDDDE;"
@@ -42,61 +46,70 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, unsigne
                             "background-color: #393D43;";
     }
 
+    // Create the icon
     icon = new QLabel(this);
     icon->setPixmap(QPixmap(std::string("res/images/svg/guild-channel-icon" + iconName + ".svg").c_str()));
     icon->setFixedSize(32, 32);
     icon->setStyleSheet("color: #8E9297");
 
+    // Create the name label
     name = new QLabel((*channel.name).c_str(), this);
     name->setStyleSheet("color: #8E9297");
 
+    // Add widgets to layout and style it
     layout = new QHBoxLayout(this);
     layout->addWidget(icon, Qt::AlignLeft);
     layout->addWidget(name, Qt::AlignLeft);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    setLayout(layout);
+    // Set the size of this widget
+    this->setFixedSize(232, 34);
 }
 
 void GuildChannelWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+    // Emit signals when clicked to open the channel or to show infos
     if (event->button() == Qt::LeftButton) {
         emit leftClicked(channel, id);
     } else if (event->button() == Qt::RightButton) {
-        emit rightClicked(channel);
+        emit rightClicked(channel); // Does nothing for now
     }
 }
 
 void GuildChannelWidget::unclicked()
 {
+    // Reset the stylesheet of this widget if currently clicked
     if (clicked) {
         clicked = false;
-        setStyleSheet("color: #8E9297;"
+        this->setStyleSheet("color: #8E9297;"
                       "background-color: none;");
     }
 }
 
 void GuildChannelWidget::mousePressEvent(QMouseEvent *)
 {
+    // Widget clicked : change the stylesheet
     if (!clicked && channel.type != 2) {
-        setStyleSheet(clickedStyleSheet);
+        this->setStyleSheet(clickedStyleSheet);
         clicked = true;
     }
 }
 
 void GuildChannelWidget::enterEvent(QEvent *)
 {
+    // Mouse hover : change the stylesheet
     if (!clicked) {
-        setStyleSheet(hoverStyleSheet);
+        this->setStyleSheet(hoverStyleSheet);
     }
 }
 
 void GuildChannelWidget::leaveEvent(QEvent *)
 {
+    // Reset the stylesheet if not clicked
     if (!clicked) {
-        setStyleSheet("color: #8E9297;"
-                      "background-color: none;");
+        this->setStyleSheet("color: #8E9297;"
+                            "background-color: none;");
     }
 }
 

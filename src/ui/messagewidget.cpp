@@ -14,117 +14,147 @@
 
 namespace Ui {
 
-MessageWidget::MessageWidget(const Api::Message& message, bool isFirstp, bool separatorBefore, QWidget *parent) : QWidget(parent)
+MessageWidget::MessageWidget(const Api::Message& message, bool isFirstp, bool separatorBefore, QWidget *parent)
+    : QWidget(parent)
 {
+    // Attribute initialization
     isFirst = isFirstp;
-    setMinimumHeight(26);
 
-    QHBoxLayout *mainLayout = new QHBoxLayout();
-    QVBoxLayout *dataLayout = new QVBoxLayout();
-    QHBoxLayout *iconLayout = new QHBoxLayout();
-    QWidget *data = new QWidget();
-    QWidget *iconContainer = new QWidget();
+    // Create the main widgets
+    QHBoxLayout *mainLayout = new QHBoxLayout(this);
+    QWidget *data = new QWidget(this);
+    QVBoxLayout *dataLayout = new QVBoxLayout(data);
+    QWidget *iconContainer = new QWidget(this);
+    QHBoxLayout *iconLayout = new QHBoxLayout(iconContainer);
 
+    // Process the timestamp to a nicer format
+
+    // Get the date and time of the message
     QDateTime dateTime = QDateTime::fromString(QString((*message.timestamp).c_str()), Qt::ISODate).toLocalTime();
+    // Get the hours and minutes
     int hour = dateTime.time().hour();
     int minute = dateTime.time().minute();
+    // Process the hours and minutes
     std::string hourString = hour > 12 ? std::to_string(hour - 12) : std::to_string(hour);
     std::string minuteString = minute < 10 ? "0" + std::to_string(minute) : std::to_string(minute);
+    // Create the final timestamp format
     QString messageTime = QString((hourString + ":" + minuteString + " ").c_str());
     hour / 12 == 1 ? messageTime += "PM" : messageTime += "AM";
 
     if (isFirst) {
+        // The message is not grouped to another message
+
+        // Variable creation
         std::string avatarFileName;
         Api::User& author = *message.author;
         std::string *avatarId = author.avatar;
+
+        // Get the icon of the message
         if (avatarId == nullptr) {
+            // Use an asset if the user doesn't have an icon
             avatarFileName = "res/images/png/user-icon-asset.png";
         } else {
+            // Request the icon
             avatarFileName = *author.id + (author.avatar->rfind("a_") == 0 ? ".gif" : ".webp");
             if (!std::ifstream(("cache/" + avatarFileName).c_str()).good()) {
                 Api::Request::requestFile("https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, "cache/" + avatarFileName);
             }
             avatarFileName = "cache/" + avatarFileName;
         }
-        iconLayout->addWidget(new RoundedImage(avatarFileName, 40, 40, 20));
+        iconLayout->addWidget(new RoundedImage(avatarFileName, 40, 40, 20, iconContainer));
 
-        QWidget *messageInfos = new QWidget();
-        QHBoxLayout *infosLayout = new QHBoxLayout();
-        QLabel *name = new QLabel((*author.username).c_str());
-
+        // Widget to show some infos of the message
+        QWidget *messageInfos = new QWidget(data);
+        QHBoxLayout *infosLayout = new QHBoxLayout(messageInfos);
+        QLabel *name = new QLabel((*author.username).c_str(), messageInfos);
         QLabel *date;
+
+        // Get the date of the message and the current date to compare them
         QDate messageDate = dateTime.date();
         QDate currentDate = QDate::currentDate();
         if (messageDate != currentDate) {
+            // The message was not send today
             if (messageDate.year() == currentDate.year() && messageDate.month() == currentDate.month() && messageDate.day() == currentDate.day() - 1) {
-                date = new QLabel("Yesterday at " + messageTime);
+                // The message was send yesterday
+                date = new QLabel("Yesterday at " + messageTime, messageInfos);
             } else {
-                date = new QLabel(((messageDate.day() < 10 ? "0" + std::to_string(messageDate.day()) : std::to_string(messageDate.day())) + "/" + (messageDate.month() < 10 ? "0" + std::to_string(messageDate.month()) : std::to_string(messageDate.month())) + "/" + std::to_string(messageDate.year())).c_str());
+                // The message is older
+                date = new QLabel(((messageDate.day() < 10 ? "0" + std::to_string(messageDate.day()) : std::to_string(messageDate.day())) + "/" + (messageDate.month() < 10 ? "0" + std::to_string(messageDate.month()) : std::to_string(messageDate.month())) + "/" + std::to_string(messageDate.year())).c_str(), messageInfos);
             }
         } else {
             date = new QLabel("Today at " + messageTime);
         }
 
+        // Style the name label
         name->setTextInteractionFlags(Qt::TextSelectableByMouse);
         name->setCursor(QCursor(Qt::IBeamCursor));
         name->setStyleSheet("color: #FFF");
 
+        // Style the date
         date->setTextInteractionFlags(Qt::TextSelectableByMouse);
         date->setStyleSheet("color: #72767D;");
 
+        // Add widgets and style the infos layout
         infosLayout->addWidget(name);
         infosLayout->addWidget(date);
         infosLayout->insertStretch(-1);
         infosLayout->setContentsMargins(0, 0, 0, 0);
 
-        messageInfos->setLayout(infosLayout);
+        // Add the message infos and style the data layout
         dataLayout->addWidget(messageInfos);
         dataLayout->setSpacing(0);
-        setContentsMargins(0, separatorBefore ? 0 : 20, 0, 0);
+
+        // Style the message widget
+        this->setContentsMargins(0, separatorBefore ? 0 : 20, 0, 0);
     } else {
+        // Add the label that shows the timestamp when the message is hovered
         hoveredTimestamp = messageTime;
-        timestampLabel = new QLabel();
+        timestampLabel = new QLabel(this);
         timestampLabel->setFixedHeight(22);
         iconLayout->addWidget(timestampLabel);
         iconLayout->setContentsMargins(0, 0, 0, 0);
         mainLayout->setContentsMargins(0, 0, 0, 0);
     }
 
+    // Style the icon container
     iconContainer->setFixedWidth(72);
     iconContainer->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
     iconContainer->setStyleSheet("color: #72767D;");
     iconContainer->setLayout(iconLayout);
 
-    QLabel *content = new QLabel((*message.content).c_str());
+    // Create and style the content label
+    QLabel *content = new QLabel((*message.content).c_str(), this);
     content->setTextInteractionFlags(Qt::TextSelectableByMouse);
     content->setCursor(QCursor(Qt::IBeamCursor));
     content->setWordWrap(true);
     content->setStyleSheet("color: #DCDDDE");
 
+    // Style the data layout
     dataLayout->setContentsMargins(0, 0, 0, 0);
     dataLayout->addWidget(content);
 
-    data->setLayout(dataLayout);
-
+    // Add widgets to the main layout and style it
     mainLayout->addWidget(iconContainer);
     mainLayout->addWidget(data);
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-
-    setStyleSheet("padding: 0px;"
-                  "margin: 0px;");
-    setLayout(mainLayout);
+    // Style
+    this->setMinimumHeight(26);
+    this->setStyleSheet("padding: 0px;"
+                        "margin: 0px;");
 }
 
 void MessageWidget::enterEvent(QEvent *)
 {
+    // Mouse hover : change the stylesheet and show the timestamp label
     setStyleSheet("background-color: #32353B;");
     if (!isFirst) timestampLabel->setText(" " + hoveredTimestamp);
 }
 
 void MessageWidget::leaveEvent(QEvent *)
 {
+    // Reset the stylesheet and hide the timestamp label
     setStyleSheet("background-color: none;");
     if (!isFirst) timestampLabel->setText("");
 }

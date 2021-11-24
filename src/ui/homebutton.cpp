@@ -7,9 +7,13 @@ namespace Ui {
 
 HomeButton::HomeButton(QWidget *parent) : QLabel(parent)
 {
-    setContentsMargins(0, 12, 0, 0);
+    // Attribute initialization (the home page is shown at the start)
     clic = true;
-    setStyleSheet("background-color: #5865F2;"
+
+    // Style
+    this->setFixedSize(48, 48);
+    this->setContentsMargins(0, 12, 0, 0);
+    this->setStyleSheet("background-color: #5865F2;"
                   "border: none;"
                   "border-radius: 16px;"
                   "background-image: url(res/images/svg/home-icon.svg);"
@@ -19,6 +23,7 @@ HomeButton::HomeButton(QWidget *parent) : QLabel(parent)
 
 void HomeButton::mouseReleaseEvent(QMouseEvent *event)
 {
+    // Emit signals when clicked to open the home page
     if (event->button() == Qt::LeftButton) {
         emit clicked();
     }
@@ -26,6 +31,7 @@ void HomeButton::mouseReleaseEvent(QMouseEvent *event)
 
 void HomeButton::unclicked()
 {
+    // Reset the stylesheet of this widget if currently clicked
     if (clic) {
         clic = false;
         setStyleSheet("background-color: #36393f;"
@@ -39,6 +45,7 @@ void HomeButton::unclicked()
 
 void HomeButton::mousePressEvent(QMouseEvent *)
 {
+    // Widget clicked : change the stylesheet
     if (!clic) {
         setStyleSheet("background-color: #5865F2;"
                       "border: none;"
@@ -52,6 +59,7 @@ void HomeButton::mousePressEvent(QMouseEvent *)
 
 void HomeButton::enterEvent(QEvent *)
 {
+    // Mouse hover : change the stylesheet
     if (!clic) {
         setStyleSheet("background-color: #5865F2;"
                       "border: none;"
@@ -64,6 +72,7 @@ void HomeButton::enterEvent(QEvent *)
 
 void HomeButton::leaveEvent(QEvent *)
 {
+    // Reset the stylesheet if not clicked
     if (!clic) {
         setStyleSheet("background-color: #36393f;"
                       "border: none;"

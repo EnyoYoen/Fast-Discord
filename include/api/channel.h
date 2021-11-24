@@ -9,6 +9,20 @@
 
 namespace Api {
 
+enum ChannelTypes {
+    GuildText,
+    DM,
+    GuildVoice,
+    GroupDM,
+    GuildCategory,
+    GuildNews,
+    GuildStore,
+    GuildNewsThread,
+    GuildPublicThread,
+    GuildPrivateThread,
+    GuildStageVoice
+};
+
 //https://discord.com/developers/docs/resources/channel
 struct Channel
 {

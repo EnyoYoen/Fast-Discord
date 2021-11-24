@@ -44,12 +44,15 @@ SOURCES += \
     ../src/ui/guildchannelwidget.cpp \
     ../src/ui/guildwidget.cpp \
     ../src/ui/homebutton.cpp \
+    ../src/ui/leftcolumn.cpp \
     ../src/ui/mainwindow.cpp \
     ../src/ui/messagearea.cpp \
     ../src/ui/messageseparator.cpp \
     ../src/ui/messagetextinput.cpp \
     ../src/ui/messagewidget.cpp \
+    ../src/ui/middlecolumn.cpp \
     ../src/ui/privatechannel.cpp \
+    ../src/ui/rightcolumn.cpp \
     ../src/ui/roundedimage.cpp
 
 HEADERS += \
@@ -75,12 +78,15 @@ HEADERS += \
     ../include/ui/guildchannelwidget.h \
     ../include/ui/guildwidget.h \
     ../include/ui/homebutton.h \
+    ../include/ui/leftcolumn.h \
     ../include/ui/mainwindow.h \
     ../include/ui/messagearea.h \
     ../include/ui/messageseparator.h \
     ../include/ui/messagetextinput.h \
     ../include/ui/messagewidget.h \
+    ../include/ui/middlecolumn.h \
     ../include/ui/privatechannel.h \
+    ../include/ui/rightcolumn.h \
     ../include/ui/roundedimage.h \
     ../lib/nlohmann/adl_serializer.hpp \
     ../lib/nlohmann/byte_container_with_subtype.hpp \

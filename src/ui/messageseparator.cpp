@@ -7,12 +7,15 @@
 
 namespace Ui {
 
-MessageSeparator::MessageSeparator(QDate date, QWidget *parent) : QWidget(parent)
+MessageSeparator::MessageSeparator(QDate date, QWidget *parent)
+    : QWidget(parent)
 {
-    QHBoxLayout *layout = new QHBoxLayout();
-    QWidget *line1 = new QWidget();
-    QWidget *line2 = new QWidget();
+    // Create the widgets
+    QHBoxLayout *layout = new QHBoxLayout(this);
+    QWidget *line1 = new QWidget(this);
+    QWidget *line2 = new QWidget(this);
 
+    // Determine the month of the separator timestamp
     std::string month("");
     switch(date.month()) {
         case 1:
@@ -52,24 +55,27 @@ MessageSeparator::MessageSeparator(QDate date, QWidget *parent) : QWidget(parent
             month = "December";
             break;
     }
-    QLabel *dateLabel = new QLabel((month + " " + std::to_string(date.day()) + ", " + std::to_string(date.year())).c_str());
+    // Create the label with the timestamp
+    QLabel *dateLabel = new QLabel((month + " " + std::to_string(date.day()) + ", " + std::to_string(date.year())).c_str(), this);
 
+    // Add the widgets to the layout
     layout->addWidget(line1);
     layout->addWidget(dateLabel);
     layout->addWidget(line2);
 
+    // Style the lines
     line1->setStyleSheet("background-color: #42454B;");
     line2->setStyleSheet("background-color: #42454B;");
-    dateLabel->setStyleSheet("color: #72767D;");
-
     line1->setFixedHeight(1);
     line2->setFixedHeight(1);
+
+    // Style the date label
+    dateLabel->setStyleSheet("color: #72767D;");
     dateLabel->setFixedHeight(21);
     dateLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
+    // Style the layout
     layout->setContentsMargins(16, 24, 14, 8);
-
-    setLayout(layout);
 }
 
 } // namespace Ui
