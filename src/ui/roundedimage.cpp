@@ -1,6 +1,7 @@
 #include "ui/roundedimage.h"
 
 #include <QPainter>
+#include <QPainterPath>
 
 #include <string>
 
