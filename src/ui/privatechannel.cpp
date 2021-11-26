@@ -14,25 +14,30 @@
 
 namespace Ui {
 
-PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int idp, QWidget *parent) : QWidget(parent)
+PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int idp, QWidget *parent)
+    : QWidget(parent)
 {
     // Attributes initialization
     id = idp;
     channel = const_cast<Api::Channel *>(&privateChannel);
+
+    // I have to create an other widget otherwise
+    // the background color is not applied everywhere, I don't know why
+    QWidget *container = new QWidget(this);
 
     // Variables initialization
     std::string channelIconFileName;
     int channelType = privateChannel.type;
 
     if (channelType == Api::DM) {
-        subtext = new QLabel("", this);
+        subtext = new QLabel("", container);
 
         // Get the icon of the channel
         Api::User dmUser = *(*privateChannel.recipients)[0];
         std::string *avatar = dmUser.avatar;
         if (avatar == nullptr) {
             // Use an asset if the other user doesn't have an icon
-            channelIconFileName = "res/images/png/user-icon-asset.png";
+            channelIconFileName = "res/images/png/user-icon-asset0.png";
         } else {
             // Request the icon
             channelIconFileName = *dmUser.id + (avatar->rfind("a_") == 0 ? ".gif" : ".webp");
@@ -43,7 +48,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int 
         }
 
         // Set the DM name to the other user name
-        name = new QLabel((*dmUser.username).c_str(), this);
+        name = new QLabel((*dmUser.username).c_str(), container);
     } else if (channelType == Api::GroupDM) {
         // Get the subtext of the group DM with the number of people in it
         std::vector<Api::User *> recipients = *privateChannel.recipients;
@@ -53,7 +58,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int 
         if (n_member+1 > 1) {
             str_member += "s";
         }
-        subtext = new QLabel((std::to_string(n_member+1) + str_member).c_str(), this);
+        subtext = new QLabel((std::to_string(n_member+1) + str_member).c_str(), container);
 
         // Get the name of the group
         std::string *channelName = privateChannel.name;
@@ -90,14 +95,20 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int 
     subtext->setFixedSize(156, 14);
 
     // Create the icon
-    icon = new RoundedImage(channelIconFileName, 32, 32, 16, this);
+    icon = new RoundedImage(channelIconFileName, 32, 32, 16, container);
 
     // Create and style the layout, and add widgets to it
-    QGridLayout *layout = new QGridLayout(this);
+    QGridLayout *layout = new QGridLayout(container);
     layout->addWidget(icon, 0, 0, 2, 2);
     layout->addWidget(name, 0, 1);
     layout->addWidget(subtext, 1, 1);
+    layout->setContentsMargins(8, 0, 8, 0);
     layout->setSpacing(0);
+
+    // Create the main layout and add the container
+    QHBoxLayout *mainLayout = new QHBoxLayout(this);
+    mainLayout->addWidget(container);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // Style this widget
     this->setFixedSize(224, 44);
@@ -111,8 +122,8 @@ void PrivateChannel::unclicked()
     if (clicked) {
         clicked = false;
         this->setStyleSheet("background-color: none;"
-                      "border-radius: 4px;"
-                      "color: #8E9297;");
+                            "border-radius: 4px;"
+                            "color: #8E9297;");
     }
 }
 
@@ -131,8 +142,8 @@ void PrivateChannel::mousePressEvent(QMouseEvent *)
     // Widget clicked : change the stylesheet
     if (!clicked) {
         this->setStyleSheet("color: #FFF;"
-                      "border-radius: 4px;"
-                      "background-color: #393D43");
+                            "border-radius: 4px;"
+                            "background-color: #393D43");
         clicked = true;
     }
 }
@@ -142,8 +153,8 @@ void PrivateChannel::enterEvent(QEvent *)
     // Mouse hover : change the stylesheet
     if (!clicked) {
         this->setStyleSheet("color: #DCDDDE;"
-                      "border-radius: 4px;"
-                      "background-color: #35373D");
+                            "border-radius: 4px;"
+                            "background-color: #35373D");
     }
 }
 
@@ -152,8 +163,8 @@ void PrivateChannel::leaveEvent(QEvent *)
     // Reset the stylesheet if not clicked
     if (!clicked) {
         this->setStyleSheet("background-color: none;"
-                      "border-radius: 4px;"
-                      "color: #8E9297;");
+                            "border-radius: 4px;"
+                            "color: #8E9297;");
     }
 }
 

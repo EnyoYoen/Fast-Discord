@@ -1,5 +1,6 @@
 #include "ui/middlecolumn.h"
 
+#include "ui/usermenu.h"
 #include "api/request.h"
 
 #include <fstream>
@@ -17,55 +18,9 @@ MiddleColumn::MiddleColumn(const Api::Client *client, QWidget *parent)
     channelList = new QScrollArea(this);
     channelList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    // Create the user menu at the bottom of the column
-    QWidget *userMenu = new QWidget(this);
-    QHBoxLayout *userMenuLayout = new QHBoxLayout(userMenu);
-
-    // Get the icon of the actual user
-    std::string channelIconFileName;
-    if (client->avatar == nullptr) {
-        // Use an asset if the user doesn't have an icon
-        channelIconFileName = "res/images/png/user-icon-asset.png";
-    } else {
-        // Request the icon
-        channelIconFileName = *client->id + (client->avatar->rfind("a_") == 0 ? ".gif" : ".webp");
-        if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-            Api::Request::requestFile("https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, "cache/" + channelIconFileName);
-        }
-        channelIconFileName = "cache/" + channelIconFileName;
-    }
-
-    // Create the widgets of the user menu
-    QWidget *userInfos = new QWidget(userMenu);
-    QVBoxLayout *userInfosLayout = new QVBoxLayout(userInfos);
-    QLabel *name = new QLabel((*client->username).c_str(), userInfos);
-
-    // Style the name label
-    name->setFixedSize(84, 18);
-    name->setStyleSheet("color: #DCDDDE;");
-
-    // Create and style the discriminator label
-    QLabel *discriminator = new QLabel(("#" + *client->discriminator).c_str(), userInfos);
-    discriminator->setFixedSize(84, 13);
-    discriminator->setStyleSheet("color: #B9BBBE;");
-
-    // Add the widgets and style the user infos layout
-    userInfosLayout->addWidget(name);
-    userInfosLayout->addWidget(discriminator);
-    userInfosLayout->setContentsMargins(0, 10, 0, 10);
-
-    // Add the icon and the infos of the user to the layout and style it
-    userMenuLayout->addWidget(new RoundedImage(channelIconFileName, 32, 32, 16, userMenu));
-    userMenuLayout->addWidget(userInfos);
-    userMenuLayout->setContentsMargins(8, 0, 8, 0);
-
-    // Style the user menu
-    userMenu->setFixedHeight(53);
-    userMenu->setStyleSheet("background-color: #292B2F");
-
     // Add the widget and style the main layout
     layout->addWidget(channelList);
-    layout->addWidget(userMenu);
+    layout->addWidget(new UserMenu(client, this));
     layout->setContentsMargins(2, 0, 0, 0);
 
     // Display private channels (we are on the home page)
@@ -109,12 +64,13 @@ void MiddleColumn::displayPrivateChannels()
 
     // Create and display the private channels
     for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
-        PrivateChannel *privateChannel = new PrivateChannel(*(*privateChannels)[i], i);
+        PrivateChannel *privateChannel = new PrivateChannel(*(*privateChannels)[i], i, privateChannelList);
         privateChannelWidgets.push_back(privateChannel);
         privateChannelListLayout->insertWidget(i, privateChannel);
         QObject::connect(privateChannel, SIGNAL(leftClicked(Api::Channel&, unsigned int)), this, SLOT(clicChannel(Api::Channel&, unsigned int)));
     }
     privateChannelListLayout->insertStretch(-1, 1);
+    privateChannelListLayout->setContentsMargins(4, 5, 4, 0);
 
     // Set the channels to the column
     channelList->setWidget(privateChannelList);
@@ -174,13 +130,14 @@ void MiddleColumn::openGuild(Api::Guild& guild)
         }
     }
     guildChannelListLayout->insertStretch(-1, 1);
+    guildChannelListLayout->setContentsMargins(4, 5, 4, 0);
 
     // Style the channel list
     channelList->setWidget(guildChannelList);
     channelList->setStyleSheet("* {background-color: #2f3136; border: none;}"
-                                     "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
-                                     "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
-                                     "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
+                               "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
+                               "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
+                               "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
 }
 
 } // namespace Ui

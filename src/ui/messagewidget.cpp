@@ -52,7 +52,7 @@ MessageWidget::MessageWidget(const Api::Message& message, bool isFirstp, bool se
         // Get the icon of the message
         if (avatarId == nullptr) {
             // Use an asset if the user doesn't have an icon
-            avatarFileName = "res/images/png/user-icon-asset.png";
+            avatarFileName = "res/images/png/user-icon-asset0.png";
         } else {
             // Request the icon
             avatarFileName = *author.id + (author.avatar->rfind("a_") == 0 ? ".gif" : ".webp");

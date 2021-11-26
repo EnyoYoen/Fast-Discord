@@ -46,6 +46,12 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, unsigne
                             "background-color: #393D43;";
     }
 
+    // I have to create an other widget otherwise
+    // the background color is not applied everywhere, I don't know why
+    QWidget *container = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(container);
+    this->setAttribute(Qt::WA_StyledBackground);
+
     // Create the icon
     icon = new QLabel(this);
     icon->setPixmap(QPixmap(std::string("res/images/svg/guild-channel-icon" + iconName + ".svg").c_str()));
@@ -57,11 +63,15 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, unsigne
     name->setStyleSheet("color: #8E9297");
 
     // Add widgets to layout and style it
-    layout = new QHBoxLayout(this);
     layout->addWidget(icon, Qt::AlignLeft);
     layout->addWidget(name, Qt::AlignLeft);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
+
+    // Create the main layout and add the container
+    QHBoxLayout *mainLayout = new QHBoxLayout(this);
+    mainLayout->addWidget(container);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // Set the size of this widget
     this->setFixedSize(232, 34);

@@ -14,11 +14,11 @@ HomeButton::HomeButton(QWidget *parent) : QLabel(parent)
     this->setFixedSize(48, 48);
     this->setContentsMargins(0, 12, 0, 0);
     this->setStyleSheet("background-color: #5865F2;"
-                  "border: none;"
-                  "border-radius: 16px;"
-                  "background-image: url(res/images/svg/home-icon.svg);"
-                  "background-repeat: no-repeat;"
-                  "background-position: center;");
+                        "border: none;"
+                        "border-radius: 16px;"
+                        "background-image: url(res/images/svg/home-icon.svg);"
+                        "background-repeat: no-repeat;"
+                        "background-position: center;");
 }
 
 void HomeButton::mouseReleaseEvent(QMouseEvent *event)

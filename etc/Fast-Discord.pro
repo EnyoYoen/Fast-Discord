@@ -53,7 +53,9 @@ SOURCES += \
     ../src/ui/middlecolumn.cpp \
     ../src/ui/privatechannel.cpp \
     ../src/ui/rightcolumn.cpp \
-    ../src/ui/roundedimage.cpp
+    ../src/ui/roundedimage.cpp \
+    ../src/ui/usermenu.cpp \
+    ../src/ui/usermenubutton.cpp
 
 HEADERS += \
     ../include/api/application.h \
@@ -88,6 +90,8 @@ HEADERS += \
     ../include/ui/privatechannel.h \
     ../include/ui/rightcolumn.h \
     ../include/ui/roundedimage.h \
+    ../include/ui/usermenu.h \
+    ../include/ui/usermenubutton.h \
     ../lib/nlohmann/adl_serializer.hpp \
     ../lib/nlohmann/byte_container_with_subtype.hpp \
     ../lib/nlohmann/detail/conversions/from_json.hpp \

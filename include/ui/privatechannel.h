@@ -13,7 +13,7 @@ class PrivateChannel : public QWidget
 {
     Q_OBJECT
 public:
-    PrivateChannel(const Api::Channel& privateChannel, unsigned int idp, QWidget *parent = nullptr);
+    PrivateChannel(const Api::Channel& privateChannel, unsigned int idp, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
 
 signals:
