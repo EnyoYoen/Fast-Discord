@@ -10,9 +10,8 @@ namespace Ui {
 MiddleColumn::MiddleColumn(const Api::Client *client, QWidget *parent)
     : QWidget(parent)
 {
-    // Create and style the layout
+    // Create the layout
     layout = new QVBoxLayout(this);
-    layout->setSpacing(0);
 
     // Create and style the channel list
     channelList = new QScrollArea(this);
@@ -21,13 +20,14 @@ MiddleColumn::MiddleColumn(const Api::Client *client, QWidget *parent)
     // Add the widget and style the main layout
     layout->addWidget(channelList);
     layout->addWidget(new UserMenu(client, this));
-    layout->setContentsMargins(2, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     // Display private channels (we are on the home page)
     this->displayPrivateChannels();
 
     // Style this column
-    this->setFixedWidth(240);
+    this->setFixedWidth(242);
     this->setStyleSheet("background-color: #2F3136;"
                         "border: none;");
 }
@@ -70,7 +70,8 @@ void MiddleColumn::displayPrivateChannels()
         QObject::connect(privateChannel, SIGNAL(leftClicked(Api::Channel&, unsigned int)), this, SLOT(clicChannel(Api::Channel&, unsigned int)));
     }
     privateChannelListLayout->insertStretch(-1, 1);
-    privateChannelListLayout->setContentsMargins(4, 5, 4, 0);
+    privateChannelListLayout->setSpacing(2);
+    privateChannelListLayout->setContentsMargins(8, 8, 8, 0);
 
     // Set the channels to the column
     channelList->setWidget(privateChannelList);
@@ -130,7 +131,8 @@ void MiddleColumn::openGuild(Api::Guild& guild)
         }
     }
     guildChannelListLayout->insertStretch(-1, 1);
-    guildChannelListLayout->setContentsMargins(4, 5, 4, 0);
+    guildChannelListLayout->setSpacing(2);
+    guildChannelListLayout->setContentsMargins(8, 8, 8, 0);
 
     // Style the channel list
     channelList->setWidget(guildChannelList);

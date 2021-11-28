@@ -5,7 +5,6 @@
 #include "api/user.h"
 #include "api/jsonutils.h"
 
-#include <QGroupBox>
 #include <QDateTime>
 
 #include <thread>
@@ -72,28 +71,36 @@ void RightColumn::openChannel(Api::Channel& channel)
         messageArea = new MessageArea(*messages, this);
         QWidget *messagesContainer = new QWidget(this);
         QVBoxLayout *messagesLayout = new QVBoxLayout(messagesContainer);
-        QGroupBox *inputBox = new QGroupBox(messagesContainer);
+        QWidget *inputContainer = new QWidget(messagesContainer);
+        QHBoxLayout *containerLayout = new QHBoxLayout(inputContainer);
+        QWidget *inputBox = new QWidget(inputContainer);
         QHBoxLayout *inputLayout = new QHBoxLayout(inputBox);
         MessageTextInput *textInput = new MessageTextInput(inputBox);
 
         // Add widget to the layout and style it
         inputLayout->addWidget(textInput);
+        inputLayout->setContentsMargins(16, 0, 16, 0);
         inputLayout->setSpacing(0);
 
         // Style the input box
+        inputBox->setFixedHeight(44);
         inputBox->setStyleSheet("background-color: #40444B;"
                                 "height: 44px;"
                                 "border-radius: 8px;");
 
+        // Add the input in an other container
+        containerLayout->addWidget(inputBox);
+        containerLayout->setContentsMargins(16, 0, 16, 0);
+
         // Create and style the typing label
         typingLabel = new QLabel(messagesContainer);
         typingLabel->setText("");
-        typingLabel->setStyleSheet("height: 24px;"
-                                   "color: #DCDDDE");
+        typingLabel->setFixedHeight(24);
+        typingLabel->setStyleSheet("color: #DCDDDE");
 
         // Add widgets to the message layout and style it
         messagesLayout->addWidget(messageArea);
-        messagesLayout->addWidget(inputBox);
+        messagesLayout->addWidget(inputContainer);
         messagesLayout->addWidget(typingLabel);
         messagesLayout->setSpacing(0);
         messagesLayout->setContentsMargins(0, 0, 0, 0);

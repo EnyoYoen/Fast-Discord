@@ -4,7 +4,6 @@
 
 #include <QInputDialog>
 #include <QLineEdit>
-#include "ui/roundedimage.h"
 
 #include <thread>
 
@@ -42,6 +41,7 @@ void MainWindow::setupInterface()
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // Style the window
+    // this->setWindowFlags(Qt::CustomizeWindowHint);
     this->setGeometry(0, 0, 940, 728);
     this->setStyleSheet("background-color: #202225;"
                         "padding: 0px;"

@@ -14,12 +14,17 @@ LeftColumn::LeftColumn(QWidget *parent)
     layout = new QVBoxLayout(this);
     homeButton = new HomeButton(this);
     QWidget *guildSeparator = new QWidget(this);
+    QWidget *spacer = new QWidget(this);
+
+    // Style the spacer
+    spacer->setFixedHeight(6);
 
     // Style the guild separator
     guildSeparator->setFixedSize(32, 2);
     guildSeparator->setStyleSheet("background-color: #444649;");
 
     // Add widgets to the layout
+    layout->addWidget(spacer);
     layout->addWidget(homeButton);
     layout->addWidget(guildSeparator);
 
@@ -31,14 +36,14 @@ LeftColumn::LeftColumn(QWidget *parent)
         GuildWidget *guildWidget = new GuildWidget(*(*guilds)[i], i, this);
         guildWidgets.push_back(guildWidget);
 
-        layout->insertWidget(i + 2, guildWidget);
+        layout->insertWidget(i + 3, guildWidget);
         layout->setAlignment(guildWidget, Qt::AlignHCenter);
 
         // Connect the clic signal
         QObject::connect(guildWidget, SIGNAL(leftClicked(Api::Guild&, unsigned int)), this, SLOT(clicGuild(Api::Guild&, unsigned int)));
     }
 
-    // Set widgets position
+    // Set widgets alignments
     layout->insertStretch(-1, 100);
     layout->setAlignment(homeButton, Qt::AlignHCenter);
     layout->setAlignment(guildSeparator, Qt::AlignHCenter);
@@ -48,7 +53,7 @@ LeftColumn::LeftColumn(QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
 
     // Style this widget
-    this->setFixedWidth(72);
+    this->setFixedWidth(70);
     this->setStyleSheet("background-color: #202225;"
                         "border: none;");
 

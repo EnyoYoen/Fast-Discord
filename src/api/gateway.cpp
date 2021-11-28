@@ -48,10 +48,10 @@ void Gateway::start()
 
     client.set_close_handler([&](web::websockets::client::websocket_close_status/* status*/, const utility::string_t &/*reason*/, const std::error_code &/*code*/)
     {
-        //Reconnect when the connection is closed
+        // Reconnect when the connection is closed
         if (connected) {
             connected = false;
-            //connect(); TODO crashes the app
+            connect();
         }
     });
     connect();

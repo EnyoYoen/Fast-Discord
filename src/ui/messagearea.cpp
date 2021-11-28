@@ -14,6 +14,8 @@ MessageArea::MessageArea(const std::vector<Api::Message *>& messages, QWidget *p
     // Create widgets
     QWidget *messageBox = new QWidget(this);
     messageLayout = new QVBoxLayout(messageBox);
+    QWidget *spacer = new QWidget(messageBox);
+    spacer->setFixedHeight(22);
 
     // Don't do some things if there are no messages
     if (messages.size() > 0) {
@@ -61,6 +63,7 @@ MessageArea::MessageArea(const std::vector<Api::Message *>& messages, QWidget *p
             // Create the message and add it to the layout
             messageLayout->addWidget(new MessageWidget(*messages[i], first, separator, this));
         }
+        messageLayout->addWidget(spacer);
         messageLayout->insertStretch(0);
     }
 
@@ -89,7 +92,7 @@ void MessageArea::addMessage(const Api::Message& newMessage, const Api::Message&
     bool separator;
     if (firstDateTime.date() != secondDateTime.date()) {
         // The messages are not sent on the same day
-        messageLayout->addWidget(new MessageSeparator(secondDateTime.date(), this));
+        messageLayout->insertWidget(-2, new MessageSeparator(secondDateTime.date(), this));
         separator = true;
     } else {
         // The messages are sent on the same day
