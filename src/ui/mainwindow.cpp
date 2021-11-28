@@ -4,6 +4,7 @@
 
 #include <QInputDialog>
 #include <QLineEdit>
+#include "ui/roundedimage.h"
 
 #include <thread>
 

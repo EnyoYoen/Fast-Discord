@@ -4,6 +4,7 @@
 #include "guild.h"
 #include "message.h"
 #include "client.h"
+#include "ui/roundedimage.h"
 
 #include <QBoxLayout>
 
@@ -31,7 +32,7 @@ public:
     // Functions that use requestApi withh less parameters
     static void requestJson(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName);
     static void requestFile(const std::string& url, const std::string& fileName);
-    static void requestImage(const std::string& url, const std::string& fileName, QBoxLayout *layout);
+    static void requestImage(const std::string& url, const std::string& fileName, Ui::RoundedImage *imageWidget);
 
     // Functions that request the API to retrieve data
     static std::vector<Guild *>   *getGuilds();

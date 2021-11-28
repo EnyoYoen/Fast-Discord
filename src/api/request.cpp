@@ -173,7 +173,11 @@ void Request::requestFile(const std::string& url, const std::string& fileName)
     requestApi(url, "", nullptr, "", "", fileName, false);
 }
 
-//void Request::requestImage(const std::string& url, const std::string& fileName, QBoxLayout *layout); // TODO not implemented yet
+void Request::requestImage(const std::string& url, const std::string& fileName, Ui::RoundedImage *imageWidget)
+{
+    requestApi(url, "", nullptr, "", "", fileName, false);
+    imageWidget->setImage(fileName);
+}
 
 // Functions that request the API to retrieve data
 

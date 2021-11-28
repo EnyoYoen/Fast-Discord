@@ -45,23 +45,26 @@ MessageWidget::MessageWidget(const Api::Message& message, bool isFirstp, bool se
         // The message is not grouped to another message
 
         // Variable creation
-        std::string avatarFileName;
         Api::User& author = *message.author;
         std::string *avatarId = author.avatar;
 
         // Get the icon of the message
         if (avatarId == nullptr) {
             // Use an asset if the user doesn't have an icon
-            avatarFileName = "res/images/png/user-icon-asset0.png";
+            iconLayout->addWidget(new RoundedImage("res/images/png/user-icon-asset0.png", 40, 40, 20, iconContainer));
         } else {
             // Request the icon
-            avatarFileName = *author.id + (author.avatar->rfind("a_") == 0 ? ".gif" : ".webp");
+            std::string avatarFileName = *author.id + (author.avatar->rfind("a_") == 0 ? ".gif" : ".webp");
             if (!std::ifstream(("cache/" + avatarFileName).c_str()).good()) {
-                Api::Request::requestFile("https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, "cache/" + avatarFileName);
+                RoundedImage *avatar = new RoundedImage(40, 40, 20, iconContainer);
+                iconLayout->addWidget(avatar);
+                Api::Request::requestImage("https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, "cache/" + avatarFileName, avatar);
+            } else {
+                iconLayout->addWidget(new RoundedImage("cache/" + avatarFileName, 40, 40, 20, iconContainer));
             }
             avatarFileName = "cache/" + avatarFileName;
         }
-        iconLayout->addWidget(new RoundedImage(avatarFileName, 40, 40, 20, iconContainer));
+
 
         // Widget to show some infos of the message
         QWidget *messageInfos = new QWidget(data);
