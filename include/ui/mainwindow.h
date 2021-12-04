@@ -32,7 +32,6 @@ private slots:
 
 private:
     void setupInterface(); // Create the interface
-    void setupGateway();   // Create and lauch the gateway
     void gatewayDispatchHandler(std::string& eventName, json& data);
         // Event handler for the gateway
 

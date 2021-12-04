@@ -39,9 +39,11 @@ MainWindow::MainWindow() : QWidget()
 
 void MainWindow::setup()
 {
-    // Setup the client
+    // Create the UI
     setupInterface();
-    setupGateway();
+
+    // Set the gateway event callback
+    gw.onDispatch([&](std::string& eventName, json& data){gatewayDispatchHandler(eventName, data);});
 }
 
 void MainWindow::setupInterface()
@@ -82,13 +84,6 @@ void MainWindow::gatewayDispatchHandler(std::string& eventName, json& data)
         std::thread typingThread = std::thread(&RightColumn::userTyping, rightColumn, data);
         typingThread.detach();
     }
-}
-
-void MainWindow::setupGateway()
-{
-    // Create and launch the gateway
-    Api::Gateway gw = Api::Gateway();
-    gw.onDispatch([&](std::string& eventName, json& data){gatewayDispatchHandler(eventName, data);});
 }
 
 } // namespace Ui

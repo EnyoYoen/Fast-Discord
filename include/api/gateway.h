@@ -4,11 +4,7 @@
 
 #include <cpprest/ws_client.h>
 
-#include <string>/*
-#include <mutex>
-#include <condition_variable>
-std::mutex lock;
-std::condition_variable urlWaiter;*/
+#include <string>
 
 using json = nlohmann::json;
 
@@ -34,11 +30,11 @@ class Gateway
 {
 public:
     Gateway();
-    void start(std::string *url);
     void onDispatch(std::function<void(std::string&, json&)> callback);
         //Sets the callback function called when the gateway recieve events
 
 private:
+    void start();
     void send(int op, const std::string& data);
                           //Send data through the gateway
     void onMessage(web::websockets::client::websocket_incoming_message message);
