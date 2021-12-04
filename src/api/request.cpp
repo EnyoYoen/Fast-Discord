@@ -12,8 +12,13 @@
 
 namespace Api {
 
+std::queue<RequestParameters> Request::requestQueue;
+std::mutex Request::lock;
+std::condition_variable Request::requestWaiter;
+std::thread Request::loop;
 std::string Request::token;       // Authorization token
 double Request::rateLimitEnd = 0; // No rate limit for now
+bool Request::stopped = false;
 
 // Store the data recieved
 size_t Request::writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -49,327 +54,421 @@ size_t Request::noOutputCallback(void *, size_t size, size_t nmemb, void *)
     return size * nmemb;
 }
 
-void Request::requestApi(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName, const std::string& outputFile, bool json)
+void Request::RequestLoop()
 {
-    // Very basic rate limit checker
-    if (rateLimitEnd != 0) { // We were rate limited
-        double sleepDuration = rateLimitEnd - std::time(0); // Time to sleep
-        
-        // We are currently rate limited 
-        if (sleepDuration > 0) std::this_thread::sleep_for(std::chrono::duration<double>(sleepDuration));
-        rateLimitEnd = 0; // Reset rate limit
-    }
+    while (!stopped) {
+        if (requestQueue.size() > 0) {
+            do {
+                RequestParameters parameters = requestQueue.front();
 
-    CURL *curl;
-    CURLcode res;
+                // Very basic rate limit checker
+                if (rateLimitEnd != 0) { // We were rate limited
+                    double sleepDuration = rateLimitEnd - std::time(0); // Time to sleep
 
-    /* Init the curl session */
-    curl = curl_easy_init();
-    if (curl) {
-        curl_mime *form = nullptr;
+                    // We are currently rate limited
+                    if (sleepDuration > 0) std::this_thread::sleep_for(std::chrono::duration<double>(sleepDuration));
+                    rateLimitEnd = 0; // Reset rate limit
+                }
 
-        /* Set our custom set of headers */
-        curl_slist *headers = curl_slist_append(nullptr, ("Authorization: " + token).c_str());
-        if (json) {
-            headers = curl_slist_append(headers, "content-type: application/json");
-        }
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+                CURL *curl;
+                CURLcode res;
 
-        /* Specify URL to get */
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+                /* Init the curl session */
+                curl = curl_easy_init();
+                if (curl) {
+                    MemoryStruct callbackStruct;
+                    curl_mime *form = nullptr;
 
-        if (outputFile != "") {
-            // If cache directory is not created, create it
-            if (!boost::filesystem::exists(boost::filesystem::path("cache/"))) boost::filesystem::create_directory(boost::filesystem::path("cache"));
-            FILE *fp = fopen(outputFile.c_str(), "wb");
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFileCallback);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+                    /* Set our custom set of headers */
+                    curl_slist *headers = curl_slist_append(nullptr, ("Authorization: " + token).c_str());
+                    if (parameters.json) {
+                        headers = curl_slist_append(headers, "content-type: application/json");
+                    }
+                    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+                    /* Specify URL to get */
+                    curl_easy_setopt(curl, CURLOPT_URL, parameters.url.c_str());
+
+                    if (parameters.outputFile != "") {
+                        // If cache directory is not created, create it
+                        if (!boost::filesystem::exists(boost::filesystem::path("cache/"))) boost::filesystem::create_directory(boost::filesystem::path("cache"));
+                        FILE *fp = fopen(parameters.outputFile.c_str(), "wb");
+                        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFileCallback);
+                        curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+                    } else {
+                        callbackStruct.memory = static_cast<char *>(malloc(1));  /* Will be grown as needed by the realloc above */
+                        callbackStruct.size = 0;    /* No data at this point */
+
+                        /* Send all data to this function  */
+                        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
+
+                        /* We pass our 'chunk' struct to the callback function */
+                        curl_easy_setopt(curl, CURLOPT_WRITEDATA, static_cast<void *>(&callbackStruct));
+                    }
+
+                    if (parameters.postDatas != "") {
+                        // Set POST data
+                        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, parameters.postDatas.c_str());
+                    }
+
+                    if (parameters.customRequest != "") {
+                        // Set custom request
+                        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, parameters.customRequest.c_str());
+                    }
+
+                    if (parameters.fileName != "") {
+                        /* Create the form */
+                        form = curl_mime_init(curl);
+
+                        /* Fill in the file upload field */
+                        curl_mimepart *field = curl_mime_addpart(form);
+                        curl_mime_name(field, "sendfile");
+                        curl_mime_filedata(field, parameters.fileName.c_str());
+
+                        /* Fill in the filename field */
+                        field = curl_mime_addpart(form);
+                        curl_mime_name(field, "filename");
+                        curl_mime_data(field, parameters.fileName.c_str(), CURL_ZERO_TERMINATED);
+
+                        /* Fill in the submit field too*/
+                        field = curl_mime_addpart(form);
+                        curl_mime_name(field, "submit");
+                        curl_mime_data(field, "send", CURL_ZERO_TERMINATED);
+
+                        curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
+                    }
+
+                    long httpCode = 0;
+                    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+                    /* Get it */
+                    res = curl_easy_perform(curl);
+
+                    /* Check for errors */
+                    if (res != CURLE_OK) {
+                        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+                    }
+
+                    /* Cleanup cURL stuff */
+                    curl_easy_cleanup(curl);
+
+                    if (parameters.fileName != "") {
+                        curl_mime_free(form);
+                    }
+
+                    if (httpCode == 429) { // We are rate limited
+                        // Set the end of the rate limit
+                        rateLimitEnd = std::time(0) + json::parse(callbackStruct.memory).value("retry_after", double(0));
+
+                        // Reset our MemoryStruct
+                        free(callbackStruct.memory);
+                        callbackStruct.size = 0;
+
+                        // Redo the request
+                        requestApi(parameters);
+                    } else {
+                        switch (parameters.type) {
+                            case GetUser:
+                                {
+                                    User *user;
+                                    unmarshal<User>(json::parse(callbackStruct.memory), "", &user);
+                                    parameters.callback(static_cast<void *>(user));
+                                    break;
+                                }
+                            case GetGuilds:
+                                {
+                                    std::vector<Guild *> *guilds;
+                                    unmarshalMultiple<Guild>(json::parse(callbackStruct.memory), "", &guilds);
+                                    parameters.callback(static_cast<void *>(guilds));
+                                    break;
+                                }
+                            case GetGuildChannels:
+                                {
+                                    std::vector<Channel *> *channels;
+                                    unmarshalMultiple<Channel>(json::parse(callbackStruct.memory), "", &channels);
+                                    parameters.callback(static_cast<void *>(channels));
+                                    break;
+                                }
+                            case GetPrivateChannels:
+                                {
+                                    std::vector<Channel *> *privateChannels;
+                                    unmarshalMultiple<Channel>(json::parse(callbackStruct.memory), "", &privateChannels);
+                                    parameters.callback(static_cast<void *>(privateChannels));
+                                    break;
+                                }
+                            case GetMessages:
+                                {
+                                    std::vector<Message *> *messages;
+                                    unmarshalMultiple<Message>(json::parse(callbackStruct.memory), "", &messages);
+                                    parameters.callback(static_cast<void *>(messages));
+                                    break;
+                                }
+                            case GetClient:
+                                {
+                                    Client *client;
+                                    unmarshal<Client>(json::parse(callbackStruct.memory), "", &client);/*
+                                    std::function<void(void *)> callback = *parameters.callback;
+                                    callback(static_cast<void *>(nullptr));*/
+                                    parameters.callback(static_cast<void *>(client));
+                                    break;
+                                }
+                            case GetClientSettings:
+                                {
+                                    ClientSettings *clientSettings;
+                                    unmarshal<ClientSettings>(json::parse(callbackStruct.memory), "", &clientSettings);
+                                    parameters.callback(static_cast<void *>(clientSettings));
+                                    break;
+                                }
+                            case GetWsUrl:
+                                {
+                                    try {
+                                        json jsonUrl = json::parse(callbackStruct.memory).at("url");
+                                        if (jsonUrl.is_null())
+                                            break;
+                                        std::string url = std::string(jsonUrl.get<std::string>());
+                                        parameters.callback(static_cast<void *>(&url));
+                                    } catch(std::exception&) {
+                                        break;
+                                    }
+                                break;
+                                }
+                            case GetImage:
+                                {
+                                    std::string imageFileName = parameters.outputFile;
+                                    parameters.callback(static_cast<void *>(&imageFileName));
+                                    break;
+                                }
+                        }
+                        requestQueue.pop();
+                    }
+                }
+            } while (!requestQueue.empty());
         } else {
-            if (callbackStruct != nullptr) {
-                callbackStruct->memory = static_cast<char *>(malloc(1));  /* Will be grown as needed by the realloc above */
-                callbackStruct->size = 0;    /* No data at this point */
-
-                /* Send all data to this function  */
-                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
-
-                /* We pass our 'chunk' struct to the callback function */
-                curl_easy_setopt(curl, CURLOPT_WRITEDATA, static_cast<void *>(callbackStruct));
-            } else {
-                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, noOutputCallback);
-            }
-        }
-
-        if (postDatas != "") {
-            // Set POST data
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postDatas.c_str());
-        }
-
-        if (customRequest != "") {
-            // Set custom request
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, customRequest.c_str());
-        }
-
-        if (fileName != "") {
-            /* Create the form */
-            form = curl_mime_init(curl);
-
-            /* Fill in the file upload field */
-            curl_mimepart *field = curl_mime_addpart(form);
-            curl_mime_name(field, "sendfile");
-            curl_mime_filedata(field, fileName.c_str());
-
-            /* Fill in the filename field */
-            field = curl_mime_addpart(form);
-            curl_mime_name(field, "filename");
-            curl_mime_data(field, fileName.c_str(), CURL_ZERO_TERMINATED);
-
-            /* Fill in the submit field too*/
-            field = curl_mime_addpart(form);
-            curl_mime_name(field, "submit");
-            curl_mime_data(field, "send", CURL_ZERO_TERMINATED);
-
-            curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
-        }
-
-        long httpCode = 0;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
-
-        /* Get it */
-        res = curl_easy_perform(curl);
-
-        /* Check for errors */
-        if (res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        }
-
-        /* Cleanup cURL stuff */
-        curl_easy_cleanup(curl);
-
-        if (fileName != "") {
-            curl_mime_free(form);
-        }
-
-        if (httpCode == 429) { // We are rate limited
-            // Set the end of the rate limit
-            rateLimitEnd = std::time(0) + json::parse(callbackStruct->memory).value("retry_after", double(0));
-
-            // Reset our MemoryStruct
-            free(callbackStruct->memory);
-            callbackStruct->size = 0;
-
-            // Redo the request
-            requestApi(url, postDatas, callbackStruct, customRequest, fileName,outputFile, json);
+            std::unique_lock<std::mutex> uniqueLock(lock);
+            requestWaiter.wait(uniqueLock);
         }
     }
 }
 
-void Request::requestJson(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName)
+void Request::startLoop()
 {
-    requestApi(url, postDatas, callbackStruct, customRequest, fileName, "", true);
+    loop = std::thread(RequestLoop);
 }
 
-void Request::requestFile(const std::string& url, const std::string& fileName)
+void Request::stopLoop()
 {
-    requestApi(url, "", nullptr, "", "", fileName, false);
+    stopped = true;
+    loop.join();
+    requestWaiter.notify_all();
 }
 
-void Request::requestImage(const std::string& url, const std::string& fileName, Ui::RoundedImage *imageWidget)
+void Request::requestApi(const RequestParameters &parameters)
 {
-    requestApi(url, "", nullptr, "", "", fileName, false);
-    imageWidget->setImage(fileName);
+    lock.lock();
+    requestQueue.push(parameters);
+    requestWaiter.notify_one();
+    lock.unlock();
 }
 
 // Functions that request the API to retrieve data
 
-std::vector<Channel *> *Request::getPrivateChannels()
+void Request::getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName)
 {
-    MemoryStruct response;
+    requestApi({
+        callback,
+        url,
+        "",
+        "",
+        "",
+        "cache/" + fileName,
+        GetImage,
+        false});
+}
 
-    requestApi(
+void Request::getPrivateChannels(std::function<void(void *)> callback)
+{
+    requestApi({
+        callback,
         "https://discord.com/api/v9/users/@me/channels",
-        "",
-        &response,
-        "",
+        "",        
         "",
         "",
-        false);
-
-    std::vector<Channel *> *channels;
-    unmarshalMultiple<Channel>(json::parse(response.memory), "", &channels);
-    return channels;
+        "",
+        GetPrivateChannels,
+        false});
 }
 
-std::vector<Guild *> *Request::getGuilds()
+void Request::getGuilds(std::function<void(void *)> callback)
 {
-    MemoryStruct response;
-
-    requestApi(
+    requestApi({
+        callback,
         "https://discord.com/api/v9/users/@me/guilds",
-        "",
-        &response,
-        "",
+        "",        
         "",
         "",
-        false);
-
-    std::vector<Guild *> *guilds;
-    unmarshalMultiple<Guild>(json::parse(response.memory), "", &guilds);
-    return guilds;
+        "",
+        GetGuilds,
+        false});
 }
 
-std::vector<Channel *> *Request::getGuildChannels(const std::string& id)
+void Request::getGuildChannels(std::function<void(void *)> callback, const std::string& id)
 {
-    MemoryStruct response;
-
-    requestApi(
+    requestApi({
+        callback,
         "https://discord.com/api/v9/guilds/" + id + "/channels",
-        "",
-        &response,
-        "",
+        "",        
         "",
         "",
-        false);
-
-    std::vector<Channel *> *channels;
-    unmarshalMultiple<Channel>(json::parse(response.memory), "", &channels);
-    return channels;
+        "",
+        GetGuildChannels,
+        false});
 }
 
-std::vector<Message *> *Request::getMessages(const std::string& channelId, unsigned int limit)
+void Request::getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit)
 {
-    MemoryStruct response;
-
     limit = limit >= 50 ? 50 : limit;
 
-    requestApi(
+    requestApi({
+        callback,
         "https://discord.com/api/v9/channels/" + channelId + "/messages?limit=" + std::to_string(limit),
-        "",
-        &response,
-        "",
+        "",        
         "",
         "",
-        false);
-
-    std::vector<Message *> *messages;
-    unmarshalMultiple<Message>(json::parse(response.memory), "", &messages);
-    return messages;
+        "",
+        GetMessages,
+        false});
 }
 
-Client *Request::getClient()
+void Request::getClient(std::function<void(void *)> callback)
 {
-    MemoryStruct response;
-
-    requestApi(
+    requestApi({
+        callback,
         "https://discord.com/api/v9/users/@me",
-        "",
-        &response,
-        "",
+        "",        
         "",
         "",
-        false);
-
-    Client *client;
-    unmarshal<Client>(json::parse(response.memory), "", &client);
-    return client;
+        "",
+        GetClient,
+        false});
 }
 
-ClientSettings *Request::getClientSettings()
+void Request::getClientSettings(std::function<void(void *)> callback)
 {
-    MemoryStruct response;
-
-    requestApi(
+    requestApi({
+        callback,
         "https://discord.com/api/v9/users/@me/settings",
-        "",
-        &response,
-        "",
+        "",        
         "",
         "",
-        false);
+        "",
+        GetClientSettings,
+        false});
+}
 
-    ClientSettings *clientSettings;
-    unmarshal<ClientSettings>(json::parse(response.memory), "", &clientSettings);
-    return clientSettings;
+void Request::getUser(std::function<void(void *)> callback, const std::string& userId)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/" + userId,
+        "",
+        "",
+        "",
+        "",
+        GetUser,
+        false});
 }
 
 // Functions that request the API to send data
 
 void Request::setStatus(const std::string& status)
 {
-    requestApi(
+    requestApi({
+        nullptr,
         "https://discord.com/api/v9/users/@me/settings",
         "{\"status\":\"" + status + "\"}",
-        nullptr,
         "PATCH",
         "",
         "",
-        false);
+        SetStatus,
+        false});
 }
 
 void Request::sendTyping(const std::string& channelId)
 {
-    requestApi("https://discord.com/api/v9/channels/" + channelId + "/typing",
-            " ",
+    requestApi({
             nullptr,
+            "https://discord.com/api/v9/channels/" + channelId + "/typing",
+            "",
             "POST",
             "",
             "",
-            false);
+            SendTyping,
+            false});
 }
 
 void Request::sendMessage(const std::string& content, const std::string& channelId)
 {
-    requestJson("https://discord.com/api/v9/channels/" + channelId + "/messages",
-            "{\"content\":\"" + content + "\"}",
+    requestApi({
             nullptr,
+            "https://discord.com/api/v9/channels/" + channelId + "/messages",
+            "{\"content\":\"" + content + "\"}",
             "",
-            "");
+            "",
+            "",
+            SendMessage,
+            true});
 }
 
 void Request::sendMessageWithFile(const std::string& content, const std::string& channelId, const std::string& filePath)
 {
-    requestApi("https://discord.com/api/v9/channels/" + channelId + "/messages",
-            "{\"content\":\"" + content + "\"}",
+    requestApi({
             nullptr,
+            "https://discord.com/api/v9/channels/" + channelId + "/messages",
+            "{\"content\":\"" + content + "\"}",
             "",
             filePath,
             "",
-            false);
+            SendMessageWithFile,
+            false});
 }
 
 void Request::deleteMessage(const std::string& channelId, const std::string& messageId)
 {
-    requestApi(
+    requestApi({
+        nullptr,
         "https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId,
         "",
-        nullptr,
         "DELETE",
         "",
         "",
-        false);
+        DeleteMessage,
+        false});
 }
 
 void Request::pinMessage(const std::string& channelId, const std::string& messageId)
 {
-    requestApi(
+    requestApi({
+        nullptr,
         "https://discord.com/api/v9/channels/" + channelId + "/pins/" + messageId,
         "",
-        nullptr,
         "PUT",
         "",
         "",
-        false);
+        PinMessage,
+        false});
 }
 
 void Request::unpinMessage(const std::string& channelId, const std::string& messageId)
 {
-    requestApi(
+    requestApi({
+        nullptr,
         "https://discord.com/api/v9/channels/" + channelId + "/pins/" + messageId,
         "",
-        nullptr,
         "PUT",
         "",
         "",
-        false);
+        UnpinMessage,
+        false});
 }
 
 } // namespace Api

@@ -28,20 +28,13 @@ LeftColumn::LeftColumn(QWidget *parent)
     layout->addWidget(homeButton);
     layout->addWidget(guildSeparator);
 
-    // Request and add guilds
-    guilds = Api::Request::getGuilds();
-    // Loop through every guild object
-    for (size_t i = 0 ; i < guilds->size() ; i++) {
-        // Create the guild widget and add it the guild storage and the layout
-        GuildWidget *guildWidget = new GuildWidget(*(*guilds)[i], i, this);
-        guildWidgets.push_back(guildWidget);
+    // Connect the signal to setup the column guilds
+    QObject::connect(this, SIGNAL(guildsRecieved(std::vector<Api::Guild *> *)), this, SLOT(displayGuilds(std::vector<Api::Guild *> *)));
 
-        layout->insertWidget(i + 3, guildWidget);
-        layout->setAlignment(guildWidget, Qt::AlignHCenter);
-
-        // Connect the clic signal
-        QObject::connect(guildWidget, SIGNAL(leftClicked(Api::Guild&, unsigned int)), this, SLOT(clicGuild(Api::Guild&, unsigned int)));
-    }
+    // Request guilds
+    Api::Request::getGuilds([this](void *guilds) {
+        emit guildsRecieved(static_cast<std::vector<Api::Guild *> *>(guilds));
+    });
 
     // Set widgets alignments
     layout->insertStretch(-1, 100);
@@ -59,6 +52,25 @@ LeftColumn::LeftColumn(QWidget *parent)
 
     // Connect the home button clic signal
     QObject::connect(homeButton, SIGNAL(clicked()), this, SLOT(clicHomeButton()));
+}
+
+void LeftColumn::displayGuilds(std::vector<Api::Guild *> *guildsp)
+{
+    // Add guilds
+    guilds = guildsp;
+
+    // Loop through every guild object
+    for (size_t i = 0 ; i < guilds->size() ; i++) {
+        // Create the guild widget and add it the guild storage and the layout
+        GuildWidget *guildWidget = new GuildWidget(*(*guilds)[i], i, this);
+        guildWidgets.push_back(guildWidget);
+
+        layout->insertWidget(i + 3, guildWidget);
+        layout->setAlignment(guildWidget, Qt::AlignHCenter);
+
+        // Connect the clic signal
+        QObject::connect(guildWidget, SIGNAL(leftClicked(Api::Guild&, unsigned int)), this, SLOT(clicGuild(Api::Guild&, unsigned int)));
+    }
 }
 
 void LeftColumn::clicHomeButton()

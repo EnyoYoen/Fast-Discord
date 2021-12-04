@@ -26,7 +26,7 @@ GuildWidget::GuildWidget(const Api::Guild& guildP, unsigned int idp, QWidget *pa
     setFixedSize(48, 48);
 
     // Create and style the layout
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout = new QVBoxLayout(this);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setAlignment(Qt::AlignCenter);
@@ -108,14 +108,21 @@ GuildWidget::GuildWidget(const Api::Guild& guildP, unsigned int idp, QWidget *pa
         // Request the icon and cache it
         *guildIconFileName += ".png";
         if (!std::ifstream(("cache/" + *guildIconFileName).c_str()).good()) {
-            Api::Request::requestFile("https://cdn.discordapp.com/icons/" + *guild.id + "/" + *guildIconFileName, "cache/" + *guildIconFileName);
-        }
-        *guildIconFileName = "cache/" + *guildIconFileName;
+            Api::Request::getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + *guild.id + "/" + *guildIconFileName, *guildIconFileName);
+        } else {
+            *guildIconFileName = "cache/" + *guildIconFileName;
 
-        // Create the icon and add it to the layout
-        icon = new RoundedImage(*guildIconFileName, 48, 48, 24, this);
-        layout->addWidget(icon);
+            // Create the icon and add it to the layout
+            icon = new RoundedImage(*guildIconFileName, 48, 48, 24, this);
+            layout->addWidget(icon);
+        }
     }
+}
+
+void GuildWidget::setIcon(const std::string& guildIconFileName)
+{
+    icon = new RoundedImage(guildIconFileName, 48, 48, 24, this);
+    layout->addWidget(icon);
 }
 
 void GuildWidget::mouseReleaseEvent(QMouseEvent *event)

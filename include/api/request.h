@@ -10,15 +10,54 @@
 
 #include <string>
 #include <vector>
+#include <queue>
+#include <condition_variable>
+#include <mutex>
+#include <functional>
+#include <thread>
 #include <cstddef>
 
 namespace Api {
 
-typedef struct
+enum RequestTypes {
+    // We need the response data
+    GetGuilds,
+    GetGuildChannels,
+    GetPrivateChannels,
+    GetMessages,
+    GetClient,
+    GetClientSettings,
+    GetImage,
+    GetWsUrl,
+    GetUser,
+
+    // We don't care about the response
+    SetStatus,
+    SendTyping,
+    SendMessage,
+    SendMessageWithFile,
+    DeleteMessage,
+    PinMessage,
+    UnpinMessage
+};
+
+struct MemoryStruct
 {
     char *memory;
     size_t size;
-} MemoryStruct;
+};
+
+struct RequestParameters
+{
+    std::function<void(void *)> callback;
+    const std::string url;
+    const std::string postDatas;
+    const std::string customRequest;
+    const std::string fileName;
+    const std::string outputFile;
+    int type;
+    bool json;
+};
 
 //Class to request to the API
 class Request
@@ -26,21 +65,22 @@ class Request
 public:
     static std::string token; // Authorization token
 
-    // Function that request the API
-    static void requestApi(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName, const std::string& outputFile, bool json);
+    // Start and stop the loop for the requests
+    static void startLoop();
+    static void stopLoop();
 
-    // Functions that use requestApi withh less parameters
-    static void requestJson(const std::string& url, const std::string& postDatas, MemoryStruct *callbackStruct, const std::string& customRequest, const std::string& fileName);
-    static void requestFile(const std::string& url, const std::string& fileName);
-    static void requestImage(const std::string& url, const std::string& fileName, Ui::RoundedImage *imageWidget);
+    // Function that request the API
+    static void requestApi(const RequestParameters& parameters);
 
     // Functions that request the API to retrieve data
-    static std::vector<Guild *>   *getGuilds();
-    static std::vector<Channel *> *getGuildChannels(const std::string& id);
-    static std::vector<Channel *> *getPrivateChannels();
-    static std::vector<Message *> *getMessages(const std::string& channelId, unsigned int limit);
-    static Client                 *getClient();
-    static ClientSettings         *getClientSettings();
+    static void getGuilds(std::function<void(void *)> callback);
+    static void getGuildChannels(std::function<void(void *)> callback, const std::string& id);
+    static void getPrivateChannels(std::function<void(void *)> callback);
+    static void getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit);
+    static void getClient(std::function<void(void *)> callback);
+    static void getClientSettings(std::function<void(void *)> callback);
+    static void getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName);
+    static void getUser(std::function<void(void *)> callback, const std::string& userId);
 
     // Functions that request the API to send data
     static void setStatus(const std::string& status);
@@ -52,9 +92,19 @@ public:
     static void unpinMessage(const std::string& channelId, const std::string& messageId);
 
 private:
+    static std::queue<RequestParameters> requestQueue;
+                                // The queue of request parameters
+    static std::mutex lock;
+    static std::condition_variable requestWaiter;
+                                // The loop waits when there is no request
+    static std::thread loop;    // The request loop
     static double rateLimitEnd; // Unix time that represents the moment of the end of the rate limit
+    static bool stopped;        // Used to stop the request loop
 
     Request(); // You can't create objects of this class
+
+    // The function that contains the request loop
+    static void RequestLoop();
 
     // Functions used by libcurl to process recieved data
     static size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);

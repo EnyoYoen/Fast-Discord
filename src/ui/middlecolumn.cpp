@@ -23,6 +23,9 @@ MiddleColumn::MiddleColumn(const Api::Client *client, QWidget *parent)
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
+    QObject::connect(this, SIGNAL(privateChannelsRecieved(std::vector<Api::Channel *> *)), this, SLOT(setPrivateChannels(std::vector<Api::Channel *> *)));
+    QObject::connect(this, SIGNAL(guildChannelsRecieved(std::vector<Api::Channel *> *)), this, SLOT(setGuildChannels(std::vector<Api::Channel *> *)));
+
     // Display private channels (we are on the home page)
     this->displayPrivateChannels();
 
@@ -32,31 +35,10 @@ MiddleColumn::MiddleColumn(const Api::Client *client, QWidget *parent)
                         "border: none;");
 }
 
-void MiddleColumn::clicChannel(Api::Channel& channel, unsigned int id)
+void MiddleColumn::setPrivateChannels(std::vector<Api::Channel *> *channels)
 {
-    // Reset the stylesheet of the channels except the one that we just clicked
-    if (channel.type == Api::DM || channel.type == Api::GroupDM) {
-        for (size_t i = 0 ; i < privateChannelWidgets.size() ; i++) {
-            if (i != id) {
-                privateChannelWidgets[i]->unclicked();
-            }
-        }
-    } else {
-        for (size_t i = 0 ; i < guildChannelWidgets.size() ; i++) {
-            if (i != id) {
-                guildChannelWidgets[i]->unclicked();
-            }
-        }
-    }
-
-    // Emit the signal to open the channel
-    emit channelClicked(channel);
-}
-
-void MiddleColumn::displayPrivateChannels()
-{
-    // Request private channels
-    privateChannels = Api::Request::getPrivateChannels();
+    // Set the private channels
+    privateChannels = channels;
 
     // Create the widgets
     QWidget *privateChannelList = new QWidget(this);
@@ -77,7 +59,7 @@ void MiddleColumn::displayPrivateChannels()
     channelList->setWidget(privateChannelList);
 }
 
-void MiddleColumn::openGuild(Api::Guild& guild)
+void MiddleColumn::setGuildChannels(std::vector<Api::Channel *> *channelsp)
 {
     // Clear the whannels
     guildChannelWidgets.clear();
@@ -87,8 +69,8 @@ void MiddleColumn::openGuild(Api::Guild& guild)
     QWidget *guildChannelList = new QWidget(this);
     QVBoxLayout *guildChannelListLayout = new QVBoxLayout(guildChannelList);
 
-    // Request the channels of the guild
-    std::vector<Api::Channel *> channels = *Api::Request::getGuildChannels(*guild.id);
+    // Set the channels
+    std::vector<Api::Channel *> channels = *channelsp;
 
     // Create the channels widgets
 
@@ -140,6 +122,39 @@ void MiddleColumn::openGuild(Api::Guild& guild)
                                "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
                                "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
+}
+
+void MiddleColumn::clicChannel(Api::Channel& channel, unsigned int id)
+{
+    // Reset the stylesheet of the channels except the one that we just clicked
+    if (channel.type == Api::DM || channel.type == Api::GroupDM) {
+        for (size_t i = 0 ; i < privateChannelWidgets.size() ; i++) {
+            if (i != id) {
+                privateChannelWidgets[i]->unclicked();
+            }
+        }
+    } else {
+        for (size_t i = 0 ; i < guildChannelWidgets.size() ; i++) {
+            if (i != id) {
+                guildChannelWidgets[i]->unclicked();
+            }
+        }
+    }
+
+    // Emit the signal to open the channel
+    emit channelClicked(channel);
+}
+
+void MiddleColumn::displayPrivateChannels()
+{
+    // Request private channels
+    Api::Request::getPrivateChannels([this](void *channels) {emit privateChannelsRecieved(static_cast<std::vector<Api::Channel *> *>(channels));});
+}
+
+void MiddleColumn::openGuild(Api::Guild& guild)
+{
+    // Request the channels of the guild
+    Api::Request::getGuildChannels([this](void *channels) {emit guildChannelsRecieved(static_cast<std::vector<Api::Channel *> *>(channels));}, *guild.id);
 }
 
 } // namespace Ui

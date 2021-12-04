@@ -25,6 +25,10 @@ public:
 
 signals:
     void messageRecieved(Api::Message);
+    void clientSettingsRecieved();
+
+private slots:
+    void setup();
 
 private:
     void setupInterface(); // Create the interface
@@ -39,6 +43,7 @@ private:
     RightColumn  *rightColumn;
 
     Api::Gateway gw;                     // For the websocket connection
+
     Api::Client *client;                 // The actual client
     Api::ClientSettings *clientSettings; // and the settings
 };

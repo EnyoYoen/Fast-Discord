@@ -6,6 +6,8 @@
 #include <QWidget>
 #include <QLabel>
 
+#include <queue>
+
 namespace Ui {
 
 // A widget for private channels (DMs and group DMs)
@@ -25,6 +27,7 @@ private:
     void mousePressEvent (QMouseEvent *) override;
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
+    void setIcon(const std::string& iconFileName);
 
     // All the main widgets
     Api::Channel *channel;

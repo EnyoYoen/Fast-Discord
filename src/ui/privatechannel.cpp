@@ -38,13 +38,23 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int 
         if (avatar == nullptr) {
             // Use an asset if the other user doesn't have an icon
             channelIconFileName = "res/images/png/user-icon-asset0.png";
+
+            // Create the icon
+            icon = new RoundedImage(channelIconFileName, 32, 32, 16, container);
         } else {
             // Request the icon
             channelIconFileName = *dmUser.id + (avatar->rfind("a_") == 0 ? ".gif" : ".webp");
             if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-                Api::Request::requestFile("https://cdn.discordapp.com/avatars/" + *dmUser.id + "/" + *avatar, "cache/" + channelIconFileName);
+                Api::Request::getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *dmUser.id + "/" + *avatar, channelIconFileName);
+
+                // Create the icon
+                icon = new RoundedImage(32, 32, 16, container);
+            } else {
+                channelIconFileName = "cache/" + channelIconFileName;
+
+                // Create the icon
+                icon = new RoundedImage(channelIconFileName, 32, 32, 16, container);
             }
-            channelIconFileName = "cache/" + channelIconFileName;
         }
 
         // Set the DM name to the other user name
@@ -80,22 +90,29 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int 
         if (channelIcon == nullptr) {
             // Use an asset if there is none
             channelIconFileName = "res/images/png/group-icon-asset1.png";
+
+            // Create the icon
+            icon = new RoundedImage(channelIconFileName, 32, 32, 16, container);
         } else {
             // Request the icon
             channelIconFileName = *channelIcon + ".png";
             if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-                Api::Request::requestFile("https://cdn.discordapp.com/channel-icons/" + *privateChannel.id + "/" + channelIconFileName, "cache/" + channelIconFileName);
+                Api::Request::getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/channel-icons/" + *privateChannel.id + "/" + channelIconFileName, channelIconFileName);
+
+                // Create the icon
+                icon = new RoundedImage(32, 32, 16, container);
+            } else {
+                channelIconFileName = "cache/" + channelIconFileName;
+
+                // Create the icon
+                icon = new RoundedImage(channelIconFileName, 32, 32, 16, container);
             }
-            channelIconFileName = "cache/" + channelIconFileName;
         }
     }
 
     // Style the widgets
     name->setFixedSize(156, 14);
     subtext->setFixedSize(156, 14);
-
-    // Create the icon
-    icon = new RoundedImage(channelIconFileName, 32, 32, 16, container);
 
     // Create and style the layout, and add widgets to it
     QGridLayout *layout = new QGridLayout(container);
@@ -114,6 +131,11 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int 
     this->setFixedSize(224, 44);
     this->setStyleSheet("border-radius: 4px;"
                         "color: #8E9297;");
+}
+
+void PrivateChannel::setIcon(const std::string& guildIconFileName)
+{
+    icon->setImage(guildIconFileName);
 }
 
 void PrivateChannel::unclicked()

@@ -17,17 +17,16 @@ Gateway::Gateway()
     token = Request::token;
 
     // Getting the websocket URL
-    MemoryStruct response;
-    Request::requestApi(
+    Request::requestApi({
+        [this](void *url) {this->start(static_cast<std::string *>(url));},
         "https://discord.com/api/v9/gateway",
         "",
-        &response,
         "",
         "",
         "",
+        GetWsUrl,
         false
-    );
-    url = json::parse(response.memory).value("url", "");
+    });
 }
 
 // Connect to the gateway
@@ -37,16 +36,17 @@ void Gateway::connect()
 }
 
 // Set the handlers and connect
-void Gateway::start()
+void Gateway::start(std::string *urlp)
 {
-    client.set_message_handler([&](web::websockets::client::websocket_incoming_message msg){
+    /*url = *urlp;
+    client.set_message_handler([this](web::websockets::client::websocket_incoming_message msg){
         try {
-            onMessage(msg); //Process messages
+            this->onMessage(msg); //Process messages
         }
         catch (const std::exception& e) {}
     });
 
-    client.set_close_handler([&](web::websockets::client::websocket_close_status/* status*/, const utility::string_t &/*reason*/, const std::error_code &/*code*/)
+    client.set_close_handler([&](web::websockets::client::websocket_close_status/* status*//*, const utility::string_t &/*reason*//*, const std::error_code &/*code*//*)
     {
         // Reconnect when the connection is closed
         if (connected) {
@@ -54,7 +54,7 @@ void Gateway::start()
             connect();
         }
     });
-    connect();
+    connect();*/
 }
 
 // Set the callback function called when the gateway recieve events

@@ -56,9 +56,9 @@ MessageWidget::MessageWidget(const Api::Message& message, bool isFirstp, bool se
             // Request the icon
             std::string avatarFileName = *author.id + (author.avatar->rfind("a_") == 0 ? ".gif" : ".webp");
             if (!std::ifstream(("cache/" + avatarFileName).c_str()).good()) {
-                RoundedImage *avatar = new RoundedImage(40, 40, 20, iconContainer);
+                avatar = new RoundedImage(40, 40, 20, iconContainer);
                 iconLayout->addWidget(avatar);
-                Api::Request::requestImage("https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, "cache/" + avatarFileName, avatar);
+                Api::Request::getImage([this](void *avatarFileName) {this->setAvatar(*static_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
             } else {
                 iconLayout->addWidget(new RoundedImage("cache/" + avatarFileName, 40, 40, 20, iconContainer));
             }
@@ -146,6 +146,11 @@ MessageWidget::MessageWidget(const Api::Message& message, bool isFirstp, bool se
     this->setMinimumHeight(26);
     this->setStyleSheet("padding: 0px;"
                         "margin: 0px;");
+}
+
+void MessageWidget::setAvatar(const std::string& avatarFileName)
+{
+    avatar->setImage(avatarFileName);
 }
 
 void MessageWidget::enterEvent(QEvent *)

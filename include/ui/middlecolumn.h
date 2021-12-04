@@ -20,6 +20,8 @@ public:
     MiddleColumn(const Api::Client *client, QWidget *parent);
 
 signals:
+    void privateChannelsRecieved(std::vector<Api::Channel *> *channels);
+    void guildChannelsRecieved(std::vector<Api::Channel *> *channels);
     void channelClicked(Api::Channel& channel);
 
 public slots:
@@ -27,6 +29,8 @@ public slots:
     void displayPrivateChannels();
 
 private slots:
+    void setPrivateChannels(std::vector<Api::Channel *> *channels);
+    void setGuildChannels(std::vector<Api::Channel *> *channels);
     void clicChannel(Api::Channel& channel, unsigned int id);
 
 private:

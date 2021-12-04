@@ -2,6 +2,7 @@
 #pragma once
 
 #include "ui/usermenubutton.h"
+#include "ui/roundedimage.h"
 #include "api/client.h"
 
 #include <QWidget>
@@ -19,6 +20,9 @@ private slots:
     void clicButton(int type, bool active);
 
 private:
+    void setIcon(const std::string& iconFileName);
+
+    RoundedImage   *avatar;     // The avatar of the user
     UserMenuButton *muteButton; // Used when deafen button is clicked
 };
 

@@ -17,7 +17,7 @@ class GuildChannelWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit GuildChannelWidget(const Api::Channel& guildChannel, unsigned int idp, QWidget *parent);
+    GuildChannelWidget(const Api::Channel& guildChannel, unsigned int idp, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
 
 signals:

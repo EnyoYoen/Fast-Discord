@@ -16,7 +16,7 @@ class GuildWidget : public QFrame
 {
     Q_OBJECT
 public:
-    GuildWidget(const Api::Guild& guildP, unsigned int idp, QWidget *parent = nullptr);
+    GuildWidget(const Api::Guild& guildP, unsigned int idp, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
 
 signals:
@@ -28,8 +28,10 @@ private:
     void mousePressEvent(QMouseEvent *) override;
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
+    void setIcon(const std::string& guildIconFileName);
 
     // All the main widgets
+    QVBoxLayout *layout;
     RoundedImage *icon;
     Api::Guild   guild;
 

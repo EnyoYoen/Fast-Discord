@@ -17,6 +17,7 @@ RoundedImage::RoundedImage(const std::string& imagePath, int width, int height, 
     h = height;
     w = width;
     r = radius;
+    hasImage = true;
 
     // Determine if the image is animated and set the image to the widget
     if (boost::algorithm::ends_with(imagePath, ".gif")) {
@@ -40,6 +41,7 @@ RoundedImage::RoundedImage(const std::string& imagePath, int width, int height, 
 RoundedImage::RoundedImage(int width, int height, int radius, QWidget *parent)
     : QLabel(parent)
 {
+    hasImage = false;
     // Attributes initialization
     h = height;
     w = width;
@@ -51,9 +53,10 @@ RoundedImage::RoundedImage(int width, int height, int radius, QWidget *parent)
 
 void RoundedImage::setImage(const std::string& imagePath)
 {
+    hasImage = true;
+
     // Determine if the image is animated and set the image to the widget
-    if (boost::algorithm::ends_with(imagePath, ".gif")
-        || boost::algorithm::ends_with(imagePath, ".webp")) {
+    if (boost::algorithm::ends_with(imagePath, ".gif")) {
         // This is an animated image
         image = QPixmap(imagePath.c_str()).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         animatedImage = new QMovie(imagePath.c_str());
@@ -70,26 +73,28 @@ void RoundedImage::setImage(const std::string& imagePath)
 
 void RoundedImage::paintEvent(QPaintEvent *)
 {
-    // Make the image rounded with some antialiasing
-    QPainter p(this);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.setRenderHint(QPainter::SmoothPixmapTransform);
+    if (hasImage) {
+        // Make the image rounded with some antialiasing
+        QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    if (animatedImage != nullptr) {
-        QPixmap target = animatedImage->currentPixmap().scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        QBrush brush = QBrush(target);
-        p.setPen(Qt::NoPen);
-        p.setBrush(target);
-        p.drawRoundedRect(0, 0, h, w, r, r);
-    } else {
-        QPixmap target = QPixmap(w, h);
-        target.fill(Qt::transparent);
+        if (animatedImage != nullptr) {
+            QPixmap target = animatedImage->currentPixmap().scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            QBrush brush = QBrush(target);
+            p.setPen(Qt::NoPen);
+            p.setBrush(target);
+            p.drawRoundedRect(0, 0, h, w, r, r);
+        } else {
+            QPixmap target = QPixmap(w, h);
+            target.fill(Qt::transparent);
 
-        QPainterPath path = QPainterPath();
-        path.addRoundedRect(0, 0, h, w, r, r);
+            QPainterPath path = QPainterPath();
+            path.addRoundedRect(0, 0, h, w, r, r);
 
-        p.setClipPath(path);
-        p.drawPixmap(0, 0, image);
+            p.setClipPath(path);
+            p.drawPixmap(0, 0, image);
+        }
     }
 }
 

@@ -18,8 +18,10 @@ public:
 private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
+    void setAvatar(const std::string& avatarFileName);
 
     QString hoveredTimestamp; // The timestamp we show
+    RoundedImage *avatar;     // The avatar if there is one
     QLabel *timestampLabel;   // The label of the timestamp
     bool isFirst;             // Is the message is not grouped
 

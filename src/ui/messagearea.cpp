@@ -8,8 +8,8 @@
 
 namespace Ui {
 
-MessageArea::MessageArea(const std::vector<Api::Message *>& messages, QWidget *parent)
-    : QScrollArea(parent)
+MessageArea::MessageArea(const std::vector<Api::Message *>& messages, QWidget */*parent*/)
+    : QScrollArea(/*parent*/) // TODO stylesheet bug
 {
     // Create widgets
     QWidget *messageBox = new QWidget(this);

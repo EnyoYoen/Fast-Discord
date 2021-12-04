@@ -19,11 +19,13 @@ public:
     LeftColumn(QWidget *parent);
 
 signals:
+    void guildsRecieved(std::vector<Api::Guild *> *guilds);
     void cleanRightColumn();
     void homeButtonClicked();
     void guildClicked(Api::Guild& guild);
 
 private slots:
+    void displayGuilds(std::vector<Api::Guild *> *guilds);
     void clicHomeButton();
     void clicGuild(Api::Guild& guild, unsigned int id);
 

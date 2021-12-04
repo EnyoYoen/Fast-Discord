@@ -29,6 +29,43 @@ RightColumn::RightColumn(Api::Client *clientp, QWidget *parent)
 
     // Style the column
     this->setStyleSheet("background-color: #36393F;");
+
+    QObject::connect(this, SIGNAL(messagesRecieved(std::vector<Api::Message *> *)), this, SLOT(setMessages(std::vector<Api::Message *> *)));
+    QObject::connect(this, SIGNAL(userTypingRecieved(const Api::User *)), this, SLOT(setUserTyping(const Api::User *)));
+}
+
+void RightColumn::setMessages(std::vector<Api::Message *> *messages)
+{
+    messagesLayout->takeAt(0);
+    channelsMessages[currentOpenedChannel] = messages;
+    messageArea = new MessageArea(*messages, this);
+    messagesLayout->insertWidget(0, messageArea);
+}
+
+void RightColumn::setUserTyping(const Api::User *user)
+{
+    // Get the actual timestamp
+    time_t currentTimestamp = std::time(nullptr);
+
+    // Get the user name and the text of the typing label
+    std::string username = *(*user).username;
+    std::string text = typingLabel->text().toUtf8().constData();
+
+    // Change the text of the typing label
+    if (text != "") {
+        // Somemone is already typing, so we change with the new user
+        size_t index = (text.find(" is typing") != std::string::npos) ? text.find(" is typing") : text.find(" are typing");
+        text.resize(text.size() - index);
+        text += " " + username + " are typing";
+    } else {
+        // The user is to only one to type
+        text = username + " is typing";
+    }
+
+    // Change the text on the label and wait 8 seconds
+    typingLabel->setText(QString::fromUtf8(text.c_str()));
+    std::this_thread::sleep_for(std::chrono::seconds(typingTimestamp + 8 - currentTimestamp));
+    typingLabel->setText("");
 }
 
 void RightColumn::clean()
@@ -52,25 +89,29 @@ void RightColumn::openChannel(Api::Channel& channel)
     if (channel.type != Api::GuildVoice) {
         this->clean(); // Clean the column
 
+        // Create some widgets
+        QWidget *messagesContainer = new QWidget(this);
+        messagesLayout = new QVBoxLayout(messagesContainer);
+
         // Get the messages of the channel
         std::string channelId = *channel.id;
         std::vector<Api::Message *> *messages;
 
         std::map<std::string, std::vector<Api::Message *> *>::iterator currentMessages = channelsMessages.find(channelId);
         if (currentMessages == channelsMessages.end()) {
-            messages = Api::Request::getMessages(channelId, 50 );
-            channelsMessages[channelId] = messages;
+            QWidget *messageAreaPlaceholder = new QWidget(messagesContainer);
+            messagesLayout->addWidget(messageAreaPlaceholder);
+            Api::Request::getMessages([this](void *messages) {emit messagesRecieved(static_cast<std::vector<Api::Message *> *>(messages));}, channelId, 50 );
         } else {
             messages = channelsMessages[channelId];
+            messageArea = new MessageArea(*messages, messagesContainer);
+            messagesLayout->addWidget(messageArea);
         }
 
         // Change the current opened channel ID
         currentOpenedChannel = channelId;
 
         // Create all the widgets
-        messageArea = new MessageArea(*messages, this);
-        QWidget *messagesContainer = new QWidget(this);
-        QVBoxLayout *messagesLayout = new QVBoxLayout(messagesContainer);
         QWidget *inputContainer = new QWidget(messagesContainer);
         QHBoxLayout *containerLayout = new QHBoxLayout(inputContainer);
         QWidget *inputBox = new QWidget(inputContainer);
@@ -99,7 +140,6 @@ void RightColumn::openChannel(Api::Channel& channel)
         typingLabel->setStyleSheet("color: #DCDDDE");
 
         // Add widgets to the message layout and style it
-        messagesLayout->addWidget(messageArea);
         messagesLayout->addWidget(inputContainer);
         messagesLayout->addWidget(typingLabel);
         messagesLayout->setSpacing(0);
@@ -147,36 +187,11 @@ void RightColumn::userTyping(const json& data)
     if (currentOpenedChannel == channelId) {
         // A user is typing in this channel
 
-        // Get the actual timestamp
-        time_t currentTimestamp = std::time(nullptr);
+        // Get the typing timestamp
+        typingTimestamp = data.value("timestamp", -1);
 
         // Get the user that is typing
-        Api::MemoryStruct response;
-        std::string url = std::string("https://discord.com/api/v9/users/") + data.value("user_id", "");
-        Api::Request::requestJson(url, "", &response, "", "");
-        Api::User *user;
-        Api::unmarshal<Api::User>(json::parse(response.memory), "", &user);
-
-        // Get the user name and the text of the typing label
-        std::string username = *(*user).username;
-        long typingTimestamp = data.value("timestamp", -1);
-        std::string text = typingLabel->text().toUtf8().constData();
-
-        // Change the text of the typing label
-        if (text != "") {
-            // Somemone is already typing, so we change with the new user
-            size_t index = (text.find(" is typing") != std::string::npos) ? text.find(" is typing") : text.find(" are typing");
-            text.resize(text.size() - index);
-            text += " " + username + " are typing";
-        } else {
-            // The user is to only one to type
-            text = username + " is typing";
-        }
-
-        // Change the text on the label and wait 8 seconds
-        typingLabel->setText(QString::fromUtf8(text.c_str()));
-        std::this_thread::sleep_for(std::chrono::seconds(typingTimestamp + 8 - currentTimestamp));
-        typingLabel->setText("");
+        Api::Request::getUser([this](void *user) {emit userTypingRecieved(static_cast<Api::User *>(user));}, data.value("user_id", ""));
     }
 }
 

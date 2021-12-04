@@ -11,13 +11,34 @@ namespace Ui {
 
 MainWindow::MainWindow() : QWidget()
 {
+    // Style the window
+    // this->setWindowFlags(Qt::CustomizeWindowHint);
+    this->setGeometry(0, 0, 940, 728);
+    this->setStyleSheet("background-color: #202225;"
+                        "padding: 0px;"
+                        "border: none;");
+
     // Ask the token to the user
     Api::Request::token = QInputDialog::getText(nullptr, "Token", "Enter your Discord token", QLineEdit::Normal, QString(), nullptr).toUtf8().constData();
 
-    // Get user settings
-    client = Api::Request::getClient();
-    clientSettings = Api::Request::getClientSettings();
+    // Start the request loop
+    Api::Request::startLoop();
 
+    // Connect the signal for the setup
+    QObject::connect(this, SIGNAL(clientSettingsRecieved()), this, SLOT(setup()));
+
+    // Get user settings
+    Api::Request::getClient([this](void *clientp){
+        client = static_cast<Api::Client *>(clientp);
+    });
+    Api::Request::getClientSettings([this](void *clientSettingsp){
+        clientSettings = static_cast<Api::ClientSettings *>(clientSettingsp);
+        emit clientSettingsRecieved();
+    });
+}
+
+void MainWindow::setup()
+{
     // Setup the client
     setupInterface();
     setupGateway();
@@ -39,13 +60,6 @@ void MainWindow::setupInterface()
     // Style the layout
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
-
-    // Style the window
-    // this->setWindowFlags(Qt::CustomizeWindowHint);
-    this->setGeometry(0, 0, 940, 728);
-    this->setStyleSheet("background-color: #202225;"
-                        "padding: 0px;"
-                        "border: none;");
 
     // Connect signals to slots of the columns
     QObject::connect(leftColumn, SIGNAL(guildClicked(Api::Guild&)), middleColumn, SLOT(openGuild(Api::Guild&)));
@@ -73,8 +87,7 @@ void MainWindow::gatewayDispatchHandler(std::string& eventName, json& data)
 void MainWindow::setupGateway()
 {
     // Create and launch the gateway
-    gw = Api::Gateway();
-    gw.start();
+    Api::Gateway gw = Api::Gateway();
     gw.onDispatch([&](std::string& eventName, json& data){gatewayDispatchHandler(eventName, data);});
 }
 

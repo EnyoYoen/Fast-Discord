@@ -1,6 +1,5 @@
 #include "ui/usermenu.h"
 
-#include "ui/roundedimage.h"
 #include "api/request.h"
 
 #include <QHBoxLayout>
@@ -26,13 +25,20 @@ UserMenu::UserMenu(const Api::Client *client, QWidget *parent)
     if (client->avatar == nullptr) {
         // Use an asset if the user doesn't have an icon
         channelIconFileName = "res/images/png/user-icon-asset0.png";
+
+        avatar = new RoundedImage(channelIconFileName, 32, 32, 16, container);
     } else {
         // Request the icon
         channelIconFileName = *client->id + (client->avatar->rfind("a_") == 0 ? ".gif" : ".webp");
         if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-            Api::Request::requestFile("https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, "cache/" + channelIconFileName);
+            Api::Request::getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, channelIconFileName);
+
+            avatar = new RoundedImage(32, 32, 16, container);
+        } else {
+            channelIconFileName = "cache/" + channelIconFileName;
+
+            avatar = new RoundedImage(channelIconFileName, 32, 32, 16, container);
         }
-        channelIconFileName = "cache/" + channelIconFileName;
     }
 
     // Create the widgets of the user menu
@@ -55,7 +61,7 @@ UserMenu::UserMenu(const Api::Client *client, QWidget *parent)
     userInfosLayout->setContentsMargins(8, 10, 4, 10);
 
     // Add the icon and the infos of the user to the layout and style it
-    layout->addWidget(new RoundedImage(channelIconFileName, 32, 32, 16, container));
+    layout->addWidget(avatar);
     layout->addWidget(userInfos);
     layout->setContentsMargins(8, 0, 8, 0);
     layout->setSpacing(0);
@@ -80,6 +86,11 @@ UserMenu::UserMenu(const Api::Client *client, QWidget *parent)
     // Connect buttons clicked signals
     QObject::connect(deafenButton, SIGNAL(leftClicked(int, bool)), this, SLOT(clicButton(int, bool)));
     QObject::connect(settingsButton, SIGNAL(leftClicked(int, bool)), this, SLOT(clicButton(int, bool)));
+}
+
+void UserMenu::setIcon(const std::string& iconFileName)
+{
+    avatar->setImage(iconFileName);
 }
 
 void UserMenu::clicButton(int type, bool active)

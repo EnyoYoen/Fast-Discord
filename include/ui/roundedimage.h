@@ -24,6 +24,7 @@ private:
     int w;
     int h;
     int r;
+    bool hasImage;
 };
 
 } // namespace Ui
