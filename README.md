@@ -41,7 +41,6 @@ SOFTWARE.
 ### Dependencies
 - Qt5 (Widgets)
 - Boost (filesystem)
-- Libcurl
 - OpenSSL (Crypto)
 - Pthread
 - Cpprestsdk
@@ -50,17 +49,17 @@ SOFTWARE.
 ### Install the dependencies
 **On Debian / Ubuntu :**
 ```shell
-$ sudo apt-get install qt5-default libboost-filesystem-dev zlib1g libcurl4-openssl-dev libssl-dev libcpprest-dev libpthread-stubs0-dev
+$ sudo apt-get install qt5-default zlib1g libcurl4-openssl-dev libssl-dev libcpprest-dev libpthread-stubs0-dev
 ```
 
 **On Windows (with [vcpkg](https://github.com/microsoft/vcpkg/#quick-start-windows)) :**
 ```shell
-> vcpkg install qt5 boost-filesystem zlib curl openssl cpprestsdk pthreads
+> vcpkg install qt5 boost-filesystem zlib openssl cpprestsdk pthreads
 ```
 
 **On MacOS (with [Homebrew](https://brew.sh/index)) :**
 ```shell
-$ brew install qt5 boost zlib curl openssl cpprestsdk libpthread-stubs
+$ brew install qt5 boost zlib openssl cpprestsdk libpthread-stubs
 ```
 
 You will also need [CMake](https://cmake.org/download/) (Minimum version : 3.0)
