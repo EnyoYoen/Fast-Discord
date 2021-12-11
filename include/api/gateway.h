@@ -4,7 +4,8 @@
 
 #include "../../lib/nlohmann/json.hpp"
 
-#include <cpprest/ws_client.h>
+#include <QtWebSockets/QtWebSockets>
+#include <QObject>
 
 #include <string>
 
@@ -28,28 +29,34 @@ enum Opcodes {
 };
 
 //https://discord.com/developers/docs/topics/gateway
-class Gateway
+class Gateway : public QObject
 {
+    Q_OBJECT
 public:
     Gateway(Api::Requester *requester, const std::string& token);
     void onDispatch(std::function<void(std::string&, json&)> callback);
         //Sets the callback function called when the gateway recieve events
 
+private slots:
+    void closeHandler();
+    void identify();
+    void errored(QAbstractSocket::SocketError err);
+    void processBinaryMessage(const QByteArray& message);
+                          // Process a text message that the gateway recieves
+    void processTextMessage(const QString& message);
+                          // Process a binary message that the gateway recieves
+
 private:
     void start();
     void send(int op, const std::string& data);
                           //Send data through the gateway
-    void onMessage(web::websockets::client::websocket_incoming_message message);
-                          //Process the messages that the gateway recieve
     void resume();        //Resume connection
-    void identify();      //Identifying to the gateway
     void heartbeat();     //Send Heartbeat message to stay connected
     void heartbeatLoop(); //Function Launched in a thread to send heartbeat messages
     void dispatch(std::string eventName, json& data);
                           //Internal function used to process some messages
-    void connect();       //Connect to the gateway
 
-    web::websockets::client::websocket_callback_client client; //websocket client
+    QWebSocket client;    // websocket client
     std::function<void(std::string&, json&)> onDispatchHandler;
          //Function called when when the gateway recieve events
     std::string url; //websocket URL

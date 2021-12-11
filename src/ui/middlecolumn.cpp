@@ -77,7 +77,7 @@ void MiddleColumn::setGuildChannels(std::vector<Api::Channel *> *channelsp)
     // Create the channels widgets
 
     size_t channelsLen = channels.size();
-    unsigned int count; // For the IDs of the channels
+    unsigned int count = 0; // For the IDs of the channels
     // Loop to find channel that are not in a category
     for (size_t i = 0 ; i < channelsLen ; i++) {
         if ((*channels[i]).type != Api::GuildCategory && (*channels[i]).parentId == nullptr) {

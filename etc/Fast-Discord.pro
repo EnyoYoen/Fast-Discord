@@ -1,4 +1,4 @@
-QT += core gui network
+QT += core gui network websockets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -132,8 +132,7 @@ HEADERS += \
     ../lib/nlohmann/thirdparty/hedley/hedley.hpp \
     ../lib/nlohmann/thirdparty/hedley/hedley_undef.hpp
 
-LIBS += \
-    -lssl -lcrypto -lpthread -lcpprest -lz -lboost_filesystem
+LIBS += -lpthread
 
 INCLUDEPATH += "../lib/"
 INCLUDEPATH += "../include/"

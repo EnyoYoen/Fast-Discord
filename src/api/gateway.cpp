@@ -3,11 +3,11 @@
 #include "api/jsonutils.h"
 
 #include <thread>
-#include <zlib.h>
 
 namespace Api {
 
 Gateway::Gateway(Api::Requester *requester, const std::string& tokenp)
+    : QObject()
 {
     // Member initialization
     seq = 0;
@@ -31,31 +31,30 @@ Gateway::Gateway(Api::Requester *requester, const std::string& tokenp)
     });
 }
 
-// Connect to the gateway
-void Gateway::connect()
-{
-    client.connect(url + "?v=9&encoding=json");
-}
-
 // Set the handlers and connect
 void Gateway::start()
 {
-    client.set_message_handler([&](web::websockets::client::websocket_incoming_message msg){
-        try {
-            onMessage(msg); //Process messages
-        }
-        catch (const std::exception& e) {}
-    });
+    QObject::connect(&client, SIGNAL(aboutToClose()), this, SLOT(closeHandler()));
+    QObject::connect(&client, SIGNAL(connected()), this, SLOT(identify()));
+    QObject::connect(&client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(errored(QAbstractSocket::SocketError)));
+    QObject::connect(&client, SIGNAL(binaryMessageReceived(const QByteArray&)), this, SLOT(processBinaryMessage(const QByteArray&)));
+    QObject::connect(&client, SIGNAL(textMessageReceived(const QString&)), this, SLOT(processTextMessage(const QString&)));
 
-    client.set_close_handler([&](web::websockets::client::websocket_close_status/* status*/, const utility::string_t &/*reason*/, const std::error_code &/*code*/)
-    {
-        // Reconnect when the connection is closed
-        if (connected) {
-            connected = false;
-            connect();
-        }
-    });
-    connect();
+    client.open(QUrl(QString(url.c_str()) + "/" + QString("?v=9&encoding=json")));
+}
+
+void Gateway::errored(QAbstractSocket::SocketError err)
+{
+    qDebug() << err;
+}
+
+void Gateway::closeHandler()
+{
+    // Reconnect when the connection is closed
+    if (connected) {
+        connected = false;
+        client.open(QUrl(QString(url.c_str()) + QString("?v=9&encoding=json")));
+    }
 }
 
 // Set the callback function called when the gateway recieve events
@@ -68,65 +67,52 @@ void Gateway::onDispatch(std::function<void(std::string&, json&)> callback)
 // Send data through the gateway
 void Gateway::send(int op, const std::string& data)
 {
-    std::string payload = "{\"op\":" + std::to_string(op) + ",\"d\":" + data + "}"; //Build the payload string
+    // Build the payload string
+    std::string payload = "{\"op\":" + std::to_string(op) + ",\"d\":" + data + "}";
 
-    // Creating the message
-    web::websockets::client::websocket_outgoing_message message;
-    message.set_utf8_message(payload);
-
-    // Send it
-    client.send(message);
+    // Send the message
+    client.sendTextMessage(QString(payload.c_str()));
 }
 
-// Process the messages that the gateway recieves
-void Gateway::onMessage(const web::websockets::client::websocket_incoming_message message)
+// Process a binary message that the gateway recieves
+void Gateway::processBinaryMessage(const QByteArray& message)
 {
-    std::string messageStr;
+    json payload = json::parse(QString(qUncompress(message)).toUtf8().constData());
+    json& data = payload.at("d");
 
-    // Convert the message to string if it is binary
-    if (message.message_type() == web::websockets::client::websocket_message_type::binary_message) {
-        Concurrency::streams::container_buffer<std::string> strbuf;
+    switch (payload.value("op", -1)) {
+        case Dispatch: //Event recieved
+            seq = payload.at("s");
+            dispatch(payload.at("t"), data);
+            break;
+        case Reconnect:
+            resume();
+            break;
+        case InvalidSession:
+            identify();
+            break;
+        case Hello:
+            connected = true;
 
-        auto task = message.body().read_to_end(strbuf).then([strbuf](size_t) {
-            return strbuf.collection();
-        });
+            // Start Heartbeating
+            heartbeatInterval = data.value("heartbeat_interval", 45000);
+            std::thread heartbeatThread = std::thread(&Gateway::heartbeatLoop, this);
+            heartbeatThread.detach();
 
-        z_stream zs;
-        memset(&zs, 0, sizeof(zs));
-
-        if (inflateInit(&zs) != Z_OK) {
-            return;
-        }
-
-        std::string compressed = task.get();
-
-        zs.next_in = reinterpret_cast<Bytef *>(const_cast<char *>(compressed.data()));
-        zs.avail_in = static_cast<uInt>(compressed.size());
-
-        int ret;
-        char buffer[32768];
-
-        do {
-            zs.next_out = reinterpret_cast<Bytef *>(buffer);
-            zs.avail_out = sizeof(buffer);
-
-            ret = inflate(&zs, 0);
-
-            if (messageStr.size() < zs.total_out) {
-                messageStr.append(buffer, zs.total_out - messageStr.size());
+            if (resuming) {
+                resume();
+            } else {
+                identify();
+                resuming = true;
             }
-        } while (ret == Z_OK);
-
-        inflateEnd(&zs);
-
-        if (ret != Z_STREAM_END) {
-            return;
-        }
-    } else {
-        messageStr = message.extract_string().get();
+            break;
     }
+}
 
-    json payload = json::parse(messageStr);
+// Process a text message that the gateway recieves
+void Gateway::processTextMessage(const QString& message)
+{
+    json payload = json::parse(message.toUtf8().constData());
     json& data = payload.at("d");
 
     switch (payload.value("op", -1)) {
@@ -161,7 +147,7 @@ void Gateway::onMessage(const web::websockets::client::websocket_incoming_messag
 // Identifying to the gateway
 void Gateway::identify()
 {
-    send(2, "{\"token\":\"" + token +"\","
+    send(Identify, "{\"token\":\"" + token +"\","
         "\"capabilities\":125,"
         "\"properties\":{"
             "\"os\":\"Linux\","
@@ -196,9 +182,9 @@ void Gateway::identify()
 // Resume connection
 void Gateway::resume()
 {
-    send(6, "{\"token\":\""+ token +"\","
-        "\"session_id\":,"
-        "\"seq\":" + std::to_string(seq) + "}");
+    send(Resume, "{\"token\":\""+ token +"\","
+                 "\"session_id\":,"
+                 "\"seq\":" + std::to_string(seq) + "}");
 }
 
 // Function Launched in a thread to send heartbeat messages

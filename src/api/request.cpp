@@ -2,12 +2,12 @@
 
 #include "api/jsonutils.h"
 
+#include <QDir>
 #include <QUrlQuery>
 #include <QMimeDatabase>
 #include <QtNetwork/QHttpMultiPart>
 #include <QtNetwork/QHttpPart>
 #include <QtNetwork/QNetworkRequest>
-#include <boost/filesystem.hpp>
 
 #include <cstdlib>
 #include <ctime>
@@ -46,7 +46,9 @@ void Requester::readReply()
     RequestParameters parameters = requestQueue.front();
     requestQueue.pop();
     if (parameters.outputFile != "") {
-        if (!boost::filesystem::exists(boost::filesystem::path("cache/"))) boost::filesystem::create_directory(boost::filesystem::path("cache"));
+        QDir dir("cache/");
+        if (!dir.exists()) dir.mkpath(".");
+
         QFile file(QString(parameters.outputFile.c_str()));
         file.open(QIODevice::WriteOnly);
         file.write(reply->readAll());

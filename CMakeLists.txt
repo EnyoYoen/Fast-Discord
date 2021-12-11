@@ -13,11 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(lib/)
 include_directories(include/)
 
-find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
-find_package(Boost COMPONENTS filesystem REQUIRED)
-find_package(ZLIB REQUIRED)
-find_package(OpenSSL REQUIRED)
-find_package(cpprestsdk REQUIRED)
+find_package(Qt5 COMPONENTS Widgets Network WebSockets REQUIRED)
 find_package(Threads REQUIRED)
 
 set(SOURCES
@@ -136,8 +132,5 @@ add_executable(Fast-Discord ${SOURCES} ${HEADERS})
 
 target_link_libraries(Fast-Discord Qt5::Widgets)
 target_link_libraries(Fast-Discord Qt5::Network)
-target_link_libraries(Fast-Discord Boost::filesystem)
-target_link_libraries(Fast-Discord ZLIB::ZLIB)
-target_link_libraries(Fast-Discord OpenSSL::Crypto)
-target_link_libraries(Fast-Discord cpprest)
+target_link_libraries(Fast-Discord Qt5::WebSockets)
 target_link_libraries(Fast-Discord pthread)
