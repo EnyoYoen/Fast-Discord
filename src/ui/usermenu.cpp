@@ -8,9 +8,12 @@
 
 namespace Ui {
 
-UserMenu::UserMenu(const Api::Client *client, QWidget *parent)
+UserMenu::UserMenu(Api::Requester *requesterp, const Api::Client *client, QWidget *parent)
     : QWidget(parent)
 {
+    // Set the requester
+    requester = requesterp;
+
     // Create the layout
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
 
@@ -31,7 +34,7 @@ UserMenu::UserMenu(const Api::Client *client, QWidget *parent)
         // Request the icon
         channelIconFileName = *client->id + (client->avatar->rfind("a_") == 0 ? ".gif" : ".webp");
         if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-            Api::Request::getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, channelIconFileName);
+            requester->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, channelIconFileName);
 
             avatar = new RoundedImage(32, 32, 16, container);
         } else {

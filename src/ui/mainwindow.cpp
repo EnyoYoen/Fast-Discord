@@ -12,26 +12,25 @@ namespace Ui {
 MainWindow::MainWindow() : QWidget()
 {
     // Style the window
-    // this->setWindowFlags(Qt::CustomizeWindowHint);
+    // this->setWindowFlags(Qt::CustomizeWindowHint); Soon
     this->setGeometry(0, 0, 940, 728);
     this->setStyleSheet("background-color: #202225;"
                         "padding: 0px;"
                         "border: none;");
 
-    // Ask the token to the user
-    Api::Request::token = QInputDialog::getText(nullptr, "Token", "Enter your Discord token", QLineEdit::Normal, QString(), nullptr).toUtf8().constData();
-
-    // Start the request loop
-    Api::Request::startLoop();
+    // Create the requester and the gateway
+    std::string token = QInputDialog::getText(nullptr, "Token", "Enter your Discord token", QLineEdit::Normal, QString(), nullptr).toUtf8().constData();
+    requester = new Api::Requester(token);
+    gw = new Api::Gateway(requester, token);
 
     // Connect the signal for the setup
     QObject::connect(this, SIGNAL(clientSettingsRecieved()), this, SLOT(setup()));
 
     // Get user settings
-    Api::Request::getClient([this](void *clientp){
+    requester->getClient([this](void *clientp){
         client = static_cast<Api::Client *>(clientp);
     });
-    Api::Request::getClientSettings([this](void *clientSettingsp){
+    requester->getClientSettings([this](void *clientSettingsp){
         clientSettings = static_cast<Api::ClientSettings *>(clientSettingsp);
         emit clientSettingsRecieved();
     });
@@ -43,16 +42,16 @@ void MainWindow::setup()
     setupInterface();
 
     // Set the gateway event callback
-    gw.onDispatch([&](std::string& eventName, json& data){gatewayDispatchHandler(eventName, data);});
+    gw->onDispatch([&](std::string& eventName, json& data){gatewayDispatchHandler(eventName, data);});
 }
 
 void MainWindow::setupInterface()
 {
     // Create all the widgets
     mainLayout = new QHBoxLayout(this);
-    leftColumn = new LeftColumn(this);
-    middleColumn = new MiddleColumn(client, this);
-    rightColumn = new RightColumn(client, this);
+    leftColumn = new LeftColumn(requester, this);
+    middleColumn = new MiddleColumn(requester, client, this);
+    rightColumn = new RightColumn(requester, client, this);
 
     // Add the column to the layout
     mainLayout->addWidget(leftColumn);

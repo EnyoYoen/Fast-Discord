@@ -4,6 +4,7 @@
 #include "ui/usermenubutton.h"
 #include "ui/roundedimage.h"
 #include "api/client.h"
+#include "api/request.h"
 
 #include <QWidget>
 
@@ -14,13 +15,15 @@ class UserMenu : public QWidget
 {
     Q_OBJECT
 public:
-    UserMenu(const Api::Client *client, QWidget *parent);
+    UserMenu(Api::Requester *requester, const Api::Client *client, QWidget *parent);
 
 private slots:
     void clicButton(int type, bool active);
 
 private:
     void setIcon(const std::string& iconFileName);
+
+    Api::Requester *requester; // To request the API
 
     RoundedImage   *avatar;     // The avatar of the user
     UserMenuButton *muteButton; // Used when deafen button is clicked

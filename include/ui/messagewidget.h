@@ -2,6 +2,7 @@
 
 #include "roundedimage.h"
 #include "api/message.h"
+#include "api/request.h"
 
 #include <QWidget>
 #include <QLabel>
@@ -13,12 +14,14 @@ class MessageWidget : public QWidget
 {
     Q_OBJECT
 public:
-    MessageWidget(const Api::Message& message, bool isFirst, bool separatorBefore, QWidget *parent);
+    MessageWidget(Api::Requester *requester, const Api::Message& message, bool isFirst, bool separatorBefore, QWidget *parent);
 
 private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
     void setAvatar(const std::string& avatarFileName);
+
+    Api::Requester *requester; // To request the API
 
     QString hoveredTimestamp; // The timestamp we show
     RoundedImage *avatar;     // The avatar if there is one

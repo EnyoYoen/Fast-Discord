@@ -1,7 +1,5 @@
 #include "ui/privatechannel.h"
 
-#include "api/request.h"
-
 #include <QPixmap>
 #include <QBitmap>
 #include <QPainter>
@@ -14,10 +12,11 @@
 
 namespace Ui {
 
-PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int idp, QWidget *parent)
+PrivateChannel::PrivateChannel(Api::Requester *requesterp, const Api::Channel& privateChannel, unsigned int idp, QWidget *parent)
     : QWidget(parent)
 {
     // Attributes initialization
+    requester = requesterp;
     id = idp;
     channel = const_cast<Api::Channel *>(&privateChannel);
 
@@ -45,7 +44,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int 
             // Request the icon
             channelIconFileName = *dmUser.id + (avatar->rfind("a_") == 0 ? ".gif" : ".webp");
             if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-                Api::Request::getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *dmUser.id + "/" + *avatar, channelIconFileName);
+                requester->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *dmUser.id + "/" + *avatar, channelIconFileName);
 
                 // Create the icon
                 icon = new RoundedImage(32, 32, 16, container);
@@ -97,7 +96,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int 
             // Request the icon
             channelIconFileName = *channelIcon + ".png";
             if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-                Api::Request::getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/channel-icons/" + *privateChannel.id + "/" + channelIconFileName, channelIconFileName);
+                requester->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/channel-icons/" + *privateChannel.id + "/" + channelIconFileName, channelIconFileName);
 
                 // Create the icon
                 icon = new RoundedImage(32, 32, 16, container);
@@ -111,7 +110,7 @@ PrivateChannel::PrivateChannel(const Api::Channel& privateChannel, unsigned int 
     }
 
     // Style the widgets
-    name->setFixedSize(156, 14);
+    if (name) name->setFixedSize(156, 14);
     subtext->setFixedSize(156, 14);
 
     // Create and style the layout, and add widgets to it

@@ -1,4 +1,4 @@
-QT       += core gui
+QT += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -133,7 +133,7 @@ HEADERS += \
     ../lib/nlohmann/thirdparty/hedley/hedley_undef.hpp
 
 LIBS += \
-    -lcurl -lssl -lcrypto -lpthread -lcpprest -lz -lboost_filesystem
+    -lssl -lcrypto -lpthread -lcpprest -lz -lboost_filesystem
 
 INCLUDEPATH += "../lib/"
 INCLUDEPATH += "../include/"

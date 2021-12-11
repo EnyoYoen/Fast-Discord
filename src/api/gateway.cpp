@@ -1,6 +1,5 @@
 #include "api/gateway.h"
 
-#include "api/request.h"
 #include "api/jsonutils.h"
 
 #include <thread>
@@ -8,16 +7,16 @@
 
 namespace Api {
 
-Gateway::Gateway()
+Gateway::Gateway(Api::Requester *requester, const std::string& tokenp)
 {
     // Member initialization
     seq = 0;
     connected = false;
     resuming = false;
-    token = Request::token;
+    token = tokenp;
 
     // Getting the websocket URL
-    Request::requestApi({
+    requester->requestApi({
         [this](void *urlp) {
             url = *static_cast<std::string *>(urlp);
             this->start();

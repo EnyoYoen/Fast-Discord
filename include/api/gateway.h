@@ -1,5 +1,7 @@
 #pragma once
 
+#include "api/request.h"
+
 #include "../../lib/nlohmann/json.hpp"
 
 #include <cpprest/ws_client.h>
@@ -29,7 +31,7 @@ enum Opcodes {
 class Gateway
 {
 public:
-    Gateway();
+    Gateway(Api::Requester *requester, const std::string& token);
     void onDispatch(std::function<void(std::string&, json&)> callback);
         //Sets the callback function called when the gateway recieve events
 

@@ -2,64 +2,148 @@
 
 #include "api/jsonutils.h"
 
-#include <curl/curl.h>
+#include <QUrlQuery>
+#include <QMimeDatabase>
+#include <QtNetwork/QHttpMultiPart>
+#include <QtNetwork/QHttpPart>
+#include <QtNetwork/QNetworkRequest>
 #include <boost/filesystem.hpp>
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <ctime>
+#include <cstring>
 #include <chrono>
 #include <thread>
+#include <iostream>
 
 namespace Api {
 
-std::queue<RequestParameters> Request::requestQueue;
-std::mutex Request::lock;
-std::condition_variable Request::requestWaiter;
-std::thread Request::loop;
-std::string Request::token;       // Authorization token
-double Request::rateLimitEnd = 0; // No rate limit for now
-bool Request::stopped = false;
-
-// Store the data recieved
-size_t Request::writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+Requester::Requester(const std::string& tokenp)
+    : QObject()
 {
-    size_t realsize = size * nmemb;
-    MemoryStruct *mem = (MemoryStruct *)userp; // MemoryStruct that we passed, to store the data
+    // Attributes initialization
+    token = tokenp;
+    currentRequestsNumber = 0;
+    rateLimitEnd = 0; // No rate limit for now
+    stopped = false;
 
-    char *ptr = static_cast<char *>(realloc(mem->memory, mem->size + realsize + 1));
-    if (ptr == nullptr) {
-        /* out of memory */
-        printf("Not enough memory (realloc returned NULL)\nMemory size : %lu\nMemory to allocate : %lu\n", mem->size, realsize);
-        return 0;
+    // Start the request loop
+    loop = std::thread([this](){RequestLoop();});
+
+    QObject::connect(this, SIGNAL(requestEmit(int, QNetworkRequest, QUrlQuery *, QHttpMultiPart *)), this, SLOT(doRequest(int, QNetworkRequest, QUrlQuery *, QHttpMultiPart *)));
+}
+
+Requester::~Requester()
+{
+    // Stop the request loop
+    stopped = true;
+    loop.join();
+    requestWaiter.notify_all();
+}
+
+void Requester::readReply()
+{
+    RequestParameters parameters = requestQueue.front();
+    requestQueue.pop();
+    if (parameters.outputFile != "") {
+        if (!boost::filesystem::exists(boost::filesystem::path("cache/"))) boost::filesystem::create_directory(boost::filesystem::path("cache"));
+        QFile file(QString(parameters.outputFile.c_str()));
+        file.open(QIODevice::WriteOnly);
+        file.write(reply->readAll());
+        file.close();
     }
+    QByteArray ba = reply->readAll();
+    const QString qsContent = QString(ba);
+    const std::string sContent = qsContent.toUtf8().constData();
+    char *content = const_cast<char *>(sContent.c_str());
 
-    mem->memory = ptr;
-    memcpy(&(mem->memory[mem->size]), contents, realsize);
-    mem->size += realsize;
-    mem->memory[mem->size] = 0;
-
-    return realsize;
+    QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+    if (statusCode.toInt() == 429) { // We are rate limited
+        // Set the end of the rate limit
+        rateLimitEnd = std::time(0) + json::parse(content, nullptr, false).value("retry_after", double(0));
+    } else {
+        switch (parameters.type) {
+            case GetUser:
+                {
+                    User *user;
+                    unmarshal<User>(json::parse(content, nullptr, false), "", &user);
+                    parameters.callback(static_cast<void *>(user));
+                    break;
+                }
+            case GetGuilds:
+                {
+                    std::vector<Guild *> *guilds;
+                    unmarshalMultiple<Guild>(json::parse(content, nullptr, false), "", &guilds);
+                    parameters.callback(static_cast<void *>(guilds));
+                    break;
+                }
+            case GetGuildChannels:
+                {
+                    std::vector<Channel *> *channels;
+                    unmarshalMultiple<Channel>(json::parse(content, nullptr, false), "", &channels);
+                    parameters.callback(static_cast<void *>(channels));
+                    break;
+                }
+            case GetPrivateChannels:
+                {
+                    std::vector<Channel *> *privateChannels;
+                    unmarshalMultiple<Channel>(json::parse(content, nullptr, false), "", &privateChannels);
+                    parameters.callback(static_cast<void *>(privateChannels));
+                    break;
+                }
+            case GetMessages:
+                {
+                    std::vector<Message *> *messages;
+                    unmarshalMultiple<Message>(json::parse(content, nullptr, false), "", &messages);
+                    parameters.callback(static_cast<void *>(messages));
+                    break;
+                }
+            case GetClient:
+                {
+                    Client *client;
+                    unmarshal<Client>(json::parse(content, nullptr, false), "", &client);
+                    parameters.callback(static_cast<void *>(client));
+                    break;
+                }
+            case GetClientSettings:
+                {
+                    ClientSettings *clientSettings;
+                    unmarshal<ClientSettings>(json::parse(content, nullptr, false), "", &clientSettings);
+                    parameters.callback(static_cast<void *>(clientSettings));
+                    break;
+                }
+            case GetWsUrl:
+                {
+                    try {
+                        json jsonUrl = json::parse(content, nullptr, false).at("url");
+                        if (jsonUrl.is_null())
+                            break;
+                        std::string url = std::string(jsonUrl.get<std::string>());
+                        parameters.callback(static_cast<void *>(&url));
+                    } catch(std::exception&) {
+                        break;
+                    }
+                break;
+                }
+            case GetImage:
+                {
+                    std::string imageFileName = parameters.outputFile;
+                    parameters.callback(static_cast<void *>(&imageFileName));
+                    break;
+                }
+        }
+        currentRequestsNumber--;
+    }
+    finishWaiter.notify_one();
 }
 
-// Store data in a file
-size_t Request::writeFileCallback(void *contents, size_t size, size_t nmemb, FILE *stream)
-{
-    size_t written = fwrite(contents, size, nmemb, stream);
-    return written;
-}
-
-// If we don't need the response
-size_t Request::noOutputCallback(void *, size_t size, size_t nmemb, void *)
-{
-    return size * nmemb;
-}
-
-void Request::RequestLoop()
+void Requester::RequestLoop()
 {
     while (!stopped) {
-        if (requestQueue.size() > 0) {
+        if (requestQueue.size() > currentRequestsNumber) {
             do {
                 RequestParameters parameters = requestQueue.front();
+                currentRequestsNumber++;
 
                 // Very basic rate limit checker
                 if (rateLimitEnd != 0) { // We were rate limited
@@ -70,179 +154,50 @@ void Request::RequestLoop()
                     rateLimitEnd = 0; // Reset rate limit
                 }
 
-                CURL *curl;
-                CURLcode res;
+                QNetworkRequest request(QUrl(QString(parameters.url.c_str())));
 
-                /* Init the curl session */
-                curl = curl_easy_init();
-                if (curl) {
-                    MemoryStruct callbackStruct;
-                    curl_mime *form = nullptr;
+                /* Set the headers */
+                request.setRawHeader(QByteArray("Authorization"), QByteArray(token.c_str()));
+                if (parameters.json) {
+                    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+                }
 
-                    /* Set our custom set of headers */
-                    curl_slist *headers = curl_slist_append(nullptr, ("Authorization: " + token).c_str());
-                    if (parameters.json) {
-                        headers = curl_slist_append(headers, "content-type: application/json");
-                    }
-                    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-                    /* Specify URL to get */
-                    curl_easy_setopt(curl, CURLOPT_URL, parameters.url.c_str());
-
-                    if (parameters.outputFile != "") {
-                        // If cache directory is not created, create it
-                        if (!boost::filesystem::exists(boost::filesystem::path("cache/"))) boost::filesystem::create_directory(boost::filesystem::path("cache"));
-                        FILE *fp = fopen(parameters.outputFile.c_str(), "wb");
-                        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFileCallback);
-                        curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-                    } else {
-                        callbackStruct.memory = static_cast<char *>(malloc(1));  /* Will be grown as needed by the realloc above */
-                        callbackStruct.size = 0;    /* No data at this point */
-
-                        /* Send all data to this function  */
-                        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
-
-                        /* We pass our 'chunk' struct to the callback function */
-                        curl_easy_setopt(curl, CURLOPT_WRITEDATA, static_cast<void *>(&callbackStruct));
-                    }
-
-                    if (parameters.postDatas != "") {
-                        // Set POST data
-                        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, parameters.postDatas.c_str());
-                    }
-
-                    if (parameters.customRequest != "") {
-                        // Set custom request
-                        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, parameters.customRequest.c_str());
-                    }
-
-                    if (parameters.fileName != "") {
-                        /* Create the form */
-                        form = curl_mime_init(curl);
-
-                        /* Fill in the file upload field */
-                        curl_mimepart *field = curl_mime_addpart(form);
-                        curl_mime_name(field, "sendfile");
-                        curl_mime_filedata(field, parameters.fileName.c_str());
-
-                        /* Fill in the filename field */
-                        field = curl_mime_addpart(form);
-                        curl_mime_name(field, "filename");
-                        curl_mime_data(field, parameters.fileName.c_str(), CURL_ZERO_TERMINATED);
-
-                        /* Fill in the submit field too*/
-                        field = curl_mime_addpart(form);
-                        curl_mime_name(field, "submit");
-                        curl_mime_data(field, "send", CURL_ZERO_TERMINATED);
-
-                        curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
-                    }
-
-                    long httpCode = 0;
-                    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
-
-                    /* Get it */
-                    res = curl_easy_perform(curl);
-
-                    /* Check for errors */
-                    if (res != CURLE_OK) {
-                        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-                    }
-
-                    /* Cleanup cURL stuff */
-                    curl_easy_cleanup(curl);
-
-                    if (parameters.fileName != "") {
-                        curl_mime_free(form);
-                    }
-
-                    if (httpCode == 429) { // We are rate limited
-                        // Set the end of the rate limit
-                        rateLimitEnd = std::time(0) + json::parse(callbackStruct.memory).value("retry_after", double(0));
-
-                        // Reset our MemoryStruct
-                        free(callbackStruct.memory);
-                        callbackStruct.size = 0;
-
-                        // Redo the request
-                        requestApi(parameters);
-                    } else {
-                        switch (parameters.type) {
-                            case GetUser:
-                                {
-                                    User *user;
-                                    unmarshal<User>(json::parse(callbackStruct.memory), "", &user);
-                                    parameters.callback(static_cast<void *>(user));
-                                    break;
-                                }
-                            case GetGuilds:
-                                {
-                                    std::vector<Guild *> *guilds;
-                                    unmarshalMultiple<Guild>(json::parse(callbackStruct.memory), "", &guilds);
-                                    parameters.callback(static_cast<void *>(guilds));
-                                    break;
-                                }
-                            case GetGuildChannels:
-                                {
-                                    std::vector<Channel *> *channels;
-                                    unmarshalMultiple<Channel>(json::parse(callbackStruct.memory), "", &channels);
-                                    parameters.callback(static_cast<void *>(channels));
-                                    break;
-                                }
-                            case GetPrivateChannels:
-                                {
-                                    std::vector<Channel *> *privateChannels;
-                                    unmarshalMultiple<Channel>(json::parse(callbackStruct.memory), "", &privateChannels);
-                                    parameters.callback(static_cast<void *>(privateChannels));
-                                    break;
-                                }
-                            case GetMessages:
-                                {
-                                    std::vector<Message *> *messages;
-                                    unmarshalMultiple<Message>(json::parse(callbackStruct.memory), "", &messages);
-                                    parameters.callback(static_cast<void *>(messages));
-                                    break;
-                                }
-                            case GetClient:
-                                {
-                                    Client *client;
-                                    unmarshal<Client>(json::parse(callbackStruct.memory), "", &client);/*
-                                    std::function<void(void *)> callback = *parameters.callback;
-                                    callback(static_cast<void *>(nullptr));*/
-                                    parameters.callback(static_cast<void *>(client));
-                                    break;
-                                }
-                            case GetClientSettings:
-                                {
-                                    ClientSettings *clientSettings;
-                                    unmarshal<ClientSettings>(json::parse(callbackStruct.memory), "", &clientSettings);
-                                    parameters.callback(static_cast<void *>(clientSettings));
-                                    break;
-                                }
-                            case GetWsUrl:
-                                {
-                                    try {
-                                        json jsonUrl = json::parse(callbackStruct.memory).at("url");
-                                        if (jsonUrl.is_null())
-                                            break;
-                                        std::string url = std::string(jsonUrl.get<std::string>());
-                                        parameters.callback(static_cast<void *>(&url));
-                                    } catch(std::exception&) {
-                                        break;
-                                    }
-                                break;
-                                }
-                            case GetImage:
-                                {
-                                    std::string imageFileName = parameters.outputFile;
-                                    parameters.callback(static_cast<void *>(&imageFileName));
-                                    break;
-                                }
-                        }
-                        requestQueue.pop();
+                QUrlQuery params;
+                if (parameters.postDatas != "") {
+                    // Set POST data
+                    size_t pos = 0;
+                    while ((pos = parameters.postDatas.find('\n')) != std::string::npos) {
+                        std::string current = parameters.postDatas.substr(0, pos);
+                        size_t pos2 = parameters.postDatas.find(':');
+                        params.addQueryItem(QString(current.substr(0, pos2).c_str()), QString(current.substr(pos2 + 1, current.length()).c_str()));
                     }
                 }
-            } while (!requestQueue.empty());
+
+                if (parameters.customRequest != "") {
+                    if (parameters.customRequest == "POST") {
+                        emit requestEmit(Post, request, &params, nullptr);
+                    } else if (parameters.customRequest == "PUT") {
+                        emit requestEmit(Put, request, &params, nullptr);
+                    } else if (parameters.customRequest == "DELETE") {
+                        emit requestEmit(Delete, request, nullptr, nullptr);
+                    }
+                } else if (parameters.fileName != "") {
+                    QHttpMultiPart multiPart(QHttpMultiPart::FormDataType);
+                    QHttpPart part;
+
+                    part.setHeader(QNetworkRequest::ContentTypeHeader, QVariant(QMimeDatabase().mimeTypeForFile(QString(parameters.fileName.c_str())).name()));
+                    QFile file(QString(parameters.fileName.c_str()));
+                    part.setBody(file.readAll());
+
+                    multiPart.append(part);
+                    emit requestEmit(Post, request, nullptr, &multiPart);
+                } else {
+                    emit requestEmit(Get, request, nullptr, nullptr);
+                }
+
+                std::unique_lock<std::mutex> uniqueLock(lock);
+                finishWaiter.wait(uniqueLock);
+            } while (!requestQueue.empty() && requestQueue.size() > currentRequestsNumber);
         } else {
             std::unique_lock<std::mutex> uniqueLock(lock);
             requestWaiter.wait(uniqueLock);
@@ -250,19 +205,32 @@ void Request::RequestLoop()
     }
 }
 
-void Request::startLoop()
+void Requester::doRequest(int requestType, QNetworkRequest request, QUrlQuery *params, QHttpMultiPart *multiPart)
 {
-    loop = std::thread(RequestLoop);
+    switch (requestType) {
+        case Get:
+            reply = netManager.get(request);
+            break;
+        case Post:
+            if (multiPart != nullptr) {
+                reply = netManager.post(request, multiPart);
+            } else {
+                reply = netManager.post(request, (*params).query().toUtf8());
+            }
+            break;
+        case Put:
+            reply = netManager.put(request, (*params).query().toUtf8());
+            break;
+        case Delete:
+            reply = netManager.deleteResource(request);
+            break;
+    }
+
+    // Connect the finished and read signals to process the reply
+    QObject::connect(reply, SIGNAL(finished()), this, SLOT(readReply(/*QNetworkReply **/)));
 }
 
-void Request::stopLoop()
-{
-    stopped = true;
-    loop.join();
-    requestWaiter.notify_all();
-}
-
-void Request::requestApi(const RequestParameters &parameters)
+void Requester::requestApi(const RequestParameters &parameters)
 {
     lock.lock();
     requestQueue.push(parameters);
@@ -272,7 +240,7 @@ void Request::requestApi(const RequestParameters &parameters)
 
 // Functions that request the API to retrieve data
 
-void Request::getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName)
+void Requester::getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName)
 {
     requestApi({
         callback,
@@ -285,7 +253,7 @@ void Request::getImage(std::function<void(void *)> callback, const std::string& 
         false});
 }
 
-void Request::getPrivateChannels(std::function<void(void *)> callback)
+void Requester::getPrivateChannels(std::function<void(void *)> callback)
 {
     requestApi({
         callback,
@@ -298,7 +266,7 @@ void Request::getPrivateChannels(std::function<void(void *)> callback)
         false});
 }
 
-void Request::getGuilds(std::function<void(void *)> callback)
+void Requester::getGuilds(std::function<void(void *)> callback)
 {
     requestApi({
         callback,
@@ -311,7 +279,7 @@ void Request::getGuilds(std::function<void(void *)> callback)
         false});
 }
 
-void Request::getGuildChannels(std::function<void(void *)> callback, const std::string& id)
+void Requester::getGuildChannels(std::function<void(void *)> callback, const std::string& id)
 {
     requestApi({
         callback,
@@ -324,7 +292,7 @@ void Request::getGuildChannels(std::function<void(void *)> callback, const std::
         false});
 }
 
-void Request::getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit)
+void Requester::getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit)
 {
     limit = limit >= 50 ? 50 : limit;
 
@@ -339,7 +307,7 @@ void Request::getMessages(std::function<void(void *)> callback, const std::strin
         false});
 }
 
-void Request::getClient(std::function<void(void *)> callback)
+void Requester::getClient(std::function<void(void *)> callback)
 {
     requestApi({
         callback,
@@ -352,7 +320,7 @@ void Request::getClient(std::function<void(void *)> callback)
         false});
 }
 
-void Request::getClientSettings(std::function<void(void *)> callback)
+void Requester::getClientSettings(std::function<void(void *)> callback)
 {
     requestApi({
         callback,
@@ -365,7 +333,7 @@ void Request::getClientSettings(std::function<void(void *)> callback)
         false});
 }
 
-void Request::getUser(std::function<void(void *)> callback, const std::string& userId)
+void Requester::getUser(std::function<void(void *)> callback, const std::string& userId)
 {
     requestApi({
         callback,
@@ -380,12 +348,12 @@ void Request::getUser(std::function<void(void *)> callback, const std::string& u
 
 // Functions that request the API to send data
 
-void Request::setStatus(const std::string& status)
+void Requester::setStatus(const std::string& status)
 {
     requestApi({
         nullptr,
         "https://discord.com/api/v9/users/@me/settings",
-        "{\"status\":\"" + status + "\"}",
+        "status:" + status,
         "PATCH",
         "",
         "",
@@ -393,7 +361,7 @@ void Request::setStatus(const std::string& status)
         false});
 }
 
-void Request::sendTyping(const std::string& channelId)
+void Requester::sendTyping(const std::string& channelId)
 {
     requestApi({
             nullptr,
@@ -406,7 +374,7 @@ void Request::sendTyping(const std::string& channelId)
             false});
 }
 
-void Request::sendMessage(const std::string& content, const std::string& channelId)
+void Requester::sendMessage(const std::string& content, const std::string& channelId)
 {
     requestApi({
             nullptr,
@@ -419,7 +387,7 @@ void Request::sendMessage(const std::string& content, const std::string& channel
             true});
 }
 
-void Request::sendMessageWithFile(const std::string& content, const std::string& channelId, const std::string& filePath)
+void Requester::sendMessageWithFile(const std::string& content, const std::string& channelId, const std::string& filePath)
 {
     requestApi({
             nullptr,
@@ -432,7 +400,7 @@ void Request::sendMessageWithFile(const std::string& content, const std::string&
             false});
 }
 
-void Request::deleteMessage(const std::string& channelId, const std::string& messageId)
+void Requester::deleteMessage(const std::string& channelId, const std::string& messageId)
 {
     requestApi({
         nullptr,
@@ -445,7 +413,7 @@ void Request::deleteMessage(const std::string& channelId, const std::string& mes
         false});
 }
 
-void Request::pinMessage(const std::string& channelId, const std::string& messageId)
+void Requester::pinMessage(const std::string& channelId, const std::string& messageId)
 {
     requestApi({
         nullptr,
@@ -458,7 +426,7 @@ void Request::pinMessage(const std::string& channelId, const std::string& messag
         false});
 }
 
-void Request::unpinMessage(const std::string& channelId, const std::string& messageId)
+void Requester::unpinMessage(const std::string& channelId, const std::string& messageId)
 {
     requestApi({
         nullptr,

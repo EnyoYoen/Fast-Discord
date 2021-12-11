@@ -41,7 +41,8 @@ private:
     MiddleColumn *middleColumn;
     RightColumn  *rightColumn;
 
-    Api::Gateway gw;                     // For the websocket connection
+    Api::Gateway   *gw;                  // For the websocket connection
+    Api::Requester *requester;           // To request the API
 
     Api::Client *client;                 // The actual client
     Api::ClientSettings *clientSettings; // and the settings

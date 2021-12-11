@@ -2,6 +2,8 @@
 
 #include <QApplication>
 
+#include <string>
+
 int main(int argc, char *argv[])
 {
     qRegisterMetaType<Api::Message>();

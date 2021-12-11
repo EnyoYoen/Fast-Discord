@@ -1,15 +1,17 @@
 #include "ui/middlecolumn.h"
 
 #include "ui/usermenu.h"
-#include "api/request.h"
 
 #include <fstream>
 
 namespace Ui {
 
-MiddleColumn::MiddleColumn(const Api::Client *client, QWidget *parent)
+MiddleColumn::MiddleColumn(Api::Requester *requesterp, const Api::Client *client, QWidget *parent)
     : QWidget(parent)
 {
+    // Set the requester
+    requester = requesterp;
+
     // Create the layout
     layout = new QVBoxLayout(this);
 
@@ -19,7 +21,7 @@ MiddleColumn::MiddleColumn(const Api::Client *client, QWidget *parent)
 
     // Add the widget and style the main layout
     layout->addWidget(channelList);
-    layout->addWidget(new UserMenu(client, this));
+    layout->addWidget(new UserMenu(requester, client, this));
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
@@ -46,7 +48,7 @@ void MiddleColumn::setPrivateChannels(std::vector<Api::Channel *> *channels)
 
     // Create and display the private channels
     for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
-        PrivateChannel *privateChannel = new PrivateChannel(*(*privateChannels)[i], i, privateChannelList);
+        PrivateChannel *privateChannel = new PrivateChannel(requester, *(*privateChannels)[i], i, privateChannelList);
         privateChannelWidgets.push_back(privateChannel);
         privateChannelListLayout->insertWidget(i, privateChannel);
         QObject::connect(privateChannel, SIGNAL(leftClicked(Api::Channel&, unsigned int)), this, SLOT(clicChannel(Api::Channel&, unsigned int)));
@@ -148,13 +150,13 @@ void MiddleColumn::clicChannel(Api::Channel& channel, unsigned int id)
 void MiddleColumn::displayPrivateChannels()
 {
     // Request private channels
-    Api::Request::getPrivateChannels([this](void *channels) {emit privateChannelsRecieved(static_cast<std::vector<Api::Channel *> *>(channels));});
+    requester->getPrivateChannels([this](void *channels) {emit privateChannelsRecieved(static_cast<std::vector<Api::Channel *> *>(channels));});
 }
 
 void MiddleColumn::openGuild(Api::Guild& guild)
 {
     // Request the channels of the guild
-    Api::Request::getGuildChannels([this](void *channels) {emit guildChannelsRecieved(static_cast<std::vector<Api::Channel *> *>(channels));}, *guild.id);
+    requester->getGuildChannels([this](void *channels) {emit guildChannelsRecieved(static_cast<std::vector<Api::Channel *> *>(channels));}, *guild.id);
 }
 
 } // namespace Ui

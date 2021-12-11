@@ -1,6 +1,5 @@
 #include "ui/messagewidget.h"
 
-#include "api/request.h"
 #include "api/jsonutils.h"
 
 #include <QHBoxLayout>
@@ -14,10 +13,11 @@
 
 namespace Ui {
 
-MessageWidget::MessageWidget(const Api::Message& message, bool isFirstp, bool separatorBefore, QWidget *parent)
+MessageWidget::MessageWidget(Api::Requester *requesterp, const Api::Message& message, bool isFirstp, bool separatorBefore, QWidget *parent)
     : QWidget(parent)
 {
-    // Attribute initialization
+    // Attributes initialization
+    requester = requesterp;
     isFirst = isFirstp;
 
     // Create the main widgets
@@ -58,7 +58,7 @@ MessageWidget::MessageWidget(const Api::Message& message, bool isFirstp, bool se
             if (!std::ifstream(("cache/" + avatarFileName).c_str()).good()) {
                 avatar = new RoundedImage(40, 40, 20, iconContainer);
                 iconLayout->addWidget(avatar);
-                Api::Request::getImage([this](void *avatarFileName) {this->setAvatar(*static_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
+                requester->getImage([this](void *avatarFileName) {this->setAvatar(*static_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
             } else {
                 iconLayout->addWidget(new RoundedImage("cache/" + avatarFileName, 40, 40, 20, iconContainer));
             }

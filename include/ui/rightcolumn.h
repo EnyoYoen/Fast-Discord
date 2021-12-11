@@ -5,6 +5,7 @@
 #include "api/message.h"
 #include "api/client.h"
 #include "api/jsonutils.h"
+#include "api/request.h"
 
 #include <QWidget>
 #include <QHBoxLayout>
@@ -23,7 +24,7 @@ class RightColumn : public QWidget
 {
     Q_OBJECT
 public:
-    RightColumn(Api::Client *clientp, QWidget *parent);
+    RightColumn(Api::Requester *requesterp, Api::Client *clientp, QWidget *parent);
     void userTyping(const json& data); // Used when we recieve TYPING_START event
                                        // from the gateway to show the typing label
 
@@ -48,6 +49,8 @@ private:
     QVBoxLayout *messagesLayout;
     MessageArea *messageArea;
     QLabel      *typingLabel;
+
+    Api::Requester *requester; // To request the API
 
     // Storing messages that we already gathered
     std::map<std::string, std::vector<Api::Message *> *> channelsMessages;

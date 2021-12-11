@@ -16,7 +16,7 @@ class MessageArea : public QScrollArea
 {
     Q_OBJECT
 public:
-    MessageArea(const std::vector<Api::Message *>& messages, QWidget *parent);
+    MessageArea(Api::Requester *requester, const std::vector<Api::Message *>& messages, QWidget *parent);
     // Add a new message
     void addMessage(const Api::Message& newMessage, const Api::Message& lastMessage);
 
@@ -25,6 +25,8 @@ private:
     void showEvent(QShowEvent *event) override;
 
     QVBoxLayout *messageLayout; // The layout of this widget
+
+    Api::Requester *requester;  // To request the API
 };
 
 } // namespace Ui

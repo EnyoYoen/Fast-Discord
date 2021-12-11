@@ -1,13 +1,12 @@
 #include "ui/leftcolumn.h"
 
-#include "api/request.h"
-
 namespace Ui {
 
-LeftColumn::LeftColumn(QWidget *parent)
+LeftColumn::LeftColumn(Api::Requester *requesterp, QWidget *parent)
     : QScrollArea(parent)
 {
     // Attribute initialization
+    requester = requesterp;
     homePageShown = true;
 
     // Create the widgets
@@ -32,7 +31,7 @@ LeftColumn::LeftColumn(QWidget *parent)
     QObject::connect(this, SIGNAL(guildsRecieved(std::vector<Api::Guild *> *)), this, SLOT(displayGuilds(std::vector<Api::Guild *> *)));
 
     // Request guilds
-    Api::Request::getGuilds([this](void *guilds) {
+    requester->getGuilds([this](void *guilds) {
         emit guildsRecieved(static_cast<std::vector<Api::Guild *> *>(guilds));
     });
 
@@ -62,7 +61,7 @@ void LeftColumn::displayGuilds(std::vector<Api::Guild *> *guildsp)
     // Loop through every guild object
     for (size_t i = 0 ; i < guilds->size() ; i++) {
         // Create the guild widget and add it the guild storage and the layout
-        GuildWidget *guildWidget = new GuildWidget(*(*guilds)[i], i, this);
+        GuildWidget *guildWidget = new GuildWidget(requester, *(*guilds)[i], i, this);
         guildWidgets.push_back(guildWidget);
 
         layout->insertWidget(i + 3, guildWidget);

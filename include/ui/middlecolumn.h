@@ -5,6 +5,7 @@
 #include "api/client.h"
 #include "api/channel.h"
 #include "api/guild.h"
+#include "api/request.h"
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -17,7 +18,7 @@ class MiddleColumn : public QWidget
 {
     Q_OBJECT
 public:
-    MiddleColumn(const Api::Client *client, QWidget *parent);
+    MiddleColumn(Api::Requester *requester, const Api::Client *client, QWidget *parent);
 
 signals:
     void privateChannelsRecieved(std::vector<Api::Channel *> *channels);
@@ -37,6 +38,8 @@ private:
     // Main widgets
     QVBoxLayout *layout;
     QScrollArea *channelList;
+
+    Api::Requester *requester; // To request the API
 
     // Storing channels that we already gathered
     std::vector<Api::Channel *>      *privateChannels;

@@ -1,7 +1,6 @@
 #include "ui/rightcolumn.h"
 
 #include "ui/messagetextinput.h"
-#include "api/request.h"
 #include "api/user.h"
 #include "api/jsonutils.h"
 
@@ -11,10 +10,11 @@
 
 namespace Ui {
 
-RightColumn::RightColumn(Api::Client *clientp, QWidget *parent)
+RightColumn::RightColumn(Api::Requester *requesterp, Api::Client *clientp, QWidget *parent)
     : QWidget(parent)
 {
     // Attribute initialization
+    requester = requesterp;
     client = clientp;
 
     // Create and style the layout
@@ -38,7 +38,7 @@ void RightColumn::setMessages(std::vector<Api::Message *> *messages)
 {
     messagesLayout->takeAt(0);
     channelsMessages[currentOpenedChannel] = messages;
-    messageArea = new MessageArea(*messages, this);
+    messageArea = new MessageArea(requester, *messages, this);
     messagesLayout->insertWidget(0, messageArea);
 }
 
@@ -101,10 +101,10 @@ void RightColumn::openChannel(Api::Channel& channel)
         if (currentMessages == channelsMessages.end()) {
             QWidget *messageAreaPlaceholder = new QWidget(messagesContainer);
             messagesLayout->addWidget(messageAreaPlaceholder);
-            Api::Request::getMessages([this](void *messages) {emit messagesRecieved(static_cast<std::vector<Api::Message *> *>(messages));}, channelId, 50 );
+            requester->getMessages([this](void *messages) {emit messagesRecieved(static_cast<std::vector<Api::Message *> *>(messages));}, channelId, 50 );
         } else {
             messages = channelsMessages[channelId];
-            messageArea = new MessageArea(*messages, messagesContainer);
+            messageArea = new MessageArea(requester, *messages, messagesContainer);
             messagesLayout->addWidget(messageArea);
         }
 
@@ -191,20 +191,20 @@ void RightColumn::userTyping(const json& data)
         typingTimestamp = data.value("timestamp", -1);
 
         // Get the user that is typing
-        Api::Request::getUser([this](void *user) {emit userTypingRecieved(static_cast<Api::User *>(user));}, data.value("user_id", ""));
+        requester->getUser([this](void *user) {emit userTypingRecieved(static_cast<Api::User *>(user));}, data.value("user_id", ""));
     }
 }
 
 void RightColumn::sendTyping()
 {
     // Send typing to the API
-    Api::Request::sendTyping(currentOpenedChannel);
+    requester->sendTyping(currentOpenedChannel);
 }
 
 void RightColumn::sendMessage(const std::string& content)
 {
     // Send a new message to the API and add it to the opened channel
-    Api::Request::sendMessage(content, currentOpenedChannel);
+    requester->sendMessage(content, currentOpenedChannel);
     std::string messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
     Api::Message newMessage = Api::Message {nullptr, new Api::User{client->username, nullptr, client->avatar, nullptr, nullptr, client->id, -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, new std::string(content), new std::string(messageTimestamp), nullptr, nullptr, nullptr, nullptr, -1, -1, -1, -1, false, false, false};
     messageArea->addMessage(newMessage, *(*channelsMessages[currentOpenedChannel])[0]);

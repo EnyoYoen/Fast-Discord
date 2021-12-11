@@ -7,6 +7,9 @@
 #include "ui/roundedimage.h"
 
 #include <QBoxLayout>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
 
 #include <string>
 #include <vector>
@@ -16,6 +19,7 @@
 #include <functional>
 #include <thread>
 #include <cstddef>
+#include <ostream>
 
 namespace Api {
 
@@ -41,12 +45,6 @@ enum RequestTypes {
     UnpinMessage
 };
 
-struct MemoryStruct
-{
-    char *memory;
-    size_t size;
-};
-
 struct RequestParameters
 {
     std::function<void(void *)> callback;
@@ -59,57 +57,65 @@ struct RequestParameters
     bool json;
 };
 
-//Class to request to the API
-class Request
-{
-public:
-    static std::string token; // Authorization token
+enum RequestMethods {
+    Get,
+    Post,
+    Put,
+    Delete
+};
 
-    // Start and stop the loop for the requests
-    static void startLoop();
-    static void stopLoop();
+// Class to request the API
+class Requester : public QObject
+{
+    Q_OBJECT
+public:
+    Requester(const std::string& token);
+    ~Requester();
 
     // Function that request the API
-    static void requestApi(const RequestParameters& parameters);
+    void requestApi(const RequestParameters& parameters);
 
     // Functions that request the API to retrieve data
-    static void getGuilds(std::function<void(void *)> callback);
-    static void getGuildChannels(std::function<void(void *)> callback, const std::string& id);
-    static void getPrivateChannels(std::function<void(void *)> callback);
-    static void getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit);
-    static void getClient(std::function<void(void *)> callback);
-    static void getClientSettings(std::function<void(void *)> callback);
-    static void getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName);
-    static void getUser(std::function<void(void *)> callback, const std::string& userId);
+    void getGuilds(std::function<void(void *)> callback);
+    void getGuildChannels(std::function<void(void *)> callback, const std::string& id);
+    void getPrivateChannels(std::function<void(void *)> callback);
+    void getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit);
+    void getClient(std::function<void(void *)> callback);
+    void getClientSettings(std::function<void(void *)> callback);
+    void getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName);
+    void getUser(std::function<void(void *)> callback, const std::string& userId);
 
     // Functions that request the API to send data
-    static void setStatus(const std::string& status);
-    static void sendTyping(const std::string& channelId);
-    static void sendMessage(const std::string& content, const std::string& channelId);
-    static void sendMessageWithFile(const std::string& content, const std::string& channelId, const std::string& filePath);
-    static void deleteMessage(const std::string& channelId, const std::string& messageId);
-    static void pinMessage(const std::string& channelId, const std::string& messageId);
-    static void unpinMessage(const std::string& channelId, const std::string& messageId);
+    void setStatus(const std::string& status);
+    void sendTyping(const std::string& channelId);
+    void sendMessage(const std::string& content, const std::string& channelId);
+    void sendMessageWithFile(const std::string& content, const std::string& channelId, const std::string& filePath);
+    void deleteMessage(const std::string& channelId, const std::string& messageId);
+    void pinMessage(const std::string& channelId, const std::string& messageId);
+    void unpinMessage(const std::string& channelId, const std::string& messageId);
+
+signals:
+    void requestEmit(int requestType, QNetworkRequest request, QUrlQuery *query, QHttpMultiPart *multiPart);
+
+private slots:
+    void doRequest(int requestType, QNetworkRequest request, QUrlQuery *query, QHttpMultiPart *multiPart);
+    void readReply();
 
 private:
-    static std::queue<RequestParameters> requestQueue;
-                                // The queue of request parameters
-    static std::mutex lock;
-    static std::condition_variable requestWaiter;
-                                // The loop waits when there is no request
-    static std::thread loop;    // The request loop
-    static double rateLimitEnd; // Unix time that represents the moment of the end of the rate limit
-    static bool stopped;        // Used to stop the request loop
-
-    Request(); // You can't create objects of this class
+    QNetworkAccessManager netManager;
+    QNetworkReply *reply;
+    std::queue<RequestParameters> requestQueue; // Queue of request parameters
+    std::mutex lock;
+    std::condition_variable requestWaiter;      // The loop waits when there is no request
+    std::condition_variable finishWaiter;       // The loop waits when there is no request
+    std::thread loop;                           // Request loop
+    std::string token;                          // Authorization token
+    double rateLimitEnd;                        // Unix time that represents the moment of the end of the rate limit
+    unsigned int currentRequestsNumber;         // The number of requests that are process at the moment
+    bool stopped;                               // Used to stop the request loop
 
     // The function that contains the request loop
-    static void RequestLoop();
-
-    // Functions used by libcurl to process recieved data
-    static size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
-    static size_t writeFileCallback(void *contents, size_t size, size_t nmemb, FILE *stream);
-    static size_t noOutputCallback(void *, size_t size, size_t nmemb, void *);
+    void RequestLoop();
 };
 
 } // namespace Api

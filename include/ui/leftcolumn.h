@@ -3,6 +3,7 @@
 #include "homebutton.h"
 #include "ui/guildwidget.h"
 #include "api/guild.h"
+#include "api/request.h"
 
 #include <QScrollArea>
 #include <QVBoxLayout>
@@ -16,7 +17,7 @@ class LeftColumn : public QScrollArea
 {
     Q_OBJECT
 public:
-    LeftColumn(QWidget *parent);
+    LeftColumn(Api::Requester *requester, QWidget *parent);
 
 signals:
     void guildsRecieved(std::vector<Api::Guild *> *guilds);
@@ -33,6 +34,8 @@ private:
     // Main widgets
     QVBoxLayout *layout;
     HomeButton  *homeButton;
+
+    Api::Requester *requester; // To request the API
 
     // Store guilds and guild widgets that we already gathered
     std::vector<Api::Guild *> *guilds;

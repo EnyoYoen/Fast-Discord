@@ -1,6 +1,5 @@
 #include "ui/guildwidget.h"
 
-#include "api/request.h"
 #include "api/guild.h"
 
 #include <QPixmap>
@@ -14,13 +13,14 @@
 
 namespace Ui {
 
-GuildWidget::GuildWidget(const Api::Guild& guildP, unsigned int idp, QWidget *parent)
+GuildWidget::GuildWidget(Api::Requester *requesterp, const Api::Guild& guildp, unsigned int idp, QWidget *parent)
     : QFrame(parent)
 {
     // Attributes initialization
     clicked = false;
     id = idp;
-    guild = Api::Guild(guildP);
+    requester = requesterp;
+    guild = Api::Guild(guildp);
 
     setMouseTracking(true);
     setFixedSize(48, 48);
@@ -30,6 +30,8 @@ GuildWidget::GuildWidget(const Api::Guild& guildP, unsigned int idp, QWidget *pa
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setAlignment(Qt::AlignCenter);
+
+    QObject::connect(this, SIGNAL(iconRecieved(std::string)), this, SLOT(setIcon(std::string)));
 
     // Create the guild icon
     std::string *guildIconFileName = guild.icon;
@@ -108,7 +110,7 @@ GuildWidget::GuildWidget(const Api::Guild& guildP, unsigned int idp, QWidget *pa
         // Request the icon and cache it
         *guildIconFileName += ".png";
         if (!std::ifstream(("cache/" + *guildIconFileName).c_str()).good()) {
-            Api::Request::getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + *guild.id + "/" + *guildIconFileName, *guildIconFileName);
+            requester->getImage([this](void *iconFileName) {emit iconRecieved(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + *guild.id + "/" + *guildIconFileName, *guildIconFileName);
         } else {
             *guildIconFileName = "cache/" + *guildIconFileName;
 

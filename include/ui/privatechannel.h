@@ -2,6 +2,7 @@
 
 #include "roundedimage.h"
 #include "api/channel.h"
+#include "api/request.h"
 
 #include <QWidget>
 #include <QLabel>
@@ -15,7 +16,7 @@ class PrivateChannel : public QWidget
 {
     Q_OBJECT
 public:
-    PrivateChannel(const Api::Channel& privateChannel, unsigned int idp, QWidget *parent);
+    PrivateChannel(Api::Requester *requester, const Api::Channel& privateChannel, unsigned int idp, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
 
 signals:
@@ -28,6 +29,8 @@ private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
     void setIcon(const std::string& iconFileName);
+
+    Api::Requester *requester; // To request the API
 
     // All the main widgets
     Api::Channel *channel;

@@ -8,9 +8,12 @@
 
 namespace Ui {
 
-MessageArea::MessageArea(const std::vector<Api::Message *>& messages, QWidget */*parent*/)
+MessageArea::MessageArea(Api::Requester *requesterp, const std::vector<Api::Message *>& messages, QWidget */*parent*/)
     : QScrollArea(/*parent*/) // TODO stylesheet bug
 {
+    // Set the requester
+    requester = requesterp;
+
     // Create widgets
     QWidget *messageBox = new QWidget(this);
     messageLayout = new QVBoxLayout(messageBox);
@@ -20,8 +23,7 @@ MessageArea::MessageArea(const std::vector<Api::Message *>& messages, QWidget */
     // Don't do some things if there are no messages
     if (messages.size() > 0) {
         // Create the first message widget and style it
-        MessageWidget *firstMessage = new MessageWidget(*messages.back(), true
-                                                        , false, this);
+        MessageWidget *firstMessage = new MessageWidget(requester, *messages.back(), true, false, this);
         firstMessage->setContentsMargins(0, 0, 0, 0);
 
         // Add it to the layout
@@ -61,7 +63,7 @@ MessageArea::MessageArea(const std::vector<Api::Message *>& messages, QWidget */
             }
 
             // Create the message and add it to the layout
-            messageLayout->addWidget(new MessageWidget(*messages[i], first, separator, this));
+            messageLayout->addWidget(new MessageWidget(requester, *messages[i], first, separator, this));
         }
         messageLayout->addWidget(spacer);
         messageLayout->insertStretch(0);
@@ -114,7 +116,7 @@ void MessageArea::addMessage(const Api::Message& newMessage, const Api::Message&
     }
 
     // Create the message and add it to the layout
-    messageLayout->addWidget(new MessageWidget(newMessage, first, separator, this));
+    messageLayout->addWidget(new MessageWidget(requester, newMessage, first, separator, this));
 }
 
 void MessageArea::showEvent(QShowEvent *)
