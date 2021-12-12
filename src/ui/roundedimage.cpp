@@ -3,7 +3,6 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QMovie>
-#include <boost/algorithm/string/predicate.hpp>
 
 #include <string>
 #include <iostream>
@@ -20,7 +19,7 @@ RoundedImage::RoundedImage(const std::string& imagePath, int width, int height, 
     hasImage = true;
 
     // Determine if the image is animated and set the image to the widget
-    if (boost::algorithm::ends_with(imagePath, ".gif")) {
+    if (imagePath.compare(imagePath.length() - 4, 4, ".gif") == 0) {
         // This is an animated image
         image = QPixmap(imagePath.c_str()).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         animatedImage = new QMovie(imagePath.c_str());
@@ -56,7 +55,7 @@ void RoundedImage::setImage(const std::string& imagePath)
     hasImage = true;
 
     // Determine if the image is animated and set the image to the widget
-    if (boost::algorithm::ends_with(imagePath, ".gif")) {
+    if (imagePath.compare(imagePath.length() - 4, 4, ".gif") == 0) {
         // This is an animated image
         image = QPixmap(imagePath.c_str()).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         animatedImage = new QMovie(imagePath.c_str());
