@@ -6,6 +6,7 @@
 #include "client.h"
 #include "ui/roundedimage.h"
 
+#include <QThread>
 #include <QBoxLayout>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
@@ -17,7 +18,6 @@
 #include <condition_variable>
 #include <mutex>
 #include <functional>
-#include <thread>
 #include <cstddef>
 #include <ostream>
 
@@ -108,7 +108,7 @@ private:
     std::mutex lock;
     std::condition_variable requestWaiter;      // The loop waits when there is no request
     std::condition_variable finishWaiter;       // The loop waits when there is no request
-    std::thread loop;                           // Request loop
+    QThread *loop;                              // Request loop
     std::string token;                          // Authorization token
     double rateLimitEnd;                        // Unix time that represents the moment of the end of the rate limit
     unsigned int currentRequestsNumber;         // The number of requests that are process at the moment

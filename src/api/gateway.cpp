@@ -2,7 +2,7 @@
 
 #include "api/jsonutils.h"
 
-#include <thread>
+#include <QThread>
 
 namespace Api {
 
@@ -36,16 +36,10 @@ void Gateway::start()
 {
     QObject::connect(&client, SIGNAL(aboutToClose()), this, SLOT(closeHandler()));
     QObject::connect(&client, SIGNAL(connected()), this, SLOT(identify()));
-    QObject::connect(&client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(errored(QAbstractSocket::SocketError)));
     QObject::connect(&client, SIGNAL(binaryMessageReceived(const QByteArray&)), this, SLOT(processBinaryMessage(const QByteArray&)));
     QObject::connect(&client, SIGNAL(textMessageReceived(const QString&)), this, SLOT(processTextMessage(const QString&)));
 
     client.open(QUrl(QString(url.c_str()) + "/" + QString("?v=9&encoding=json")));
-}
-
-void Gateway::errored(QAbstractSocket::SocketError err)
-{
-    qDebug() << err;
 }
 
 void Gateway::closeHandler()
@@ -96,8 +90,8 @@ void Gateway::processBinaryMessage(const QByteArray& message)
 
             // Start Heartbeating
             heartbeatInterval = data.value("heartbeat_interval", 45000);
-            std::thread heartbeatThread = std::thread(&Gateway::heartbeatLoop, this);
-            heartbeatThread.detach();
+            QThread *heartbeatThread = QThread::create([this](){heartbeatLoop();});
+            heartbeatThread->start();
 
             if (resuming) {
                 resume();
@@ -131,8 +125,8 @@ void Gateway::processTextMessage(const QString& message)
 
             // Start Heartbeating
             heartbeatInterval = data.value("heartbeat_interval", 45000);
-            std::thread heartbeatThread = std::thread(&Gateway::heartbeatLoop, this);
-            heartbeatThread.detach();
+            QThread *heartbeatThread = QThread::create([this](){heartbeatLoop();});
+            heartbeatThread->start();
 
             if (resuming) {
                 resume();
@@ -193,7 +187,7 @@ void Gateway::heartbeatLoop()
     while (connected) {
         send(1, std::to_string(seq));
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(heartbeatInterval));
+        QThread::msleep(heartbeatInterval);
     }
 }
 

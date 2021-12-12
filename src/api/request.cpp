@@ -12,9 +12,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <cstring>
-#include <chrono>
-#include <thread>
-#include <iostream>
 
 namespace Api {
 
@@ -28,7 +25,8 @@ Requester::Requester(const std::string& tokenp)
     stopped = false;
 
     // Start the request loop
-    loop = std::thread([this](){RequestLoop();});
+    loop = QThread::create([this](){RequestLoop();});
+    loop->start();
 
     QObject::connect(this, SIGNAL(requestEmit(int, QNetworkRequest, QUrlQuery *, QHttpMultiPart *)), this, SLOT(doRequest(int, QNetworkRequest, QUrlQuery *, QHttpMultiPart *)));
 }
@@ -37,7 +35,7 @@ Requester::~Requester()
 {
     // Stop the request loop
     stopped = true;
-    loop.join();
+    loop->wait();
     requestWaiter.notify_all();
 }
 
@@ -150,9 +148,10 @@ void Requester::RequestLoop()
                 // Very basic rate limit checker
                 if (rateLimitEnd != 0) { // We were rate limited
                     double sleepDuration = rateLimitEnd - std::time(0); // Time to sleep
+                    qDebug() << sleepDuration;
 
                     // We are currently rate limited
-                    if (sleepDuration > 0) std::this_thread::sleep_for(std::chrono::duration<double>(sleepDuration));
+                    if (sleepDuration > 0) QThread::msleep(sleepDuration);
                     rateLimitEnd = 0; // Reset rate limit
                 }
 

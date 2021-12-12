@@ -6,8 +6,6 @@
 
 #include <QDateTime>
 
-#include <thread>
-
 namespace Ui {
 
 RightColumn::RightColumn(Api::Requester *requesterp, Api::Client *clientp, QWidget *parent)
@@ -64,7 +62,7 @@ void RightColumn::setUserTyping(const Api::User *user)
 
     // Change the text on the label and wait 8 seconds
     typingLabel->setText(QString::fromUtf8(text.c_str()));
-    std::this_thread::sleep_for(std::chrono::seconds(typingTimestamp + 8 - currentTimestamp));
+    QThread::sleep(typingTimestamp + 8 - currentTimestamp);
     typingLabel->setText("");
 }
 

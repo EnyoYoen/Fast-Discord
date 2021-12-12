@@ -2,10 +2,9 @@
 
 #include "api/request.h"
 
+#include <QThread>
 #include <QInputDialog>
 #include <QLineEdit>
-
-#include <thread>
 
 namespace Ui {
 
@@ -80,8 +79,9 @@ void MainWindow::gatewayDispatchHandler(std::string& eventName, json& data)
         emit messageRecieved(*message);
     } else if (eventName == "TYPING_START") {
         // Someone is typing
-        std::thread typingThread = std::thread(&RightColumn::userTyping, rightColumn, data);
-        typingThread.detach();
+        gatewayData = data;
+        QThread *typingThread = QThread::create([this](){rightColumn->userTyping(gatewayData);});
+        typingThread->start();
     }
 }
 

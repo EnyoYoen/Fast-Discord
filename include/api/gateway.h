@@ -5,7 +5,6 @@
 #include "../../lib/nlohmann/json.hpp"
 
 #include <QtWebSockets/QtWebSockets>
-#include <QObject>
 
 #include <string>
 
@@ -40,7 +39,6 @@ public:
 private slots:
     void closeHandler();
     void identify();
-    void errored(QAbstractSocket::SocketError err);
     void processBinaryMessage(const QByteArray& message);
                           // Process a text message that the gateway recieves
     void processTextMessage(const QString& message);
@@ -59,7 +57,7 @@ private:
     QWebSocket client;    // websocket client
     std::function<void(std::string&, json&)> onDispatchHandler;
          //Function called when when the gateway recieve events
-    std::string url; //websocket URL
+    std::string url;      //websocket URL
     std::string sessionId;
     std::string token;
     int heartbeatInterval;

@@ -46,6 +46,8 @@ private:
 
     Api::Client *client;                 // The actual client
     Api::ClientSettings *clientSettings; // and the settings
+
+    json gatewayData;
 };
 
 } // namespace Ui
