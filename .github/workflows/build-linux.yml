@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build Linux
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -23,8 +23,6 @@ jobs:
 
       - name: Build
         shell: bash
-        env:
-          CXX: cl.exe
         run: |
           cd bin
           cmake ..
