@@ -19,7 +19,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           version: 5.15.2
-          arch: x64, x86
+          arch: x64
 
       - name: Build
         shell: bash
