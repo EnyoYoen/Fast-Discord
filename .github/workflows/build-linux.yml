@@ -1,0 +1,30 @@
+name: Build Linux
+-
+-on:
+-  push:
+-    branches: [ main ]
+-  pull_request:
+-    branches: [ main ]
+-    
+-  workflow_dispatch:
+-
+-jobs:
+-  build:
+-    runs-on: ubuntu-latest
+-
+-    steps:
+-      - uses: actions/checkout@v2
+-      
+-      - name: Install Qt        
+-        uses: jurplel/install-qt-action@v2
+-        with:
+-          version: 5.15.2
+-          arch: x64, x86
+-
+-      - name: Build
+-        shell: bash
+-        run: |
+-          cd bin
+-          cmake ..
+-          cmake --build . --parallel $(nproc)
+
