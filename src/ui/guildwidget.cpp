@@ -22,14 +22,18 @@ GuildWidget::GuildWidget(Api::Requester *requesterp, const Api::Guild& guildp, u
     requester = requesterp;
     guild = Api::Guild(guildp);
 
-    setMouseTracking(true);
-    setFixedSize(48, 48);
+    // Style the widget
+    this->setMouseTracking(true);
+    this->setFixedSize(60, 48);
 
     // Create and style the layout
-    layout = new QVBoxLayout(this);
-    layout->setSpacing(0);
+    layout = new QHBoxLayout(this);
+    layout->setSpacing(8);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setAlignment(Qt::AlignCenter);
+
+    // Create the white pill
+    pill = new GuildPill(this);
+    layout->addWidget(pill);
 
     QObject::connect(this, SIGNAL(iconRecieved(std::string)), this, SLOT(setIcon(std::string)));
 
@@ -96,14 +100,23 @@ GuildWidget::GuildWidget(Api::Requester *requesterp, const Api::Guild& guildp, u
             if (!nonLetterFound) iconText += firstLetter;
         }
 
-        // Add the text icon
-        layout->addWidget(new QLabel(iconText.c_str(), this));
+        // Create and add the text icon
+
+        textIcon = new QLabel(this);
+        QHBoxLayout *iconTextLayout = new QHBoxLayout(textIcon);
+        QLabel *text = new QLabel(iconText.c_str(), textIcon);
+
+        iconTextLayout->setContentsMargins(0, 0, 0, 0);
+        iconTextLayout->addWidget(text, 0, Qt::AlignHCenter);
+
+        text->setFixedHeight(40);
+        textIcon->setFixedSize(48, 48);
+        textIcon->setStyleSheet("border-radius: 24px;"
+                                "color: #DCDDDE;"
+                                "background-color: #36393F;");
+        layout->addWidget(textIcon);
         icon = nullptr;
 
-        // Style this widget
-        this->setStyleSheet("border-radius: 24px;"
-                      "color: #DCDDDE;"
-                      "background-color: #36393F;");
     } else {
         // This guild has an icon
 
@@ -142,7 +155,23 @@ void GuildWidget::unclicked()
     // Reset the stylesheet of this widget if currently clicked
     if (clicked && !icon) {
         clicked = false;
-        setStyleSheet("border-radius: 24px; color: #DCDDDE; background-color: #36393F;");
+        textIcon->setStyleSheet("border-radius: 24px; color: #DCDDDE; background-color: #36393F;");
+    }
+
+    if (unreadMessages) {
+        pill->setHeight(8);
+    } else {
+        pill->setHeight(0);
+    }
+}
+
+void GuildWidget::setUnread(bool unread)
+{
+    unreadMessages = unread;
+    if (unread) {
+        pill->setHeight(8);
+    } else {
+        pill->setHeight(0);
     }
 }
 
@@ -150,24 +179,33 @@ void GuildWidget::mousePressEvent(QMouseEvent *)
 {
     // Widget clicked : change the stylesheet
     if (!clicked && !icon) {
-        setStyleSheet("background-color: #5865F2; color: #FFF; border-radius: 16px;");
+        textIcon->setStyleSheet("background-color: #5865F2; color: #FFF; border-radius: 16px;");
         clicked = true;
     }
+    pill->setHeight(40);
 }
 
 void GuildWidget::enterEvent(QEvent *)
 {
     // Mouse hover : change the stylesheet
     if (!clicked && !icon) {
-        setStyleSheet("background-color: #5865F2; color: #FFF; border-radius: 16px;");
+        textIcon->setStyleSheet("background-color: #5865F2; color: #FFF; border-radius: 16px;");
     }
+    if (pill->height() != 40) pill->setHeight(20);
 }
 
 void GuildWidget::leaveEvent(QEvent *)
 {
     // Reset the stylesheet if not clicked
     if (!clicked && !icon) {
-        setStyleSheet("border-radius: 24px; color: #DCDDDE; background-color: #36393F;");
+        textIcon->setStyleSheet("border-radius: 24px; color: #DCDDDE; background-color: #36393F;");
+    }
+    if (pill->height() != 40) {
+        if (unreadMessages) {
+            pill->setHeight(8);
+        } else {
+            pill->setHeight(0);
+        }
     }
 }
 

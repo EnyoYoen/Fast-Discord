@@ -27,17 +27,8 @@ LeftColumn::LeftColumn(Api::Requester *requesterp, QWidget *parent)
     layout->addWidget(homeButton);
     layout->addWidget(guildSeparator);
 
-    // Connect the signal to setup the column guilds
-    QObject::connect(this, SIGNAL(guildsRecieved(std::vector<Api::Guild *> *)), this, SLOT(displayGuilds(std::vector<Api::Guild *> *)));
-
-    // Request guilds
-    requester->getGuilds([this](void *guilds) {
-        emit guildsRecieved(static_cast<std::vector<Api::Guild *> *>(guilds));
-    });
-
     // Set widgets alignments
     layout->insertStretch(-1, 100);
-    layout->setAlignment(homeButton, Qt::AlignHCenter);
     layout->setAlignment(guildSeparator, Qt::AlignHCenter);
 
     // Style the layout
@@ -45,7 +36,7 @@ LeftColumn::LeftColumn(Api::Requester *requesterp, QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
 
     // Style this widget
-    this->setFixedWidth(70);
+    this->setFixedWidth(72);
     this->setStyleSheet("background-color: #202225;"
                         "border: none;");
 
@@ -65,7 +56,6 @@ void LeftColumn::displayGuilds(std::vector<Api::Guild *> *guildsp)
         guildWidgets.push_back(guildWidget);
 
         layout->insertWidget(i + 3, guildWidget);
-        layout->setAlignment(guildWidget, Qt::AlignHCenter);
 
         // Connect the clic signal
         QObject::connect(guildWidget, SIGNAL(leftClicked(Api::Guild&, unsigned int)), this, SLOT(clicGuild(Api::Guild&, unsigned int)));
@@ -109,6 +99,13 @@ void LeftColumn::clicGuild(Api::Guild& guild, unsigned int id)
     // Emit signals
     emit cleanRightColumn();
     emit guildClicked(guild);
+}
+
+void LeftColumn::setUnreadGuild(const std::string& guildId)
+{
+    for (size_t i = 0 ; i < guilds->size() ; i++) {
+        if (*(*guilds)[i]->id == guildId) guildWidgets[i]->setUnread(true);
+    }
 }
 
 } // namespace Ui

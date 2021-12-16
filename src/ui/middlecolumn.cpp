@@ -32,7 +32,7 @@ MiddleColumn::MiddleColumn(Api::Requester *requesterp, const Api::Client *client
     this->displayPrivateChannels();
 
     // Style this column
-    this->setFixedWidth(242);
+    this->setFixedWidth(240);
     this->setStyleSheet("background-color: #2F3136;"
                         "border: none;");
 }

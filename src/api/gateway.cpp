@@ -110,7 +110,7 @@ void Gateway::processTextMessage(const QString& message)
     json& data = payload.at("d");
 
     switch (payload.value("op", -1)) {
-        case Dispatch: //Event recieved
+        case Dispatch: //Event received
             seq = payload.at("s");
             dispatch(payload.at("t"), data);
             break;

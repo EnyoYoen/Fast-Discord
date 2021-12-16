@@ -18,17 +18,17 @@ class LeftColumn : public QScrollArea
     Q_OBJECT
 public:
     LeftColumn(Api::Requester *requester, QWidget *parent);
+    void displayGuilds(std::vector<Api::Guild *> *guilds);
 
 signals:
-    void guildsRecieved(std::vector<Api::Guild *> *guilds);
     void cleanRightColumn();
     void homeButtonClicked();
     void guildClicked(Api::Guild& guild);
 
 private slots:
-    void displayGuilds(std::vector<Api::Guild *> *guilds);
     void clicHomeButton();
     void clicGuild(Api::Guild& guild, unsigned int id);
+    void setUnreadGuild(const std::string& guildId);
 
 private:
     // Main widgets

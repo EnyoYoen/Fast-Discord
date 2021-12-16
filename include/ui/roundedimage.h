@@ -13,6 +13,7 @@ public:
     RoundedImage(const std::string& imagePath, int width, int height, int radius, QWidget *parent);
     RoundedImage(int width, int height, int radius, QWidget *parent);
     void setImage(const std::string& imagePath);
+
 private:
     void paintEvent(QPaintEvent *) override;
     void enterEvent(QEvent *) override;

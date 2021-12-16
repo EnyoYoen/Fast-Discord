@@ -1,12 +1,13 @@
 #pragma once
 
 #include "roundedimage.h"
+#include "guildpill.h"
 #include "api/guild.h"
 #include "api/request.h"
 
 #include <QFrame>
 #include <QLabel>
-#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 #include <string>
 
@@ -19,6 +20,7 @@ class GuildWidget : public QFrame
 public:
     GuildWidget(Api::Requester *requester, const Api::Guild& guildp, unsigned int idp, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
+    void setUnread(bool unread);
 
 signals:
     void iconRecieved(const std::string& iconFileName);
@@ -37,12 +39,15 @@ private:
     Api::Requester *requester; // To request the API
 
     // All the main widgets
-    QVBoxLayout *layout;
+    QHBoxLayout  *layout;
     RoundedImage *icon;
-    Api::Guild   guild;
+    QLabel       *textIcon;
+    GuildPill    *pill;
+    Api::Guild    guild;
 
-    unsigned int id;      // The id that we assign to the widget
-    bool         clicked; // If the widget is clicked
+    unsigned int id;       // The id that we assign to the widget
+    bool         clicked;  // If the widget is clicked
+    bool         unreadMessages;
 };
 
 } // namespace Ui

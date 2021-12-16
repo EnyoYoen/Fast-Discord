@@ -24,8 +24,9 @@ public:
     MainWindow();
 
 signals:
-    void messageRecieved(Api::Message);
-    void clientSettingsRecieved();
+    void messageReceived(Api::Message);
+    void clientSettingsReceived();
+    void unreadUpdateReceived(const std::string&);
 
 private slots:
     void setup();

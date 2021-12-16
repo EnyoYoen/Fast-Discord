@@ -1,15 +1,17 @@
 #pragma once
 
+#include "guildpill.h"
+
 #include <QLabel>
 
 namespace Ui {
 
 // The button at the top left corner of the app
-class HomeButton : public QLabel
+class HomeButton : public QWidget
 {
     Q_OBJECT
 public:
-    HomeButton(QWidget *parent = nullptr);
+    HomeButton(QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
 
 signals:
@@ -20,6 +22,9 @@ private:
     void mousePressEvent(QMouseEvent *) override;
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
+
+    GuildPill *pill;
+    QLabel    *image;
 
     bool clic; // If the widget is clicked
 };

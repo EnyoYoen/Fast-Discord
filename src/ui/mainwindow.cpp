@@ -23,7 +23,7 @@ MainWindow::MainWindow() : QWidget()
     gw = new Api::Gateway(requester, token);
 
     // Connect the signal for the setup
-    QObject::connect(this, SIGNAL(clientSettingsRecieved()), this, SLOT(setup()));
+    QObject::connect(this, SIGNAL(clientSettingsReceived()), this, SLOT(setup()));
 
     // Get user settings
     requester->getClient([this](void *clientp){
@@ -31,7 +31,7 @@ MainWindow::MainWindow() : QWidget()
     });
     requester->getClientSettings([this](void *clientSettingsp){
         clientSettings = static_cast<Api::ClientSettings *>(clientSettingsp);
-        emit clientSettingsRecieved();
+        emit clientSettingsReceived();
     });
 }
 
@@ -66,17 +66,24 @@ void MainWindow::setupInterface()
     QObject::connect(leftColumn, SIGNAL(homeButtonClicked()), middleColumn, SLOT(displayPrivateChannels()));
     QObject::connect(leftColumn, SIGNAL(cleanRightColumn()), rightColumn, SLOT(clean()));
     QObject::connect(middleColumn, SIGNAL(channelClicked(Api::Channel&)), rightColumn, SLOT(openChannel(Api::Channel&)));
-    QObject::connect(this, SIGNAL(messageRecieved(Api::Message)), rightColumn, SLOT(addMessage(Api::Message)));
+    QObject::connect(this, SIGNAL(unreadUpdateReceived(const std::string&)), leftColumn, SLOT(setUnreadGuild(const std::string&)));
+    QObject::connect(this, SIGNAL(messageReceived(Api::Message)), rightColumn, SLOT(addMessage(Api::Message)));
 }
 
 void MainWindow::gatewayDispatchHandler(std::string& eventName, json& data)
 {
     // Process gateway events
-    if (eventName == "MESSAGE_CREATE") {
+    if (eventName == "READY") {
+        std::vector<Api::Guild *> *guilds;
+        Api::unmarshalMultiple<Api::Guild>(data.at("guilds"), "", &guilds);
+        leftColumn->displayGuilds(guilds);
+    } else if (eventName == "CHANNEL_UNREAD_UPDATE") {
+        emit unreadUpdateReceived(data.value("guild_id", ""));
+    } else if (eventName == "MESSAGE_CREATE") {
         // We recieved a message
         Api::Message *message;
         Api::unmarshal<Api::Message>(data, "", &message);
-        emit messageRecieved(*message);
+        emit messageReceived(*message);
     } else if (eventName == "TYPING_START") {
         // Someone is typing
         gatewayData = data;

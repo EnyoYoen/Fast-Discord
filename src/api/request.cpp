@@ -148,7 +148,6 @@ void Requester::RequestLoop()
                 // Very basic rate limit checker
                 if (rateLimitEnd != 0) { // We were rate limited
                     double sleepDuration = rateLimitEnd - std::time(0); // Time to sleep
-                    qDebug() << sleepDuration;
 
                     // We are currently rate limited
                     if (sleepDuration > 0) QThread::msleep(sleepDuration);
