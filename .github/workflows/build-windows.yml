@@ -1,0 +1,30 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install Qt        
+        uses: jurplel/install-qt-action@v2
+        with:
+          arch: 'win64_msvc2019_64'
+
+      - name: Build
+        shell: bash
+        env:
+          CXX: cl.exe
+        run: |
+          cd bin
+          cmake ..
+          cmake --build . --parallel $(nproc)
