@@ -18,6 +18,7 @@ GuildWidget::GuildWidget(Api::RessourceManager *rmp, const Api::Guild& guild, QW
 {
     // Attributes initialization
     clicked = false;
+    unreadMessages = false;
     id = *guild.id;
     rm = rmp;
 

@@ -14,7 +14,9 @@ include_directories(lib/)
 include_directories(include/)
 
 find_package(Qt5 COMPONENTS Widgets Network WebSockets REQUIRED)
-find_package(Threads REQUIRED)
+if (NOT WIN32)
+    find_package(Threads REQUIRED)
+endif (WIN32)
 
 set(SOURCES
     "src/api/application.cpp"
@@ -98,4 +100,6 @@ add_executable(Fast-Discord ${SOURCES} ${HEADERS})
 target_link_libraries(Fast-Discord Qt5::Widgets)
 target_link_libraries(Fast-Discord Qt5::Network)
 target_link_libraries(Fast-Discord Qt5::WebSockets)
-target_link_libraries(Fast-Discord pthread)
+if (NOT WIN32)
+    target_link_libraries(Fast-Discord pthread)
+endif (WIN32)

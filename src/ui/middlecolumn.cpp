@@ -41,7 +41,7 @@ void MiddleColumn::setPresences(const std::vector<Api::Presence *>& presences)
             bool found = false;
             for (unsigned int j = 0 ; j < privateChannels->size() ; j++) {
                 if ((*privateChannels)[j]->type == Api::DM && (*(*privateChannels)[j]->recipientIds)[0] == *presences[i]->userId) {
-                    privateChannelWidgets[j]->setStatus(presences[0]->status);
+                    privateChannelWidgets[j]->setStatus(presences[i]->status);
                     found = true;
                     break;
                 }
@@ -175,30 +175,20 @@ void MiddleColumn::clicPrivateChannel(const std::string& id)
 
 void MiddleColumn::displayPrivateChannels()
 {
-    rm->getPrivateChannels([&](const void *channelsPtr){
-        const std::vector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const std::vector<Api::PrivateChannel *> *>(channelsPtr);
-        // Create the widgets
-        QWidget *privateChannelList = new QWidget(this);
-        QVBoxLayout *privateChannelListLayout = new QVBoxLayout(privateChannelList);
+    // Create the widgets
+    QWidget *privateChannelList = new QWidget(this);
+    QVBoxLayout *privateChannelListLayout = new QVBoxLayout(privateChannelList);
 
-        // Create and display the private channels
-        for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
-            PrivateChannelWidget *privateChannelWidget = new PrivateChannelWidget(rm, *(*privateChannels)[i], privateChannelList);
-            privateChannelWidgets.push_back(privateChannelWidget);
-            privateChannelListLayout->insertWidget(i, privateChannelWidget);
-            QObject::connect(privateChannelWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicPrivateChannel(const std::string&)));
-        }
-        privateChannelListLayout->insertStretch(-1, 1);
-        privateChannelListLayout->setSpacing(2);
-        privateChannelListLayout->setContentsMargins(8, 8, 8, 0);
+    // Display the private channels
+    for (unsigned int i = 0 ; i < privateChannelWidgets.size() ; i++) {
+        privateChannelListLayout->insertWidget(i, privateChannelWidgets[i]);
+    }
+    privateChannelListLayout->insertStretch(-1, 1);
+    privateChannelListLayout->setSpacing(2);
+    privateChannelListLayout->setContentsMargins(8, 8, 8, 0);
 
-        // Set the channels to the column
-        channelList->setWidget(privateChannelList);
-
-        rm->getPresences([&](const void *presencesPtr){
-            setPresences(*reinterpret_cast<const std::vector<Api::Presence *> *>(presencesPtr));
-        });
-    });
+    // Set the channels to the column
+    channelList->setWidget(privateChannelList);
 }
 
 void MiddleColumn::openGuild(const std::string& guildId)

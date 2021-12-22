@@ -50,7 +50,6 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     // the background color is not applied everywhere, I don't know why
     QWidget *container = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(container);
-    this->setAttribute(Qt::WA_StyledBackground);
 
     // Create the icon
     icon = new QLabel(this);
@@ -100,7 +99,7 @@ void GuildChannelWidget::unclicked()
 void GuildChannelWidget::mousePressEvent(QMouseEvent *)
 {
     // Widget clicked : change the stylesheet
-    if (!clicked && type != 2) {
+    if (!clicked && type != Api::GuildVoice) {
         this->setStyleSheet(clickedStyleSheet);
         clicked = true;
     }

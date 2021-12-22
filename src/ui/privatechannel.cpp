@@ -20,6 +20,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     // Attributes initialization
     rm = rmp;
     id = *privateChannel.id;
+    status = "offline";
 
     // I have to create an other widget otherwise
     // the background color is not applied everywhere, I don't know why
@@ -164,15 +165,12 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 
 void PrivateChannelWidget::setStatus(std::string *statusp)
 {
-    if (statusp != nullptr) {
-        if (statusIcon == nullptr) {
-            status = *statusp;
-        } else {
+    status = *statusp;
+    if (*statusp != "" && statusIcon != nullptr) {
             statusIcon->setStyleSheet(QString(("border-radius: 5px;"
-                                      "background-image: url(res/images/svg/" + *statusp + "-icon.svg);"
+                                      "background-image: url(res/images/svg/" + status + "-icon.svg);"
                                       "background-repeat: no-repeat;"
                                       "background-position: center;").c_str()));
-        }
     }
 }
 

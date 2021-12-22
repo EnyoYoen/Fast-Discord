@@ -42,7 +42,7 @@ private:
     QLabel              *subtext;
     QLabel              *statusIcon = nullptr;
 
-    std::string  status = "offline";
+    std::string  status;
     bool         clicked; // If the widget is clicked
 };
 
