@@ -13,14 +13,13 @@
 
 namespace Ui {
 
-GuildWidget::GuildWidget(Api::Requester *requesterp, const Api::Guild& guildp, unsigned int idp, QWidget *parent)
+GuildWidget::GuildWidget(Api::RessourceManager *rmp, const Api::Guild& guild, QWidget *parent)
     : QFrame(parent)
 {
     // Attributes initialization
     clicked = false;
-    id = idp;
-    requester = requesterp;
-    guild = Api::Guild(guildp);
+    id = *guild.id;
+    rm = rmp;
 
     // Style the widget
     this->setMouseTracking(true);
@@ -28,7 +27,7 @@ GuildWidget::GuildWidget(Api::Requester *requesterp, const Api::Guild& guildp, u
 
     // Create and style the layout
     layout = new QHBoxLayout(this);
-    layout->setSpacing(8);
+    layout->setSpacing(6);
     layout->setContentsMargins(0, 0, 0, 0);
 
     // Create the white pill
@@ -39,7 +38,7 @@ GuildWidget::GuildWidget(Api::Requester *requesterp, const Api::Guild& guildp, u
 
     // Create the guild icon
     std::string *guildIconFileName = guild.icon;
-    if (guildIconFileName == nullptr) {
+    if (guildIconFileName == nullptr || *guildIconFileName == "") {
         // The guild doesn't have icon : we need to create one with the name
 
         // Split the name for every space in it
@@ -123,7 +122,7 @@ GuildWidget::GuildWidget(Api::Requester *requesterp, const Api::Guild& guildp, u
         // Request the icon and cache it
         *guildIconFileName += ".png";
         if (!std::ifstream(("cache/" + *guildIconFileName).c_str()).good()) {
-            requester->getImage([this](void *iconFileName) {emit iconRecieved(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + *guild.id + "/" + *guildIconFileName, *guildIconFileName);
+            rm->getImage([this](void *iconFileName) {emit iconRecieved(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + *guild.id + "/" + *guildIconFileName, *guildIconFileName);
         } else {
             *guildIconFileName = "cache/" + *guildIconFileName;
 
@@ -144,9 +143,9 @@ void GuildWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     // Emit signals when clicked to open the channel or to show infos
     if (event->button() == Qt::LeftButton) {
-        emit leftClicked(guild, id);
+        emit leftClicked(id);
     } else if (event->button() == Qt::RightButton) {
-        emit rightClicked(guild); // Does nothing for now
+        emit rightClicked(id); // Does nothing for now
     }
 }
 

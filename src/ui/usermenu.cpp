@@ -8,11 +8,11 @@
 
 namespace Ui {
 
-UserMenu::UserMenu(Api::Requester *requesterp, const Api::Client *client, QWidget *parent)
+UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidget *parent)
     : QWidget(parent)
 {
-    // Set the requester
-    requester = requesterp;
+    // Set the ressource manager
+    rm = rmp;
 
     // Create the layout
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
@@ -25,23 +25,17 @@ UserMenu::UserMenu(Api::Requester *requesterp, const Api::Client *client, QWidge
 
     // Get the icon of the actual user
     std::string channelIconFileName;
-    if (client->avatar == nullptr) {
+    if (client->avatar == nullptr || *client->avatar == "") {
         // Use an asset if the user doesn't have an icon
         channelIconFileName = "res/images/png/user-icon-asset0.png";
 
         avatar = new RoundedImage(channelIconFileName, 32, 32, 16, container);
     } else {
+        avatar = new RoundedImage(32, 32, 16, container);
+
         // Request the icon
         channelIconFileName = *client->id + (client->avatar->rfind("a_") == 0 ? ".gif" : ".webp");
-        if (!std::ifstream(("cache/" + channelIconFileName).c_str()).good()) {
-            requester->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, channelIconFileName);
-
-            avatar = new RoundedImage(32, 32, 16, container);
-        } else {
-            channelIconFileName = "cache/" + channelIconFileName;
-
-            avatar = new RoundedImage(channelIconFileName, 32, 32, 16, container);
-        }
+        rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, channelIconFileName);
     }
 
     // Create the widgets of the user menu

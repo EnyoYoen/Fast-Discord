@@ -71,13 +71,13 @@ void Gateway::send(int op, const std::string& data)
 // Process a binary message that the gateway recieves
 void Gateway::processBinaryMessage(const QByteArray& message)
 {
-    json payload = json::parse(QString(qUncompress(message)).toUtf8().constData());
-    json& data = payload.at("d");
+    QJsonDocument payload = QJsonDocument::fromJson(qUncompress(message));
+    QJsonValue data = payload["d"];
 
-    switch (payload.value("op", -1)) {
+    switch (payload["op"].toInt(-1)) {
         case Dispatch: //Event recieved
-            seq = payload.at("s");
-            dispatch(payload.at("t"), data);
+            seq = payload["s"].toInt();
+            dispatch(payload["t"].toString().toUtf8().constData(), data);
             break;
         case Reconnect:
             resume();
@@ -89,7 +89,7 @@ void Gateway::processBinaryMessage(const QByteArray& message)
             connected = true;
 
             // Start Heartbeating
-            heartbeatInterval = data.value("heartbeat_interval", 45000);
+            heartbeatInterval = data["heartbeat_interval"].toInt(45000);
             QThread *heartbeatThread = QThread::create([this](){heartbeatLoop();});
             heartbeatThread->start();
 
@@ -106,13 +106,13 @@ void Gateway::processBinaryMessage(const QByteArray& message)
 // Process a text message that the gateway recieves
 void Gateway::processTextMessage(const QString& message)
 {
-    json payload = json::parse(message.toUtf8().constData());
-    json& data = payload.at("d");
+    QJsonDocument payload = QJsonDocument::fromJson(message.toUtf8());
+    QJsonValue data = payload["d"];
 
-    switch (payload.value("op", -1)) {
-        case Dispatch: //Event received
-            seq = payload.at("s");
-            dispatch(payload.at("t"), data);
+    switch (payload["op"].toInt(-1)) {
+        case Dispatch: //Event recieved
+            seq = payload["s"].toInt();
+            dispatch(payload["t"].toString().toUtf8().constData(), data);
             break;
         case Reconnect:
             resume();
@@ -124,7 +124,7 @@ void Gateway::processTextMessage(const QString& message)
             connected = true;
 
             // Start Heartbeating
-            heartbeatInterval = data.value("heartbeat_interval", 45000);
+            heartbeatInterval = data["heartbeat_interval"].toInt(45000);
             QThread *heartbeatThread = QThread::create([this](){heartbeatLoop();});
             heartbeatThread->start();
 
@@ -195,7 +195,7 @@ void Gateway::heartbeatLoop()
 void Gateway::dispatch(std::string eventName, json& data)
 {
     if (eventName == "READY") {
-        sessionId = data.at("session_id");
+        sessionId = data["session_id"].toString().toUtf8().constData();
     }
     onDispatchHandler(eventName, data);
 }

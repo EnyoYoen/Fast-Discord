@@ -66,4 +66,17 @@ struct ChannelMention
     int          type;
 };
 
+struct PrivateChannel
+{
+    ~PrivateChannel();
+
+    std::vector<std::string> *recipientIds;
+    std::string *icon;
+    std::string *id;
+    std::string *lastMessageId;
+    std::string *name;
+    std::string *ownerId;
+    int          type;
+};
+
 } // namespace Api

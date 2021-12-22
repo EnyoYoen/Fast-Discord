@@ -28,7 +28,9 @@ SOURCES += \
     ../src/api/jsonutils.cpp \
     ../src/api/message.cpp \
     ../src/api/overwrite.cpp \
+    ../src/api/presence.cpp \
     ../src/api/request.cpp \
+    ../src/api/ressourcemanager.cpp \
     ../src/api/role.cpp \
     ../src/api/sticker.cpp \
     ../src/api/team.cpp \
@@ -66,7 +68,9 @@ HEADERS += \
     ../include/api/jsonutils.h \
     ../include/api/message.h \
     ../include/api/overwrite.h \
+    ../include/api/presence.h \
     ../include/api/request.h \
+    ../include/api/ressourcemanager.h \
     ../include/api/role.h \
     ../include/api/sticker.h \
     ../include/api/team.h \
@@ -88,48 +92,8 @@ HEADERS += \
     ../include/ui/rightcolumn.h \
     ../include/ui/roundedimage.h \
     ../include/ui/usermenu.h \
-    ../include/ui/usermenubutton.h \
-    ../lib/nlohmann/adl_serializer.hpp \
-    ../lib/nlohmann/byte_container_with_subtype.hpp \
-    ../lib/nlohmann/detail/conversions/from_json.hpp \
-    ../lib/nlohmann/detail/conversions/to_chars.hpp \
-    ../lib/nlohmann/detail/conversions/to_json.hpp \
-    ../lib/nlohmann/detail/exceptions.hpp \
-    ../lib/nlohmann/detail/hash.hpp \
-    ../lib/nlohmann/detail/input/binary_reader.hpp \
-    ../lib/nlohmann/detail/input/input_adapters.hpp \
-    ../lib/nlohmann/detail/input/json_sax.hpp \
-    ../lib/nlohmann/detail/input/lexer.hpp \
-    ../lib/nlohmann/detail/input/parser.hpp \
-    ../lib/nlohmann/detail/input/position_t.hpp \
-    ../lib/nlohmann/detail/iterators/internal_iterator.hpp \
-    ../lib/nlohmann/detail/iterators/iter_impl.hpp \
-    ../lib/nlohmann/detail/iterators/iteration_proxy.hpp \
-    ../lib/nlohmann/detail/iterators/iterator_traits.hpp \
-    ../lib/nlohmann/detail/iterators/json_reverse_iterator.hpp \
-    ../lib/nlohmann/detail/iterators/primitive_iterator.hpp \
-    ../lib/nlohmann/detail/json_pointer.hpp \
-    ../lib/nlohmann/detail/json_ref.hpp \
-    ../lib/nlohmann/detail/macro_scope.hpp \
-    ../lib/nlohmann/detail/macro_unscope.hpp \
-    ../lib/nlohmann/detail/meta/cpp_future.hpp \
-    ../lib/nlohmann/detail/meta/detected.hpp \
-    ../lib/nlohmann/detail/meta/identity_tag.hpp \
-    ../lib/nlohmann/detail/meta/is_sax.hpp \
-    ../lib/nlohmann/detail/meta/type_traits.hpp \
-    ../lib/nlohmann/detail/meta/void_t.hpp \
-    ../lib/nlohmann/detail/output/binary_writer.hpp \
-    ../lib/nlohmann/detail/output/output_adapters.hpp \
-    ../lib/nlohmann/detail/output/serializer.hpp \
-    ../lib/nlohmann/detail/string_escape.hpp \
-    ../lib/nlohmann/detail/value_t.hpp \
-    ../lib/nlohmann/json.hpp \
-    ../lib/nlohmann/json_fwd.hpp \
-    ../lib/nlohmann/ordered_map.hpp \
-    ../lib/nlohmann/thirdparty/hedley/hedley.hpp \
-    ../lib/nlohmann/thirdparty/hedley/hedley_undef.hpp
+    ../include/ui/usermenubutton.h
 
-INCLUDEPATH += "../lib/"
 INCLUDEPATH += "../include/"
 
 # Default rules for deployment.

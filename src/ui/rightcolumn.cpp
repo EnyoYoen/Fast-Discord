@@ -8,11 +8,11 @@
 
 namespace Ui {
 
-RightColumn::RightColumn(Api::Requester *requesterp, Api::Client *clientp, QWidget *parent)
+RightColumn::RightColumn(Api::RessourceManager *rmp, Api::Client *clientp, QWidget *parent)
     : QWidget(parent)
 {
     // Attribute initialization
-    requester = requesterp;
+    rm = rmp;
     client = clientp;
 
     // Create and style the layout
@@ -28,15 +28,15 @@ RightColumn::RightColumn(Api::Requester *requesterp, Api::Client *clientp, QWidg
     // Style the column
     this->setStyleSheet("background-color: #36393F;");
 
-    QObject::connect(this, SIGNAL(messagesRecieved(std::vector<Api::Message *> *)), this, SLOT(setMessages(std::vector<Api::Message *> *)));
-    QObject::connect(this, SIGNAL(userTypingRecieved(const Api::User *)), this, SLOT(setUserTyping(const Api::User *)));
+    QObject::connect(this, SIGNAL(messagesReceived(std::vector<Api::Message *> *)), this, SLOT(setMessages(std::vector<Api::Message *> *)));
+    QObject::connect(this, SIGNAL(userTypingReceived(const Api::User *)), this, SLOT(setUserTyping(const Api::User *)));
 }
 
 void RightColumn::setMessages(std::vector<Api::Message *> *messages)
 {
     messagesLayout->takeAt(0);
     channelsMessages[currentOpenedChannel] = messages;
-    messageArea = new MessageArea(requester, *messages, this);
+    messageArea = new MessageArea(rm, *messages, this);
     messagesLayout->insertWidget(0, messageArea);
 }
 
@@ -81,10 +81,23 @@ void RightColumn::clean()
     layout->addWidget(placeholder);
 }
 
-void RightColumn::openChannel(Api::Channel& channel)
+void RightColumn::openGuildChannel(const std::string& guildId, const std::string& id)
 {
-    // Do nothing if the channel is a guild voice (not implemented)
-    if (channel.type != Api::GuildVoice) {
+    rm->getGuildChannel([&](void *channel){
+        openChannel(id, reinterpret_cast<Api::Channel *>(channel)->type);
+    }, guildId, id);
+}
+
+void RightColumn::openPrivateChannel(const std::string& id)
+{
+    rm->getPrivateChannel([&](void *channel){
+        openChannel(id, reinterpret_cast<Api::PrivateChannel *>(channel)->type);
+    }, id);
+}
+
+void RightColumn::openChannel(const std::string& channelId, int type)
+{
+    if (type != Api::GuildVoice) {
         this->clean(); // Clean the column
 
         // Create some widgets
@@ -92,17 +105,16 @@ void RightColumn::openChannel(Api::Channel& channel)
         messagesLayout = new QVBoxLayout(messagesContainer);
 
         // Get the messages of the channel
-        std::string channelId = *channel.id;
         std::vector<Api::Message *> *messages;
 
         std::map<std::string, std::vector<Api::Message *> *>::iterator currentMessages = channelsMessages.find(channelId);
         if (currentMessages == channelsMessages.end()) {
             QWidget *messageAreaPlaceholder = new QWidget(messagesContainer);
             messagesLayout->addWidget(messageAreaPlaceholder);
-            requester->getMessages([this](void *messages) {emit messagesRecieved(static_cast<std::vector<Api::Message *> *>(messages));}, channelId, 50 );
+            rm->getMessages([this](void *messages) {emit messagesReceived(static_cast<std::vector<Api::Message *> *>(messages));}, channelId, 50 );
         } else {
             messages = channelsMessages[channelId];
-            messageArea = new MessageArea(requester, *messages, messagesContainer);
+            messageArea = new MessageArea(rm, *messages, messagesContainer);
             messagesLayout->addWidget(messageArea);
         }
 
@@ -147,7 +159,7 @@ void RightColumn::openChannel(Api::Channel& channel)
         layout->addWidget(messagesContainer);
         layout->setContentsMargins(0, 0, 0, 0);
 
-        if (channel.type != Api::DM && channel.type != Api::GroupDM) {
+        if (type != Api::DM && type != Api::GroupDM) {
             // Guild channel
 
             // Create the widgets of the user list
@@ -169,7 +181,7 @@ void RightColumn::openChannel(Api::Channel& channel)
     }
 }
 
-void RightColumn::addMessage(Api::Message message)
+void RightColumn::addMessage(const Api::Message& message)
 {
     // Add the message if it belongs to this channels
     if (*message.channelId == currentOpenedChannel) {
@@ -181,28 +193,28 @@ void RightColumn::addMessage(Api::Message message)
 void RightColumn::userTyping(const json& data)
 {
     // TODO : it's showing typing only for the current opened channel, other typing events are ignored
-    std::string channelId = data.value("channel_id", "");
+    std::string channelId = data["channel_id"].toString().toUtf8().constData();
     if (currentOpenedChannel == channelId) {
         // A user is typing in this channel
 
         // Get the typing timestamp
-        typingTimestamp = data.value("timestamp", -1);
+        typingTimestamp = data["timestamp"].toInt(-1);
 
         // Get the user that is typing
-        requester->getUser([this](void *user) {emit userTypingRecieved(static_cast<Api::User *>(user));}, data.value("user_id", ""));
+        rm->getUser([this](void *user) {emit userTypingReceived(static_cast<Api::User *>(user));}, data["user_id"].toString().toUtf8().constData());
     }
 }
 
 void RightColumn::sendTyping()
 {
     // Send typing to the API
-    requester->sendTyping(currentOpenedChannel);
+    rm->requester->sendTyping(currentOpenedChannel);
 }
 
 void RightColumn::sendMessage(const std::string& content)
 {
     // Send a new message to the API and add it to the opened channel
-    requester->sendMessage(content, currentOpenedChannel);
+    rm->requester->sendMessage(content, currentOpenedChannel);
     std::string messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
     Api::Message newMessage = Api::Message {nullptr, new Api::User{client->username, nullptr, client->avatar, nullptr, nullptr, client->id, -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, new std::string(content), new std::string(messageTimestamp), nullptr, nullptr, nullptr, nullptr, -1, -1, -1, -1, false, false, false};
     messageArea->addMessage(newMessage, *(*channelsMessages[currentOpenedChannel])[0]);

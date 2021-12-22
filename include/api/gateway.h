@@ -2,13 +2,12 @@
 
 #include "api/request.h"
 
-#include "../../lib/nlohmann/json.hpp"
-
 #include <QtWebSockets/QtWebSockets>
+#include <QJsonValue>
 
 #include <string>
 
-using json = nlohmann::json;
+using json = QJsonValue;
 
 namespace Api {
 

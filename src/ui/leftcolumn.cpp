@@ -2,11 +2,11 @@
 
 namespace Ui {
 
-LeftColumn::LeftColumn(Api::Requester *requesterp, QWidget *parent)
+LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     : QScrollArea(parent)
 {
     // Attribute initialization
-    requester = requesterp;
+    rm = rmp;
     homePageShown = true;
 
     // Create the widgets
@@ -44,21 +44,18 @@ LeftColumn::LeftColumn(Api::Requester *requesterp, QWidget *parent)
     QObject::connect(homeButton, SIGNAL(clicked()), this, SLOT(clicHomeButton()));
 }
 
-void LeftColumn::displayGuilds(std::vector<Api::Guild *> *guildsp)
+void LeftColumn::displayGuilds(const std::vector<Api::Guild *>& guilds)
 {
-    // Add guilds
-    guilds = guildsp;
-
     // Loop through every guild object
-    for (size_t i = 0 ; i < guilds->size() ; i++) {
+    for (size_t i = 0 ; i < guilds.size() ; i++) {
         // Create the guild widget and add it the guild storage and the layout
-        GuildWidget *guildWidget = new GuildWidget(requester, *(*guilds)[i], i, this);
+        GuildWidget *guildWidget = new GuildWidget(rm, *guilds[i], this);
         guildWidgets.push_back(guildWidget);
 
         layout->insertWidget(i + 3, guildWidget);
 
         // Connect the clic signal
-        QObject::connect(guildWidget, SIGNAL(leftClicked(Api::Guild&, unsigned int)), this, SLOT(clicGuild(Api::Guild&, unsigned int)));
+        QObject::connect(guildWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicGuild(const std::string&)));
     }
 }
 
@@ -79,7 +76,7 @@ void LeftColumn::clicHomeButton()
     }
 }
 
-void LeftColumn::clicGuild(Api::Guild& guild, unsigned int id)
+void LeftColumn::clicGuild(const std::string& guildId)
 {
     // A guild is clicked
 
@@ -91,21 +88,24 @@ void LeftColumn::clicGuild(Api::Guild& guild, unsigned int id)
 
     // Reset the stylesheet of the guild widgets except the one clicked
     for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
-        if (i != id) {
+        if (guildWidgets[i]->id != guildId) {
             guildWidgets[i]->unclicked();
         }
     }
 
     // Emit signals
     emit cleanRightColumn();
-    emit guildClicked(guild);
+    emit guildClicked(guildId);
 }
 
 void LeftColumn::setUnreadGuild(const std::string& guildId)
 {
-    for (size_t i = 0 ; i < guilds->size() ; i++) {
-        if (*(*guilds)[i]->id == guildId) guildWidgets[i]->setUnread(true);
-    }
+    rm->getGuilds([&](void *guilds){
+        for (size_t i = 0 ; i < static_cast<std::vector<Api::Guild *> *>(guilds)->size() ; i++) {
+            if (*(*static_cast<std::vector<Api::Guild *> *>(guilds))[i]->id == guildId)
+                guildWidgets[i]->setUnread(true);
+        }
+    });
 }
 
 } // namespace Ui

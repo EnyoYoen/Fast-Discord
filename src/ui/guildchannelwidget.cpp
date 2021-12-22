@@ -2,17 +2,17 @@
 
 namespace Ui {
 
-GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, unsigned int idp, QWidget *parent)
+GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget *parent)
     : QWidget(parent)
 {
     // Attributes initialization
-    id = idp;
-    channel = guildChannel;
+    id = *guildChannel.id;
+    type = guildChannel.type;
     clicked = false;
 
     //  Determine the icon of this channel with its type
     std::string iconName;
-    switch (channel.type) {
+    switch (type) {
     case Api::GuildText:
         iconName = "0";
         break;
@@ -34,7 +34,7 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, unsigne
     }
 
     // Set the different stylesheets
-    if (channel.type == Api::GuildCategory) {
+    if (type == Api::GuildCategory) {
         // It is a category, there is no stylesheet
         hoverStyleSheet = clickedStyleSheet = (char *)"color: #FFF;";
     } else {
@@ -59,7 +59,7 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, unsigne
     icon->setStyleSheet("color: #8E9297");
 
     // Create the name label
-    name = new QLabel((*channel.name).c_str(), this);
+    name = new QLabel((*guildChannel.name).c_str(), this);
     name->setStyleSheet("color: #8E9297");
 
     // Add widgets to layout and style it
@@ -81,9 +81,9 @@ void GuildChannelWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     // Emit signals when clicked to open the channel or to show infos
     if (event->button() == Qt::LeftButton) {
-        emit leftClicked(channel, id);
+        emit leftClicked(id);
     } else if (event->button() == Qt::RightButton) {
-        emit rightClicked(channel); // Does nothing for now
+        emit rightClicked(id); // Does nothing for now
     }
 }
 
@@ -93,14 +93,14 @@ void GuildChannelWidget::unclicked()
     if (clicked) {
         clicked = false;
         this->setStyleSheet("color: #8E9297;"
-                      "background-color: none;");
+                            "background-color: none;");
     }
 }
 
 void GuildChannelWidget::mousePressEvent(QMouseEvent *)
 {
     // Widget clicked : change the stylesheet
-    if (!clicked && channel.type != 2) {
+    if (!clicked && type != 2) {
         this->setStyleSheet(clickedStyleSheet);
         clicked = true;
     }

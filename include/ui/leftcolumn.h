@@ -3,7 +3,7 @@
 #include "homebutton.h"
 #include "ui/guildwidget.h"
 #include "api/guild.h"
-#include "api/request.h"
+#include "api/ressourcemanager.h"
 
 #include <QScrollArea>
 #include <QVBoxLayout>
@@ -17,17 +17,19 @@ class LeftColumn : public QScrollArea
 {
     Q_OBJECT
 public:
-    LeftColumn(Api::Requester *requester, QWidget *parent);
-    void displayGuilds(std::vector<Api::Guild *> *guilds);
+    LeftColumn(Api::RessourceManager *rm, QWidget *parent);
 
 signals:
     void cleanRightColumn();
     void homeButtonClicked();
-    void guildClicked(Api::Guild& guild);
+    void guildClicked(const std::string&);
+
+public slots:
+    void displayGuilds(const std::vector<Api::Guild *>& guilds);
 
 private slots:
     void clicHomeButton();
-    void clicGuild(Api::Guild& guild, unsigned int id);
+    void clicGuild(const std::string&);
     void setUnreadGuild(const std::string& guildId);
 
 private:
@@ -35,10 +37,8 @@ private:
     QVBoxLayout *layout;
     HomeButton  *homeButton;
 
-    Api::Requester *requester; // To request the API
+    Api::RessourceManager *rm; // To request the API
 
-    // Store guilds and guild widgets that we already gathered
-    std::vector<Api::Guild *> *guilds;
     std::vector<GuildWidget *> guildWidgets;
 
     bool homePageShown; // If the home page is shown

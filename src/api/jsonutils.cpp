@@ -12,151 +12,157 @@
 #include "api/voice.h"
 #include "api/guild.h"
 #include "api/client.h"
+#include "api/presence.h"
 
 #include <string>
 
+#include <QJsonObject>
+
 namespace Api {
 
-// Get a std::string at the specified key, or nullptr if there's nothing
-std::string *valueNoNull(json jsonObj, const std::string& key)
+std::string *getString(QJsonObject jsonObj, const char *key)
 {
-    try {
-        // Getting the JSON object at 'key', if not empty
-        json attribute = key == static_cast<std::string>("") ? jsonObj : jsonObj.at(key);
-        if (attribute.is_null())
-            return nullptr; // The attribute at the key specified is null
-        return new std::string(attribute.get<std::string>());
-    } catch(std::exception&) {
-        return nullptr; // There is nothing at the key specified
-    }
+    std::string str = jsonObj[QString(key)].toString().toUtf8().constData();
+    return new std::string(str);
 }
 
-std::vector<std::string> *getStringsFromJson(json jsonObj, const std::string& key)
+std::vector<std::string> *getStringsFromJson(QJsonArray jsonArray)
 {
-    try {
-        // Getting the JSON object at 'key', if not empty
-        json jsonstrings = key == static_cast<std::string>("") ? jsonObj : jsonObj.at(key);
-        std::vector<std::string> *strings = new std::vector<std::string>;
+    std::vector<std::string> *strings = new std::vector<std::string>;
 
-        // Filling the vector
-        for (unsigned int i = 0 ; i < jsonstrings.size() ; i++) {
-            strings->push_back(*valueNoNull(jsonstrings[i], ""));
-        }
-
-        return strings;
-    } catch(std::exception& e) {
-        return nullptr; // There is nothing at the key specified
+    // Filling the vector
+    for (int i = 0 ; i < jsonArray.size() ; i++) {
+        strings->push_back(jsonArray[i].toString().toUtf8().constData());
     }
+
+    return strings;
 }
 
-// All the specialization of 'unmarshalObj'
+// All the specialization of 'unmarshal'
 
 template <>
-void unmarshalObj<User>(json jsonObj, User **object)
+void unmarshal<User>(QJsonObject jsonObj, User **object)
 {
     *object = new User {
-        valueNoNull(jsonObj, "username"     ),
-        valueNoNull(jsonObj, "discriminator"),
-        valueNoNull(jsonObj, "avatar"       ),
-        valueNoNull(jsonObj, "locale"       ),
-        valueNoNull(jsonObj, "email"        ),
-        valueNoNull(jsonObj, "id"           ),
+        getString(jsonObj, "username"),
+        getString(jsonObj, "discriminator"),
+        getString(jsonObj, "avatar"),
+        getString(jsonObj, "locale"),
+        getString(jsonObj, "email"),
+        getString(jsonObj, "id"),
 
-        jsonObj.value("flags"       , -1),
-        jsonObj.value("premium_type", -1),
-        jsonObj.value("public_flags", -1),
+        jsonObj["flags"].toInt(-1),
+        jsonObj["premium_type"].toInt(-1),
+        jsonObj["public_flags"].toInt(-1),
 
-        jsonObj.value("bot"        , false),
-        jsonObj.value("system"     , false),
-        jsonObj.value("mfa_enabled", false),
-        jsonObj.value("verified"   , false)
+        jsonObj["bot"].toBool(),
+        jsonObj["system"].toBool(),
+        jsonObj["mfa_enabled"].toBool(),
+        jsonObj["verified"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<Overwrite>(json jsonObj, Overwrite **object)
+void unmarshal<Overwrite>(QJsonObject jsonObj, Overwrite **object)
 {
     *object = new Overwrite {
-        valueNoNull(jsonObj, "id"   ),
-        valueNoNull(jsonObj, "allow"),
-        valueNoNull(jsonObj, "deny" ),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "allow"),
+        getString(jsonObj, "deny"),
 
-        jsonObj.value("type", -1)
+        jsonObj["type"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<ThreadMember>(json jsonObj, ThreadMember **object)
+void unmarshal<ThreadMember>(QJsonObject jsonObj, ThreadMember **object)
 {
     *object = new ThreadMember {
-        valueNoNull(jsonObj, "join_timestamp"),
-        valueNoNull(jsonObj, "id"            ),
-        valueNoNull(jsonObj, "user_id"       ),
+        getString(jsonObj, "join_timestamp"),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "user_id"),
 
-        jsonObj.value("flags", -1)
+        jsonObj["flags"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<ThreadMetadata>(json jsonObj, ThreadMetadata **object)
+void unmarshal<ThreadMetadata>(QJsonObject jsonObj, ThreadMetadata **object)
 {
     *object = new ThreadMetadata {
-        valueNoNull(jsonObj, "archive_timestamp"),
+        getString(jsonObj, "archive_timestamp"),
 
-        jsonObj.value("auto_archive_duration", -1),
+        jsonObj["auto_archive_duration"].toInt(-1),
 
-        jsonObj.value("archived", false),
-        jsonObj.value("locked"  , false)
+        jsonObj["archived"].toBool(),
+        jsonObj["locked"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<Channel>(json jsonObj, Channel **object)
+void unmarshal<Channel>(QJsonObject jsonObj, Channel **object)
 {
     std::vector<User *> *recipients = new std::vector<User *>;
     std::vector<Overwrite *> *permissionOverwrites = new std::vector<Overwrite *>;
     ThreadMember *member = new ThreadMember;
     ThreadMetadata *threadMetadata = new ThreadMetadata;
 
-    unmarshalMultiple<User>(jsonObj, "recipients", &recipients);
-    unmarshalMultiple<Overwrite>(jsonObj, "permission_overwrites", &permissionOverwrites);
-    unmarshal<ThreadMember>(jsonObj, "member", &member);
-    unmarshal<ThreadMetadata>(jsonObj, "thread_metadata", &threadMetadata);
+    unmarshalMultiple<User>(jsonObj["recipients"].toArray(), &recipients);
+    unmarshalMultiple<Overwrite>(jsonObj["permission_overwrites"].toArray(), &permissionOverwrites);
+    unmarshal<ThreadMember>(jsonObj["member"].toObject(), &member);
+    unmarshal<ThreadMetadata>(jsonObj["thread_metadata"].toObject(), &threadMetadata);
 
     *object = new Channel {
         recipients,
         permissionOverwrites,
         member,
         threadMetadata,
-        valueNoNull(jsonObj, "id"                ),
-        valueNoNull(jsonObj, "name"              ),
-        valueNoNull(jsonObj, "topic"             ),
-        valueNoNull(jsonObj, "icon"              ),
-        valueNoNull(jsonObj, "last_pin_timestamp"),
-        valueNoNull(jsonObj, "rtc_region"        ),
-        valueNoNull(jsonObj, "permissions"       ),
-        valueNoNull(jsonObj, "guild_id"          ),
-        valueNoNull(jsonObj, "last_message_id"   ),
-        valueNoNull(jsonObj, "owner_id"          ),
-        valueNoNull(jsonObj, "application_id"    ),
-        valueNoNull(jsonObj, "parent_id"         ),
 
-        jsonObj.value("type"                         , -1),
-        jsonObj.value("position"                     , -1),
-        jsonObj.value("bitrate"                      , -1),
-        jsonObj.value("user_limit"                   , -1),
-        jsonObj.value("rate_limit_per_user"          , -1),
-        jsonObj.value("video_quality_mode"           , -1),
-        jsonObj.value("message_count"                , -1),
-        jsonObj.value("member_count"                 , -1),
-        jsonObj.value("default_auto_archive_duration", -1),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "name"),
+        getString(jsonObj, "topic"),
+        getString(jsonObj, "icon"),
+        getString(jsonObj, "last_pin_timestamp"),
+        getString(jsonObj, "rtc_region"),
+        getString(jsonObj, "permissions"),
+        getString(jsonObj, "guild_id"),
+        getString(jsonObj, "last_message_id"),
+        getString(jsonObj, "owner_id"),
+        getString(jsonObj, "application_id"),
+        getString(jsonObj, "parent_id"),
 
-        jsonObj.value("nsfw", false)
+        jsonObj["type"].toInt(-1),
+        jsonObj["position"].toInt(-1),
+        jsonObj["bitrate"].toInt(-1),
+        jsonObj["user_limit"].toInt(-1),
+        jsonObj["rate_limit_per_user"].toInt(-1),
+        jsonObj["video_quality_mode"].toInt(-1),
+        jsonObj["message_count"].toInt(-1),
+        jsonObj["member_count"].toInt(-1),
+        jsonObj["default_auto_archive_duration"].toInt(-1),
+
+        jsonObj["nsfw"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<TeamMember>(json jsonObj, TeamMember **object)
+void unmarshal<PrivateChannel>(QJsonObject jsonObj, PrivateChannel **object)
+{
+    *object = new PrivateChannel {
+        getStringsFromJson(jsonObj["recipient_ids"].toArray()),
+
+        getString(jsonObj, "icon"),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "last_message_id"),
+        getString(jsonObj, "name"),
+        getString(jsonObj, "owner_id"),
+
+        jsonObj["type"].toInt(-1)
+    };
+}
+
+template <>
+void unmarshal<TeamMember>(QJsonObject jsonObj, TeamMember **object)
 {
     User *user = new User;
 
@@ -164,16 +170,16 @@ void unmarshalObj<TeamMember>(json jsonObj, TeamMember **object)
 
     *object = new TeamMember {
         user,
-        getStringsFromJson(jsonObj, "permissions"),
+        getStringsFromJson(jsonObj["permissions"].toArray()),
 
-        valueNoNull(jsonObj, "team_id"),
+        getString(jsonObj, "team_id"),
 
-        jsonObj.value("member_ship_state", -1)
+        jsonObj["member_ship_state"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<Team>(json jsonObj, Team **object)
+void unmarshal<Team>(QJsonObject jsonObj, Team **object)
 {
     std::vector<TeamMember *> *members = new std::vector<TeamMember *>;
 
@@ -181,15 +187,16 @@ void unmarshalObj<Team>(json jsonObj, Team **object)
 
     *object = new Team {
         members,
-        valueNoNull(jsonObj, "icon"         ),
-        valueNoNull(jsonObj, "id"           ),
-        valueNoNull(jsonObj, "name"         ),
-        valueNoNull(jsonObj, "owner_user_id")
+
+        getString(jsonObj, "icon"),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "name"),
+        getString(jsonObj, "owner_user_id")
     };
 }
 
 template <>
-void unmarshalObj<Application>(json jsonObj, Application **object)
+void unmarshal<Application>(QJsonObject jsonObj, Application **object)
 {
     User *owner = new User;
     Team *team = new Team;
@@ -200,57 +207,57 @@ void unmarshalObj<Application>(json jsonObj, Application **object)
     *object = new Application {
         owner,
         team,
-        getStringsFromJson(jsonObj, "rpc_origins"),
+        getStringsFromJson(jsonObj["rpc_origins"].toArray()),
 
-        valueNoNull(jsonObj, "id"                  ),
-        valueNoNull(jsonObj, "name"                ),
-        valueNoNull(jsonObj, "icon"                ),
-        valueNoNull(jsonObj, "description"         ),
-        valueNoNull(jsonObj, "terms_of_service_url"),
-        valueNoNull(jsonObj, "privacy_policy_url"  ),
-        valueNoNull(jsonObj, "summary"             ),
-        valueNoNull(jsonObj, "verify_key"          ),
-        valueNoNull(jsonObj, "guild_id"            ),
-        valueNoNull(jsonObj, "primary_sku_id"      ),
-        valueNoNull(jsonObj, "slug"                ),
-        valueNoNull(jsonObj, "cover_image"         ),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "name"),
+        getString(jsonObj, "icon"),
+        getString(jsonObj, "description"),
+        getString(jsonObj, "terms_of_service_url"),
+        getString(jsonObj, "privacy_policy_url"),
+        getString(jsonObj, "summary"),
+        getString(jsonObj, "verify_key"),
+        getString(jsonObj, "guild_id"),
+        getString(jsonObj, "primary_sku_id"),
+        getString(jsonObj, "slug"),
+        getString(jsonObj, "cover_image"),
 
-        jsonObj.value("flags", -1),
+        jsonObj["flags"].toInt(-1),
 
-        jsonObj.value("bot_public"            , false),
-        jsonObj.value("bot_require_code_grant", false)
+        jsonObj["bot_public"].toBool(),
+        jsonObj["bot_require_code_grant"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<MessageActivity>(json jsonObj, MessageActivity **object)
+void unmarshal<MessageActivity>(QJsonObject jsonObj, MessageActivity **object)
 {
     *object = new MessageActivity {
-        valueNoNull(jsonObj, "party_id"),
+        getString(jsonObj, "party_id"),
 
-        jsonObj.value("type", -1)
+        jsonObj["type"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<GuildMessageMember>(json jsonObj, GuildMessageMember **object)
+void unmarshal<GuildMessageMember>(QJsonObject jsonObj, GuildMessageMember **object)
 {
     *object = new GuildMessageMember {
-        getStringsFromJson(jsonObj, "roles"),
+        getStringsFromJson(jsonObj["roles"].toArray()),
 
-        valueNoNull(jsonObj, "nick"         ),
-        valueNoNull(jsonObj, "joined_at"    ),
-        valueNoNull(jsonObj, "premium_since"),
-        valueNoNull(jsonObj, "permissions"  ),
+        getString(jsonObj, "nick"),
+        getString(jsonObj, "joined_at"),
+        getString(jsonObj, "premium_since"),
+        getString(jsonObj, "permissions"),
 
-        jsonObj.value("deaf"   , false),
-        jsonObj.value("mute"   , false),
-        jsonObj.value("pending", false)
+        jsonObj["deaf"].toBool(),
+        jsonObj["mute"].toBool(),
+        jsonObj["pending"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<MessageInteraction>(json jsonObj, MessageInteraction **object)
+void unmarshal<MessageInteraction>(QJsonObject jsonObj, MessageInteraction **object)
 {
     User *user = new User;
 
@@ -259,15 +266,15 @@ void unmarshalObj<MessageInteraction>(json jsonObj, MessageInteraction **object)
     *object = new MessageInteraction {
         user,
 
-        valueNoNull(jsonObj, "id"  ),
-        valueNoNull(jsonObj, "name"),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "name"),
 
-        jsonObj.value("type", -1)
+        jsonObj["type"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<Emoji>(json jsonObj, Emoji **object)
+void unmarshal<Emoji>(QJsonObject jsonObj, Emoji **object)
 {
     User *user = new User;
 
@@ -275,20 +282,20 @@ void unmarshalObj<Emoji>(json jsonObj, Emoji **object)
 
     *object = new Emoji {
         user,
-        getStringsFromJson(jsonObj, "roles"),
+        getStringsFromJson(jsonObj["roles"].toArray()),
 
-        valueNoNull(jsonObj, "id"),
-        valueNoNull(jsonObj, "name"),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "name"),
 
-        jsonObj.value("requireColons", false),
-        jsonObj.value("managed"      , false),
-        jsonObj.value("animated"     , false),
-        jsonObj.value("available"    , false)
+        jsonObj["requireColons"].toBool(),
+        jsonObj["managed"].toBool(),
+        jsonObj["animated"].toBool(),
+        jsonObj["available"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<Reaction>(json jsonObj, Reaction **object)
+void unmarshal<Reaction>(QJsonObject jsonObj, Reaction **object)
 {
     Emoji *emoji = new Emoji;
 
@@ -297,67 +304,67 @@ void unmarshalObj<Reaction>(json jsonObj, Reaction **object)
     *object = new Reaction {
         emoji,
 
-        jsonObj.value("count", -1),
+        jsonObj["count"].toInt(-1),
 
-        jsonObj.value("me", false)
+        jsonObj["me"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<EmbedField>(json jsonObj, EmbedField **object)
+void unmarshal<EmbedField>(QJsonObject jsonObj, EmbedField **object)
 {
     *object = new EmbedField {
-        valueNoNull(jsonObj, "name"),
-        valueNoNull(jsonObj, "value"),
+        getString(jsonObj, "name"),
+        getString(jsonObj, "value"),
 
-        jsonObj.value("inline", false)
+        jsonObj["inline"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<EmbedFooter>(json jsonObj, EmbedFooter **object)
+void unmarshal<EmbedFooter>(QJsonObject jsonObj, EmbedFooter **object)
 {
     *object = new EmbedFooter {
-        valueNoNull(jsonObj, "text"          ),
-        valueNoNull(jsonObj, "icon_url"      ),
-        valueNoNull(jsonObj, "proxy_icon_url")
+        getString(jsonObj, "text"),
+        getString(jsonObj, "icon_url"),
+        getString(jsonObj, "proxy_icon_url"),
     };
 }
 
 template <>
-void unmarshalObj<EmbedTVI>(json jsonObj, EmbedTVI **object)
+void unmarshal<EmbedTVI>(QJsonObject jsonObj, EmbedTVI **object)
 {
     *object = new EmbedTVI {
-        valueNoNull(jsonObj, "url"      ),
-        valueNoNull(jsonObj, "proxy_url"),
+        getString(jsonObj, "url"),
+        getString(jsonObj, "proxy_url"),
 
-        jsonObj.value("height", -1),
-        jsonObj.value("width" , -1)
+        jsonObj["height"].toInt(-1),
+        jsonObj["width"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<EmbedProvider>(json jsonObj, EmbedProvider **object)
+void unmarshal<EmbedProvider>(QJsonObject jsonObj, EmbedProvider **object)
 {
     *object = new EmbedProvider {
-        valueNoNull(jsonObj, "name"),
-        valueNoNull(jsonObj, "url" )
+        getString(jsonObj, "name"),
+        getString(jsonObj, "url"),
     };
 }
 
 template <>
-void unmarshalObj<EmbedAuthor>(json jsonObj, EmbedAuthor **object)
+void unmarshal<EmbedAuthor>(QJsonObject jsonObj, EmbedAuthor **object)
 {
     *object = new EmbedAuthor {
-        valueNoNull(jsonObj, "name"          ),
-        valueNoNull(jsonObj, "url"           ),
-        valueNoNull(jsonObj, "icon_url"      ),
-        valueNoNull(jsonObj, "proxy_icon_url")
+        getString(jsonObj, "name"),
+        getString(jsonObj, "url"),
+        getString(jsonObj, "icon_url"),
+        getString(jsonObj, "proxy_icon_url")
     };
 }
 
 template <>
-void unmarshalObj<Embed>(json jsonObj, Embed **object)
+void unmarshal<Embed>(QJsonObject jsonObj, Embed **object)
 {
     std::vector<EmbedField *> *fields = new std::vector<EmbedField *>;
     EmbedFooter *footer = new EmbedFooter;
@@ -384,46 +391,46 @@ void unmarshalObj<Embed>(json jsonObj, Embed **object)
         provider,
         author,
 
-        valueNoNull(jsonObj, "title"      ),
-        valueNoNull(jsonObj, "type"       ),
-        valueNoNull(jsonObj, "description"),
-        valueNoNull(jsonObj, "url"        ),
-        valueNoNull(jsonObj, "timestamp"  ),
+        getString(jsonObj, "title"),
+        getString(jsonObj, "type"),
+        getString(jsonObj, "description"),
+        getString(jsonObj, "url"),
+        getString(jsonObj, "timestamp"),
 
-        jsonObj.value("color", -1)
+        jsonObj["color"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<Attachment>(json jsonObj, Attachment **object)
+void unmarshal<Attachment>(QJsonObject jsonObj, Attachment **object)
 {
     *object = new Attachment {
-        valueNoNull(jsonObj, "id"          ),
-        valueNoNull(jsonObj, "filename"    ),
-        valueNoNull(jsonObj, "content_type"),
-        valueNoNull(jsonObj, "url"         ),
-        valueNoNull(jsonObj, "proxy_url"   ),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "filename"),
+        getString(jsonObj, "content_type"),
+        getString(jsonObj, "url"),
+        getString(jsonObj, "proxy_url"),
 
-        jsonObj.value("size"  , -1),
-        jsonObj.value("height", -1),
-        jsonObj.value("width" , -1)
+        jsonObj["size"].toInt(-1),
+        jsonObj["height"].toInt(-1),
+        jsonObj["width"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<ChannelMention>(json jsonObj, ChannelMention **object)
+void unmarshal<ChannelMention>(QJsonObject jsonObj, ChannelMention **object)
 {
     *object = new ChannelMention {
-        valueNoNull(jsonObj, "id"      ),
-        valueNoNull(jsonObj, "guild_id"),
-        valueNoNull(jsonObj, "name"    ),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "guild_id"),
+        getString(jsonObj, "name"),
 
-        jsonObj.value("type", -1)
+        jsonObj["type"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<SelectOption>(json jsonObj, SelectOption **object)
+void unmarshal<SelectOption>(QJsonObject jsonObj, SelectOption **object)
 {
     Emoji *emoji = new Emoji;
 
@@ -432,16 +439,16 @@ void unmarshalObj<SelectOption>(json jsonObj, SelectOption **object)
     *object = new SelectOption {
         emoji,
 
-        valueNoNull(jsonObj, "label"      ),
-        valueNoNull(jsonObj, "value"      ),
-        valueNoNull(jsonObj, "description"),
+        getString(jsonObj, "label"),
+        getString(jsonObj, "value"),
+        getString(jsonObj, "description"),
 
-        jsonObj.value("default", false)
+        jsonObj["default"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<MessageComponent>(json jsonObj, MessageComponent **object)
+void unmarshal<MessageComponent>(QJsonObject jsonObj, MessageComponent **object)
 {
     Emoji *emoji = new Emoji;
     std::vector<SelectOption *> *components = new std::vector<SelectOption *>;
@@ -454,58 +461,58 @@ void unmarshalObj<MessageComponent>(json jsonObj, MessageComponent **object)
         components,
         nullptr,
 
-        valueNoNull(jsonObj, "custom_id"  ),
-        valueNoNull(jsonObj, "label"      ),
-        valueNoNull(jsonObj, "url"        ),
-        valueNoNull(jsonObj, "placeholder"),
+        getString(jsonObj, "custom_id"),
+        getString(jsonObj, "label"),
+        getString(jsonObj, "url"),
+        getString(jsonObj, "placeholder"),
 
-        jsonObj.value("type"      , -1),
-        jsonObj.value("style"     , -1),
-        jsonObj.value("min_values", -1),
-        jsonObj.value("max_values", -1),
+        jsonObj["type"].toInt(-1),
+        jsonObj["style"].toInt(-1),
+        jsonObj["min_values"].toInt(-1),
+        jsonObj["max_values"].toInt(-1),
 
-        jsonObj.value("disabled", false)
+        jsonObj["disabled"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<StickerItem>(json jsonObj, StickerItem **object)
+void unmarshal<StickerItem>(QJsonObject jsonObj, StickerItem **object)
 {
     *object = new StickerItem {
-        valueNoNull(jsonObj, "id"  ),
-        valueNoNull(jsonObj, "name"),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "name"),
 
-        jsonObj.value("format_type", -1)
+        jsonObj["format_type"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<Sticker>(json jsonObj, Sticker **object)
+void unmarshal<Sticker>(QJsonObject jsonObj, Sticker **object)
 {
     User *user = new User;
 
-    unmarshal<User>(jsonObj, "user", &user),
+    unmarshal<User>(jsonObj, "user", &user);
 
     *object = new Sticker {
         user,
 
-        valueNoNull(jsonObj, "id"         ),
-        valueNoNull(jsonObj, "pack_id"    ),
-        valueNoNull(jsonObj, "name"       ),
-        valueNoNull(jsonObj, "description"),
-        valueNoNull(jsonObj, "tags"       ),
-        valueNoNull(jsonObj, "asset"      ),
-        valueNoNull(jsonObj, "guild_id"   ),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "pack_id"),
+        getString(jsonObj, "name"),
+        getString(jsonObj, "description"),
+        getString(jsonObj, "tags"),
+        getString(jsonObj, "asset"),
+        getString(jsonObj, "guild_id"),
 
-        jsonObj.value("type"       , -1),
-        jsonObj.value("format_type", -1),
-        jsonObj.value("sort_value" , -1),
+        jsonObj["type"].toInt(-1),
+        jsonObj["format_type"].toInt(-1),
+        jsonObj["sort_value"].toInt(-1),
 
-        jsonObj.value("available", false)
+        jsonObj["available"].toBool()
     };
 }
 
-Message *getPartialMessage(json jsonObj, const std::string& key)
+Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
 {
     Application *application = new Application;
     User *author = new User;
@@ -535,54 +542,53 @@ Message *getPartialMessage(json jsonObj, const std::string& key)
     unmarshalMultiple<StickerItem>(jsonObj, "sticker_items", &stickerItems);
     unmarshalMultiple<Sticker>(jsonObj, "stickers", &stickers);
 
-    try {
-        jsonObj = key == static_cast<std::string>("") ? jsonObj : jsonObj.at(key);
-
-        return new Message {
-            application,
-            author,
-            activity,
-            member,
-            nullptr,
-            thread,
-            interaction,
-
-            reactions,
-            nullptr,
-            mentions,
-            attachments,
-            mentionChannels,
-            getStringsFromJson(jsonObj, "mention_roles"),
-            components,
-            stickerItems,
-            stickers,
-
-            valueNoNull(jsonObj, "id"              ),
-            valueNoNull(jsonObj, "channel_id"      ),
-            valueNoNull(jsonObj, "guild_id"        ),
-            valueNoNull(jsonObj, "content"         ),
-            valueNoNull(jsonObj, "timestamp"       ),
-            valueNoNull(jsonObj, "edited_timestamp"),
-            valueNoNull(jsonObj, "webhook_id"      ),
-            valueNoNull(jsonObj, "application_id"  ),
-            valueNoNull(jsonObj, "nonce"           ),
-
-            jsonObj.value("nonce"              , -1),
-            jsonObj.value("author_public_flags", -1),
-            jsonObj.value("type"               , -1),
-            jsonObj.value("flags"              , -1),
-
-            jsonObj.value("tts"             , false),
-            jsonObj.value("pinned"          , false),
-            jsonObj.value("mention_everyone", false)
-        };
-    } catch(json::out_of_range& e) {
+    if (key == QString("") && jsonObj[key].type() == QJsonValue::Undefined) {
         return nullptr;
     }
+    jsonObj = key == QString("") ? jsonObj : jsonObj[key].toObject();
+
+    return new Message {
+        application,
+        author,
+        activity,
+        member,
+        nullptr,
+        thread,
+        interaction,
+
+        reactions,
+        nullptr,
+        mentions,
+        attachments,
+        mentionChannels,
+        getStringsFromJson(jsonObj["mention_roles"].toArray()),
+        components,
+        stickerItems,
+        stickers,
+
+        getString(jsonObj, "id"),
+        getString(jsonObj, "channel_id"),
+        getString(jsonObj, "guild_id"),
+        getString(jsonObj, "content"),
+        getString(jsonObj, "timestamp"),
+        getString(jsonObj, "edited_timestamp"),
+        getString(jsonObj, "webhook_id"),
+        getString(jsonObj, "application_id"),
+        getString(jsonObj, "nonce"),
+
+        jsonObj["nonce"].toInt(-1),
+        jsonObj["author_public_flags"].toInt(-1),
+        jsonObj["type"].toInt(-1),
+        jsonObj["flags"].toInt(-1),
+
+        jsonObj["tts"].toBool(),
+        jsonObj["pinned"].toBool(),
+        jsonObj["mention_everyone"].toBool()
+    };
 }
 
 template <>
-void unmarshalObj<Message>(json jsonObj, Message **object)
+void unmarshal<Message>(QJsonObject jsonObj, Message **object)
 {
     Application *application = new Application;
     User *author = new User;
@@ -626,34 +632,34 @@ void unmarshalObj<Message>(json jsonObj, Message **object)
         mentions,
         attachments,
         mentionChannels,
-        getStringsFromJson(jsonObj, "mention_roles"),
+        getStringsFromJson(jsonObj["mention_roles"].toArray()),
         components,
         stickerItems,
         stickers,
 
-        valueNoNull(jsonObj, "id"              ),
-        valueNoNull(jsonObj, "channel_id"      ),
-        valueNoNull(jsonObj, "guild_id"        ),
-        valueNoNull(jsonObj, "content"         ),
-        valueNoNull(jsonObj, "timestamp"       ),
-        valueNoNull(jsonObj, "edited_timestamp"),
-        valueNoNull(jsonObj, "webhook_id"      ),
-        valueNoNull(jsonObj, "application_id"  ),
-        valueNoNull(jsonObj, "nonce"           ),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "channel_id"),
+        getString(jsonObj, "guild_id"),
+        getString(jsonObj, "content"),
+        getString(jsonObj, "timestamp"),
+        getString(jsonObj, "edited_timestamp"),
+        getString(jsonObj, "webhook_id"),
+        getString(jsonObj, "application_id"),
+        getString(jsonObj, "nonce"),
 
-        jsonObj.value("nonce"              , -1),
-        jsonObj.value("author_public_flags", -1),
-        jsonObj.value("type"               , -1),
-        jsonObj.value("flags"              , -1),
+        jsonObj["nonce"].toInt(-1),
+        jsonObj["author_public_flags"].toInt(-1),
+        jsonObj["type"].toInt(-1),
+        jsonObj["flags"].toInt(-1),
 
-        jsonObj.value("tts"             , false),
-        jsonObj.value("pinned"          , false),
-        jsonObj.value("mention_everyone", false)
+        jsonObj["tts"].toBool(),
+        jsonObj["pinned"].toBool(),
+        jsonObj["mention_everyone"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<GuildMember>(json jsonObj, GuildMember **object)
+void unmarshal<GuildMember>(QJsonObject jsonObj, GuildMember **object)
 {
     User *user = new User;
 
@@ -661,22 +667,22 @@ void unmarshalObj<GuildMember>(json jsonObj, GuildMember **object)
 
     *object = new GuildMember {
         user,
-        getStringsFromJson(jsonObj, "roles"),
+        getStringsFromJson(jsonObj["roles"].toArray()),
 
-        valueNoNull(jsonObj, "nick"         ),
-        valueNoNull(jsonObj, "avatar"       ),
-        valueNoNull(jsonObj, "joined_at"    ),
-        valueNoNull(jsonObj, "premium_since"),
-        valueNoNull(jsonObj, "permissions"  ),
+        getString(jsonObj, "nick"),
+        getString(jsonObj, "avatar"),
+        getString(jsonObj, "joined_at"),
+        getString(jsonObj, "premium_since"),
+        getString(jsonObj, "permissions"),
 
-        jsonObj.value("deaf"   , false),
-        jsonObj.value("mute"   , false),
-        jsonObj.value("pending", false)
+        jsonObj["deaf"].toBool(),
+        jsonObj["mute"].toBool(),
+        jsonObj["pending"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<VoiceState>(json jsonObj, VoiceState **object)
+void unmarshal<VoiceState>(QJsonObject jsonObj, VoiceState **object)
 {
     GuildMember *member = new GuildMember;
 
@@ -685,35 +691,35 @@ void unmarshalObj<VoiceState>(json jsonObj, VoiceState **object)
     *object = new VoiceState {
         member,
 
-        valueNoNull(jsonObj, "guild_id"                  ),
-        valueNoNull(jsonObj, "channel_id"                ),
-        valueNoNull(jsonObj, "user_id"                   ),
-        valueNoNull(jsonObj, "session_id"                ),
-        valueNoNull(jsonObj, "request_to_speak_timestamp"),
+        getString(jsonObj, "guild_id"),
+        getString(jsonObj, "channel_id"),
+        getString(jsonObj, "user_id"),
+        getString(jsonObj, "session_id"),
+        getString(jsonObj, "request_to_speak_timestamp"),
 
-        jsonObj.value("deaf"       , false),
-        jsonObj.value("mute"       , false),
-        jsonObj.value("self_deaf"  , false),
-        jsonObj.value("self_mute"  , false),
-        jsonObj.value("self_stream", false),
-        jsonObj.value("self_video" , false),
-        jsonObj.value("suppress"   , false)
+        jsonObj["deaf"].toBool(),
+        jsonObj["mute"].toBool(),
+        jsonObj["self_deaf"].toBool(),
+        jsonObj["self_mute"].toBool(),
+        jsonObj["self_stream"].toBool(),
+        jsonObj["self_video"].toBool(),
+        jsonObj["suppress"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<WelcomeScreenChannel>(json jsonObj, WelcomeScreenChannel **object)
+void unmarshal<WelcomeScreenChannel>(QJsonObject jsonObj, WelcomeScreenChannel **object)
 {
     *object = new WelcomeScreenChannel {
-        valueNoNull(jsonObj, "channel_id" ),
-        valueNoNull(jsonObj, "description"),
-        valueNoNull(jsonObj, "emoji_id"   ),
-        valueNoNull(jsonObj, "emoji_name" )
+        getString(jsonObj, "channel_id"),
+        getString(jsonObj, "description"),
+        getString(jsonObj, "emoji_id"),
+        getString(jsonObj, "emoji_name"),
     };
 }
 
 template <>
-void unmarshalObj<WelcomeScreen>(json jsonObj, WelcomeScreen **object)
+void unmarshal<WelcomeScreen>(QJsonObject jsonObj, WelcomeScreen **object)
 {
     std::vector<WelcomeScreenChannel *> *welcomeChannels = new std::vector<WelcomeScreenChannel *>;
 
@@ -722,27 +728,27 @@ void unmarshalObj<WelcomeScreen>(json jsonObj, WelcomeScreen **object)
     *object = new WelcomeScreen {
         welcomeChannels,
 
-        valueNoNull(jsonObj, "description")
+        getString(jsonObj, "description"),
     };
 }
 
 template <>
-void unmarshalObj<StageInstance>(json jsonObj, StageInstance **object)
+void unmarshal<StageInstance>(QJsonObject jsonObj, StageInstance **object)
 {
     *object = new StageInstance {
-        valueNoNull(jsonObj, "id"        ),
-        valueNoNull(jsonObj, "guild_id"  ),
-        valueNoNull(jsonObj, "channel_id"),
-        valueNoNull(jsonObj, "topic"     ),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "guild_id"),
+        getString(jsonObj, "channel_id"),
+        getString(jsonObj, "topic"),
 
-        jsonObj.value("privacy_level" , -1),
+        jsonObj["privacy_level"].toInt(-1),
 
-        jsonObj.value("discoverable_disabled" , false)
+        jsonObj["discoverable_disabled"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<Guild>(json jsonObj, Guild **object)
+void unmarshal<Guild>(QJsonObject jsonObj, Guild **object)
 {
     WelcomeScreen *welcomeScreen = new WelcomeScreen;
     std::vector<VoiceState *> *voiceStates = new std::vector<VoiceState *>;
@@ -752,17 +758,17 @@ void unmarshalObj<Guild>(json jsonObj, Guild **object)
     std::vector<StageInstance *> *stageInstances = new std::vector<StageInstance *>;
     std::vector<Sticker *> *stickers = new std::vector<Sticker *>;
 
-    unmarshal<WelcomeScreen>(jsonObj, "welcome_screen", &welcomeScreen);
-    unmarshalMultiple<VoiceState>(jsonObj, "voice_states", &voiceStates);
-    unmarshalMultiple<GuildMember>(jsonObj, "members", &members);
-    unmarshalMultiple<Channel>(jsonObj, "channels", &channels);
-    unmarshalMultiple<Channel>(jsonObj, "threads", &threads);
-    unmarshalMultiple<StageInstance>(jsonObj, "stage_instances", &stageInstances);
-    unmarshalMultiple<Sticker>(jsonObj, "stickers", &stickers);
+    unmarshal<WelcomeScreen>(jsonObj["welcome_screen"].toObject(), &welcomeScreen);
+    unmarshalMultiple<VoiceState>(jsonObj["voice_states"].toArray(), &voiceStates);
+    unmarshalMultiple<GuildMember>(jsonObj["members"].toArray(), &members);
+    unmarshalMultiple<Channel>(jsonObj["channels"].toArray(), &channels);
+    unmarshalMultiple<Channel>(jsonObj["threads"].toArray(), &threads);
+    unmarshalMultiple<StageInstance>(jsonObj["stage_instances"].toArray(), &stageInstances);
+    unmarshalMultiple<Sticker>(jsonObj["stickers"].toArray(), &stickers);
 
     *object = new Guild {
         welcomeScreen,
-        getStringsFromJson(jsonObj, "guild_features"),
+        getStringsFromJson(jsonObj["guild_features"].toArray()),
         voiceStates,
         members,
         channels,
@@ -771,87 +777,86 @@ void unmarshalObj<Guild>(json jsonObj, Guild **object)
         stageInstances,
         stickers,
 
-        valueNoNull(jsonObj, "id"                       ),
-        valueNoNull(jsonObj, "name"                     ),
-        valueNoNull(jsonObj, "icon"                     ),
-        valueNoNull(jsonObj, "icon_hash"                ),
-        valueNoNull(jsonObj, "splash"                   ),
-        valueNoNull(jsonObj, "discovery_splash"         ),
-        valueNoNull(jsonObj, "owner_id"                 ),
-        valueNoNull(jsonObj, "permissions"              ),
-        valueNoNull(jsonObj, "region"                   ),
-        valueNoNull(jsonObj, "afk_channel_id"           ),
-        valueNoNull(jsonObj, "widget_channel_id"        ),
-        valueNoNull(jsonObj, "application_id"           ),
-        valueNoNull(jsonObj, "system_channel_id"        ),
-        valueNoNull(jsonObj, "rules_channel_id"         ),
-        valueNoNull(jsonObj, "joined_at"                ),
-        valueNoNull(jsonObj, "vanity_url_code"          ),
-        valueNoNull(jsonObj, "description"              ),
-        valueNoNull(jsonObj, "banner"                   ),
-        valueNoNull(jsonObj, "preferred_locale"         ),
-        valueNoNull(jsonObj, "public_updates_channel_id"),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "name"),
+        getString(jsonObj, "icon"),
+        getString(jsonObj, "icon_hash"),
+        getString(jsonObj, "splash"),
+        getString(jsonObj, "discovery_splash"),
+        getString(jsonObj, "owner_id"),
+        getString(jsonObj, "permissions"),
+        getString(jsonObj, "region"),
+        getString(jsonObj, "afk_channel_id"),
+        getString(jsonObj, "widget_channel_id"),
+        getString(jsonObj, "application_id"),
+        getString(jsonObj, "system_channel_id"),
+        getString(jsonObj, "rules_channel_id"),
+        getString(jsonObj, "joined_at"),
+        getString(jsonObj, "vanity_url_code"),
+        getString(jsonObj, "description"),
+        getString(jsonObj, "banner"),
+        getString(jsonObj, "preferred_locale"),
+        getString(jsonObj, "public_updates_channel_id"),
 
-        jsonObj.value("afk_timeout"                  , -1),
-        jsonObj.value("verification_level"           , -1),
-        jsonObj.value("default_message_notifications", -1),
-        jsonObj.value("explicit_content_filter"      , -1),
-        jsonObj.value("mfa_level"                    , -1),
-        jsonObj.value("system_channel_flags"         , -1),
-        jsonObj.value("member_count"                 , -1),
-        jsonObj.value("max_presences"                , -1),
-        jsonObj.value("max_members"                  , -1),
-        jsonObj.value("premium_tier"                 , -1),
-        jsonObj.value("premium_subscription_count"   , -1),
-        jsonObj.value("max_video_channel_users"      , -1),
-        jsonObj.value("approximate_member_count"     , -1),
-        jsonObj.value("approximate_presence_count"   , -1),
-        jsonObj.value("nsfw_level"                   , -1),
+        jsonObj["afk_timeout"].toInt(-1),
+        jsonObj["verification_level"].toInt(-1),
+        jsonObj["default_message_notifications"].toInt(-1),
+        jsonObj["explicit_content_filter"].toInt(-1),
+        jsonObj["mfa_level"].toInt(-1),
+        jsonObj["system_channel_flags"].toInt(-1),
+        jsonObj["member_count"].toInt(-1),
+        jsonObj["max_presences"].toInt(-1),
+        jsonObj["max_members"].toInt(-1),
+        jsonObj["premium_tier"].toInt(-1),
+        jsonObj["premium_subscription_count"].toInt(-1),
+        jsonObj["max_video_channel_users"].toInt(-1),
+        jsonObj["approximate_member_count"].toInt(-1),
+        jsonObj["approximate_presence_count"].toInt(-1),
+        jsonObj["nsfw_level"].toInt(-1),
 
-        jsonObj.value("owner"         , false),
-        jsonObj.value("widget_enabled", false),
-        jsonObj.value("large"         , false),
-        jsonObj.value("unavailable"   , false)
+        jsonObj["owner"].toBool(),
+        jsonObj["widget_enabled"].toBool(),
+        jsonObj["large"].toBool(),
+        jsonObj["unavailable"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<CustomStatus>(json jsonObj, CustomStatus **object)
+void unmarshal<CustomStatus>(QJsonObject jsonObj, CustomStatus **object)
 {
     *object = new CustomStatus {
-        valueNoNull(jsonObj, "text"     ),
-        valueNoNull(jsonObj, "expiresAt"),
-        valueNoNull(jsonObj, "emojiName"),
-        valueNoNull(jsonObj, "emojiId"  )
+        getString(jsonObj, "text"),
+        getString(jsonObj, "expires_at"),
+        getString(jsonObj, "emoji_name"),
+        getString(jsonObj, "emoji_id")
     };
 }
 
 template <>
-void unmarshalObj<FriendSourceFlags>(json jsonObj, FriendSourceFlags **object)
+void unmarshal<FriendSourceFlags>(QJsonObject jsonObj, FriendSourceFlags **object)
 {
     *object = new FriendSourceFlags {
-        jsonObj.value("all"           , false),
-        jsonObj.value("mutual_friends", false),
-        jsonObj.value("mutual_guilds" , false)
+        jsonObj["all"].toBool(),
+        jsonObj["mutual_friends"].toBool(),
+        jsonObj["mutual_guilds"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<GuildFolder>(json jsonObj, GuildFolder **object)
+void unmarshal<GuildFolder>(QJsonObject jsonObj, GuildFolder **object)
 {
     *object = new GuildFolder {
-        getStringsFromJson(jsonObj, "guild_ids"),
+        getStringsFromJson(jsonObj["guild_ids"].toArray()),
 
-        valueNoNull(jsonObj, "name"),
+        getString(jsonObj, "name"),
 
-        jsonObj.at("id").is_null() ? -1 : jsonObj.value("id" , -1),
-        //jsonObj.value("color" , -1)
-        -1
+        jsonObj["id"].toInt(-1),
+        jsonObj["color"].toInt(-1)
     };
 }
 
 template <>
-void unmarshalObj<ClientSettings>(json jsonObj, ClientSettings **object)
+void unmarshal<ClientSettings>(QJsonObject jsonObj, ClientSettings **object)
 {
     CustomStatus *customStatus = new CustomStatus;
     FriendSourceFlags *friendSourceFlags = new FriendSourceFlags;
@@ -865,66 +870,181 @@ void unmarshalObj<ClientSettings>(json jsonObj, ClientSettings **object)
         customStatus,
         friendSourceFlags,
         guildFolders,
-        getStringsFromJson(jsonObj, "guild_positions"),
-        getStringsFromJson(jsonObj, "restricted_guilds"),
+        getStringsFromJson(jsonObj["guild_positions"].toArray()),
+        getStringsFromJson(jsonObj["restricted_guilds"].toArray()),
 
-        valueNoNull(jsonObj, "locale"),
-        valueNoNull(jsonObj, "status"),
-        valueNoNull(jsonObj, "theme"),
+        getString(jsonObj, "locale"),
+        getString(jsonObj, "status"),
+        getString(jsonObj, "theme"),
 
-        jsonObj.value("afk_timeout"            , -1),
-        jsonObj.value("animate_stickers"       , -1),
-        jsonObj.value("explicit_content_filter", -1),
-        jsonObj.value("friend_discovery_flags" , -1),
-        jsonObj.value("timezone_offset"        , -1),
+        jsonObj["afk_timeout"].toInt(-1),
+        jsonObj["animate_stickers"].toInt(-1),
+        jsonObj["explicit_content_filter"].toInt(-1),
+        jsonObj["friend_discovery_flags"].toInt(-1),
+        jsonObj["timezone_offset"].toInt(-1),
 
-        jsonObj.value("allow_accessibility_detection"   , false),
-        jsonObj.value("animate_emoji"                   , false),
-        jsonObj.value("contact_sync_enabled"            , false),
-        jsonObj.value("convert_emoticons"               , false),
-        jsonObj.value("default_guilds_restricted"       , false),
-        jsonObj.value("detect_platform_accounts"        , false),
-        jsonObj.value("developer_mode"                  , false),
-        jsonObj.value("disable_games_tab"               , false),
-        jsonObj.value("enable_tts_command"              , false),
-        jsonObj.value("gif_auto_play"                   , false),
-        jsonObj.value("inline_attachment_media"         , false),
-        jsonObj.value("inline_embed_media"              , false),
-        jsonObj.value("message_display_compact"         , false),
-        jsonObj.value("native_phone_integration_enabled", false),
-        jsonObj.value("render_embeds"                   , false),
-        jsonObj.value("render_reactions"                , false),
-        jsonObj.value("show_current_game"               , false),
-        jsonObj.value("stream_notifications_enabled"    , false),
-        jsonObj.value("view_nsfw_guilds"                , false)
+        jsonObj["allow_accessibility_detection"].toBool(),
+        jsonObj["animate_emoji"].toBool(),
+        jsonObj["contact_sync_enabled"].toBool(),
+        jsonObj["convert_emoticons"].toBool(),
+        jsonObj["default_guilds_restricted"].toBool(),
+        jsonObj["detect_platform_accounts"].toBool(),
+        jsonObj["developer_mode"].toBool(),
+        jsonObj["disable_games_tab"].toBool(),
+        jsonObj["enable_tts_command"].toBool(),
+        jsonObj["gif_auto_play"].toBool(),
+        jsonObj["inline_attachment_media"].toBool(),
+        jsonObj["inline_embed_media"].toBool(),
+        jsonObj["message_display_compact"].toBool(),
+        jsonObj["native_phone_integration_enabled"].toBool(),
+        jsonObj["render_embeds"].toBool(),
+        jsonObj["render_reactions"].toBool(),
+        jsonObj["show_current_game"].toBool(),
+        jsonObj["stream_notifications_enabled"].toBool(),
+        jsonObj["view_nsfw_guilds"].toBool()
     };
 }
 
 template <>
-void unmarshalObj<Client>(json jsonObj, Client **object)
+void unmarshal<Client>(QJsonObject jsonObj, Client **object)
 {
     *object = new Client {
-        valueNoNull(jsonObj, "id"           ),
-        valueNoNull(jsonObj, "username"     ),
-        valueNoNull(jsonObj, "avatar"       ),
-        valueNoNull(jsonObj, "discriminator"),
-        valueNoNull(jsonObj, "banner"       ),
-        valueNoNull(jsonObj, "bio"          ),
-        valueNoNull(jsonObj, "locale"       ),
-        valueNoNull(jsonObj, "email"        ),
-        valueNoNull(jsonObj, "phone"        ),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "username"),
+        getString(jsonObj, "avatar"),
+        getString(jsonObj, "discriminator"),
+        getString(jsonObj, "banner"),
+        getString(jsonObj, "bio"),
+        getString(jsonObj, "locale"),
+        getString(jsonObj, "email"),
+        getString(jsonObj, "phone"),
 
-        jsonObj.value("public_flags"   , -1),
-        jsonObj.value("flags"          , -1),
-        jsonObj.value("purchased_flags", -1),
-        //jsonObj.value("banner_color"   , -1),
-        //jsonObj.value("accent_color"   , -1),
-        -1,
-        -1,
+        jsonObj["public_flags"].toInt(-1),
+        jsonObj["flags"].toInt(-1),
+        jsonObj["purchased_flags"].toInt(-1),
+        jsonObj["banner_color"].toInt(-1),
+        jsonObj["accent_color"].toInt(-1),
 
-        jsonObj.value("nsfw_allowed", false),
-        jsonObj.value("mfa_enabled" , false),
-        jsonObj.value("verified"    , false)
+        jsonObj["nsfw_allowed"].toBool(),
+        jsonObj["mfa_enabled"].toBool(),
+        jsonObj["verified"].toBool()
+    };
+}
+
+template <>
+void unmarshal<ActivityTimestamps>(QJsonObject jsonObj, ActivityTimestamps **object)
+{
+    *object = new ActivityTimestamps {
+        jsonObj["start"].toInt(-1),
+        jsonObj["end"].toInt(-1)
+    };
+}
+
+template <>
+void unmarshal<ActivityAssets>(QJsonObject jsonObj, ActivityAssets **object)
+{
+    *object = new ActivityAssets {
+        getString(jsonObj, "large_image"),
+        getString(jsonObj, "large_text"),
+        getString(jsonObj, "small_image"),
+        getString(jsonObj, "small_text")
+    };
+}
+
+template <>
+void unmarshal<PartySize>(QJsonObject jsonObj, PartySize **object)
+{
+    *object = new PartySize {
+        jsonObj["current_size"].toInt(-1),
+        jsonObj["max_size"].toInt(-1)
+    };
+}
+
+template <>
+void unmarshal<ActivityParty>(QJsonObject jsonObj, ActivityParty **object)
+{
+    PartySize *size = new PartySize;
+
+    unmarshal<PartySize>(jsonObj, "size", &size);
+
+    *object = new ActivityParty {
+        size,
+
+        getString(jsonObj, "id")
+    };
+}
+
+template <>
+void unmarshal<ActivitySecrets>(QJsonObject jsonObj, ActivitySecrets **object)
+{
+    *object = new ActivitySecrets {
+        getString(jsonObj, "match"),
+        getString(jsonObj, "join"),
+        getString(jsonObj, "spectate")
+    };
+}
+
+template <>
+void unmarshal<Activity>(QJsonObject jsonObj, Activity **object)
+{
+    ActivityTimestamps *timestamps = new ActivityTimestamps;
+    ActivityAssets *assets = new ActivityAssets;
+    ActivityParty *party = new ActivityParty;
+    ActivitySecrets *secrets = new ActivitySecrets;
+
+    unmarshal<ActivityTimestamps>(jsonObj, "timestamps", &timestamps);
+    unmarshal<ActivityAssets>(jsonObj, "assets", &assets);
+    unmarshal<ActivityParty>(jsonObj, "party", &party);
+    unmarshal<ActivitySecrets>(jsonObj, "secrets", &secrets);
+
+    *object = new Activity {
+        timestamps,
+        assets,
+        party,
+        secrets,
+
+        getString(jsonObj, "application_id"),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "name"),
+        getString(jsonObj, "state"),
+        getString(jsonObj, "details"),
+
+        jsonObj["created_at"].toInt(-1),
+        jsonObj["type"].toInt(-1),
+
+        jsonObj["instance"].toBool(false)
+    };
+}
+
+template <>
+void unmarshal<ClientStatus>(QJsonObject jsonObj, ClientStatus **object)
+{
+    *object = new ClientStatus {
+        getString(jsonObj, "desktop"),
+        getString(jsonObj, "mobile"),
+        getString(jsonObj, "web")
+    };
+}
+
+template <>
+void unmarshal<Presence>(QJsonObject jsonObj, Presence **object)
+{
+    User *user = new User;
+    ClientStatus *clientStatus = new ClientStatus;
+    std::vector<Activity *> *activities = new std::vector<Activity *>;
+
+    unmarshal<User>(jsonObj, "user", &user);
+    unmarshal<ClientStatus>(jsonObj, "client_status", &clientStatus);
+    unmarshalMultiple<Activity>(jsonObj, "activities", &activities);
+
+    *object = new Presence {
+        user,
+        clientStatus,
+        activities,
+
+        getString(jsonObj, "user_id"),
+        getString(jsonObj, "guild_id"),
+        getString(jsonObj, "status")
     };
 }
 

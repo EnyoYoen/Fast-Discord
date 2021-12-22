@@ -29,4 +29,14 @@ ChannelMention::~ChannelMention()
     delete name;
 }
 
+PrivateChannel::~PrivateChannel()
+{
+    delete recipientIds;
+    delete icon;
+    delete id;
+    delete lastMessageId;
+    delete name;
+    delete ownerId;
+}
+
 } // namespace Api

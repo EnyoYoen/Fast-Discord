@@ -3,7 +3,7 @@
 #include "roundedimage.h"
 #include "guildpill.h"
 #include "api/guild.h"
-#include "api/request.h"
+#include "api/ressourcemanager.h"
 
 #include <QFrame>
 #include <QLabel>
@@ -18,14 +18,16 @@ class GuildWidget : public QFrame
 {
     Q_OBJECT
 public:
-    GuildWidget(Api::Requester *requester, const Api::Guild& guildp, unsigned int idp, QWidget *parent);
+    GuildWidget(Api::RessourceManager *rm, const Api::Guild& guildp, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
     void setUnread(bool unread);
 
+    std::string  id;       // The id of the guild
+
 signals:
     void iconRecieved(const std::string& iconFileName);
-    void leftClicked(Api::Guild&, unsigned int);
-    void rightClicked(Api::Guild&);
+    void leftClicked(const std::string&);
+    void rightClicked(const std::string&);
 
 private slots:
     void setIcon(const std::string& guildIconFileName);
@@ -36,16 +38,13 @@ private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
 
-    Api::Requester *requester; // To request the API
+    Api::RessourceManager *rm; // To request the API
 
     // All the main widgets
     QHBoxLayout  *layout;
     RoundedImage *icon;
     QLabel       *textIcon;
     GuildPill    *pill;
-    Api::Guild    guild;
-
-    unsigned int id;       // The id that we assign to the widget
     bool         clicked;  // If the widget is clicked
     bool         unreadMessages;
 };

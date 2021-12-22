@@ -2,6 +2,7 @@
 
 #include "api/jsonutils.h"
 
+#include <QJsonDocument>
 #include <QDir>
 #include <QUrlQuery>
 #include <QMimeDatabase>
@@ -53,72 +54,67 @@ void Requester::readReply()
         file.close();
     }
     QByteArray ba = reply->readAll();
-    const QString qsContent = QString(ba);
-    const std::string sContent = qsContent.toUtf8().constData();
-    char *content = const_cast<char *>(sContent.c_str());
 
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     if (statusCode.toInt() == 429) { // We are rate limited
         // Set the end of the rate limit
-        rateLimitEnd = std::time(0) + json::parse(content, nullptr, false).value("retry_after", double(0));
+        rateLimitEnd = std::time(0) + QJsonDocument::fromJson(ba)["retry_after"].toDouble();
     } else {
         switch (parameters.type) {
             case GetUser:
                 {
                     User *user;
-                    unmarshal<User>(json::parse(content, nullptr, false), "", &user);
+                    unmarshal<User>(QJsonDocument::fromJson(ba).object(), &user);
                     parameters.callback(static_cast<void *>(user));
                     break;
                 }
             case GetGuilds:
                 {
                     std::vector<Guild *> *guilds;
-                    unmarshalMultiple<Guild>(json::parse(content, nullptr, false), "", &guilds);
+                    unmarshalMultiple<Guild>(QJsonDocument::fromJson(ba).array(), &guilds);
                     parameters.callback(static_cast<void *>(guilds));
                     break;
                 }
             case GetGuildChannels:
                 {
                     std::vector<Channel *> *channels;
-                    unmarshalMultiple<Channel>(json::parse(content, nullptr, false), "", &channels);
+                    unmarshalMultiple<Channel>(QJsonDocument::fromJson(ba).array(), &channels);
                     parameters.callback(static_cast<void *>(channels));
                     break;
                 }
             case GetPrivateChannels:
                 {
                     std::vector<Channel *> *privateChannels;
-                    unmarshalMultiple<Channel>(json::parse(content, nullptr, false), "", &privateChannels);
+                    unmarshalMultiple<Channel>(QJsonDocument::fromJson(ba).array(), &privateChannels);
                     parameters.callback(static_cast<void *>(privateChannels));
                     break;
                 }
             case GetMessages:
                 {
                     std::vector<Message *> *messages;
-                    unmarshalMultiple<Message>(json::parse(content, nullptr, false), "", &messages);
+                    unmarshalMultiple<Message>(QJsonDocument::fromJson(ba).array(), &messages);
                     parameters.callback(static_cast<void *>(messages));
                     break;
                 }
             case GetClient:
                 {
                     Client *client;
-                    unmarshal<Client>(json::parse(content, nullptr, false), "", &client);
+                    unmarshal<Client>(QJsonDocument::fromJson(ba).object(), &client);
                     parameters.callback(static_cast<void *>(client));
                     break;
                 }
             case GetClientSettings:
                 {
                     ClientSettings *clientSettings;
-                    unmarshal<ClientSettings>(json::parse(content, nullptr, false), "", &clientSettings);
+                    unmarshal<ClientSettings>(QJsonDocument::fromJson(ba).object(), &clientSettings);
                     parameters.callback(static_cast<void *>(clientSettings));
                     break;
                 }
             case GetWsUrl:
                 {
                     try {
-                        json jsonUrl = json::parse(content, nullptr, false).at("url");
-                        if (jsonUrl.is_null())
-                            break;
-                        std::string url = std::string(jsonUrl.get<std::string>());
+                        QJsonValue jsonUrl = QJsonDocument::fromJson(ba)["url"];
+                        std::string url = jsonUrl.toString().toUtf8().constData();
                         parameters.callback(static_cast<void *>(&url));
                     } catch(std::exception&) {
                         break;

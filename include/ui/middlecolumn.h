@@ -5,11 +5,14 @@
 #include "api/client.h"
 #include "api/channel.h"
 #include "api/guild.h"
-#include "api/request.h"
+#include "api/ressourcemanager.h"
+#include "api/presence.h"
 
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QScrollArea>
+
+#include <vector>
 
 namespace Ui {
 
@@ -18,33 +21,37 @@ class MiddleColumn : public QWidget
 {
     Q_OBJECT
 public:
-    MiddleColumn(Api::Requester *requester, const Api::Client *client, QWidget *parent);
+    MiddleColumn(Api::RessourceManager *rm, const Api::Client *client, QWidget *parent);
 
 signals:
-    void privateChannelsRecieved(std::vector<Api::Channel *> *channels);
-    void guildChannelsRecieved(std::vector<Api::Channel *> *channels);
-    void channelClicked(Api::Channel& channel);
+    void guildChannelsReceived(const std::vector<Api::Channel *> *channels);
+    void guildChannelClicked(const std::string& guildId, const std::string& id);
+    void privateChannelClicked(const std::string& id);
 
 public slots:
-    void openGuild(Api::Guild& guild);
+    void setPresences(const std::vector<Api::Presence *>& presences);
+    void setPrivateChannels(const std::vector<Api::PrivateChannel *>& channels);
+    void updatePresence(const Api::Presence& presence);
     void displayPrivateChannels();
+    void openGuild(const std::string&);
 
 private slots:
-    void setPrivateChannels(std::vector<Api::Channel *> *channels);
-    void setGuildChannels(std::vector<Api::Channel *> *channels);
-    void clicChannel(Api::Channel& channel, unsigned int id);
+    void setGuildChannels(const std::vector<Api::Channel *> *channels);
+    void clicGuildChannel(const std::string& id);
+    void clicPrivateChannel(const std::string& id);
 
 private:
     // Main widgets
     QVBoxLayout *layout;
     QScrollArea *channelList;
 
-    Api::Requester *requester; // To request the API
+    Api::RessourceManager *rm; // To request the API
 
     // Storing channels that we already gathered
-    std::vector<Api::Channel *>      *privateChannels;
-    std::vector<PrivateChannel *>     privateChannelWidgets;
-    std::vector<GuildChannelWidget *> guildChannelWidgets;
+    std::vector<PrivateChannelWidget *> privateChannelWidgets;
+    std::vector<GuildChannelWidget *>   guildChannelWidgets;
+
+    std::string openedGuildId;
 };
 
 } // namespace Ui

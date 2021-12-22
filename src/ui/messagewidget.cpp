@@ -13,11 +13,11 @@
 
 namespace Ui {
 
-MessageWidget::MessageWidget(Api::Requester *requesterp, const Api::Message& message, bool isFirstp, bool separatorBefore, QWidget *parent)
+MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message& message, bool isFirstp, bool separatorBefore, QWidget *parent)
     : QWidget(parent)
 {
     // Attributes initialization
-    requester = requesterp;
+    rm = rmp;
     isFirst = isFirstp;
 
     // Create the main widgets
@@ -49,7 +49,7 @@ MessageWidget::MessageWidget(Api::Requester *requesterp, const Api::Message& mes
         std::string *avatarId = author.avatar;
 
         // Get the icon of the message
-        if (avatarId == nullptr) {
+        if (avatarId == nullptr || *avatarId == "") {
             // Use an asset if the user doesn't have an icon
             iconLayout->addWidget(new RoundedImage("res/images/png/user-icon-asset0.png", 40, 40, 20, iconContainer));
         } else {
@@ -58,7 +58,7 @@ MessageWidget::MessageWidget(Api::Requester *requesterp, const Api::Message& mes
             if (!std::ifstream(("cache/" + avatarFileName).c_str()).good()) {
                 avatar = new RoundedImage(40, 40, 20, iconContainer);
                 iconLayout->addWidget(avatar);
-                requester->getImage([this](void *avatarFileName) {this->setAvatar(*static_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
+                rm->getImage([this](void *avatarFileName) {this->setAvatar(*static_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
             } else {
                 iconLayout->addWidget(new RoundedImage("cache/" + avatarFileName, 40, 40, 20, iconContainer));
             }

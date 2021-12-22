@@ -6,11 +6,11 @@
 
 namespace Ui {
 
-MiddleColumn::MiddleColumn(Api::Requester *requesterp, const Api::Client *client, QWidget *parent)
+MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, const Api::Client *client, QWidget *parent)
     : QWidget(parent)
 {
     // Set the requester
-    requester = requesterp;
+    rm = rmp;
 
     // Create the layout
     layout = new QVBoxLayout(this);
@@ -21,15 +21,11 @@ MiddleColumn::MiddleColumn(Api::Requester *requesterp, const Api::Client *client
 
     // Add the widget and style the main layout
     layout->addWidget(channelList);
-    layout->addWidget(new UserMenu(requester, client, this));
+    layout->addWidget(new UserMenu(rm, client, this));
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    QObject::connect(this, SIGNAL(privateChannelsRecieved(std::vector<Api::Channel *> *)), this, SLOT(setPrivateChannels(std::vector<Api::Channel *> *)));
-    QObject::connect(this, SIGNAL(guildChannelsRecieved(std::vector<Api::Channel *> *)), this, SLOT(setGuildChannels(std::vector<Api::Channel *> *)));
-
-    // Display private channels (we are on the home page)
-    this->displayPrivateChannels();
+    QObject::connect(this, SIGNAL(guildChannelsReceived(const std::vector<Api::Channel *> *)), this, SLOT(setGuildChannels(const std::vector<Api::Channel *> *)));
 
     // Style this column
     this->setFixedWidth(240);
@@ -37,21 +33,49 @@ MiddleColumn::MiddleColumn(Api::Requester *requesterp, const Api::Client *client
                         "border: none;");
 }
 
-void MiddleColumn::setPrivateChannels(std::vector<Api::Channel *> *channels)
+void MiddleColumn::setPresences(const std::vector<Api::Presence *>& presences)
 {
-    // Set the private channels
-    privateChannels = channels;
+    rm->getPrivateChannels([&](const void *channelsPtr){
+        const std::vector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const std::vector<Api::PrivateChannel *> *>(channelsPtr);
+        for (unsigned int i = 0 ; i < presences.size() ; i++) {
+            bool found = false;
+            for (unsigned int j = 0 ; j < privateChannels->size() ; j++) {
+                if ((*privateChannels)[j]->type == Api::DM && (*(*privateChannels)[j]->recipientIds)[0] == *presences[i]->userId) {
+                    privateChannelWidgets[j]->setStatus(presences[0]->status);
+                    found = true;
+                    break;
+                }
+            }
+            if (found) continue;
+        }
+    });
+}
 
+void MiddleColumn::updatePresence(const Api::Presence& presence)
+{
+    rm->getPrivateChannels([&](const void *channelsPtr){
+        const std::vector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const std::vector<Api::PrivateChannel *> *>(channelsPtr);
+        for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
+            if ((*privateChannels)[i]->type == Api::DM && (*(*privateChannels)[i]->recipientIds)[0] == *(presence.user->id)) {
+                privateChannelWidgets[i]->setStatus(presence.status);
+                break;
+            }
+        }
+    });
+}
+
+void MiddleColumn::setPrivateChannels(const std::vector<Api::PrivateChannel *>& privateChannels)
+{
     // Create the widgets
     QWidget *privateChannelList = new QWidget(this);
     QVBoxLayout *privateChannelListLayout = new QVBoxLayout(privateChannelList);
 
     // Create and display the private channels
-    for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
-        PrivateChannel *privateChannel = new PrivateChannel(requester, *(*privateChannels)[i], i, privateChannelList);
-        privateChannelWidgets.push_back(privateChannel);
-        privateChannelListLayout->insertWidget(i, privateChannel);
-        QObject::connect(privateChannel, SIGNAL(leftClicked(Api::Channel&, unsigned int)), this, SLOT(clicChannel(Api::Channel&, unsigned int)));
+    for (unsigned int i = 0 ; i < privateChannels.size() ; i++) {
+        PrivateChannelWidget *privateChannelWidget = new PrivateChannelWidget(rm, *privateChannels[i], privateChannelList);
+        privateChannelWidgets.push_back(privateChannelWidget);
+        privateChannelListLayout->insertWidget(i, privateChannelWidget);
+        QObject::connect(privateChannelWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicPrivateChannel(const std::string&)));
     }
     privateChannelListLayout->insertStretch(-1, 1);
     privateChannelListLayout->setSpacing(2);
@@ -61,7 +85,7 @@ void MiddleColumn::setPrivateChannels(std::vector<Api::Channel *> *channels)
     channelList->setWidget(privateChannelList);
 }
 
-void MiddleColumn::setGuildChannels(std::vector<Api::Channel *> *channelsp)
+void MiddleColumn::setGuildChannels(const std::vector<Api::Channel *> *channels)
 {
     // Clear the whannels
     guildChannelWidgets.clear();
@@ -71,18 +95,15 @@ void MiddleColumn::setGuildChannels(std::vector<Api::Channel *> *channelsp)
     QWidget *guildChannelList = new QWidget(this);
     QVBoxLayout *guildChannelListLayout = new QVBoxLayout(guildChannelList);
 
-    // Set the channels
-    std::vector<Api::Channel *> channels = *channelsp;
-
     // Create the channels widgets
 
-    size_t channelsLen = channels.size();
+    size_t channelsLen = channels->size();
     unsigned int count = 0; // For the IDs of the channels
     // Loop to find channel that are not in a category
     for (size_t i = 0 ; i < channelsLen ; i++) {
-        if ((*channels[i]).type != Api::GuildCategory && (*channels[i]).parentId == nullptr) {
+        if ((*(*channels)[i]).type != Api::GuildCategory && ((*(*channels)[i]).parentId == nullptr || *(*(*channels)[i]).parentId == "")) {
             // Create and add the channel widget to the list
-            GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[i], count, guildChannelList);
+            GuildChannelWidget *channelWidget = new GuildChannelWidget(*(*channels)[i], guildChannelList);
             guildChannelListLayout->addWidget(channelWidget);
             guildChannelWidgets.push_back(channelWidget);
             count++;
@@ -90,26 +111,26 @@ void MiddleColumn::setGuildChannels(std::vector<Api::Channel *> *channelsp)
     }
     // Loop through all channels to create widgets
     for (size_t i = 0 ; i < channelsLen ; i++) {
-        if ((*channels[i]).type == Api::GuildCategory) {
+        if ((*(*channels)[i]).type == Api::GuildCategory) {
             // Create the category channel channel widget
-            GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[i], count, guildChannelList);
+            GuildChannelWidget *channelWidget = new GuildChannelWidget(*(*channels)[i], guildChannelList);
             guildChannelListLayout->addWidget(channelWidget);
             guildChannelWidgets.push_back(channelWidget);
             count++;
             // Loop another time to find channels belonging to this category
             for (size_t j = 0 ; j < channelsLen ; j++) {
-                if ((*channels[j]).parentId == nullptr) continue;
+                if (*(*(*channels)[j]).parentId == "") continue;
                     // Category or 'orphan' channel
-                if (*(*channels[j]).parentId == *(*channels[i]).id) {
+                if (*(*(*channels)[j]).parentId == *(*(*channels)[i]).id) {
                     // This channel belongs to the category
                     // Create and add the channel widget
-                    GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[j], count, guildChannelList);
+                    GuildChannelWidget *channelWidget = new GuildChannelWidget(*(*channels)[j], guildChannelList);
                     guildChannelWidgets.push_back(channelWidget);
                     guildChannelListLayout->addWidget(channelWidget);
                     count++;
 
                     // Connect the clicked signal to open the channel
-                    QObject::connect(channelWidget, SIGNAL(leftClicked(Api::Channel&, unsigned int)), this, SLOT(clicChannel(Api::Channel&, unsigned int)));
+                    QObject::connect(channelWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicGuildChannel(const std::string&)));
                 }
             }
         }
@@ -126,37 +147,66 @@ void MiddleColumn::setGuildChannels(std::vector<Api::Channel *> *channelsp)
                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
 }
 
-void MiddleColumn::clicChannel(Api::Channel& channel, unsigned int id)
+void MiddleColumn::clicGuildChannel(const std::string& id)
 {
     // Reset the stylesheet of the channels except the one that we just clicked
-    if (channel.type == Api::DM || channel.type == Api::GroupDM) {
-        for (size_t i = 0 ; i < privateChannelWidgets.size() ; i++) {
-            if (i != id) {
-                privateChannelWidgets[i]->unclicked();
-            }
-        }
-    } else {
-        for (size_t i = 0 ; i < guildChannelWidgets.size() ; i++) {
-            if (i != id) {
-                guildChannelWidgets[i]->unclicked();
-            }
+    for (size_t i = 0 ; i < guildChannelWidgets.size() ; i++) {
+        if (guildChannelWidgets[i]->id != id) {
+            guildChannelWidgets[i]->unclicked();
         }
     }
 
     // Emit the signal to open the channel
-    emit channelClicked(channel);
+    emit guildChannelClicked(id, openedGuildId);
+}
+
+void MiddleColumn::clicPrivateChannel(const std::string& id)
+{
+    // Reset the stylesheet of the channels except the one that we just clicked
+    for (size_t i = 0 ; i < privateChannelWidgets.size() ; i++) {
+        if (privateChannelWidgets[i]->id != id) {
+            privateChannelWidgets[i]->unclicked();
+        }
+    }
+
+    // Emit the signal to open the channel
+    emit privateChannelClicked(id);
 }
 
 void MiddleColumn::displayPrivateChannels()
 {
-    // Request private channels
-    requester->getPrivateChannels([this](void *channels) {emit privateChannelsRecieved(static_cast<std::vector<Api::Channel *> *>(channels));});
+    rm->getPrivateChannels([&](const void *channelsPtr){
+        const std::vector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const std::vector<Api::PrivateChannel *> *>(channelsPtr);
+        // Create the widgets
+        QWidget *privateChannelList = new QWidget(this);
+        QVBoxLayout *privateChannelListLayout = new QVBoxLayout(privateChannelList);
+
+        // Create and display the private channels
+        for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
+            PrivateChannelWidget *privateChannelWidget = new PrivateChannelWidget(rm, *(*privateChannels)[i], privateChannelList);
+            privateChannelWidgets.push_back(privateChannelWidget);
+            privateChannelListLayout->insertWidget(i, privateChannelWidget);
+            QObject::connect(privateChannelWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicPrivateChannel(const std::string&)));
+        }
+        privateChannelListLayout->insertStretch(-1, 1);
+        privateChannelListLayout->setSpacing(2);
+        privateChannelListLayout->setContentsMargins(8, 8, 8, 0);
+
+        // Set the channels to the column
+        channelList->setWidget(privateChannelList);
+
+        rm->getPresences([&](const void *presencesPtr){
+            setPresences(*reinterpret_cast<const std::vector<Api::Presence *> *>(presencesPtr));
+        });
+    });
 }
 
-void MiddleColumn::openGuild(Api::Guild& guild)
+void MiddleColumn::openGuild(const std::string& guildId)
 {
+    openedGuildId = guildId;
+
     // Request the channels of the guild
-    requester->getGuildChannels([this](void *channels) {emit guildChannelsRecieved(static_cast<std::vector<Api::Channel *> *>(channels));}, *guild.id);
+    rm->getGuildChannels([this](const void *channels) {emit guildChannelsReceived(reinterpret_cast<const std::vector<Api::Channel *> *>(channels));}, guildId);
 }
 
 } // namespace Ui
