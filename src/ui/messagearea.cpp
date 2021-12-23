@@ -109,14 +109,16 @@ void MessageArea::addMessage(const Api::Message& newMessage, const Api::Message&
     bool first;
     // If the messages are separated by more than 7.30 minutes
     // or the authors are not the same
-    if (secondTime - firstTime > 450 || *lastMessage.author->id != *newMessage.author->id) {
+    if (secondTime - firstTime > 420 || *lastMessage.author->id != *newMessage.author->id) {
         first = true;
     } else {
         first = false;
     }
 
     // Create the message and add it to the layout
-    messageLayout->addWidget(new MessageWidget(rm, newMessage, first, separator, this));
+    messageLayout->insertWidget(messageLayout->count() - 1, new MessageWidget(rm, newMessage, first, separator, this));
+    QScrollBar *vsb = verticalScrollBar();
+    vsb->setValue(vsb->maximum());
 }
 
 void MessageArea::showEvent(QShowEvent *)

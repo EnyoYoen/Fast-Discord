@@ -92,7 +92,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
         }, (*privateChannel.recipientIds)[0]);
     } else if (channelType == Api::GroupDM) {
         // Get the subtext of the group DM with the number of people in it
-        int nMember = privateChannel.recipientIds->size();
+        size_t nMember = privateChannel.recipientIds->size();
         std::string str_member = " member";
         // Plural
         if (nMember + 1 > 1) {

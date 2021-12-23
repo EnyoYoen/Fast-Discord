@@ -44,10 +44,12 @@ void Gateway::start()
 
 void Gateway::closeHandler()
 {
+    qDebug() << "closed";
     // Reconnect when the connection is closed
     if (connected) {
         connected = false;
         client.open(QUrl(QString(url.c_str()) + QString("?v=9&encoding=json")));
+        qDebug() << "Connection opened";
     }
 }
 
@@ -63,7 +65,7 @@ void Gateway::send(int op, const std::string& data)
 {
     // Build the payload string
     std::string payload = "{\"op\":" + std::to_string(op) + ",\"d\":" + data + "}";
-
+    //qDebug() << ("Send: " + payload).c_str();
     // Send the message
     client.sendTextMessage(QString(payload.c_str()));
 }
@@ -90,7 +92,13 @@ void Gateway::processBinaryMessage(const QByteArray& message)
 
             // Start Heartbeating
             heartbeatInterval = data["heartbeat_interval"].toInt(45000);
-            QThread *heartbeatThread = QThread::create([this](){heartbeatLoop();});
+            QThread *heartbeatThread = QThread::create([this](){
+                while (connected) {
+                    send(1, std::to_string(seq));
+
+                    QThread::msleep(heartbeatInterval);
+                }
+            });
             heartbeatThread->start();
 
             if (resuming) {
@@ -108,6 +116,7 @@ void Gateway::processTextMessage(const QString& message)
 {
     QJsonDocument payload = QJsonDocument::fromJson(message.toUtf8());
     QJsonValue data = payload["d"];
+    //qDebug() << QString("Received: ") + message;
 
     switch (payload["op"].toInt(-1)) {
         case Dispatch: //Event recieved
@@ -125,13 +134,19 @@ void Gateway::processTextMessage(const QString& message)
 
             // Start Heartbeating
             heartbeatInterval = data["heartbeat_interval"].toInt(45000);
-            QThread *heartbeatThread = QThread::create([this](){heartbeatLoop();});
+            QThread *heartbeatThread = QThread::create([this](){
+                while (connected) {
+                    send(1, std::to_string(seq));
+
+                    QThread::msleep(heartbeatInterval);
+                }
+            });
             heartbeatThread->start();
 
             if (resuming) {
                 resume();
             } else {
-                identify();
+                //identify();
                 resuming = true;
             }
             break;
@@ -179,16 +194,6 @@ void Gateway::resume()
     send(Resume, "{\"token\":\""+ token +"\","
                  "\"session_id\":,"
                  "\"seq\":" + std::to_string(seq) + "}");
-}
-
-// Function Launched in a thread to send heartbeat messages
-void Gateway::heartbeatLoop()
-{
-    while (connected) {
-        send(1, std::to_string(seq));
-
-        QThread::msleep(heartbeatInterval);
-    }
 }
 
 // Internal function used to process some messages

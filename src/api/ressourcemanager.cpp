@@ -33,14 +33,14 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
         emit presencesReceived(*presences);
     } else if (eventName == "PRESENCE_UPDATE") {
         Api::Presence *presence;
-        Api::unmarshal<Api::Presence>(data, "", &presence);
+        Api::unmarshal<Api::Presence>(data.toObject(), &presence);
         emit presenceReceived(*presence);
     } else if (eventName == "CHANNEL_UNREAD_UPDATE") {
         emit unreadUpdateReceived(data["guild_id"].toString().toUtf8().constData());
     } else if (eventName == "MESSAGE_CREATE") {
         // We received a message
         Api::Message *message;
-        Api::unmarshal<Api::Message>(data, "", &message);
+        Api::unmarshal<Api::Message>(data.toObject(), &message);
         emit messageReceived(*message);
     } else if (eventName == "TYPING_START") {
         // Someone is typing

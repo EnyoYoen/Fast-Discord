@@ -18,7 +18,7 @@ enum Opcodes {
     Identify,
     PresenceUpdate,
     VoiceStateUpdate,
-    Resume,
+    Resume = 6,
     Reconnect,
     RequestGuildMembers,
     InvalidSession,
@@ -49,7 +49,6 @@ private:
                           //Send data through the gateway
     void resume();        //Resume connection
     void heartbeat();     //Send Heartbeat message to stay connected
-    void heartbeatLoop(); //Function Launched in a thread to send heartbeat messages
     void dispatch(std::string eventName, json& data);
                           //Internal function used to process some messages
 
