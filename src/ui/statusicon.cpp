@@ -1,5 +1,6 @@
 #include "ui/statusicon.h"
 
+#include <QPainterPath>
 #include <QPainter>
 #include <QDebug>
 
