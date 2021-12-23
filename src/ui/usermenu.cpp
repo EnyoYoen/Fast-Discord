@@ -21,7 +21,6 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
     // the background color is not applied everywhere, I don't know why
     QWidget *container = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(container);
-    this->setAttribute(Qt::WA_StyledBackground);
 
     // Get the icon of the actual user
     std::string channelIconFileName;
@@ -37,6 +36,30 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
         channelIconFileName = *client->id + (client->avatar->rfind("a_") == 0 ? ".gif" : ".webp");
         rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, channelIconFileName);
     }
+
+    // Set the background of the status icon
+    QLabel *statusBackground = new QLabel(this);
+    statusBackground->setFixedSize(16, 16);
+    statusBackground->move(28, 29);
+    statusBackground->setStyleSheet("border-radius: 8px;"
+                                    "background-color: #292B2F;");
+
+    // Set the status icon
+    statusIcon = new QLabel(this);
+    statusIcon->setFixedSize(10, 10);
+    statusIcon->setStyleSheet("border-radius: 5px;");
+    statusIcon->move(31, 32);
+    rm->getClientSettings([&](void *settingsPtr){
+        std::string status = *reinterpret_cast<Api::ClientSettings *>(settingsPtr)->status;
+        if (status == "online") statusIcon->setStyleSheet("border-radius: 5px;"
+                                                          "background-color: rgb(0, 224, 71);");
+        else if (status == "idle") statusIcon->setStyleSheet("border-radius: 5px;"
+                                                             "background-color: rgb(255, 169, 21);");
+        else if (status == "dnd") statusIcon->setStyleSheet("border-radius: 5px;"
+                                                            "background-color: rgb(255, 48, 51);");
+        else if (status == "offline") statusIcon->setStyleSheet("border-radius: 5px;"
+                                                                "background-color: rgb(90, 90, 90);");
+    });
 
     // Create the widgets of the user menu
     QWidget *userInfos = new QWidget(container);

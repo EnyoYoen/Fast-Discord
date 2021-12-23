@@ -1,5 +1,7 @@
 #include "api/ressourcemanager.h"
 
+#include <QFile>
+
 #include <fstream>
 
 namespace Api {
@@ -147,8 +149,8 @@ void RessourceManager::getClientSettings(std::function<void(void *)> callback)
 
 void RessourceManager::getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName)
 {
-    if (!std::ifstream(("cache/" + fileName).c_str()).good())
-        requester->getImage(callback, url, fileName);
+    if (!std::ifstream(("cache/" + fileName).c_str()).good()) {
+        requester->getImage(callback, url, fileName);}
     else {
         std::string path = "cache/" + fileName;
         callback(reinterpret_cast<void *>(const_cast<std::string *>(&path)));

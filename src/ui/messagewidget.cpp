@@ -25,7 +25,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message& mes
     QWidget *data = new QWidget(this);
     QVBoxLayout *dataLayout = new QVBoxLayout(data);
     QWidget *iconContainer = new QWidget(this);
-    QHBoxLayout *iconLayout = new QHBoxLayout(iconContainer);
+    QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
 
     // Process the timestamp to a nicer format
 
@@ -54,15 +54,10 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message& mes
             iconLayout->addWidget(new RoundedImage("res/images/png/user-icon-asset0.png", 40, 40, 20, iconContainer));
         } else {
             // Request the icon
-            std::string avatarFileName = *author.id + (author.avatar->rfind("a_") == 0 ? ".gif" : ".webp");
-            if (!std::ifstream(("cache/" + avatarFileName).c_str()).good()) {
-                avatar = new RoundedImage(40, 40, 20, iconContainer);
-                iconLayout->addWidget(avatar);
-                rm->getImage([this](void *avatarFileName) {this->setAvatar(*static_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
-            } else {
-                iconLayout->addWidget(new RoundedImage("cache/" + avatarFileName, 40, 40, 20, iconContainer));
-            }
-            avatarFileName = "cache/" + avatarFileName;
+            std::string avatarFileName = *author.avatar + (author.avatar->rfind("a_") == 0 ? ".gif" : ".png");
+            avatar = new RoundedImage(40, 40, 20, iconContainer);
+            iconLayout->addWidget(avatar);
+            rm->getImage([this](void *avatarFileName) {this->setAvatar(*static_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
         }
 
 

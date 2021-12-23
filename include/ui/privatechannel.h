@@ -1,6 +1,7 @@
 #pragma once
 
 #include "roundedimage.h"
+#include "statusicon.h"
 #include "api/channel.h"
 #include "api/ressourcemanager.h"
 #include "api/user.h"
@@ -38,11 +39,11 @@ private:
 
     // All the main widgets
     RoundedImage        *icon;
+    StatusIcon          *statusIcon;
     QLabel              *name;
     QLabel              *subtext;
-    QLabel              *statusIcon = nullptr;
+    QLabel              *statusBackground;
 
-    std::string  status;
     bool         clicked; // If the widget is clicked
 };
 

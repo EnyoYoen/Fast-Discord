@@ -20,7 +20,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     // Attributes initialization
     rm = rmp;
     id = *privateChannel.id;
-    status = "offline";
+    statusIcon = nullptr;
+    statusBackground = nullptr;
 
     // I have to create an other widget otherwise
     // the background color is not applied everywhere, I don't know why
@@ -57,20 +58,15 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             }
 
             // Set the background of the status icon
-            QLabel *statusBackground = new QLabel(this);
+            statusBackground = new QLabel(this);
             statusBackground->setFixedSize(16, 16);
             statusBackground->move(28, 24);
             statusBackground->setStyleSheet("border-radius: 8px;"
                                             "background-color: #2F3136;");
 
             // Set the status icon
-            statusIcon = new QLabel(this);
-            statusIcon->setFixedSize(10, 10);
+            statusIcon = new StatusIcon(this);
             statusIcon->move(31, 27);
-            statusIcon->setStyleSheet(QString(("border-radius: 5px;"
-                                      "background-image: url(res/images/svg/" + status + "-icon.svg);"
-                                      "background-repeat: no-repeat;"
-                                      "background-position: center;").c_str()));
 
             // Set the DM name to the other user name
             name = new QLabel((*dmUser->username).c_str(), container);
@@ -163,15 +159,9 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     }
 }
 
-void PrivateChannelWidget::setStatus(std::string *statusp)
+void PrivateChannelWidget::setStatus(std::string *status)
 {
-    status = *statusp;
-    if (*statusp != "" && statusIcon != nullptr) {
-            statusIcon->setStyleSheet(QString(("border-radius: 5px;"
-                                      "background-image: url(res/images/svg/" + status + "-icon.svg);"
-                                      "background-repeat: no-repeat;"
-                                      "background-position: center;").c_str()));
-    }
+    statusIcon->setStatus(*status);
 }
 
 void PrivateChannelWidget::setIcon(const std::string& guildIconFileName)
@@ -183,10 +173,14 @@ void PrivateChannelWidget::unclicked()
 {
     // Reset the stylesheet of this widget if currently clicked
     if (clicked) {
-        clicked = false;
+        if (statusBackground != nullptr) {
+            statusBackground->setStyleSheet("border-radius: 8px;"
+                                            "background-color: #2F3136;");
+        }
         this->setStyleSheet("background-color: none;"
                             "border-radius: 4px;"
                             "color: #8E9297;");
+        clicked = false;
     }
 }
 
@@ -204,6 +198,10 @@ void PrivateChannelWidget::mousePressEvent(QMouseEvent *)
 {
     // Widget clicked : change the stylesheet
     if (!clicked) {
+        if (statusBackground != nullptr) {
+            statusBackground->setStyleSheet("border-radius: 8px;"
+                                            "background-color: #393D43;");
+        }
         this->setStyleSheet("color: #FFF;"
                             "border-radius: 4px;"
                             "background-color: #393D43");
@@ -215,6 +213,10 @@ void PrivateChannelWidget::enterEvent(QEvent *)
 {
     // Mouse hover : change the stylesheet
     if (!clicked) {
+        if (statusBackground != nullptr) {
+            statusBackground->setStyleSheet("border-radius: 8px;"
+                                            "background-color: #35373D;");
+        }
         this->setStyleSheet("color: #DCDDDE;"
                             "border-radius: 4px;"
                             "background-color: #35373D");
@@ -225,6 +227,10 @@ void PrivateChannelWidget::leaveEvent(QEvent *)
 {
     // Reset the stylesheet if not clicked
     if (!clicked) {
+        if (statusBackground != nullptr) {
+            statusBackground->setStyleSheet("border-radius: 8px;"
+                                            "background-color: #2F3136;");
+        }
         this->setStyleSheet("background-color: none;"
                             "border-radius: 4px;"
                             "color: #8E9297;");

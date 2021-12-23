@@ -1,5 +1,5 @@
 # Fast-Discord
-![Fast-Discord image](doc/images/Fast-Discord.png)
+![Fast-Discord image](doc/images/Fast-Discord.gif)
 *For now it is very basic*
 
  - [Origins of this project](#origins)

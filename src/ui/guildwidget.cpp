@@ -168,10 +168,12 @@ void GuildWidget::unclicked()
 void GuildWidget::setUnread(bool unread)
 {
     unreadMessages = unread;
-    if (unread) {
-        pill->setHeight(8);
-    } else {
-        pill->setHeight(0);
+    if (pill->height() <= 8) {
+        if (unread) {
+            pill->setHeight(8);
+        } else {
+            pill->setHeight(0);
+        }
     }
 }
 

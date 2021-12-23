@@ -16,7 +16,7 @@ include_directories(include/)
 find_package(Qt5 COMPONENTS Widgets Network WebSockets REQUIRED)
 if (NOT WIN32)
     find_package(Threads REQUIRED)
-endif (WIN32)
+endif (NOT WIN32)
 
 set(SOURCES
     "src/api/application.cpp"

@@ -157,7 +157,7 @@ void MiddleColumn::clicGuildChannel(const std::string& id)
     }
 
     // Emit the signal to open the channel
-    emit guildChannelClicked(id, openedGuildId);
+    emit guildChannelClicked(openedGuildId, id);
 }
 
 void MiddleColumn::clicPrivateChannel(const std::string& id)

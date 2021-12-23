@@ -52,6 +52,7 @@ SOURCES += \
     ../src/ui/privatechannel.cpp \
     ../src/ui/rightcolumn.cpp \
     ../src/ui/roundedimage.cpp \
+    ../src/ui/statusicon.cpp \
     ../src/ui/usermenu.cpp \
     ../src/ui/usermenubutton.cpp
 
@@ -91,6 +92,7 @@ HEADERS += \
     ../include/ui/privatechannel.h \
     ../include/ui/rightcolumn.h \
     ../include/ui/roundedimage.h \
+    ../include/ui/statusicon.h \
     ../include/ui/usermenu.h \
     ../include/ui/usermenubutton.h
 

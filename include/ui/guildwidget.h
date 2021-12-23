@@ -45,8 +45,8 @@ private:
     RoundedImage *icon;
     QLabel       *textIcon;
     GuildPill    *pill;
-    bool         clicked;  // If the widget is clicked
-    bool         unreadMessages;
+    bool          clicked;  // If the widget is clicked
+    bool          unreadMessages;
 };
 
 } // namespace Ui

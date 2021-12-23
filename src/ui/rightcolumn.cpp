@@ -107,8 +107,7 @@ void RightColumn::openChannel(const std::string& channelId, int type)
         // Get the messages of the channel
         std::vector<Api::Message *> *messages;
 
-        std::map<std::string, std::vector<Api::Message *> *>::iterator currentMessages = channelsMessages.find(channelId);
-        if (currentMessages == channelsMessages.end()) {
+        if (channelsMessages.find(channelId) == channelsMessages.end()) {
             QWidget *messageAreaPlaceholder = new QWidget(messagesContainer);
             messagesLayout->addWidget(messageAreaPlaceholder);
             rm->getMessages([this](void *messages) {emit messagesReceived(static_cast<std::vector<Api::Message *> *>(messages));}, channelId, 50 );

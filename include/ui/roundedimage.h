@@ -20,7 +20,7 @@ private:
     void leaveEvent(QEvent *) override;
 
     // The image and its dimensions
-    QMovie *animatedImage;
+    QMovie *animatedImage = nullptr;
     QPixmap image;
     int w;
     int h;

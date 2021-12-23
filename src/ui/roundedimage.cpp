@@ -85,9 +85,6 @@ void RoundedImage::paintEvent(QPaintEvent *)
             p.setBrush(target);
             p.drawRoundedRect(0, 0, h, w, r, r);
         } else {
-            QPixmap target = QPixmap(w, h);
-            target.fill(Qt::transparent);
-
             QPainterPath path = QPainterPath();
             path.addRoundedRect(0, 0, h, w, r, r);
 
@@ -99,7 +96,6 @@ void RoundedImage::paintEvent(QPaintEvent *)
 
 void RoundedImage::enterEvent(QEvent *)
 {
-    //std::cout << animatedImage->state() << std::endl;
     if (animatedImage != nullptr && animatedImage->state() == QMovie::Paused) animatedImage->setPaused(false);
 }
 

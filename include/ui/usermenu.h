@@ -2,6 +2,7 @@
 
 #include "ui/usermenubutton.h"
 #include "ui/roundedimage.h"
+#include "ui/statusicon.h"
 #include "api/client.h"
 #include "api/ressourcemanager.h"
 
@@ -25,6 +26,7 @@ private:
     Api::RessourceManager *rm; // To request the API
 
     RoundedImage   *avatar;     // The avatar of the user
+    QLabel         *statusIcon; // The status icon
     UserMenuButton *muteButton; // Used when deafen button is clicked
 };
 
