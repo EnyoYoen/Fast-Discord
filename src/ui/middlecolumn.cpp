@@ -137,7 +137,7 @@ void MiddleColumn::setGuildChannels(const std::vector<Api::Channel *> *channels)
     }
     guildChannelListLayout->insertStretch(-1, 1);
     guildChannelListLayout->setSpacing(2);
-    guildChannelListLayout->setContentsMargins(8, 8, 8, 0);
+    guildChannelListLayout->setContentsMargins(8, 8, 8, 8);
 
     // Style the channel list
     channelList->setWidget(guildChannelList);

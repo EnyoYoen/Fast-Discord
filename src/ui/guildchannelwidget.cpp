@@ -73,7 +73,7 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // Set the size of this widget
-    this->setFixedSize(232, 34);
+    this->setFixedSize(224, 34);
 }
 
 void GuildChannelWidget::mouseReleaseEvent(QMouseEvent *event)
