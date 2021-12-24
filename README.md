@@ -1,3 +1,4 @@
+
 # Fast-Discord
 ![Fast-Discord image](doc/images/Fast-Discord.gif)
 *For now it is very basic*
@@ -7,6 +8,7 @@
  - [License](#license)
  - [Build and Run](#build-and-run)
  - [Contact](#contact)
+ - [Get your Discord token](#get-your-discord-token)
 
 This project is really huge and requires a lot of time so any help is welcome, from the smallest syntax correction to major changes.
 ## Origins
@@ -69,3 +71,16 @@ cmake --build .
 The executable is in the 'Fast-Discord/bin' folder ;)
 ## Contact
 Fast-Discord's discord server : https://discord.gg/DezBvjrGve
+## Get your Discord token
+Go to https://discord.com/login without logging in
+Press Ctrl+Shift+I to open the Web Developer Tools
+Go to the Network tab
+![](doc/images/Network-tab.png)
+Press XHR
+![](doc/images/XHR.png)
+Now log in : network requests should appear
+![](doc/images/Requests.png)
+Open one of the request and search for the Authorization header in Request Headers (If it is not here, open an other request)
+![](doc/images/Authorization.png)
+Copy the token next to "Authorization"
+
