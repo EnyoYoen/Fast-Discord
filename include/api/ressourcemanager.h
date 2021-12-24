@@ -42,6 +42,9 @@ signals:
     void unreadUpdateReceived(const std::string&);
     void presenceReceived(const Api::Presence&);
     void messageReceived(const Api::Message&);
+    void channelCreated(const Api::Channel *, const Api::PrivateChannel *);
+    void channelUpdated(const Api::Channel *, const Api::PrivateChannel *);
+    void channelDeleted(const std::string&, const std::string&, int);
 
 private:
     void gatewayDispatchHandler(std::string& eventName, json& data);

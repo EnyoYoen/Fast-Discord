@@ -94,7 +94,7 @@ void MessageArea::addMessage(const Api::Message& newMessage, const Api::Message&
     bool separator;
     if (firstDateTime.date() != secondDateTime.date()) {
         // The messages are not sent on the same day
-        messageLayout->insertWidget(-2, new MessageSeparator(secondDateTime.date(), this));
+        messageLayout->insertWidget(messageLayout->count() - 1, new MessageSeparator(secondDateTime.date(), this));
         separator = true;
     } else {
         // The messages are sent on the same day

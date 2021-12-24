@@ -199,4 +199,48 @@ void MiddleColumn::openGuild(const std::string& guildId)
     rm->getGuildChannels([this](const void *channels) {emit guildChannelsReceived(reinterpret_cast<const std::vector<Api::Channel *> *>(channels));}, guildId);
 }
 
+void MiddleColumn::updateChannel(const Api::Channel *channel, const Api::PrivateChannel *privateChannel)
+{
+    if (channel == nullptr) {
+        for (auto it = privateChannelWidgets.begin() ; it != privateChannelWidgets.end() ; it++) {
+            if (*privateChannel->id == (*it)->id) {
+                privateChannelWidgets.erase(it);
+                privateChannelWidgets.insert(it, new PrivateChannelWidget(rm, *privateChannel, this));
+                break;
+            }
+        }
+        displayPrivateChannels();
+    } else {
+        openGuild(*channel->guildId);
+    }
+}
+
+void MiddleColumn::createChannel(const Api::Channel *channel, const Api::PrivateChannel *privateChannel)
+{
+    if (channel == nullptr) {
+        for (unsigned int i = 0 ; i < privateChannelWidgets.size() ; i++) {
+            if (*privateChannel->id == (*privateChannelWidgets[i]).id) {
+                privateChannelWidgets.push_back(new PrivateChannelWidget(rm, *privateChannel, this));
+            }
+        }
+        displayPrivateChannels();
+    } else {
+        openGuild(*channel->guildId);
+    }
+}
+
+void MiddleColumn::deleteChannel(const std::string& id, const std::string& guildId, int type)
+{
+    if (type == Api::DM || type == Api::GroupDM) {
+        for (unsigned int i = 0 ; i < privateChannelWidgets.size() ; i++) {
+            if (id == (*privateChannelWidgets[i]).id) {
+                delete privateChannelWidgets[i];
+            }
+        }
+        displayPrivateChannels();
+    } else {
+        openGuild(guildId);
+    }
+}
+
 } // namespace Ui

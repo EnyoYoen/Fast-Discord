@@ -34,6 +34,9 @@ public slots:
     void updatePresence(const Api::Presence& presence);
     void displayPrivateChannels();
     void openGuild(const std::string&);
+    void updateChannel(const Api::Channel *channel, const Api::PrivateChannel *privateChannel);
+    void createChannel(const Api::Channel *channel, const Api::PrivateChannel *privateChannel);
+    void deleteChannel(const std::string& id, const std::string& guildId, int type);
 
 private slots:
     void setGuildChannels(const std::vector<Api::Channel *> *channels);

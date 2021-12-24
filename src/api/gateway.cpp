@@ -65,7 +65,7 @@ void Gateway::send(int op, const std::string& data)
 {
     // Build the payload string
     std::string payload = "{\"op\":" + std::to_string(op) + ",\"d\":" + data + "}";
-    //qDebug() << ("Send: " + payload).c_str();
+    qDebug() << ("Send: " + payload).c_str();
     // Send the message
     client.sendTextMessage(QString(payload.c_str()));
 }
@@ -116,7 +116,7 @@ void Gateway::processTextMessage(const QString& message)
 {
     QJsonDocument payload = QJsonDocument::fromJson(message.toUtf8());
     QJsonValue data = payload["d"];
-    //qDebug() << QString("Received: ") + message;
+    qDebug() << QString("Received: ") + message;
 
     switch (payload["op"].toInt(-1)) {
         case Dispatch: //Event recieved

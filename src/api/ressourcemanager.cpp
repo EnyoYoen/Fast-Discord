@@ -31,10 +31,101 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
     } else if (eventName == "READY_SUPPLEMENTAL") {
         Api::unmarshalMultiple<Api::Presence>(data["merged_presences"]["friends"].toArray(), &presences);
         emit presencesReceived(*presences);
-    } else if (eventName == "PRESENCE_UPDATE") {
-        Api::Presence *presence;
-        Api::unmarshal<Api::Presence>(data.toObject(), &presence);
-        emit presenceReceived(*presence);
+    } else if (eventName == "CHANNEL_CREATE") {
+        Api::Channel *channel;
+        Api::unmarshal<Api::Channel>(data.toObject(), &channel);
+        if (channel->type == DM || channel->type == GroupDM) {
+            std::vector<std::string> *recipients = nullptr;
+            if (channel->recipients != nullptr) {
+                recipients = new std::vector<std::string>();
+                for (unsigned int i = 0 ; i < channel->recipients->size() ; i++) {
+                    users->push_back((*channel->recipients)[i]);
+                    recipients->push_back(*(*channel->recipients)[i]->id);
+                }
+            }
+
+            PrivateChannel *privateChannel = new PrivateChannel {
+                recipients,
+                channel->icon,
+                channel->id,
+                channel->lastMessageId,
+                channel->name,
+                channel->ownerId,
+                channel->type
+            };
+            privateChannels->push_back(privateChannel);
+
+            emit channelCreated(nullptr, privateChannel);
+        } else {
+            (*guildsChannels)[*channel->guildId].push_back(channel);
+
+            emit channelCreated(channel, nullptr);
+        }
+    } else if (eventName == "CHANNEL_UPDATE") {
+        Api::Channel *channel;
+        Api::unmarshal<Api::Channel>(data.toObject(), &channel);
+        if (channel->type == DM || channel->type == GroupDM) {
+            std::vector<std::string> *recipients = nullptr;
+            if (channel->recipients != nullptr) {
+                recipients = new std::vector<std::string>();
+                for (unsigned int i = 0 ; i < channel->recipients->size() ; i++) {
+                    users->push_back((*channel->recipients)[i]);
+                    recipients->push_back(*(*channel->recipients)[i]->id);
+                }
+            }
+
+            for (auto it = privateChannels->begin() ; it != privateChannels->end() ; it++) {
+                if (*(*it)->id == *channel->id) {
+                    privateChannels->erase(it);
+                    break;
+                }
+            }
+
+            PrivateChannel *privateChannel = new PrivateChannel {
+                recipients,
+                channel->icon,
+                channel->id,
+                channel->lastMessageId,
+                channel->name,
+                channel->ownerId,
+                channel->type
+            };
+            privateChannels->push_back(privateChannel);
+
+            emit channelUpdated(nullptr, privateChannel);
+        } else {
+            for (auto it = (*guildsChannels)[*channel->guildId].begin() ; it != (*guildsChannels)[*channel->guildId].end() ; it++) {
+                if (*(*it)->id == *channel->id) {
+                    (*guildsChannels)[*channel->guildId].erase(it);
+                    break;
+                }
+            }
+            (*guildsChannels)[*channel->guildId].push_back(channel);
+
+            emit channelUpdated(channel, nullptr);
+        }
+    } else if (eventName == "CHANNEL_DELETE") {
+        Api::Channel *channel;
+        Api::unmarshal<Api::Channel>(data.toObject(), &channel);
+        if (channel->type == DM || channel->type == GroupDM) {
+            for (auto it = privateChannels->begin() ; it != privateChannels->end() ; it++) {
+                if (*(*it)->id == *channel->id) {
+                    privateChannels->erase(it);
+                    break;
+                }
+            }
+
+            emit channelDeleted(*channel->id, "", channel->type);
+        } else {
+            for (auto it = (*guildsChannels)[*channel->guildId].begin() ; it != (*guildsChannels)[*channel->guildId].end() ; it++) {
+                if (*(*it)->id == *channel->id) {
+                    (*guildsChannels)[*channel->guildId].erase(it);
+                    break;
+                }
+            }
+
+            emit channelDeleted(*channel->id, *channel->guildId, channel->type);
+        }
     } else if (eventName == "CHANNEL_UNREAD_UPDATE") {
         emit unreadUpdateReceived(data["guild_id"].toString().toUtf8().constData());
     } else if (eventName == "MESSAGE_CREATE") {
@@ -42,6 +133,10 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
         Api::Message *message;
         Api::unmarshal<Api::Message>(data.toObject(), &message);
         emit messageReceived(*message);
+    } else if (eventName == "PRESENCE_UPDATE") {
+        Api::Presence *presence;
+        Api::unmarshal<Api::Presence>(data.toObject(), &presence);
+        emit presenceReceived(*presence);
     } else if (eventName == "TYPING_START") {
         // Someone is typing
         /*gatewayData = data;
