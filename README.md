@@ -72,15 +72,15 @@ The executable is in the 'Fast-Discord/bin' folder ;)
 ## Contact
 Fast-Discord's discord server : https://discord.gg/DezBvjrGve
 ## Get your Discord token
-Go to https://discord.com/login without logging in
-Press Ctrl+Shift+I to open the Web Developer Tools
-Go to the Network tab
+Go to https://discord.com/login without logging in  
+Press Ctrl+Shift+I to open the Web Developer Tools  
+Go to the Network tab  
 ![](doc/images/Network-tab.png)
-Press XHR
+Press XHR  
 ![](doc/images/XHR.png)
-Now log in : network requests should appear
+Now log in : network requests should appear  
 ![](doc/images/Requests.png)
-Open one of the request and search for the Authorization header in Request Headers (If it is not here, open an other request)
+Open one of the request and search for the Authorization header in Request Headers (If it is not here, open an other request)  
 ![](doc/images/Authorization.png)
 Copy the token next to "Authorization"
 

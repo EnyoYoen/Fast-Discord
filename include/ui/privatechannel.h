@@ -27,6 +27,10 @@ public:
 signals:
     void leftClicked(const std::string&);
     void rightClicked(const std::string&);
+    void closeButtonClicked(const std::string&, const std::string&, int);
+
+public slots:
+    void closeChannel();
 
 private:
     void mouseReleaseEvent(QMouseEvent *event) override;

@@ -76,6 +76,7 @@ void MiddleColumn::setPrivateChannels(const std::vector<Api::PrivateChannel *>& 
         privateChannelWidgets.push_back(privateChannelWidget);
         privateChannelListLayout->insertWidget(i, privateChannelWidget);
         QObject::connect(privateChannelWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicPrivateChannel(const std::string&)));
+        QObject::connect(privateChannelWidget, SIGNAL(closeButtonClicked(const std::string&, const std::string&, int)), this, SLOT(deleteChannel(const std::string&, const std::string&, int)));
     }
     privateChannelListLayout->insertStretch(-1, 1);
     privateChannelListLayout->setSpacing(2);
@@ -235,9 +236,11 @@ void MiddleColumn::deleteChannel(const std::string& id, const std::string& guild
         for (unsigned int i = 0 ; i < privateChannelWidgets.size() ; i++) {
             if (id == (*privateChannelWidgets[i]).id) {
                 delete privateChannelWidgets[i];
+                privateChannelWidgets.erase(privateChannelWidgets.begin() + i);
+                displayPrivateChannels();
+                break;
             }
         }
-        displayPrivateChannels();
     } else {
         openGuild(guildId);
     }

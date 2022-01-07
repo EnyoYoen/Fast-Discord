@@ -1,5 +1,7 @@
 #include "ui/privatechannel.h"
 
+#include "ui/closechannelbutton.h"
+
 #include <QPixmap>
 #include <QBitmap>
 #include <QPainter>
@@ -30,7 +32,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     // Create and style the layout
     QGridLayout *layout = new QGridLayout(container);
     layout->setContentsMargins(8, 0, 8, 0);
-    layout->setSpacing(0);
+    layout->setHorizontalSpacing(4);
+    layout->setVerticalSpacing(4);
 
     // Variables initialization
     std::string channelIconFileName;
@@ -72,13 +75,17 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             name = new QLabel((*dmUser->username).c_str(), container);
 
             // Style the widgets
-            if (name) name->setFixedSize(156, 14);
-            subtext->setFixedSize(156, 14);
+            if (name) name->setFixedSize(145, 14);
+            subtext->setFixedSize(145, 14);
+
+            CloseChannelButton *closeButton = new CloseChannelButton(container);
+            QObject::connect(closeButton, SIGNAL(clicked()), this, SLOT(closeChannel()));
 
             // Add widgets to the layout
-            layout->addWidget(icon, 0, 0, 2, 2);
+            layout->addWidget(icon, 0, 0, 2, 1);
             layout->addWidget(name, 0, 1);
             layout->addWidget(subtext, 1, 1);
+            layout->addWidget(closeButton, 0, 2, 2, 1);
 
             // Create the main layout and add the container
             QHBoxLayout *mainLayout = new QHBoxLayout(this);
@@ -108,18 +115,18 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
                 // Get the name of the other user if there is only two person
                 rm->getUser([&](void *user){
                     name = new QLabel((*static_cast<Api::User *>(user)->username).c_str());
-                    name->setFixedSize(156, 14);
+                    name->setFixedSize(145, 14);
                     layout->addWidget(name, 0, 1);
                 }, (*privateChannel.recipientIds)[0]);
             } else {
                 // Set it with 'Unnamed'
                 name = new QLabel("Unnamed");
-                name->setFixedSize(156, 14);
+                name->setFixedSize(145, 14);
                 layout->addWidget(name, 0, 1);
             }
         } else {
             name = new QLabel(channelName->c_str());
-            name->setFixedSize(156, 14);
+            name->setFixedSize(145, 14);
             layout->addWidget(name, 0, 1);
         }
 
@@ -141,11 +148,15 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
         }
 
         // Style the subtext
-        subtext->setFixedSize(156, 14);
+        subtext->setFixedSize(145, 14);
+
+        CloseChannelButton *closeButton = new CloseChannelButton(container);
+        QObject::connect(closeButton, SIGNAL(clicked()), this, SLOT(closeChannel()));
 
         // Add widgets to the layout
-        layout->addWidget(icon, 0, 0, 2, 2);
+        layout->addWidget(icon, 0, 0, 2, 1);
         layout->addWidget(subtext, 1, 1);
+        layout->addWidget(closeButton, 0, 2, 2, 2);
 
         // Create the main layout and add the container
         QHBoxLayout *mainLayout = new QHBoxLayout(this);
@@ -167,6 +178,11 @@ void PrivateChannelWidget::setStatus(std::string *status)
 void PrivateChannelWidget::setIcon(const std::string& guildIconFileName)
 {
     icon->setImage(guildIconFileName);
+}
+
+void PrivateChannelWidget::closeChannel()
+{
+    emit closeButtonClicked(id, "", Api::DM);
 }
 
 void PrivateChannelWidget::unclicked()
