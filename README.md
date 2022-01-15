@@ -1,4 +1,4 @@
-
+![Fast-Discord logo](doc/images/Fast-Discord-Logo.png)
 # Fast-Discord
 ![Fast-Discord image](doc/images/Fast-Discord.gif)
 *For now it is very basic*
