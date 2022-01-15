@@ -4,7 +4,7 @@
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QGroupBox>
+#include <QLabel>
 #include <QDateTime>
 
 #include <fstream>
@@ -121,11 +121,12 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message& mes
     iconContainer->setLayout(iconLayout);
 
     // Create and style the content label
-    QLabel *content = new QLabel((*message.content).c_str(), this);
+    content = new MarkdownLabel(*message.content, this);
+    /*QLabel *content = new QLabel((*message.content).c_str(), this);
     content->setTextInteractionFlags(Qt::TextSelectableByMouse);
     content->setCursor(QCursor(Qt::IBeamCursor));
     content->setWordWrap(true);
-    content->setStyleSheet("color: #DCDDDE");
+    content->setStyleSheet("color: #DCDDDE");*/
 
     // Style the data layout
     dataLayout->setContentsMargins(0, 0, 0, 0);
@@ -152,6 +153,8 @@ void MessageWidget::enterEvent(QEvent *)
 {
     // Mouse hover : change the stylesheet and show the timestamp label
     setStyleSheet("background-color: #32353B;");
+    content->setStyleSheet("background-color: #32353B;"
+                           "color: #DCDDDE;");
     if (!isFirst) timestampLabel->setText(" " + hoveredTimestamp);
 }
 
@@ -159,6 +162,8 @@ void MessageWidget::leaveEvent(QEvent *)
 {
     // Reset the stylesheet and hide the timestamp label
     setStyleSheet("background-color: none;");
+    content->setStyleSheet("background-color: #36393F;"
+                           "color: #DCDDDE;");
     if (!isFirst) timestampLabel->setText("");
 }
 

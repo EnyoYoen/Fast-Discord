@@ -44,12 +44,10 @@ void Gateway::start()
 
 void Gateway::closeHandler()
 {
-    qDebug() << "closed";
     // Reconnect when the connection is closed
     if (connected) {
         connected = false;
         client.open(QUrl(QString(url.c_str()) + QString("?v=9&encoding=json")));
-        qDebug() << "Connection opened";
     }
 }
 

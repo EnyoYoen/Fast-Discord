@@ -1,6 +1,7 @@
 #pragma once
 
 #include "roundedimage.h"
+#include "ui/markdownlabel.h"
 #include "api/message.h"
 #include "api/ressourcemanager.h"
 
@@ -26,6 +27,7 @@ private:
     QString hoveredTimestamp; // The timestamp we show
     RoundedImage *avatar;     // The avatar if there is one
     QLabel *timestampLabel;   // The label of the timestamp
+    MarkdownLabel *content;
     bool isFirst;             // Is the message is not grouped
 
 };

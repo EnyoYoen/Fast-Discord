@@ -45,6 +45,7 @@ SOURCES += \
     ../src/ui/homebutton.cpp \
     ../src/ui/leftcolumn.cpp \
     ../src/ui/mainwindow.cpp \
+    ../src/ui/markdownlabel.cpp \
     ../src/ui/messagearea.cpp \
     ../src/ui/messageseparator.cpp \
     ../src/ui/messagetextinput.cpp \
@@ -86,6 +87,7 @@ HEADERS += \
     ../include/ui/homebutton.h \
     ../include/ui/leftcolumn.h \
     ../include/ui/mainwindow.h \
+    ../include/ui/markdownlabel.h \
     ../include/ui/messagearea.h \
     ../include/ui/messageseparator.h \
     ../include/ui/messagetextinput.h \
