@@ -38,6 +38,9 @@ void RightColumn::setMessages(std::vector<Api::Message *> *messages)
     channelsMessages[currentOpenedChannel] = messages;
     messageArea = new MessageArea(rm, *messages, this);
     messagesLayout->insertWidget(0, messageArea);
+
+    QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
+    QObject::connect(this, SIGNAL(moreMessagesReceived(const std::vector<Api::Message *>&)), messageArea, SLOT(addMessages(const std::vector<Api::Message *>&)));
 }
 
 void RightColumn::setUserTyping(const Api::User *user)
@@ -110,11 +113,14 @@ void RightColumn::openChannel(const std::string& channelId, int type)
         if (channelsMessages.find(channelId) == channelsMessages.end()) {
             QWidget *messageAreaPlaceholder = new QWidget(messagesContainer);
             messagesLayout->addWidget(messageAreaPlaceholder);
-            rm->getMessages([this](void *messages) {emit messagesReceived(static_cast<std::vector<Api::Message *> *>(messages));}, channelId, 50 );
+            rm->getMessages([this](void *messages) {emit messagesReceived(static_cast<std::vector<Api::Message *> *>(messages));}, channelId, 50, false);
         } else {
             messages = channelsMessages[channelId];
             messageArea = new MessageArea(rm, *messages, messagesContainer);
             messagesLayout->addWidget(messageArea);
+
+            QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
+            QObject::connect(this, SIGNAL(moreMessagesReceived(const std::vector<Api::Message *>&)), messageArea, SLOT(setMessages(const std::vector<Api::Message *>&)));
         }
 
         // Change the current opened channel ID
@@ -215,8 +221,14 @@ void RightColumn::sendMessage(const std::string& content)
     // Send a new message to the API and add it to the opened channel
     rm->requester->sendMessage(content, currentOpenedChannel);
     std::string messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
-    Api::Message newMessage = Api::Message {nullptr, new Api::User{client->username, nullptr, client->avatar, nullptr, nullptr, client->id, -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, new std::string(content), new std::string(messageTimestamp), nullptr, nullptr, nullptr, nullptr, -1, -1, -1, -1, false, false, false};
-    messageArea->addMessage(newMessage, *(*channelsMessages[currentOpenedChannel])[0]);
+    Api::Message *newMessage = new Api::Message {nullptr, new Api::User{new std::string(client->username->c_str()), new std::string(""), new std::string(client->avatar->c_str()), new std::string(""), new std::string(""), new std::string(client->id->c_str()), -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, new std::string(""), new std::string(""), new std::string(""), new std::string(content), new std::string(messageTimestamp), new std::string(""), new std::string(""), new std::string(""), new std::string(""), -1, -1, -1, -1, false, false, false};
+    messageArea->addMessage(*newMessage, *(*channelsMessages[currentOpenedChannel])[0]);
+    channelsMessages[currentOpenedChannel]->insert(channelsMessages[currentOpenedChannel]->cbegin(), newMessage);
+}
+
+void RightColumn::loadMoreMessages()
+{
+    rm->getMessages([this](void *messages){emit moreMessagesReceived(*static_cast<std::vector<Api::Message *> *>(messages));}, currentOpenedChannel, 50, true);
 }
 
 } // namespace Ui

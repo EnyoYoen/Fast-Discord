@@ -20,6 +20,15 @@ public:
     // Add a new message
     void addMessage(const Api::Message& newMessage, const Api::Message& lastMessage);
 
+signals:
+    void scrollbarHigh();
+
+public slots:
+    void addMessages(const std::vector<Api::Message *>& messages);
+
+private slots:
+    void scrollBarMoved(int value);
+
 private:
     // The scroll to the very end
     void showEvent(QShowEvent *event) override;
@@ -27,6 +36,10 @@ private:
     QVBoxLayout *messageLayout; // The layout of this widget
 
     Api::RessourceManager *rm;  // To request the API
+
+    int tempScrollBarValue;
+    int tempScrollBarRange;
+    bool emitScrollBarHigh;
 };
 
 } // namespace Ui

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QLabel>
-#include <QResizeEvent>
 
 namespace Ui {
 

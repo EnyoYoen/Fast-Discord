@@ -29,7 +29,7 @@ Requester::Requester(const std::string& tokenp)
     loop = QThread::create([this](){RequestLoop();});
     loop->start();
 
-    QObject::connect(this, SIGNAL(requestEmit(int, QNetworkRequest, QUrlQuery *, QHttpMultiPart *)), this, SLOT(doRequest(int, QNetworkRequest, QUrlQuery *, QHttpMultiPart *)));
+    QObject::connect(this, SIGNAL(requestEmit(int, QNetworkRequest, QByteArray *, QHttpMultiPart *)), this, SLOT(doRequest(int, QNetworkRequest, QByteArray *, QHttpMultiPart *)));
 }
 
 Requester::~Requester()
@@ -158,22 +158,11 @@ void Requester::RequestLoop()
                     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
                 }
 
-                QUrlQuery params;
-                if (parameters.postDatas != "") {
-                    // Set POST data
-                    size_t pos = 0;
-                    while ((pos = parameters.postDatas.find('\n')) != std::string::npos) {
-                        std::string current = parameters.postDatas.substr(0, pos);
-                        size_t pos2 = parameters.postDatas.find(':');
-                        params.addQueryItem(QString(current.substr(0, pos2).c_str()), QString(current.substr(pos2 + 1, current.length()).c_str()));
-                    }
-                }
-
                 if (parameters.customRequest != "") {
                     if (parameters.customRequest == "POST") {
-                        emit requestEmit(Post, request, &params, nullptr);
+                        emit requestEmit(Post, request, new QByteArray(parameters.postDatas.c_str(), parameters.postDatas.length()), nullptr);
                     } else if (parameters.customRequest == "PUT") {
-                        emit requestEmit(Put, request, &params, nullptr);
+                        emit requestEmit(Put, request, new QByteArray(parameters.postDatas.c_str(), parameters.postDatas.length()), nullptr);
                     } else if (parameters.customRequest == "DELETE") {
                         emit requestEmit(Delete, request, nullptr, nullptr);
                     }
@@ -201,7 +190,7 @@ void Requester::RequestLoop()
     }
 }
 
-void Requester::doRequest(int requestType, QNetworkRequest request, QUrlQuery *params, QHttpMultiPart *multiPart)
+void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *postDatas, QHttpMultiPart *multiPart)
 {
     switch (requestType) {
         case Get:
@@ -211,11 +200,11 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QUrlQuery *p
             if (multiPart != nullptr) {
                 reply = netManager.post(request, multiPart);
             } else {
-                reply = netManager.post(request, (*params).query().toUtf8());
+                reply = netManager.post(request, *postDatas);
             }
             break;
         case Put:
-            reply = netManager.put(request, (*params).query().toUtf8());
+            reply = netManager.put(request, *postDatas);
             break;
         case Delete:
             reply = netManager.deleteResource(request);
@@ -223,7 +212,7 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QUrlQuery *p
     }
 
     // Connect the finished and read signals to process the reply
-    QObject::connect(reply, SIGNAL(finished()), this, SLOT(readReply(/*QNetworkReply **/)));
+    QObject::connect(reply, SIGNAL(finished()), this, SLOT(readReply()));
 }
 
 void Requester::requestApi(const RequestParameters &parameters)
@@ -288,13 +277,13 @@ void Requester::getGuildChannels(std::function<void(void *)> callback, const std
         false});
 }
 
-void Requester::getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit)
+void Requester::getMessages(std::function<void(void *)> callback, const std::string& channelId, const std::string& beforeId, unsigned int limit)
 {
     limit = limit >= 50 ? 50 : limit;
 
     requestApi({
         callback,
-        "https://discord.com/api/v9/channels/" + channelId + "/messages?limit=" + std::to_string(limit),
+        "https://discord.com/api/v9/channels/" + channelId + "/messages?" + (beforeId != "" ? "before=" + beforeId + "&" : "" ) + "limit=" + std::to_string(limit),
         "",        
         "",
         "",
@@ -376,7 +365,7 @@ void Requester::sendMessage(const std::string& content, const std::string& chann
             nullptr,
             "https://discord.com/api/v9/channels/" + channelId + "/messages",
             "{\"content\":\"" + content + "\"}",
-            "",
+            "POST",
             "",
             "",
             SendMessage,
@@ -389,7 +378,7 @@ void Requester::sendMessageWithFile(const std::string& content, const std::strin
             nullptr,
             "https://discord.com/api/v9/channels/" + channelId + "/messages",
             "{\"content\":\"" + content + "\"}",
-            "",
+            "POST",
             filePath,
             "",
             SendMessageWithFile,

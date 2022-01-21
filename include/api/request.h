@@ -79,7 +79,7 @@ public:
     void getGuilds(std::function<void(void *)> callback);
     void getGuildChannels(std::function<void(void *)> callback, const std::string& id);
     void getPrivateChannels(std::function<void(void *)> callback);
-    void getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit);
+    void getMessages(std::function<void(void *)> callback, const std::string& channelId, const std::string& beforeId, unsigned int limit);
     void getClient(std::function<void(void *)> callback);
     void getClientSettings(std::function<void(void *)> callback);
     void getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName);
@@ -95,10 +95,10 @@ public:
     void unpinMessage(const std::string& channelId, const std::string& messageId);
 
 signals:
-    void requestEmit(int requestType, QNetworkRequest request, QUrlQuery *query, QHttpMultiPart *multiPart);
+    void requestEmit(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);
 
 private slots:
-    void doRequest(int requestType, QNetworkRequest request, QUrlQuery *query, QHttpMultiPart *multiPart);
+    void doRequest(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);
     void readReply();
 
 private:

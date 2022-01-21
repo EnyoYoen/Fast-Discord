@@ -132,7 +132,7 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
         // We received a message
         Api::Message *message;
         Api::unmarshal<Api::Message>(data.toObject(), &message);
-        emit messageReceived(*message);
+        if (*message->author->id != *client->id) emit messageReceived(*message);
     } else if (eventName == "PRESENCE_UPDATE") {
         Api::Presence *presence;
         Api::unmarshal<Api::Presence>(data.toObject(), &presence);
@@ -209,15 +209,30 @@ void RessourceManager::getPrivateChannels(std::function<void(void *)> callback)
         callback(reinterpret_cast<void *>(privateChannels));
 }
 
-void RessourceManager::getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit)
+void RessourceManager::getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit, bool newMessages)
 {
-    if (messages->find(channelId) == messages->end() || (*messages)[channelId].size() < limit)
+    if (messages->find(channelId) == messages->end()) {
         requester->getMessages([&, callback](void *messagesPtr) {
             (*messages)[channelId] = *reinterpret_cast<std::vector<Message *> *>(messagesPtr);
             callback(messagesPtr);
-        }, channelId, limit);
-    else
+        }, channelId, "", limit);
+    } else if ((*messages)[channelId].size() < limit) {
+        requester->getMessages([&, callback](void *messagesPtr) {
+            std::vector<Message *> messagesVector = *reinterpret_cast<std::vector<Message *> *>(messagesPtr);
+            for (unsigned int i = 0 ; i < messagesVector.size() ; i++)
+                (*messages)[channelId].push_back(messagesVector[i]);
+            callback(reinterpret_cast<void *>(&(*messages)[channelId]));
+        }, channelId, *(*messages)[channelId].back()->id, limit - (*messages)[channelId].size());
+    } else if (newMessages) {
+        requester->getMessages([&, callback](void *messagesPtr) {
+            std::vector<Message *> messagesVector = *reinterpret_cast<std::vector<Message *> *>(messagesPtr);
+            for (unsigned int i = 0 ; i < messagesVector.size() ; i++)
+                (*messages)[channelId].push_back(messagesVector[i]);
+            callback(messagesPtr);
+        }, channelId, *(*messages)[channelId].back()->id, limit);
+    } else {
         callback(reinterpret_cast<void *>(&(*messages)[channelId]));
+    }
 }
 
 void RessourceManager::getClient(std::function<void(void *)> callback)

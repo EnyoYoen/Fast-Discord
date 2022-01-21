@@ -29,6 +29,7 @@ public:
 signals:
     void userTypingReceived(const Api::User *user);
     void messagesReceived(std::vector<Api::Message *> *messages);
+    void moreMessagesReceived(const std::vector<Api::Message *>& messages);
 
 public slots:
     void clean();
@@ -41,6 +42,7 @@ private slots:
     void setUserTyping(const Api::User *user);
     void sendTyping();
     void sendMessage(const std::string& content);
+    void loadMoreMessages();
 
 private:
     void openChannel(const std::string& channelId, int type);

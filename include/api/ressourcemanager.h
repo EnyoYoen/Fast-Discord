@@ -25,7 +25,7 @@ public:
     void getGuildChannels(std::function<void(void *)> callback, const std::string& id);
     void getPrivateChannel(std::function<void(void *)> callback, const std::string& id);
     void getPrivateChannels(std::function<void(void *)> callback);
-    void getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit);
+    void getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit, bool newMessages);
     void getClient(std::function<void(void *)> callback);
     void getClientSettings(std::function<void(void *)> callback);
     void getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName);

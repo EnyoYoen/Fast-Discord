@@ -122,11 +122,6 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message& mes
 
     // Create and style the content label
     content = new MarkdownLabel(*message.content, this);
-    /*QLabel *content = new QLabel((*message.content).c_str(), this);
-    content->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    content->setCursor(QCursor(Qt::IBeamCursor));
-    content->setWordWrap(true);
-    content->setStyleSheet("color: #DCDDDE");*/
 
     // Style the data layout
     dataLayout->setContentsMargins(0, 0, 0, 0);

@@ -1,4 +1,5 @@
 ![Fast-Discord logo](doc/images/Fast-Discord-Logo.png)
+*Thanks to [Sour Dani](https://github.com/dangreene0) for the logo*
 # Fast-Discord
 ![Fast-Discord image](doc/images/Fast-Discord.gif)
 *For now it is very basic*
