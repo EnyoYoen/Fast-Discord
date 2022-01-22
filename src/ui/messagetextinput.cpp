@@ -29,7 +29,7 @@ void MessageTextInput::keyPressEvent(QKeyEvent *event)
         // Get the text and strip the spaces and the new lines
         std::string content = toPlainText().toUtf8().constData();
         content.erase(std::remove(content.begin(), content.end(), '\n'), content.end());
-        content.erase(std::remove(content.begin(), content.end(), ' '), content.end());
+        //content.erase(std::remove(content.begin(), content.end(), ' '), content.end());
 
         // Emit signals if the message is not empty
         if (content != "") {
