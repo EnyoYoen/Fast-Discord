@@ -121,7 +121,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message& mes
     iconContainer->setLayout(iconLayout);
 
     // Create and style the content label
-    content = new MarkdownLabel(*message.content, this);
+    content = new MarkdownLabel(*message.content, rm, this);
 
     // Style the data layout
     dataLayout->setContentsMargins(0, 0, 0, 0);

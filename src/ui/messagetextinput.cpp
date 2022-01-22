@@ -5,9 +5,11 @@
 #include <algorithm>
 #include <ctime>
 
+#include <QDebug>
+
 namespace Ui {
 
-MessageTextInput::MessageTextInput(QWidget *parent) : QPlainTextEdit(parent)
+MessageTextInput::MessageTextInput(QWidget *parent) : QTextEdit(parent)
 {
     // Initialize attribute
     lastTypingTimestamp = 0;
@@ -28,26 +30,29 @@ void MessageTextInput::keyPressEvent(QKeyEvent *event)
     if (!event->modifiers().testFlag(Qt::ShiftModifier) && event->key() == Qt::Key_Return) {
         // Get the text and strip the spaces and the new lines
         std::string content = toPlainText().toUtf8().constData();
-        content.erase(std::remove(content.begin(), content.end(), '\n'), content.end());
-        //content.erase(std::remove(content.begin(), content.end(), ' '), content.end());
+
+        unsigned long start = content.find_first_not_of(" \n\r\t\f\v");
+        content = start == std::string::npos ? "" : content.substr(start);
+        unsigned long end = content.find_last_not_of(" \n\r\t\f\v");
+        content = end == std::string::npos ? "" : content.substr(0, end + 1);
 
         // Emit signals if the message is not empty
         if (content != "") {
             emit clear();
             emit returnPressed(content);
         }
-    }
+    } else {
+        // Compare the last timestamp and the actual time
+        time_t actualTimestamp = std::time(nullptr);
+        if (actualTimestamp - lastTypingTimestamp > 8) {
+            // Send typing because we typed more than 8 seconds ago
+            lastTypingTimestamp = actualTimestamp;
+            emit typing();
+        }
 
-    // Compare the last timestamp and the actual time
-    time_t actualTimestamp = std::time(nullptr);
-    if (actualTimestamp - lastTypingTimestamp > 8) {
-        // Send typing because we typed more than 8 seconds ago
-        lastTypingTimestamp = actualTimestamp;
-        emit typing();
+        // Spread the event
+        QTextEdit::keyPressEvent(event);
     }
-
-    // Spread the event
-    QPlainTextEdit::keyPressEvent(event);
 }
 
 } // namespace Ui

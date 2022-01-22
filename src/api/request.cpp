@@ -23,6 +23,7 @@ Requester::Requester(const std::string& tokenp)
     token = tokenp;
     currentRequestsNumber = 0;
     rateLimitEnd = 0; // No rate limit for now
+    requestsToCheck = 0;
     stopped = false;
 
     // Start the request loop
@@ -124,11 +125,17 @@ void Requester::readReply()
             case GetImage:
                 {
                     std::string imageFileName = parameters.outputFile;
-                    parameters.callback(static_cast<void *>(&imageFileName));
+                    lock.lock();
+                    if (requestsToCheck == 0) parameters.callback(static_cast<void *>(&imageFileName));
+                    lock.unlock();
                     break;
                 }
         }
         currentRequestsNumber--;
+
+        lock.lock();
+        if (requestsToCheck > 0) requestsToCheck--;
+        lock.unlock();
     }
     finishWaiter.notify_one();
 }
@@ -220,6 +227,18 @@ void Requester::requestApi(const RequestParameters &parameters)
     lock.lock();
     requestQueue.push(parameters);
     requestWaiter.notify_one();
+    lock.unlock();
+}
+
+void Requester::removeImageRequestCallbacks()
+{
+    lock.lock();
+    requestsToCheck = currentRequestsNumber + requestQueue.size();
+
+    for (unsigned int i = requestQueue.size() ; i > 0 ; i--) {
+        RequestParameters temp = requestQueue.front();
+        if (temp.type != GetImage) requestQueue.push(temp);
+    }
     lock.unlock();
 }
 

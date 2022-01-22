@@ -1,12 +1,13 @@
 #pragma once
 
-#include <QPlainTextEdit>
+#include <QTextEdit>
 #include <QObject>
+#include <QKeyEvent>
 
 namespace Ui {
 
 // The input to send messages
-class MessageTextInput : public QPlainTextEdit
+class MessageTextInput : public QTextEdit
 {
     Q_OBJECT
 public:

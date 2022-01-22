@@ -1,5 +1,7 @@
 #pragma once
 
+#include "api/ressourcemanager.h"
+
 #include <QLabel>
 
 namespace Ui {
@@ -7,7 +9,7 @@ namespace Ui {
 class MarkdownLabel : public QLabel
 {
 public:
-    MarkdownLabel(const std::string& content, QWidget *parent);
+    MarkdownLabel(const std::string& content, Api::RessourceManager *rm, QWidget *parent);
 };
 
 } // namespace Ui

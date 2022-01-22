@@ -71,6 +71,8 @@ void RightColumn::setUserTyping(const Api::User *user)
 
 void RightColumn::clean()
 {
+    rm->requester->removeImageRequestCallbacks();
+
     // Remove all items from the layout
     QLayoutItem *item;
     while ((item = layout->takeAt(0)) != nullptr) {

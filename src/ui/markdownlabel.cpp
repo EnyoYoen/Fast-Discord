@@ -5,7 +5,7 @@
 
 namespace Ui {
 
-MarkdownLabel::MarkdownLabel(const std::string& content, QWidget *parent)
+MarkdownLabel::MarkdownLabel(const std::string& content, Api::RessourceManager *rm, QWidget *parent)
     : QLabel(parent)
 {
     if (content != "") {
@@ -139,7 +139,17 @@ MarkdownLabel::MarkdownLabel(const std::string& content, QWidget *parent)
                 } else if (content[i] == ' ' && !firstCharFound) {
                     html += "&nbsp;";
                 } else if (content[i] == '<') {
-                    html += "&lt;";
+                    unsigned int emojiNameEnd = content.find(":", i + 2);
+                    unsigned int emojiIdEnd = content.find(">", i + 1);
+                    if (content[i + 1] == ':' && emojiNameEnd != std::string::npos && emojiIdEnd != std::string::npos && emojiIdEnd < content.find("\n") && emojiNameEnd < emojiIdEnd) {
+                        std::string fileName = content.substr(emojiNameEnd + 1, emojiIdEnd - emojiNameEnd - 1) + ".webp";
+                        //html += "<img src=\"cache/" + fileName + "\">";
+                        //rm->getImage([this](void *){}, "https://cdn.discordapp.com/emojis/" + fileName, fileName);
+                        i += emojiIdEnd - i;
+                    } else {
+                        html += "&lt;";
+                        firstCharFound = true;
+                    }
                 } else if (content[i] == '>') {
                     if (!firstCharFound && content[i + 1] == ' ') {
                         html += "<span>&nbsp;</span>&nbsp;&nbsp;&nbsp;&nbsp;";
@@ -147,6 +157,7 @@ MarkdownLabel::MarkdownLabel(const std::string& content, QWidget *parent)
                         i++;
                     } else {
                         html += "&gt;";
+                        firstCharFound = true;
                     }
                 } else {
                     firstCharFound = true;

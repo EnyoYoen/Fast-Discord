@@ -1,6 +1,6 @@
 #pragma once
 
-#include "roundedimage.h"
+#include "ui/roundedimage.h"
 #include "ui/markdownlabel.h"
 #include "api/message.h"
 #include "api/ressourcemanager.h"
@@ -17,12 +17,12 @@ class MessageWidget : public QWidget
 public:
     MessageWidget(Api::RessourceManager *rm, const Api::Message& message, bool isFirst, bool separatorBefore, QWidget *parent);
 
+    Api::RessourceManager *rm; // To request the API
+
 private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
     void setAvatar(const std::string& avatarFileName);
-
-    Api::RessourceManager *rm; // To request the API
 
     QString hoveredTimestamp; // The timestamp we show
     RoundedImage *avatar;     // The avatar if there is one

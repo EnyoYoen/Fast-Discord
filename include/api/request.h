@@ -74,6 +74,7 @@ public:
 
     // Function that request the API
     void requestApi(const RequestParameters& parameters);
+    void removeImageRequestCallbacks();
 
     // Functions that request the API to retrieve data
     void getGuilds(std::function<void(void *)> callback);
@@ -111,7 +112,9 @@ private:
     QThread *loop;                              // Request loop
     std::string token;                          // Authorization token
     double rateLimitEnd;                        // Unix time that represents the moment of the end of the rate limit
-    unsigned int currentRequestsNumber;         // The number of requests that are process at the moment
+    unsigned int requestsToCheck;               // The number of requests that we have to check when we need to remove
+                                                // callbacks for image requests
+    unsigned int currentRequestsNumber;         // The number of requests that are processed at the moment
     bool stopped;                               // Used to stop the request loop
 
     // The function that contains the request loop
