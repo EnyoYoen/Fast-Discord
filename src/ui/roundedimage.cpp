@@ -60,7 +60,7 @@ void RoundedImage::setImage(const std::string& imagePath)
         image = QPixmap(imagePath.c_str()).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         animatedImage = new QMovie(imagePath.c_str());
         animatedImage->start();
-        //animatedImage->setPaused(true);
+        animatedImage->setPaused(true);
         this->setMovie(animatedImage);
     } else {
         // Not animated

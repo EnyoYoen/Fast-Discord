@@ -57,8 +57,8 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
                                                              "background-color: rgb(255, 169, 21);");
         else if (status == "dnd") statusIcon->setStyleSheet("border-radius: 5px;"
                                                             "background-color: rgb(255, 48, 51);");
-        else if (status == "offline") statusIcon->setStyleSheet("border-radius: 5px;"
-                                                                "background-color: rgb(90, 90, 90);");
+        else statusIcon->setStyleSheet("border-radius: 5px;"
+                                       "background-color: rgb(90, 90, 90);");
     });
 
     // Create the widgets of the user menu

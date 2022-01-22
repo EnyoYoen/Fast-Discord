@@ -120,7 +120,7 @@ void RightColumn::openChannel(const std::string& channelId, int type)
             messagesLayout->addWidget(messageArea);
 
             QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
-            QObject::connect(this, SIGNAL(moreMessagesReceived(const std::vector<Api::Message *>&)), messageArea, SLOT(setMessages(const std::vector<Api::Message *>&)));
+            QObject::connect(this, SIGNAL(moreMessagesReceived(const std::vector<Api::Message *>&)), messageArea, SLOT(addMessages(const std::vector<Api::Message *>&)));
         }
 
         // Change the current opened channel ID
@@ -228,7 +228,8 @@ void RightColumn::sendMessage(const std::string& content)
 
 void RightColumn::loadMoreMessages()
 {
-    rm->getMessages([this](void *messages){emit moreMessagesReceived(*static_cast<std::vector<Api::Message *> *>(messages));}, currentOpenedChannel, 50, true);
+   if (channelsMessages[currentOpenedChannel]->size() >= 50)
+       rm->getMessages([this](void *messages){emit moreMessagesReceived(*static_cast<std::vector<Api::Message *> *>(messages));}, currentOpenedChannel, 50, true);
 }
 
 } // namespace Ui

@@ -28,6 +28,7 @@ public slots:
 
 private slots:
     void scrollBarMoved(int value);
+    void changeSliderValue(int min, int max);
 
 private:
     // The scroll to the very end

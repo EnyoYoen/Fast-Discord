@@ -85,6 +85,7 @@ MessageArea::MessageArea(Api::RessourceManager *rmp, const std::vector<Api::Mess
                         "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
 
     QObject::connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(scrollBarMoved(int)));
+    QObject::connect(this->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(changeSliderValue(int, int)));
 }
 
 void MessageArea::addMessage(const Api::Message& newMessage, const Api::Message& lastMessage)
@@ -126,8 +127,10 @@ void MessageArea::addMessage(const Api::Message& newMessage, const Api::Message&
 
 void MessageArea::addMessages(const std::vector<Api::Message *>& messages)
 {
-    unsigned int size = messages.size() - 1;
-    for (unsigned int i = size ; i > 1; i--) {
+    int size = messages.size() - 1;
+    if (size == -1) return;
+
+    for (int i = size ; i > 1; i--) {
         // Get date and time of the messages
         QDateTime firstDateTime = QDateTime::fromString(QString((*messages[size - i + 1]->timestamp).c_str()), Qt::ISODate);
         QDateTime secondDateTime = QDateTime::fromString(QString((*messages[size - i]->timestamp).c_str()), Qt::ISODate);
@@ -160,9 +163,12 @@ void MessageArea::addMessages(const std::vector<Api::Message *>& messages)
         // Create the message and add it to the layout
         messageLayout->insertWidget(separator ? 1 : 0, new MessageWidget(rm, *messages[size - i], first, separator, this));
     }
+}
 
-    this->verticalScrollBar()->setValue((this->verticalScrollBar()->maximum() - this->verticalScrollBar()->minimum()) - tempScrollBarRange + tempScrollBarValue);
-    //emitScrollBarHigh = true;
+void MessageArea::changeSliderValue(int min, int max)
+{
+    this->verticalScrollBar()->setValue(max - min - tempScrollBarRange + tempScrollBarValue);
+    emitScrollBarHigh = true;
 }
 
 void MessageArea::showEvent(QShowEvent *)
