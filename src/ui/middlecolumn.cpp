@@ -84,6 +84,10 @@ void MiddleColumn::setPrivateChannels(const std::vector<Api::PrivateChannel *>& 
 
     // Set the channels to the column
     channelList->setWidget(privateChannelList);
+    channelList->setStyleSheet("* {background-color: #2f3136; border: none;}"
+                               "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
+                               "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
+                               "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
 }
 
 void MiddleColumn::setGuildChannels(const std::vector<Api::Channel *> *channels)

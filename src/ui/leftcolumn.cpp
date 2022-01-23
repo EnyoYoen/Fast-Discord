@@ -10,10 +10,11 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     homePageShown = true;
 
     // Create the widgets
-    layout = new QVBoxLayout(this);
-    homeButton = new HomeButton(this);
-    QWidget *guildSeparator = new QWidget(this);
-    QWidget *spacer = new QWidget(this);
+    QWidget *content = new QWidget(this);
+    layout = new QVBoxLayout(content);
+    homeButton = new HomeButton(content);
+    QWidget *guildSeparator = new QWidget(content);
+    QWidget *spacer = new QWidget(content);
 
     // Style the spacer
     spacer->setFixedHeight(6);
@@ -28,15 +29,20 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     layout->addWidget(guildSeparator);
 
     // Set widgets alignments
-    layout->insertStretch(-1, 100);
+    layout->insertStretch(3, 1);
     layout->setAlignment(guildSeparator, Qt::AlignHCenter);
 
     // Style the layout
     layout->setSpacing(6);
     layout->setContentsMargins(0, 0, 0, 0);
 
+
     // Style this widget
+    this->setWidget(content);
+    this->setWidgetResizable(true);
     this->setFixedWidth(72);
+    this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setStyleSheet("background-color: #202225;"
                         "border: none;");
 
