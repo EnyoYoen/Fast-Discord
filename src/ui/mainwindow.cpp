@@ -38,22 +38,19 @@ MainWindow::MainWindow() : QWidget()
 }
 
 std::string MainWindow::getToken() {
-    QFile *file = new QFile("config.ini");
+    QSettings* settings = new QSettings("Fast-Discord", "config");
     std::string token = "";
 
-    if (!file->exists()) {
-        // Create config file if not exists
-        QSettings* settings = new QSettings("config.ini", QSettings::IniFormat);
-
+    if (settings->value("token", "") == "") {
+        // Add token if it's empty
         token = QInputDialog::getText(nullptr, "Token", "Enter your Discord token", QLineEdit::Normal, QString(), nullptr).toUtf8().constData();
         token.erase(std::remove_if(token.begin(), token.end(), ::isspace), token.end());
 
         settings->setValue("token", token.c_str());
     }
     else {
-        // Load config file and get token from it
-        QSettings settings("config.ini", QSettings::IniFormat);
-        token = settings.value("token", token.c_str()).toString().toStdString();
+        // Get token from config file
+        token = settings->value("token", token.c_str()).toString().toStdString();
     }
 
     return token;
