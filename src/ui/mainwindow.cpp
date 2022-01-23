@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QInputDialog>
 #include <QLineEdit>
+#include <QSettings>
 
 namespace Ui {
 
@@ -17,9 +18,10 @@ MainWindow::MainWindow() : QWidget()
                         "padding: 0px;"
                         "border: none;");
 
+    // Get token from config if exists and get it from user input if not
+    std::string token = getToken();
+
     // Create the ressource manager
-    std::string token = QInputDialog::getText(nullptr, "Token", "Enter your Discord token", QLineEdit::Normal, QString(), nullptr).toUtf8().constData();
-    token.erase(std::remove_if(token.begin(), token.end(), ::isspace), token.end());
     rm = new Api::RessourceManager(token);
 
     // Connect the signal for the setup
@@ -33,6 +35,28 @@ MainWindow::MainWindow() : QWidget()
         clientSettings = static_cast<Api::ClientSettings *>(clientSettingsp);
         emit clientSettingsReceived();
     });
+}
+
+std::string MainWindow::getToken() {
+    QFile *file = new QFile("config.ini");
+    std::string token = "";
+
+    if (!file->exists()) {
+        // Create config file if not exists
+        QSettings* settings = new QSettings("config.ini", QSettings::IniFormat);
+
+        token = QInputDialog::getText(nullptr, "Token", "Enter your Discord token", QLineEdit::Normal, QString(), nullptr).toUtf8().constData();
+        token.erase(std::remove_if(token.begin(), token.end(), ::isspace), token.end());
+
+        settings->setValue("token", token.c_str());
+    }
+    else {
+        // Load config file and get token from it
+        QSettings settings("config.ini", QSettings::IniFormat);
+        token = settings.value("token", token.c_str()).toString().toStdString();
+    }
+
+    return token;
 }
 
 void MainWindow::setup()

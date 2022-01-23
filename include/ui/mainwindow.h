@@ -25,6 +25,8 @@ private slots:
     void setup();
 
 private:
+    std::string getToken();
+
     //All the widget that need to be accessed from different functions
     QHBoxLayout  *mainLayout;
     LeftColumn   *leftColumn;

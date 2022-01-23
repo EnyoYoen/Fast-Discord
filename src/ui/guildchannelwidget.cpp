@@ -52,23 +52,25 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     QHBoxLayout *layout = new QHBoxLayout(container);
 
     // Create the icon
-    if (type != Api::GuildCategory) {
-        icon = new QLabel(this);
-        icon->setPixmap(QPixmap(std::string("res/images/svg/guild-channel-icon" + iconName + ".svg").c_str()));
-        icon->setFixedSize(32, 32);
-        icon->setStyleSheet("color: #8E9297");
-    }
+    icon = new QLabel(this);
+    icon->setPixmap(QPixmap(std::string("res/images/svg/guild-channel-icon" + iconName + ".svg").c_str()));
+    icon->setFixedSize(32, 32);
+    icon->setStyleSheet("color: #8E9297");
 
     // Create the name label
     name = new QLabel((*guildChannel.name).c_str(), this);
     name->setStyleSheet("color: #8E9297");
 
     // Add widgets to layout and style it
-    if (type != Api::GuildCategory) {
+    if (type == Api::GuildCategory) {
+        layout->addWidget(name, Qt::AlignLeft);
         layout->addWidget(icon, Qt::AlignLeft);
     }
+    else {
+        layout->addWidget(icon, Qt::AlignLeft);
+        layout->addWidget(name, Qt::AlignLeft);
+    }
 
-    layout->addWidget(name, Qt::AlignLeft);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
@@ -98,14 +100,16 @@ void GuildChannelWidget::unclicked()
         clicked = false;
         this->setStyleSheet("color: #8E9297;"
                             "background-color: none;");
+        this->name->setStyleSheet("color: #8E9297;");
     }
 }
 
 void GuildChannelWidget::mousePressEvent(QMouseEvent *)
 {
     // Widget clicked : change the stylesheet
-    if (!clicked && type != Api::GuildVoice) {
+    if (!clicked && type != Api::GuildVoice && type != Api::GuildCategory) {
         this->setStyleSheet(clickedStyleSheet);
+        this->name->setStyleSheet("color: #FFF;");
         clicked = true;
     }
 }
@@ -115,6 +119,7 @@ void GuildChannelWidget::enterEvent(QEvent *)
     // Mouse hover : change the stylesheet
     if (!clicked) {
         this->setStyleSheet(hoverStyleSheet);
+        this->name->setStyleSheet("color: #DCDDDE;");
     }
 }
 
@@ -124,6 +129,7 @@ void GuildChannelWidget::leaveEvent(QEvent *)
     if (!clicked) {
         this->setStyleSheet("color: #8E9297;"
                             "background-color: none;");
+        this->name->setStyleSheet("color: #8E9297;");
     }
 }
 
