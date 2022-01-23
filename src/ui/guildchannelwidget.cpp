@@ -52,23 +52,25 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     QHBoxLayout *layout = new QHBoxLayout(container);
 
     // Create the icon
-    if (type != Api::GuildCategory) {
-        icon = new QLabel(this);
-        icon->setPixmap(QPixmap(std::string("res/images/svg/guild-channel-icon" + iconName + ".svg").c_str()));
-        icon->setFixedSize(32, 32);
-        icon->setStyleSheet("color: #8E9297");
-    }
+    icon = new QLabel(this);
+    icon->setPixmap(QPixmap(std::string("res/images/svg/guild-channel-icon" + iconName + ".svg").c_str()));
+    icon->setFixedSize(32, 32);
+    icon->setStyleSheet("color: #8E9297");
 
     // Create the name label
     name = new QLabel((*guildChannel.name).c_str(), this);
     name->setStyleSheet("color: #8E9297");
 
     // Add widgets to layout and style it
-    if (type != Api::GuildCategory) {
+    if (type == Api::GuildCategory) {
+        layout->addWidget(name, Qt::AlignLeft);
         layout->addWidget(icon, Qt::AlignLeft);
     }
+    else {
+        layout->addWidget(icon, Qt::AlignLeft);
+        layout->addWidget(name, Qt::AlignLeft);
+    }
 
-    layout->addWidget(name, Qt::AlignLeft);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
