@@ -211,7 +211,7 @@ void RessourceManager::getPrivateChannels(std::function<void(void *)> callback)
 
 void RessourceManager::getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit, bool newMessages)
 {
-    if (messages->find(channelId) == messages->end()) {
+    if (messages->find(channelId) == messages->end() || (*messages)[channelId].size() == 0) {
         requester->getMessages([&, callback](void *messagesPtr) {
             (*messages)[channelId] = *reinterpret_cast<std::vector<Message *> *>(messagesPtr);
             callback(messagesPtr);

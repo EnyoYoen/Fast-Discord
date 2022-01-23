@@ -62,15 +62,8 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     name->setStyleSheet("color: #8E9297");
 
     // Add widgets to layout and style it
-    if (type == Api::GuildCategory) {
-        layout->addWidget(name, Qt::AlignLeft);
-        layout->addWidget(icon, Qt::AlignLeft);
-    }
-    else {
-        layout->addWidget(icon, Qt::AlignLeft);
-        layout->addWidget(name, Qt::AlignLeft);
-    }
-
+    layout->addWidget(icon, Qt::AlignLeft);
+    layout->addWidget(name, Qt::AlignLeft);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 

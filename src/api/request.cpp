@@ -233,10 +233,10 @@ void Requester::requestApi(const RequestParameters &parameters)
 void Requester::removeImageRequestCallbacks()
 {
     lock.lock();
-    requestsToCheck = currentRequestsNumber + requestQueue.size();
-
+    requestsToCheck = currentRequestsNumber;
     for (unsigned int i = requestQueue.size() ; i > 0 ; i--) {
         RequestParameters temp = requestQueue.front();
+        requestQueue.pop();
         if (temp.type != GetImage) requestQueue.push(temp);
     }
     lock.unlock();
