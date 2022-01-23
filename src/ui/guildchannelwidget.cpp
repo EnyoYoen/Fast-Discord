@@ -100,14 +100,16 @@ void GuildChannelWidget::unclicked()
         clicked = false;
         this->setStyleSheet("color: #8E9297;"
                             "background-color: none;");
+        this->name->setStyleSheet("color: #8E9297;");
     }
 }
 
 void GuildChannelWidget::mousePressEvent(QMouseEvent *)
 {
     // Widget clicked : change the stylesheet
-    if (!clicked && type != Api::GuildVoice) {
+    if (!clicked && type != Api::GuildVoice && type != Api::GuildCategory) {
         this->setStyleSheet(clickedStyleSheet);
+        this->name->setStyleSheet("color: #FFF;");
         clicked = true;
     }
 }
@@ -117,6 +119,7 @@ void GuildChannelWidget::enterEvent(QEvent *)
     // Mouse hover : change the stylesheet
     if (!clicked) {
         this->setStyleSheet(hoverStyleSheet);
+        this->name->setStyleSheet("color: #DCDDDE;");
     }
 }
 
@@ -126,6 +129,7 @@ void GuildChannelWidget::leaveEvent(QEvent *)
     if (!clicked) {
         this->setStyleSheet("color: #8E9297;"
                             "background-color: none;");
+        this->name->setStyleSheet("color: #8E9297;");
     }
 }
 
