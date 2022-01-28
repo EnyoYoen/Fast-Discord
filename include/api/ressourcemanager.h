@@ -32,6 +32,10 @@ public:
     void getUser(std::function<void(void *)> callback, const std::string& userId);
     void getPresences(std::function<void(void *)> callback);
 
+    std::vector<Api::Message *> getAllMessages(std::string& channelId);
+    bool hasMessages(const std::string& channelId);
+    void pushFrontMessage(const std::string& channelId, Api::Message *message);
+
     Requester *requester;
 
 signals:

@@ -8,67 +8,20 @@
 
 namespace Ui {
 
-MessageArea::MessageArea(Api::RessourceManager *rmp, const std::vector<Api::Message *>& messages, QWidget */*parent*/)
+MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget */*parent*/)
     : QScrollArea(/*parent*/) // TODO stylesheet bug
 {
     // Set the ressource manager
     rm = rmp;
     emitScrollBarHigh = true;
+    stopped = false;
+
+    messageCreateThread = QThread::create([this](){loop();});
+    messageCreateThread->start();
 
     // Create widgets
-    QWidget *messageBox = new QWidget(this);
+    messageBox = new QWidget(this);
     messageLayout = new QVBoxLayout(messageBox);
-    QWidget *spacer = new QWidget(messageBox);
-    spacer->setFixedHeight(22);
-
-    // Don't do some things if there are no messages
-    if (messages.size() > 0) {
-        // Create the first message widget and style it
-        MessageWidget *firstMessage = new MessageWidget(rm, *messages.back(), true, false, this);
-        firstMessage->setContentsMargins(0, 0, 0, 0);
-
-        // Add it to the layout
-        messageLayout->addWidget(firstMessage);
-
-        // Loop through the messages starting by the end (the most recents)
-        for (int i = messages.size() - 2; i >= 0 ; i--) {
-            // Get date and time of the messages
-            QDateTime firstDateTime = QDateTime::fromString(QString((*messages[i + 1]->timestamp).c_str()), Qt::ISODate);
-            QDateTime secondDateTime = QDateTime::fromString(QString((*messages[i]->timestamp).c_str()), Qt::ISODate);
-
-            // Determine if we need a separator (messages not sent the same day)
-            bool separator;
-            if (firstDateTime.date() != secondDateTime.date()) {
-                // The messages are not sent on the same day
-                messageLayout->addWidget(new MessageSeparator(secondDateTime.date(), this));
-                separator = true;
-            } else {
-                // The messages are sent on the same day
-                separator = false;
-            }
-
-            // Determine If the two messages are grouped
-
-            // Get seconds since epoch of the messages
-            qint64 firstTime = firstDateTime.toSecsSinceEpoch();
-            qint64 secondTime = secondDateTime.toSecsSinceEpoch();
-            bool first;
-            // If the messages are separated by more than 7.30 minutes
-            // or the authors are not the same
-            if (secondTime - firstTime > 450 || *messages[i + 1]->author->id != *messages[i]->author->id) {
-                // The message is not grouped to another message
-                first = true;
-            } else {
-                // The message is grouped to another message
-                first = false;
-            }
-
-            // Create the message and add it to the layout
-            messageLayout->addWidget(new MessageWidget(rm, *messages[i], first, separator, this));
-        }
-        messageLayout->addWidget(spacer);
-        messageLayout->insertStretch(0);
-    }
 
     // Style the layout
     messageLayout->setSpacing(0);
@@ -86,43 +39,67 @@ MessageArea::MessageArea(Api::RessourceManager *rmp, const std::vector<Api::Mess
 
     QObject::connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(scrollBarMoved(int)));
     QObject::connect(this->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(changeSliderValue(int, int)));
+    QObject::connect(this, SIGNAL(messageCreate(Api::Message *, int, bool, bool, bool)), this, SLOT(displayMessage(Api::Message *, int, bool, bool, bool)));
+    QObject::connect(this, SIGNAL(separatorCreate(const QDate&, bool)), this, SLOT(displaySeparator(const QDate&, bool)));
+    QObject::connect(this, SIGNAL(messagesEnd()), this, SLOT(scrollBottom()));
 }
 
-void MessageArea::addMessage(const Api::Message& newMessage, const Api::Message& lastMessage)
+void MessageArea::setMessages(const std::vector<Api::Message *>& messages)
 {
-    // Get date and time of the messages
-    QDateTime firstDateTime = QDateTime::fromString(QString((*lastMessage.timestamp).c_str()), Qt::ISODate);
-    QDateTime secondDateTime = QDateTime::fromString(QString((*newMessage.timestamp).c_str()), Qt::ISODate);
+    this->show();
 
-    // Determine if we need a separator (messages not sent the same day)
-    bool separator;
-    if (firstDateTime.date() != secondDateTime.date()) {
-        // The messages are not sent on the same day
-        messageLayout->insertWidget(messageLayout->count() - 1, new MessageSeparator(secondDateTime.date(), this));
-        separator = true;
-    } else {
-        // The messages are sent on the same day
-        separator = false;
+    if (messages.size() > 0) {
+        lock.lock();
+        // Loop through the messages starting by the end (the most recents)
+        messageQueue.push(QueuedMessage{messages.back(), nullptr, false});
+        for (int i = messages.size() - 2; i >= 1 ; i--) {
+            messageQueue.push(QueuedMessage{messages[i], messages[i + 1], false});
+        }
+        messageQueue.push(QueuedMessage{messages[0], messages[1], true});
+        lock.unlock();
+        messageWaiter.notify_one();
+
+        QWidget *spacer = new QWidget(messageBox);
+        spacer->setFixedHeight(22);
+        messageLayout->addWidget(spacer);
+        messageLayout->insertStretch(0);
     }
+}
 
-    // Determine If the two messages are grouped
+void MessageArea::addMessage(Api::Message *newMessage, Api::Message *lastMessage)
+{
+    lock.lock();
+    messageQueue.push(QueuedMessage{newMessage, lastMessage, false});
+    lock.unlock();
+    messageWaiter.notify_one();
+    scrollBottom();
+}
 
-    // Get seconds since epoch of the messages
-    qint64 firstTime = firstDateTime.toSecsSinceEpoch();
-    qint64 secondTime = secondDateTime.toSecsSinceEpoch();
-    bool first;
-    // If the messages are separated by more than 7.30 minutes
-    // or the authors are not the same
-    if (secondTime - firstTime > 420 || *lastMessage.author->id != *newMessage.author->id) {
-        first = true;
-    } else {
-        first = false;
-    }
-
-    // Create the message and add it to the layout
-    messageLayout->insertWidget(messageLayout->count() - 1, new MessageWidget(rm, newMessage, first, separator, this));
+void MessageArea::scrollBottom()
+{
+    // Scroll to the bottom
     QScrollBar *vsb = verticalScrollBar();
     vsb->setValue(vsb->maximum());
+}
+
+void MessageArea::clear()
+{
+    // Remove all items from the layout
+    if (messageLayout->count() > 0) {
+        QLayoutItem *item;
+        while ((item = messageLayout->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+    }
+
+    lock.lock();
+    for (unsigned int i = 0; i < messageQueue.size() ; i++) {
+        messageQueue.pop();
+    }
+    lock.unlock();
+
+    this->hide();
 }
 
 void MessageArea::addMessages(const std::vector<Api::Message *>& messages)
@@ -130,39 +107,13 @@ void MessageArea::addMessages(const std::vector<Api::Message *>& messages)
     int size = messages.size() - 1;
     if (size == -1) return;
 
-    for (int i = size ; i > 1; i--) {
-        // Get date and time of the messages
-        QDateTime firstDateTime = QDateTime::fromString(QString((*messages[size - i + 1]->timestamp).c_str()), Qt::ISODate);
-        QDateTime secondDateTime = QDateTime::fromString(QString((*messages[size - i]->timestamp).c_str()), Qt::ISODate);
-
-        // Determine if we need a separator (messages not sent the same day)
-        bool separator;
-        if (firstDateTime.date() != secondDateTime.date()) {
-            // The messages are not sent on the same day
-            messageLayout->insertWidget(0, new MessageSeparator(secondDateTime.date(), this));
-            separator = true;
-        } else {
-            // The messages are sent on the same day
-            separator = false;
-        }
-
-        // Determine If the two messages are grouped
-
-        // Get seconds since epoch of the messages
-        qint64 firstTime = firstDateTime.toSecsSinceEpoch();
-        qint64 secondTime = secondDateTime.toSecsSinceEpoch();
-        bool first;
-        // If the messages are separated by more than 7.30 minutes
-        // or the authors are not the same
-        if (secondTime - firstTime > 420 || *messages[size - i + 1]->author->id != *messages[size - i]->author->id) {
-            first = true;
-        } else {
-            first = false;
-        }
-
-        // Create the message and add it to the layout
-        messageLayout->insertWidget(separator ? 1 : 0, new MessageWidget(rm, *messages[size - i], first, separator, this));
+    lock.lock();
+    messageQueue.push(QueuedMessage{messages.back(), nullptr, false});
+    for (int i = size; i > 1 ; i--) {
+        messageQueue.push(QueuedMessage{messages[size - i + 1], messages[size - i], false});
     }
+    lock.unlock();
+    messageWaiter.notify_one();
 }
 
 void MessageArea::changeSliderValue(int min, int max)
@@ -186,6 +137,93 @@ void MessageArea::scrollBarMoved(int value)
         emitScrollBarHigh = false;
         emit scrollbarHigh();
     }
+}
+
+void MessageArea::loop()
+{
+    while (!stopped) {
+        if (messageQueue.size() > 0) {
+            do {
+                lock.lock();
+                QueuedMessage queuedMessage = messageQueue.front();
+                messageQueue.pop();
+                lock.unlock();
+                Api::Message *message = queuedMessage.message;
+
+                if (queuedMessage.lastMessage == nullptr) {
+                    emit messageCreate(message, 0, false, true, false);
+                } else {
+                    Api::Message *lastMessage = queuedMessage.lastMessage;
+
+                    // Get date and time of the messages
+                    QDateTime firstDateTime = QDateTime::fromString(QString((*lastMessage->timestamp).c_str()), Qt::ISODate);
+                    QDateTime secondDateTime = QDateTime::fromString(QString((*message->timestamp).c_str()), Qt::ISODate);
+
+                    // Determine if we need a separator (messages not sent the same day)
+                    bool separator;
+                    if (firstDateTime.date() != secondDateTime.date()) {
+                        // The messages are not sent on the same day
+                        emit separatorCreate(secondDateTime.date(), false);
+                        separator = true;
+                    } else {
+                        // The messages are sent on the same day
+                        separator = false;
+                    }
+
+                    // Determine If the two messages are grouped
+
+                    // Get seconds since epoch of the messages
+                    qint64 firstTime = firstDateTime.toSecsSinceEpoch();
+                    qint64 secondTime = secondDateTime.toSecsSinceEpoch();
+                    bool first;
+                    // If the messages are separated by more than 7.30 minutes
+                    // or the authors are not the same
+                    if (secondTime - firstTime > 450 || *lastMessage->author->id != *message->author->id) {
+                        // The message is not grouped to another message
+                        first = true;
+                    } else {
+                        // The message is grouped to another message
+                        first = false;
+                    }
+
+                    // Create the message and add it to the layout
+                    emit messageCreate(message, 0, false, first, separator);
+                }
+
+                if (queuedMessage.end)
+                    emit messagesEnd();
+            } while (!messageQueue.empty());
+        } else {
+            std::unique_lock<std::mutex> uniqueLock(lock);
+            messageWaiter.wait(uniqueLock);
+        }
+    }
+}
+
+void MessageArea::displayMessage(Api::Message *message, int pos, bool top, bool first, bool separator)
+{
+    if (top) {
+        messageLayout->insertWidget(0, new MessageWidget(rm, message, first, separator, this));
+    } else {
+        if (pos != 0)
+            messageLayout->insertWidget(pos, new MessageWidget(rm, message, first, separator, this));
+        else
+            messageLayout->insertWidget(messageLayout->count() - 1, new MessageWidget(rm, message, first, separator, this));
+    }
+}
+
+void MessageArea::displaySeparator(const QDate& date, bool top)
+{
+    if (top)
+        messageLayout->insertWidget(0, new MessageSeparator(date, this));
+    else
+        messageLayout->insertWidget(messageLayout->count() - 1, new MessageSeparator(date, this));
+}
+
+MessageArea::~MessageArea()
+{
+    stopped = true;
+    messageWaiter.notify_one();
 }
 
 } // namespace Ui

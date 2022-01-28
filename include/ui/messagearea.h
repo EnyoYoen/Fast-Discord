@@ -6,8 +6,18 @@
 #include <QShowEvent>
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <QThread>
 
 #include <vector>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+
+struct QueuedMessage {
+    Api::Message *message;
+    Api::Message *lastMessage;
+    bool end;
+};
 
 namespace Ui {
 
@@ -16,27 +26,44 @@ class MessageArea : public QScrollArea
 {
     Q_OBJECT
 public:
-    MessageArea(Api::RessourceManager *rm, const std::vector<Api::Message *>& messages, QWidget *parent);
-    // Add a new message
-    void addMessage(const Api::Message& newMessage, const Api::Message& lastMessage);
+    MessageArea(Api::RessourceManager *rm, QWidget *parent);
+    ~MessageArea();
+
+    // Add messages
+    void setMessages(const std::vector<Api::Message *>& messages);
+    void addMessage(Api::Message *newMessage, Api::Message *lastMessage);
+    void clear();
 
 signals:
+    void messagesEnd();
     void scrollbarHigh();
+    void separatorCreate(const QDate&, bool);
+    void messageCreate(Api::Message *, int, bool, bool, bool);
 
 public slots:
     void addMessages(const std::vector<Api::Message *>& messages);
 
 private slots:
+    void scrollBottom();
     void scrollBarMoved(int value);
     void changeSliderValue(int min, int max);
+    void displaySeparator(const QDate& date, bool top);
+    void displayMessage(Api::Message *message, int pos, bool top, bool first, bool separator);
 
 private:
-    // The scroll to the very end
-    void showEvent(QShowEvent *event) override;
+    void showEvent(QShowEvent *event) override; // To scroll to the very end
+    void loop();
 
+    QWidget *messageBox;
     QVBoxLayout *messageLayout; // The layout of this widget
 
     Api::RessourceManager *rm;  // To request the API
+
+    QThread *messageCreateThread;
+    std::queue<QueuedMessage> messageQueue;
+    std::mutex lock;
+    std::condition_variable messageWaiter;
+    bool stopped;
 
     int tempScrollBarValue;
     int tempScrollBarRange;

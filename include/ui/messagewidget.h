@@ -15,7 +15,7 @@ class MessageWidget : public QWidget
 {
     Q_OBJECT
 public:
-    MessageWidget(Api::RessourceManager *rm, const Api::Message& message, bool isFirst, bool separatorBefore, QWidget *parent);
+    MessageWidget(Api::RessourceManager *rm, Api::Message *message, bool isFirst, bool separatorBefore, QWidget *parent);
 
     Api::RessourceManager *rm; // To request the API
 

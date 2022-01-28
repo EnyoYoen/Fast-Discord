@@ -216,6 +216,8 @@ void RessourceManager::getMessages(std::function<void(void *)> callback, const s
             (*messages)[channelId] = *reinterpret_cast<std::vector<Message *> *>(messagesPtr);
             callback(messagesPtr);
         }, channelId, "", limit);
+    } else if ((*messages)[channelId].size() < 50) {
+        callback(reinterpret_cast<void *>(&(*messages)[channelId]));
     } else if ((*messages)[channelId].size() < limit) {
         requester->getMessages([&, callback](void *messagesPtr) {
             std::vector<Message *> messagesVector = *reinterpret_cast<std::vector<Message *> *>(messagesPtr);
@@ -285,6 +287,23 @@ void RessourceManager::getPresences(std::function<void(void *)> callback)
 {
     callback(reinterpret_cast<void *>(presences));
 }
+
+
+std::vector<Api::Message *> RessourceManager::getAllMessages(std::string& channelId)
+{
+    return (*messages)[channelId];
+}
+
+bool RessourceManager::hasMessages(const std::string& channelId)
+{
+    return messages->find(channelId) == messages->end();
+}
+
+void RessourceManager::pushFrontMessage(const std::string& channelId, Api::Message *message)
+{
+    (*messages)[channelId].insert((*messages)[channelId].cbegin(), message);
+}
+
 
 RessourceManager::~RessourceManager()
 {

@@ -42,7 +42,6 @@ MessageComponent::~MessageComponent()
 
 Message::~Message()
 {
-    //Putting delete for each field leads to a double free error;delete I don't know why
     delete application;
     delete author;
     delete activity;

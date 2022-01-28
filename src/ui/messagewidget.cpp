@@ -13,7 +13,7 @@
 
 namespace Ui {
 
-MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message& message, bool isFirstp, bool separatorBefore, QWidget *parent)
+MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, bool isFirstp, bool separatorBefore, QWidget *parent)
     : QWidget(parent)
 {
     // Attributes initialization
@@ -30,7 +30,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message& mes
     // Process the timestamp to a nicer format
 
     // Get the date and time of the message
-    QDateTime dateTime = QDateTime::fromString(QString((*message.timestamp).c_str()), Qt::ISODate).toLocalTime();
+    QDateTime dateTime = QDateTime::fromString(QString((*message->timestamp).c_str()), Qt::ISODate).toLocalTime();
     // Get the hours and minutes
     int hour = dateTime.time().hour();
     int minute = dateTime.time().minute();
@@ -45,7 +45,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message& mes
         // The message is not grouped to another message
 
         // Variable creation
-        Api::User& author = *message.author;
+        Api::User& author = *message->author;
         std::string *avatarId = author.avatar;
 
         // Get the icon of the message
@@ -121,7 +121,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message& mes
     iconContainer->setLayout(iconLayout);
 
     // Create and style the content label
-    content = new MarkdownLabel(*message.content, rm, this);
+    content = new MarkdownLabel(*message->content, rm, this);
 
     // Style the data layout
     dataLayout->setContentsMargins(0, 0, 0, 0);

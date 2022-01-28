@@ -14,6 +14,11 @@ RightColumn::RightColumn(Api::RessourceManager *rmp, Api::Client *clientp, QWidg
     // Attribute initialization
     rm = rmp;
     client = clientp;
+    placeholder = true;
+    messagesLayout = nullptr;
+
+    // Create the message area
+    messageArea = new MessageArea(rm, this);
 
     // Create and style the layout
     layout = new QHBoxLayout(this);
@@ -34,9 +39,12 @@ RightColumn::RightColumn(Api::RessourceManager *rmp, Api::Client *clientp, QWidg
 
 void RightColumn::setMessages(std::vector<Api::Message *> *messages)
 {
-    messagesLayout->takeAt(0);
-    channelsMessages[currentOpenedChannel] = messages;
-    messageArea = new MessageArea(rm, *messages, this);
+    /*for (unsigned int i = 0 ; i < messages->size() ; i++) {
+        rm->pushFrontMessage(currentOpenedChannel, (*messages)[i]);
+    }*/
+
+    messageArea->clear();
+    messageArea->setMessages(*messages);
     messagesLayout->insertWidget(0, messageArea);
 
     QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
@@ -73,17 +81,18 @@ void RightColumn::clean()
 {
     rm->requester->removeImageRequestCallbacks();
 
-    // Remove all items from the layout
-    QLayoutItem *item;
-    while ((item = layout->takeAt(0)) != nullptr) {
-        delete item->widget();
-        delete item;
+    if (messagesLayout != nullptr)
+        messagesLayout->removeItem(messagesLayout->itemAt(0));
+    messageArea->clear();
+
+    for (unsigned int i = 0 ; i < 10 ; i++) {
+        layout->removeItem(layout->itemAt(i));
     }
 
-    // And add a placeholder
-    QWidget *placeholder = new QWidget(this);
-    placeholder->setStyleSheet("background-color: #36393F;");
-    layout->addWidget(placeholder);
+    // Add a placeholder
+    QWidget *placeholderWidget = new QWidget(this);
+    placeholderWidget->setStyleSheet("background-color: #36393F;");
+    layout->addWidget(placeholderWidget);
 }
 
 void RightColumn::openGuildChannel(const std::string& guildId, const std::string& id)
@@ -103,30 +112,33 @@ void RightColumn::openPrivateChannel(const std::string& id)
 void RightColumn::openChannel(const std::string& channelId, int type)
 {
     if (type != Api::GuildVoice) {
-        this->clean(); // Clean the column
+        rm->requester->removeImageRequestCallbacks();
+        messageArea->clear();
+        for (unsigned int i = 0 ; i < 10 ; i++) {
+            layout->removeItem(layout->itemAt(i));
+        }
 
         // Create some widgets
         QWidget *messagesContainer = new QWidget(this);
         messagesLayout = new QVBoxLayout(messagesContainer);
 
-        // Get the messages of the channel
-        std::vector<Api::Message *> *messages;
+        // Change the current opened channel ID
+        currentOpenedChannel = channelId;
 
-        if (channelsMessages.find(channelId) == channelsMessages.end()) {
+        // Get the messages of the channel
+        if (!rm->hasMessages(channelId)) {
             QWidget *messageAreaPlaceholder = new QWidget(messagesContainer);
             messagesLayout->addWidget(messageAreaPlaceholder);
             rm->getMessages([this](void *messages) {emit messagesReceived(static_cast<std::vector<Api::Message *> *>(messages));}, channelId, 50, false);
         } else {
-            messages = channelsMessages[channelId];
-            messageArea = new MessageArea(rm, *messages, messagesContainer);
-            messagesLayout->addWidget(messageArea);
+            rm->getMessages([this](void *messagePtr) {
+                std::vector<Api::Message *> *messages = reinterpret_cast<std::vector<Api::Message *> *>(messagePtr);
+                messageArea->setMessages(*messages);
 
-            QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
-            QObject::connect(this, SIGNAL(moreMessagesReceived(const std::vector<Api::Message *>&)), messageArea, SLOT(addMessages(const std::vector<Api::Message *>&)));
+                QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
+                QObject::connect(this, SIGNAL(moreMessagesReceived(const std::vector<Api::Message *>&)), messageArea, SLOT(addMessages(const std::vector<Api::Message *>&)));
+            }, channelId, 50, false);
         }
-
-        // Change the current opened channel ID
-        currentOpenedChannel = channelId;
 
         // Create all the widgets
         QWidget *inputContainer = new QWidget(messagesContainer);
@@ -157,6 +169,7 @@ void RightColumn::openChannel(const std::string& channelId, int type)
         typingLabel->setStyleSheet("color: #DCDDDE");
 
         // Add widgets to the message layout and style it
+        messagesLayout->addWidget(messageArea);
         messagesLayout->addWidget(inputContainer);
         messagesLayout->addWidget(typingLabel);
         messagesLayout->setSpacing(0);
@@ -166,21 +179,21 @@ void RightColumn::openChannel(const std::string& channelId, int type)
         layout->addWidget(messagesContainer);
         layout->setContentsMargins(0, 0, 0, 0);
 
-        if (type != Api::DM && type != Api::GroupDM) {
+        /*if (type != Api::DM && type != Api::GroupDM) {
             // Guild channel
 
             // Create the widgets of the user list
-            QScrollArea *userList = new QScrollArea(this);
-            //QVBoxLayout *userListLayout = new QVBoxLayout(userList);
+            QScrollArea *userListWidget = new QScrollArea(this);
+            QVBoxLayout *userListLayout = new QVBoxLayout(userList);
 
             // Style the user list
-            userList->setFixedWidth(240);
-            userList->setStyleSheet("border: none;"
-                                    "background-color: #2F3136");
+            userListWidget->setFixedWidth(240);
+            userListWidget->setStyleSheet("border: none;"
+                                          "background-color: #2F3136");
 
             // Add it to the layout
-            layout->addWidget(userList);
-        }
+            layout->addWidget(userListWidget);
+        }*/
 
         // Connect signals to slots
         QObject::connect(textInput, SIGNAL(returnPressed(std::string)), this, SLOT(sendMessage(const std::string&)));
@@ -192,8 +205,10 @@ void RightColumn::addMessage(const Api::Message& message)
 {
     // Add the message if it belongs to this channels
     if (*message.channelId == currentOpenedChannel) {
-        std::vector<Api::Message *> channelMessages = *channelsMessages[currentOpenedChannel];
-        messageArea->addMessage(message, *(*channelsMessages[currentOpenedChannel])[0]);
+        rm->getMessages([this, message](void *messagePtr) {
+            std::vector<Api::Message *> channelMessages = *reinterpret_cast<std::vector<Api::Message *> *>(messagePtr);
+            messageArea->addMessage(const_cast<Api::Message *>(&message), channelMessages[0]);
+        }, currentOpenedChannel, 1, false);
     }
 }
 
@@ -224,13 +239,13 @@ void RightColumn::sendMessage(const std::string& content)
     rm->requester->sendMessage(content, currentOpenedChannel);
     std::string messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
     Api::Message *newMessage = new Api::Message {nullptr, new Api::User{new std::string(client->username->c_str()), new std::string(""), new std::string(client->avatar->c_str()), new std::string(""), new std::string(""), new std::string(client->id->c_str()), -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, new std::string(""), new std::string(""), new std::string(""), new std::string(content), new std::string(messageTimestamp), new std::string(""), new std::string(""), new std::string(""), new std::string(""), -1, -1, -1, -1, false, false, false};
-    messageArea->addMessage(*newMessage, *(*channelsMessages[currentOpenedChannel])[0]);
-    channelsMessages[currentOpenedChannel]->insert(channelsMessages[currentOpenedChannel]->cbegin(), newMessage);
+    this->addMessage(*newMessage);
+    rm->pushFrontMessage(currentOpenedChannel, newMessage);
 }
 
 void RightColumn::loadMoreMessages()
 {
-   if (channelsMessages[currentOpenedChannel]->size() >= 50)
+   if (rm->getAllMessages(currentOpenedChannel).size() >= 50)
        rm->getMessages([this](void *messages){emit moreMessagesReceived(*static_cast<std::vector<Api::Message *> *>(messages));}, currentOpenedChannel, 50, true);
 }
 

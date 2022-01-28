@@ -52,11 +52,9 @@ private:
     QVBoxLayout *messagesLayout;
     MessageArea *messageArea;
     QLabel      *typingLabel;
+    bool         placeholder;
 
     Api::RessourceManager *rm; // To request the API
-
-    // Storing messages that we already gathered
-    std::map<std::string, std::vector<Api::Message *> *> channelsMessages;
 
     Api::Client *client;              // Store the actual user
     std::string currentOpenedChannel; // Current channel ID
