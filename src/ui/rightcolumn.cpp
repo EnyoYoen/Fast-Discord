@@ -35,20 +35,15 @@ RightColumn::RightColumn(Api::RessourceManager *rmp, Api::Client *clientp, QWidg
 
     QObject::connect(this, SIGNAL(messagesReceived(std::vector<Api::Message *> *)), this, SLOT(setMessages(std::vector<Api::Message *> *)));
     QObject::connect(this, SIGNAL(userTypingReceived(const Api::User *)), this, SLOT(setUserTyping(const Api::User *)));
+    QObject::connect(this, SIGNAL(moreMessagesReceived(const std::vector<Api::Message *>&)), messageArea, SLOT(addMessages(const std::vector<Api::Message *>&)));
+    QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
 }
 
 void RightColumn::setMessages(std::vector<Api::Message *> *messages)
 {
-    /*for (unsigned int i = 0 ; i < messages->size() ; i++) {
-        rm->pushFrontMessage(currentOpenedChannel, (*messages)[i]);
-    }*/
-
     messageArea->clear();
     messageArea->setMessages(*messages);
     messagesLayout->insertWidget(0, messageArea);
-
-    QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
-    QObject::connect(this, SIGNAL(moreMessagesReceived(const std::vector<Api::Message *>&)), messageArea, SLOT(addMessages(const std::vector<Api::Message *>&)));
 }
 
 void RightColumn::setUserTyping(const Api::User *user)
@@ -79,7 +74,7 @@ void RightColumn::setUserTyping(const Api::User *user)
 
 void RightColumn::clean()
 {
-    rm->requester->removeImageRequestCallbacks();
+    rm->requester->removeImageRequests();
 
     if (messagesLayout != nullptr)
         messagesLayout->removeItem(messagesLayout->itemAt(0));
@@ -112,7 +107,7 @@ void RightColumn::openPrivateChannel(const std::string& id)
 void RightColumn::openChannel(const std::string& channelId, int type)
 {
     if (type != Api::GuildVoice) {
-        rm->requester->removeImageRequestCallbacks();
+        rm->requester->removeImageRequests();
         messageArea->clear();
         for (unsigned int i = 0 ; i < 10 ; i++) {
             layout->removeItem(layout->itemAt(i));
@@ -134,9 +129,6 @@ void RightColumn::openChannel(const std::string& channelId, int type)
             rm->getMessages([this](void *messagePtr) {
                 std::vector<Api::Message *> *messages = reinterpret_cast<std::vector<Api::Message *> *>(messagePtr);
                 messageArea->setMessages(*messages);
-
-                QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
-                QObject::connect(this, SIGNAL(moreMessagesReceived(const std::vector<Api::Message *>&)), messageArea, SLOT(addMessages(const std::vector<Api::Message *>&)));
             }, channelId, 50, false);
         }
 
@@ -245,8 +237,9 @@ void RightColumn::sendMessage(const std::string& content)
 
 void RightColumn::loadMoreMessages()
 {
-   if (rm->getAllMessages(currentOpenedChannel).size() >= 50)
-       rm->getMessages([this](void *messages){emit moreMessagesReceived(*static_cast<std::vector<Api::Message *> *>(messages));}, currentOpenedChannel, 50, true);
+   rm->getMessages([this](void *messages){
+       emit moreMessagesReceived(*static_cast<std::vector<Api::Message *> *>(messages));
+   }, currentOpenedChannel, 50, true);
 }
 
 } // namespace Ui

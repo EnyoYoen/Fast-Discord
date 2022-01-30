@@ -211,7 +211,14 @@ void RessourceManager::getPrivateChannels(std::function<void(void *)> callback)
 
 void RessourceManager::getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit, bool newMessages)
 {
-    if (messages->find(channelId) == messages->end() || (*messages)[channelId].size() == 0) {
+    if (newMessages && (*messages)[channelId].size() >= 50) {
+        requester->getMessages([&, callback](void *messagesPtr) {
+            std::vector<Message *> messagesVector = *reinterpret_cast<std::vector<Message *> *>(messagesPtr);
+            for (unsigned int i = 0 ; i < messagesVector.size() ; i++)
+                (*messages)[channelId].push_back(messagesVector[i]);
+            callback(messagesPtr);
+        }, channelId, *(*messages)[channelId].back()->id, limit);
+    } else if (messages->find(channelId) == messages->end() || (*messages)[channelId].size() == 0) {
         requester->getMessages([&, callback](void *messagesPtr) {
             (*messages)[channelId] = *reinterpret_cast<std::vector<Message *> *>(messagesPtr);
             callback(messagesPtr);
@@ -225,13 +232,6 @@ void RessourceManager::getMessages(std::function<void(void *)> callback, const s
                 (*messages)[channelId].push_back(messagesVector[i]);
             callback(reinterpret_cast<void *>(&(*messages)[channelId]));
         }, channelId, *(*messages)[channelId].back()->id, limit - (*messages)[channelId].size());
-    } else if (newMessages) {
-        requester->getMessages([&, callback](void *messagesPtr) {
-            std::vector<Message *> messagesVector = *reinterpret_cast<std::vector<Message *> *>(messagesPtr);
-            for (unsigned int i = 0 ; i < messagesVector.size() ; i++)
-                (*messages)[channelId].push_back(messagesVector[i]);
-            callback(messagesPtr);
-        }, channelId, *(*messages)[channelId].back()->id, limit);
     } else {
         callback(reinterpret_cast<void *>(&(*messages)[channelId]));
     }

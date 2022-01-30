@@ -74,7 +74,7 @@ public:
 
     // Function that request the API
     void requestApi(const RequestParameters& parameters);
-    void removeImageRequestCallbacks();
+    void removeImageRequests();
 
     // Functions that request the API to retrieve data
     void getGuilds(std::function<void(void *)> callback);

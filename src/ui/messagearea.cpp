@@ -13,6 +13,7 @@ MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget */*parent*/)
 {
     // Set the ressource manager
     rm = rmp;
+    timestamp = -1;
     emitScrollBarHigh = true;
     stopped = false;
 
@@ -39,7 +40,7 @@ MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget */*parent*/)
 
     QObject::connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(scrollBarMoved(int)));
     QObject::connect(this->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(changeSliderValue(int, int)));
-    QObject::connect(this, SIGNAL(messageCreate(Api::Message *, int, bool, bool, bool)), this, SLOT(displayMessage(Api::Message *, int, bool, bool, bool)));
+    QObject::connect(this, SIGNAL(messageCreate(Api::Message *, bool, bool, bool)), this, SLOT(displayMessage(Api::Message *, bool, bool, bool)));
     QObject::connect(this, SIGNAL(separatorCreate(const QDate&, bool)), this, SLOT(displaySeparator(const QDate&, bool)));
     QObject::connect(this, SIGNAL(messagesEnd()), this, SLOT(scrollBottom()));
 }
@@ -51,11 +52,11 @@ void MessageArea::setMessages(const std::vector<Api::Message *>& messages)
     if (messages.size() > 0) {
         lock.lock();
         // Loop through the messages starting by the end (the most recents)
-        messageQueue.push(QueuedMessage{messages.back(), nullptr, false});
+        messageQueue.push(QueuedMessage{messages.back(), nullptr, false, false});
         for (int i = messages.size() - 2; i >= 1 ; i--) {
-            messageQueue.push(QueuedMessage{messages[i], messages[i + 1], false});
+            messageQueue.push(QueuedMessage{messages[i], messages[i + 1], false, false});
         }
-        messageQueue.push(QueuedMessage{messages[0], messages[1], true});
+        messageQueue.push(QueuedMessage{messages[0], messages[1], true, false});
         lock.unlock();
         messageWaiter.notify_one();
 
@@ -69,7 +70,7 @@ void MessageArea::setMessages(const std::vector<Api::Message *>& messages)
 void MessageArea::addMessage(Api::Message *newMessage, Api::Message *lastMessage)
 {
     lock.lock();
-    messageQueue.push(QueuedMessage{newMessage, lastMessage, false});
+    messageQueue.push(QueuedMessage{newMessage, lastMessage, false, false});
     lock.unlock();
     messageWaiter.notify_one();
     scrollBottom();
@@ -104,21 +105,22 @@ void MessageArea::clear()
 
 void MessageArea::addMessages(const std::vector<Api::Message *>& messages)
 {
-    int size = messages.size() - 1;
-    if (size == -1) return;
-
-    lock.lock();
-    messageQueue.push(QueuedMessage{messages.back(), nullptr, false});
-    for (int i = size; i > 1 ; i--) {
-        messageQueue.push(QueuedMessage{messages[size - i + 1], messages[size - i], false});
+    int size = messages.size();
+    if (size != 0) {
+        lock.lock();
+        for (int i = 0; i < size - 1; i++) {
+            messageQueue.push(QueuedMessage{messages[i], messages[i + 1], false, true});
+        }
+        messageQueue.push(QueuedMessage{messages.back(), nullptr, false, true});
+        lock.unlock();
+        messageWaiter.notify_one();
     }
-    lock.unlock();
-    messageWaiter.notify_one();
 }
 
 void MessageArea::changeSliderValue(int min, int max)
 {
     this->verticalScrollBar()->setValue(max - min - tempScrollBarRange + tempScrollBarValue);
+    timestamp = QDateTime::currentSecsSinceEpoch();
     emitScrollBarHigh = true;
 }
 
@@ -133,7 +135,7 @@ void MessageArea::scrollBarMoved(int value)
 {
     tempScrollBarValue = value;
     tempScrollBarRange = this->verticalScrollBar()->maximum() - this->verticalScrollBar()->minimum();
-    if (value < tempScrollBarRange * 0.1 && emitScrollBarHigh) {
+    if (value < tempScrollBarRange * 0.1 && emitScrollBarHigh && timestamp - QDateTime::currentSecsSinceEpoch() > 5) {
         emitScrollBarHigh = false;
         emit scrollbarHigh();
     }
@@ -151,7 +153,7 @@ void MessageArea::loop()
                 Api::Message *message = queuedMessage.message;
 
                 if (queuedMessage.lastMessage == nullptr) {
-                    emit messageCreate(message, 0, false, true, false);
+                    emit messageCreate(message, queuedMessage.top, true, false);
                 } else {
                     Api::Message *lastMessage = queuedMessage.lastMessage;
 
@@ -163,7 +165,7 @@ void MessageArea::loop()
                     bool separator;
                     if (firstDateTime.date() != secondDateTime.date()) {
                         // The messages are not sent on the same day
-                        emit separatorCreate(secondDateTime.date(), false);
+                        emit separatorCreate(secondDateTime.date(), queuedMessage.top);
                         separator = true;
                     } else {
                         // The messages are sent on the same day
@@ -187,7 +189,7 @@ void MessageArea::loop()
                     }
 
                     // Create the message and add it to the layout
-                    emit messageCreate(message, 0, false, first, separator);
+                    emit messageCreate(message, queuedMessage.top, first, separator);
                 }
 
                 if (queuedMessage.end)
@@ -200,16 +202,12 @@ void MessageArea::loop()
     }
 }
 
-void MessageArea::displayMessage(Api::Message *message, int pos, bool top, bool first, bool separator)
+void MessageArea::displayMessage(Api::Message *message, bool top, bool first, bool separator)
 {
-    if (top) {
-        messageLayout->insertWidget(0, new MessageWidget(rm, message, first, separator, this));
-    } else {
-        if (pos != 0)
-            messageLayout->insertWidget(pos, new MessageWidget(rm, message, first, separator, this));
-        else
-            messageLayout->insertWidget(messageLayout->count() - 1, new MessageWidget(rm, message, first, separator, this));
-    }
+    if (top)
+        messageLayout->insertWidget(separator ? 1 : 0, new MessageWidget(rm, message, first, separator, this));
+    else
+        messageLayout->insertWidget(messageLayout->count() - 1, new MessageWidget(rm, message, first, separator, this));
 }
 
 void MessageArea::displaySeparator(const QDate& date, bool top)

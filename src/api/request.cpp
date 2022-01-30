@@ -230,7 +230,7 @@ void Requester::requestApi(const RequestParameters &parameters)
     lock.unlock();
 }
 
-void Requester::removeImageRequestCallbacks()
+void Requester::removeImageRequests()
 {
     lock.lock();
     requestsToCheck = currentRequestsNumber;

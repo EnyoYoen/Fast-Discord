@@ -17,6 +17,7 @@ struct QueuedMessage {
     Api::Message *message;
     Api::Message *lastMessage;
     bool end;
+    bool top;
 };
 
 namespace Ui {
@@ -38,7 +39,7 @@ signals:
     void messagesEnd();
     void scrollbarHigh();
     void separatorCreate(const QDate&, bool);
-    void messageCreate(Api::Message *, int, bool, bool, bool);
+    void messageCreate(Api::Message *, bool, bool, bool);
 
 public slots:
     void addMessages(const std::vector<Api::Message *>& messages);
@@ -48,7 +49,7 @@ private slots:
     void scrollBarMoved(int value);
     void changeSliderValue(int min, int max);
     void displaySeparator(const QDate& date, bool top);
-    void displayMessage(Api::Message *message, int pos, bool top, bool first, bool separator);
+    void displayMessage(Api::Message *message, bool top, bool first, bool separator);
 
 private:
     void showEvent(QShowEvent *event) override; // To scroll to the very end
@@ -65,6 +66,7 @@ private:
     std::condition_variable messageWaiter;
     bool stopped;
 
+    unsigned long timestamp;
     int tempScrollBarValue;
     int tempScrollBarRange;
     bool emitScrollBarHigh;
