@@ -6,6 +6,7 @@
 #include <QJsonValue>
 
 #include <string>
+#include <map>
 
 using json = QJsonValue;
 
@@ -23,7 +24,9 @@ enum Opcodes {
     RequestGuildMembers,
     InvalidSession,
     Hello,
-    HeartbeatACK
+    HeartbeatACK,
+    DMChannelOpened = 13,
+    GuildChannelOpened
 };
 
 //https://discord.com/developers/docs/topics/gateway
@@ -34,6 +37,9 @@ public:
     Gateway(Api::Requester *requester, const std::string& token);
     void onDispatch(std::function<void(std::string&, json&)> callback);
         //Sets the callback function called when the gateway recieve events
+
+    void sendGuildChannelOpened(const std::map<std::string, std::vector<std::vector<int>>> channels, const std::string& guildId, bool activities, bool threads, bool typing);
+    void sendDMChannelOpened(const std::string& channelId);
 
 private slots:
     void closeHandler();

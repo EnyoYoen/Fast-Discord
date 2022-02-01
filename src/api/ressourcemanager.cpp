@@ -158,6 +158,7 @@ void RessourceManager::getGuilds(std::function<void(void *)> callback)
 
 void RessourceManager::getGuildChannels(std::function<void(void *)> callback, const std::string& id)
 {
+    openedGuildsChannels[id];
     if (guildsChannels->find(id) == guildsChannels->end()) {
         requester->getGuildChannels([&, callback](void *guildChannelsPtr) {
             (*guildsChannels)[id] = *reinterpret_cast<std::vector<Channel *> *>(guildChannelsPtr);
@@ -170,6 +171,8 @@ void RessourceManager::getGuildChannels(std::function<void(void *)> callback, co
 
 void RessourceManager::getGuildChannel(std::function<void(void *)> callback, const std::string& guildId, const std::string& id)
 {
+    openedGuildsChannels[guildId][id];
+
     if (guildsChannels->find(guildId) == guildsChannels->end()) {
         requester->getGuildChannels([&, callback](void *guildChannelsPtr) {
             (*guildsChannels)[guildId] = *reinterpret_cast<std::vector<Channel *> *>(guildChannelsPtr);
@@ -211,6 +214,25 @@ void RessourceManager::getPrivateChannels(std::function<void(void *)> callback)
 
 void RessourceManager::getMessages(std::function<void(void *)> callback, const std::string& channelId, unsigned int limit, bool newMessages)
 {
+    bool found = false;
+    for (auto it = openedGuildsChannels.begin() ; it != openedGuildsChannels.end() ; it++) {
+        std::map<std::string, std::vector<std::vector<int>>> channels = it->second;
+        if (channels.find(channelId) != channels.end()) {
+            found = true;
+            unsigned int size = (*messages)[channelId].size();
+
+            std::vector<int> indexes;
+            indexes.push_back(size);
+            indexes.push_back(size + limit);
+            channels[channelId].push_back(indexes);
+            gw->sendGuildChannelOpened(channels, it->first, true, true, true);
+            break;
+        }
+    }
+    if (!found) {
+        gw->sendDMChannelOpened(channelId);
+    }
+
     if (newMessages) {
         if ((*messages)[channelId].size() >= 50)
             requester->getMessages([&, callback](void *messagesPtr) {

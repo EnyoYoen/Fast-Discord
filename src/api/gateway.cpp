@@ -57,10 +57,36 @@ void Gateway::onDispatch(std::function<void(std::string&, json&)> callback)
     onDispatchHandler = callback;
 }
 
+void Gateway::sendGuildChannelOpened(const std::map<std::string, std::vector<std::vector<int>>> channels, const std::string& guildId, bool activities, bool threads, bool typing)
+{
+    std::string data = "{\"guild_id\":\"" + guildId + "\"" + (typing ? ",\"typing\":true" : "") + (activities ? ",\"activities\":true" : "") + (threads ? ",\"threads\":true" : "") + ",\"channels\":{";
+
+    unsigned int counter = 0;
+    for (auto it = channels.begin() ; it != channels.end() ; it++, counter++) {
+        data += std::string(counter > 0 ? "," : "") + "\"" + it->first + "\":[";
+        std::vector<std::vector<int>> messagesNumbers = it->second;
+        for (unsigned int i = 0 ; i < messagesNumbers.size() ; i++) {
+            data += "[";
+            for (unsigned int j = 0 ; j < messagesNumbers[i].size() ; j++) {
+                data += std::to_string(messagesNumbers[i][j]) + (j + 1 < messagesNumbers[i].size() ? "," : "");
+            }
+            data += "]" + std::string(i + 1 < messagesNumbers.size() ? "," : "");
+        }
+        data += "]";
+    }
+
+    send(GuildChannelOpened, data + "}}");
+}
+
+void Gateway::sendDMChannelOpened(const std::string& channelId)
+{
+    send(DMChannelOpened, "{\"channel_id\":\"" + channelId + "\"}");
+}
 
 // Send data through the gateway
 void Gateway::send(int op, const std::string& data)
 {
+    qDebug() << data.c_str();
     // Build the payload string
     std::string payload = "{\"op\":" + std::to_string(op) + ",\"d\":" + data + "}";
     // Send the message
@@ -70,6 +96,7 @@ void Gateway::send(int op, const std::string& data)
 // Process a binary message that the gateway recieves
 void Gateway::processBinaryMessage(const QByteArray& message)
 {
+    qDebug() << qUncompress(message);
     QJsonDocument payload = QJsonDocument::fromJson(qUncompress(message));
     QJsonValue data = payload["d"];
 
@@ -111,6 +138,7 @@ void Gateway::processBinaryMessage(const QByteArray& message)
 // Process a text message that the gateway recieves
 void Gateway::processTextMessage(const QString& message)
 {
+    qDebug() << message;
     QJsonDocument payload = QJsonDocument::fromJson(message.toUtf8());
     QJsonValue data = payload["d"];
 

@@ -64,6 +64,10 @@ private:
     std::vector<PrivateChannel *> *privateChannels;
     std::vector<Presence *>       *presences;
 
+    std::vector<std::string> openedDMChannels;
+    std::map<std::string, std::map<std::string, std::vector<std::vector<int>>>> openedGuildsChannels;
+    //       ^ guild ID   ^ channels  ^ channel ID  ^ indexes of messages that we have (I think?)
+
     Client         *client = nullptr;
     ClientSettings *clientSettings = nullptr;
 };
