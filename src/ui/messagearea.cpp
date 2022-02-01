@@ -135,7 +135,7 @@ void MessageArea::scrollBarMoved(int value)
 {
     tempScrollBarValue = value;
     tempScrollBarRange = this->verticalScrollBar()->maximum() - this->verticalScrollBar()->minimum();
-    if (value < tempScrollBarRange * 0.1 && emitScrollBarHigh && timestamp - QDateTime::currentSecsSinceEpoch() > 5) {
+    if (value < tempScrollBarRange * 0.1 && emitScrollBarHigh && timestamp - QDateTime::currentSecsSinceEpoch() > 2) {
         emitScrollBarHigh = false;
         emit scrollbarHigh();
     }
@@ -163,7 +163,7 @@ void MessageArea::loop()
 
                     // Determine if we need a separator (messages not sent the same day)
                     bool separator;
-                    if (firstDateTime.date() != secondDateTime.date()) {
+                    if (firstDateTime.toLocalTime().date() != secondDateTime.toLocalTime().date()) {
                         // The messages are not sent on the same day
                         emit separatorCreate(secondDateTime.date(), queuedMessage.top);
                         separator = true;
