@@ -135,7 +135,7 @@ void MessageArea::scrollBarMoved(int value)
 {
     tempScrollBarValue = value;
     tempScrollBarRange = this->verticalScrollBar()->maximum() - this->verticalScrollBar()->minimum();
-    if (value < tempScrollBarRange * 0.1 && emitScrollBarHigh && timestamp - QDateTime::currentSecsSinceEpoch() > 2) {
+    if (value < tempScrollBarRange * 0.1 && emitScrollBarHigh && timestamp - QDateTime::currentSecsSinceEpoch() > 1) {
         emitScrollBarHigh = false;
         emit scrollbarHigh();
     }
