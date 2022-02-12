@@ -73,7 +73,7 @@ void MessageArea::addMessage(Api::Message *newMessage, Api::Message *lastMessage
     messageQueue.push(QueuedMessage{newMessage, lastMessage, false, false});
     lock.unlock();
     messageWaiter.notify_one();
-    scrollBottom();
+    if (verticalScrollBar()->value() < 0.95 * verticalScrollBar()->minimum()) scrollBottom();
 }
 
 void MessageArea::scrollBottom()

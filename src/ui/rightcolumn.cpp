@@ -197,9 +197,10 @@ void RightColumn::addMessage(const Api::Message& message)
 {
     // Add the message if it belongs to this channels
     if (*message.channelId == currentOpenedChannel) {
-        rm->getMessages([this, message](void *messagePtr) {
+        Api::Message *messagep = const_cast<Api::Message *>(&message);
+        rm->getMessages([this, messagep](void *messagePtr) {
             std::vector<Api::Message *> channelMessages = *reinterpret_cast<std::vector<Api::Message *> *>(messagePtr);
-            messageArea->addMessage(const_cast<Api::Message *>(&message), channelMessages[0]);
+            messageArea->addMessage(messagep, channelMessages[0]);
         }, currentOpenedChannel, 1, false);
     }
 }

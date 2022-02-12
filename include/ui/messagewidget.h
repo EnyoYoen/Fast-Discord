@@ -23,11 +23,13 @@ private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
     void setAvatar(const std::string& avatarFileName);
+    void addImage(const std::string& filename, int width, int height);
 
     QString hoveredTimestamp; // The timestamp we show
     RoundedImage *avatar;     // The avatar if there is one
     QLabel *timestampLabel;   // The label of the timestamp
     MarkdownLabel *content;
+    QVBoxLayout *dataLayout;
     bool isFirst;             // Is the message is not grouped
 
 };

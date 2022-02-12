@@ -23,7 +23,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
     // Create the main widgets
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     QWidget *data = new QWidget(this);
-    QVBoxLayout *dataLayout = new QVBoxLayout(data);
+    dataLayout = new QVBoxLayout(data);
     QWidget *iconContainer = new QWidget(this);
     QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
 
@@ -57,7 +57,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
             std::string avatarFileName = *author.avatar + (author.avatar->rfind("a_") == 0 ? ".gif" : ".png");
             avatar = new RoundedImage(40, 40, 20, iconContainer);
             iconLayout->addWidget(avatar);
-            rm->getImage([this](void *avatarFileName) {this->setAvatar(*static_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
+            rm->getImage([this](void *avatarFileName) {this->setAvatar(*reinterpret_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
         }
 
 
@@ -114,6 +114,20 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
         mainLayout->setContentsMargins(0, 0, 0, 0);
     }
 
+    if (message->attachments != nullptr) {
+        std::vector<Api::Attachment *> attachments = *message->attachments;
+        for (unsigned int i = 0 ; i < attachments.size() ; i++) {
+            if (attachments[i]->contentType != nullptr
+              && attachments[i]->contentType->find("image") != std::string::npos
+              && attachments[i]->contentType->find("svg") == std::string::npos) {
+                Api::Attachment *attachment = attachments[i];
+                rm->getImage([this, attachment](void *filename) {
+                    this->addImage(*reinterpret_cast<std::string *>(filename), attachment->width, attachment->height);
+                }, *attachments[i]->proxyUrl, *attachments[i]->filename);
+            }
+        }
+    }
+
     // Style the icon container
     iconContainer->setFixedWidth(72);
     iconContainer->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
@@ -142,6 +156,26 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
 void MessageWidget::setAvatar(const std::string& avatarFileName)
 {
     avatar->setImage(avatarFileName);
+}
+
+void MessageWidget::addImage(const std::string& filename, int width, int height)
+{
+    QLabel *imageLabel = new QLabel(this);
+
+    if (width >= height && width > 400) {
+        float ratio = width / 400;
+        width /= ratio;
+        height /= ratio;
+    } else if (height > width && height > 400) {
+        float ratio = height / 400;
+        height /= ratio;
+        width /= ratio;
+    }
+    imageLabel->setFixedSize(width, height);
+
+    QPixmap pixmap(QString(filename.c_str()));
+    imageLabel->setPixmap(pixmap.scaled(width, height, Qt::KeepAspectRatio));
+    dataLayout->addWidget(imageLabel);
 }
 
 void MessageWidget::enterEvent(QEvent *)

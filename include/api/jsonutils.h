@@ -15,7 +15,6 @@ void unmarshal(QJsonObject jsonObj, T **object);
 template <typename T>
 void unmarshal(QJsonValue jsonVal, const QString& key, T **object)
 {
-    QJsonObject jsonObj = jsonVal[key].toObject();
     unmarshal(jsonVal[key].toObject(), object);
 }
 
@@ -43,7 +42,7 @@ void unmarshalMultiple(QJsonObject jsonObj, QString key, std::vector<T *> **obje
 
     for (int i = 0 ; i < jsonArray.size() ; i++) {
         T *object;
-        unmarshal<T>(jsonArray[i].toObject(), "", &object);
+        unmarshal<T>(jsonArray[i].toObject(), &object);
         (*objects)->push_back(object);
     }
 }
