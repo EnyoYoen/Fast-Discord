@@ -24,7 +24,6 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
     // Create the main widgets
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     QWidget *data = new QWidget(this);
-    data->setStyleSheet("background-color: white;");
     dataLayout = new QVBoxLayout(data);
     QWidget *iconContainer = new QWidget(this);
     QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
@@ -124,7 +123,6 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
 
     // Create and style the content label
     content = new MarkdownLabel(*message->content, rm, this);
-    content->setStyleSheet("background-color: none;");
 
     // Style the data layout
     dataLayout->setContentsMargins(0, 0, 0, 0);
