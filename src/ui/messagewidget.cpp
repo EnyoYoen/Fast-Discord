@@ -135,9 +135,11 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
             if (attachments[i]->contentType != nullptr
               && attachments[i]->contentType->find("image") != std::string::npos
               && attachments[i]->contentType->find("svg") == std::string::npos) {
+                std::string filename = *attachments[i]->id +
+                        attachments[i]->filename->substr(attachments[i]->filename->find_last_of('.'));
                 rm->getImage([this, attachment](void *filename) {
                     this->addImage(*reinterpret_cast<std::string *>(filename), attachment->width, attachment->height);
-                }, *attachments[i]->proxyUrl, *attachments[i]->filename);
+                }, *attachments[i]->proxyUrl, filename);
             } else {
                 dataLayout->addWidget(new AttachmentFile(rm, attachment, data));
             }
@@ -177,7 +179,7 @@ void MessageWidget::addImage(const std::string& filename, int width, int height)
     imageLabel->setFixedSize(width, height);
 
     QPixmap pixmap(QString(filename.c_str()));
-    imageLabel->setPixmap(pixmap.scaled(width, height, Qt::KeepAspectRatio));
+    imageLabel->setPixmap(pixmap.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     dataLayout->addWidget(imageLabel);
 }
 
