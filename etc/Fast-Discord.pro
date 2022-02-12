@@ -38,6 +38,7 @@ SOURCES += \
     ../src/api/user.cpp \
     ../src/api/voice.cpp \
     ../src/main.cpp \
+    ../src/ui/attachmentfile.cpp \
     ../src/ui/closechannelbutton.cpp \
     ../src/ui/guildchannelwidget.cpp \
     ../src/ui/guildpill.cpp \
@@ -80,6 +81,7 @@ HEADERS += \
     ../include/api/thread.h \
     ../include/api/user.h \
     ../include/api/voice.h \
+    ../include/ui/attachmentfile.h \
     ../include/ui/closechannelbutton.h \
     ../include/ui/guildchannelwidget.h \
     ../include/ui/guildpill.h \

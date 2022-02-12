@@ -86,6 +86,7 @@ void Gateway::sendDMChannelOpened(const std::string& channelId)
 // Send data through the gateway
 void Gateway::send(int op, const std::string& data)
 {
+    //qDebug() << "⇧" << data.substr(0, 198).c_str();
     // Build the payload string
     std::string payload = "{\"op\":" + std::to_string(op) + ",\"d\":" + data + "}";
     // Send the message
@@ -95,6 +96,7 @@ void Gateway::send(int op, const std::string& data)
 // Process a binary message that the gateway recieves
 void Gateway::processBinaryMessage(const QByteArray& message)
 {
+    //qDebug() << "⇩" << qUncompress(message).mid(0, 198);
     QJsonDocument payload = QJsonDocument::fromJson(qUncompress(message));
     QJsonValue data = payload["d"];
 
@@ -136,6 +138,7 @@ void Gateway::processBinaryMessage(const QByteArray& message)
 // Process a text message that the gateway recieves
 void Gateway::processTextMessage(const QString& message)
 {
+    //qDebug() << "⇩" << message.mid(0, 198);
     QJsonDocument payload = QJsonDocument::fromJson(message.toUtf8());
     QJsonValue data = payload["d"];
 

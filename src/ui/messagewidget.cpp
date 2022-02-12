@@ -1,6 +1,7 @@
 #include "ui/messagewidget.h"
 
 #include "api/jsonutils.h"
+#include "ui/attachmentfile.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -23,6 +24,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
     // Create the main widgets
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     QWidget *data = new QWidget(this);
+    data->setStyleSheet("background-color: white;");
     dataLayout = new QVBoxLayout(data);
     QWidget *iconContainer = new QWidget(this);
     QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
@@ -114,20 +116,6 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
         mainLayout->setContentsMargins(0, 0, 0, 0);
     }
 
-    if (message->attachments != nullptr) {
-        std::vector<Api::Attachment *> attachments = *message->attachments;
-        for (unsigned int i = 0 ; i < attachments.size() ; i++) {
-            if (attachments[i]->contentType != nullptr
-              && attachments[i]->contentType->find("image") != std::string::npos
-              && attachments[i]->contentType->find("svg") == std::string::npos) {
-                Api::Attachment *attachment = attachments[i];
-                rm->getImage([this, attachment](void *filename) {
-                    this->addImage(*reinterpret_cast<std::string *>(filename), attachment->width, attachment->height);
-                }, *attachments[i]->proxyUrl, *attachments[i]->filename);
-            }
-        }
-    }
-
     // Style the icon container
     iconContainer->setFixedWidth(72);
     iconContainer->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
@@ -136,10 +124,27 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
 
     // Create and style the content label
     content = new MarkdownLabel(*message->content, rm, this);
+    content->setStyleSheet("background-color: none;");
 
     // Style the data layout
     dataLayout->setContentsMargins(0, 0, 0, 0);
     dataLayout->addWidget(content);
+
+    if (message->attachments != nullptr) {
+        std::vector<Api::Attachment *> attachments = *message->attachments;
+        for (unsigned int i = 0 ; i < attachments.size() ; i++) {
+            Api::Attachment *attachment = attachments[i];
+            if (attachments[i]->contentType != nullptr
+              && attachments[i]->contentType->find("image") != std::string::npos
+              && attachments[i]->contentType->find("svg") == std::string::npos) {
+                rm->getImage([this, attachment](void *filename) {
+                    this->addImage(*reinterpret_cast<std::string *>(filename), attachment->width, attachment->height);
+                }, *attachments[i]->proxyUrl, *attachments[i]->filename);
+            } else {
+                dataLayout->addWidget(new AttachmentFile(rm, attachment, data));
+            }
+        }
+    }
 
     // Add widgets to the main layout and style it
     mainLayout->addWidget(iconContainer);
