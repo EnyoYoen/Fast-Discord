@@ -1,23 +1,17 @@
 #pragma once
 
-#include "api/ressourcemanager.h"
+#include "api/request.h"
 
-#include <QWidget>
+#include <QLabel>
 #include <QMouseEvent>
 
 namespace Ui {
 
-class AttachmentFile : public QWidget
+class AttachmentFile : public QLabel
 {
     Q_OBJECT
 public:
-    AttachmentFile(Api::RessourceManager *rm, Api::Attachment *attachment, QWidget *parent);
-
-private:
-    //void mouseReleaseEvent(QMouseEvent *event) override;
-
-    Api::RessourceManager *rm;
-    Api::Attachment *attachment;
+    AttachmentFile(Api::Requester *requester, Api::Attachment *attachment, QWidget *parent);
 };
 
 } // namespace Ui

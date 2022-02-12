@@ -141,7 +141,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
                     this->addImage(*reinterpret_cast<std::string *>(filename), attachment->width, attachment->height);
                 }, *attachments[i]->proxyUrl, filename);
             } else {
-                dataLayout->addWidget(new AttachmentFile(rm, attachment, data));
+                dataLayout->addWidget(new AttachmentFile(rm->requester, attachment, data));
             }
         }
     }

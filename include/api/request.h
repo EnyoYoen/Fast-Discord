@@ -34,6 +34,7 @@ enum RequestTypes {
     GetImage,
     GetWsUrl,
     GetUser,
+    GetFile,
 
     // We don't care about the response
     SetStatus,
@@ -85,6 +86,7 @@ public:
     void getClientSettings(std::function<void(void *)> callback);
     void getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName);
     void getUser(std::function<void(void *)> callback, const std::string& userId);
+    void getFile(const std::string& url, const std::string& filename);
 
     // Functions that request the API to send data
     void setStatus(const std::string& status);

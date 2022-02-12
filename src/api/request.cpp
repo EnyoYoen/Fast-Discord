@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QUrlQuery>
 #include <QMimeDatabase>
+#include <QStandardPaths>
 #include <QtNetwork/QHttpMultiPart>
 #include <QtNetwork/QHttpPart>
 #include <QtNetwork/QNetworkRequest>
@@ -46,13 +47,26 @@ void Requester::readReply()
     RequestParameters parameters = requestQueue.front();
     requestQueue.pop();
     if (parameters.outputFile != "") {
-        QDir dir("cache/");
-        if (!dir.exists()) dir.mkpath(".");
+        if (parameters.type == GetImage) {
+            QDir dir("cache/");
+            if (!dir.exists()) dir.mkpath(".");
 
-        QFile file(QString(parameters.outputFile.c_str()));
-        file.open(QIODevice::WriteOnly);
-        file.write(reply->readAll());
-        file.close();
+            QFile file(QString(parameters.outputFile.c_str()));
+            file.open(QIODevice::WriteOnly);
+            file.write(reply->readAll());
+            file.close();
+        } else {
+            QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + "/";
+            if (downloadsFolder.isEmpty()) {
+                QDir dir("download/");
+                if (!dir.exists()) dir.mkpath(".");
+                downloadsFolder = "download/";
+            }
+            QFile file(downloadsFolder + QString(parameters.outputFile.c_str()));
+            file.open(QIODevice::WriteOnly);
+            file.write(reply->readAll());
+            file.close();
+        }
     }
     QByteArray ba = reply->readAll();
 
@@ -440,6 +454,19 @@ void Requester::unpinMessage(const std::string& channelId, const std::string& me
         "",
         "",
         UnpinMessage,
+        false});
+}
+
+void Requester::getFile(const std::string& url, const std::string& filename)
+{
+    requestApi({
+        nullptr,
+        url,
+        "",
+        "",
+        "",
+        filename,
+        GetFile,
         false});
 }
 
