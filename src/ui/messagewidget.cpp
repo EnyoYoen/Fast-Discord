@@ -122,11 +122,14 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
     iconContainer->setLayout(iconLayout);
 
     // Create and style the content label
-    content = new MarkdownLabel(*message->content, rm, this);
+    content = nullptr;
+    if (message->content != nullptr && *message->content != "") {
+        content = new MarkdownLabel(*message->content, rm, this);
+        dataLayout->addWidget(content);
+    }
 
     // Style the data layout
     dataLayout->setContentsMargins(0, 0, 0, 0);
-    dataLayout->addWidget(content);
 
     if (message->attachments != nullptr) {
         std::vector<Api::Attachment *> attachments = *message->attachments;
@@ -187,8 +190,9 @@ void MessageWidget::enterEvent(QEvent *)
 {
     // Mouse hover : change the stylesheet and show the timestamp label
     setStyleSheet("background-color: #32353B;");
-    content->setStyleSheet("background-color: #32353B;"
-                           "color: #DCDDDE;");
+    if (content != nullptr)
+        content->setStyleSheet("background-color: #32353B;"
+                               "color: #DCDDDE;");
     if (!isFirst) timestampLabel->setText(" " + hoveredTimestamp);
 }
 
@@ -196,8 +200,9 @@ void MessageWidget::leaveEvent(QEvent *)
 {
     // Reset the stylesheet and hide the timestamp label
     setStyleSheet("background-color: none;");
-    content->setStyleSheet("background-color: #36393F;"
-                           "color: #DCDDDE;");
+    if (content != nullptr)
+        content->setStyleSheet("background-color: #36393F;"
+                               "color: #DCDDDE;");
     if (!isFirst) timestampLabel->setText("");
 }
 

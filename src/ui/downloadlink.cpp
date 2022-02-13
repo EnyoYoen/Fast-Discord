@@ -1,22 +1,21 @@
-#include "ui/downloadbutton.h"
+#include "ui/downloadlink.h"
 
 #include <QFileDialog>
 #include <QStandardPaths>
 
 namespace Ui {
 
-DownloadButton::DownloadButton(const std::string& urlp, Api::Requester *request, QWidget *parent)
-    : QLabel(parent)
+DownloadLink::DownloadLink(const std::string& urlp, const std::string& filename, Api::Requester *request, QWidget *parent)
+    : QLabel(filename.c_str(), parent)
 {
     url = std::string(urlp);
     requester = request;
 
-    this->setFixedSize(24, 24);
     this->setCursor(Qt::PointingHandCursor);
-    this->setPixmap(QPixmap("res/images/svg/download-icon.svg"));
+    this->setStyleSheet("color: #00AFF4;");
 }
 
-void DownloadButton::mouseReleaseEvent(QMouseEvent *)
+void DownloadLink::mouseReleaseEvent(QMouseEvent *)
 {
     QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + "/";
     if (downloadsFolder.isEmpty()) {

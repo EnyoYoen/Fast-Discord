@@ -103,6 +103,7 @@ signals:
 private slots:
     void doRequest(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);
     void readReply();
+    void writeFile();
 
 private:
     QNetworkAccessManager netManager;

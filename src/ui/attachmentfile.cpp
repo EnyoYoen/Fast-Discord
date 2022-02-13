@@ -1,6 +1,7 @@
 #include "ui/attachmentfile.h"
 
 #include "ui/downloadbutton.h"
+#include "ui/downloadlink.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -22,9 +23,6 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, Api::Attachment *attac
     image->setPixmap(pix.scaled(30, 40, Qt::KeepAspectRatio));
     image->setFixedSize(30, 40);
 
-    QLabel *filename = new QLabel(attachment->filename->c_str(), infos);
-    filename->setStyleSheet("color: #00AFF4;");
-
     QString sizeStr;
     int size = attachment->size;
     if (size < 1024) {
@@ -36,15 +34,17 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, Api::Attachment *attac
     }
     QLabel *filesize = new QLabel(sizeStr, infos);
     filesize->setStyleSheet("color: #72767D;");
+    filesize->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    filesize->setCursor(Qt::IBeamCursor);
 
-    infosLayout->addWidget(filename);
+    infosLayout->addWidget(new DownloadLink(*attachment->url, *attachment->filename, requester, container));
     infosLayout->addWidget(filesize);
     infosLayout->setContentsMargins(0, 0, 0, 0);
     infosLayout->setSpacing(0);
 
     layout->addWidget(image);
     layout->addWidget(infos);
-    layout->addWidget(new DownloadButton(*attachment->proxyUrl, requester, container));
+    layout->addWidget(new DownloadButton(*attachment->url, requester, container));
     layout->setContentsMargins(10, 10, 10, 10);
     layout->setSpacing(8);
 

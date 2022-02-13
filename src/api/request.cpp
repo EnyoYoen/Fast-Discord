@@ -6,7 +6,6 @@
 #include <QDir>
 #include <QUrlQuery>
 #include <QMimeDatabase>
-#include <QStandardPaths>
 #include <QtNetwork/QHttpMultiPart>
 #include <QtNetwork/QHttpPart>
 #include <QtNetwork/QNetworkRequest>
@@ -42,31 +41,26 @@ Requester::~Requester()
     requestWaiter.notify_all();
 }
 
+void Requester::writeFile()
+{
+    QFile file(QString(requestQueue.front().outputFile.c_str()));
+    file.open(QIODevice::WriteOnly | QIODevice::Append);
+    file.write(reply->readAll());
+    file.close();
+}
+
 void Requester::readReply()
 {
     RequestParameters parameters = requestQueue.front();
     requestQueue.pop();
-    if (parameters.outputFile != "") {
-        if (parameters.type == GetImage) {
-            QDir dir("cache/");
-            if (!dir.exists()) dir.mkpath(".");
+    if (parameters.outputFile != "" && parameters.type == GetImage) {
+        QDir dir("cache/");
+        if (!dir.exists()) dir.mkpath(".");
 
-            QFile file(QString(parameters.outputFile.c_str()));
-            file.open(QIODevice::WriteOnly);
-            file.write(reply->readAll());
-            file.close();
-        } else {
-            QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + "/";
-            if (downloadsFolder.isEmpty()) {
-                QDir dir("download/");
-                if (!dir.exists()) dir.mkpath(".");
-                downloadsFolder = "download/";
-            }
-            QFile file(downloadsFolder + QString(parameters.outputFile.c_str()));
-            file.open(QIODevice::WriteOnly);
-            file.write(reply->readAll());
-            file.close();
-        }
+        QFile file(QString(parameters.outputFile.c_str()));
+        file.open(QIODevice::WriteOnly);
+        file.write(reply->readAll());
+        file.close();
     }
     QByteArray ba = reply->readAll();
 
@@ -106,6 +100,7 @@ void Requester::readReply()
                 }
             case GetMessages:
                 {
+                    qDebug() << QString(ba).toUtf8().constData();
                     std::vector<Message *> *messages;
                     unmarshalMultiple<Message>(QJsonDocument::fromJson(ba).array(), &messages);
                     parameters.callback(static_cast<void *>(messages));
@@ -174,7 +169,8 @@ void Requester::RequestLoop()
                 QNetworkRequest request(QUrl(QString(parameters.url.c_str())));
 
                 /* Set the headers */
-                request.setRawHeader(QByteArray("Authorization"), QByteArray(token.c_str()));
+                if (parameters.type != GetFile)
+                    request.setRawHeader(QByteArray("Authorization"), QByteArray(token.c_str()));
                 if (parameters.json) {
                     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
                 }
@@ -234,6 +230,8 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *
 
     // Connect the finished and read signals to process the reply
     QObject::connect(reply, SIGNAL(finished()), this, SLOT(readReply()));
+    if (requestQueue.front().type == GetFile)
+        QObject::connect(reply, SIGNAL(readyRead()), this, SLOT(writeFile()));
 }
 
 void Requester::requestApi(const RequestParameters &parameters)

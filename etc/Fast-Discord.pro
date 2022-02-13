@@ -41,6 +41,7 @@ SOURCES += \
     ../src/ui/attachmentfile.cpp \
     ../src/ui/closechannelbutton.cpp \
     ../src/ui/downloadbutton.cpp \
+    ../src/ui/downloadlink.cpp \
     ../src/ui/guildchannelwidget.cpp \
     ../src/ui/guildpill.cpp \
     ../src/ui/guildwidget.cpp \
@@ -85,6 +86,7 @@ HEADERS += \
     ../include/ui/attachmentfile.h \
     ../include/ui/closechannelbutton.h \
     ../include/ui/downloadbutton.h \
+    ../include/ui/downloadlink.h \
     ../include/ui/guildchannelwidget.h \
     ../include/ui/guildpill.h \
     ../include/ui/guildwidget.h \
