@@ -100,7 +100,6 @@ void Requester::readReply()
                 }
             case GetMessages:
                 {
-                    qDebug() << QString(ba).toUtf8().constData();
                     std::vector<Message *> *messages;
                     unmarshalMultiple<Message>(QJsonDocument::fromJson(ba).array(), &messages);
                     parameters.callback(static_cast<void *>(messages));
