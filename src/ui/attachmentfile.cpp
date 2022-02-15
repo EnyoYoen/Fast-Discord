@@ -52,7 +52,7 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, Api::Attachment *attac
     container->setStyleSheet("background-color: #2F3136;"
                              "border-color: #292B2F;");
     this->setFixedHeight(62);
-    this->setStyleSheet("border-radius: 5px;");
+    this->setStyleSheet("border-radius: 3px;");
 }
 
 } // namespace Ui

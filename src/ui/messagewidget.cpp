@@ -31,6 +31,10 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
             recipientMessage(message);
             break;
 
+        case Api::CallT:
+            callMessage(message);
+            break;
+
         default:
             defaultMessage(message, separatorBefore);
     }
@@ -127,48 +131,6 @@ QString MessageWidget::processTimestamp(QDateTime dateTime)
     }
 
     return date;
-}
-
-void MessageWidget::recipientMessage(Api::Message *message)
-{
-    std::string arrowName;
-    std::string text;
-
-    if (message->type == Api::RecipientAdd) {
-        arrowName = "green-right-arrow.svg";
-        text = *(*message->mentions)[0]->username + " added " +
-                *message->author->username + " to the group.";
-    } else {
-        arrowName = "red-left-arrow.svg";
-        text = *(*message->mentions)[0]->username + " left the group.";
-    }
-
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    QWidget *spacer = new QWidget(this);
-    QLabel *arrow = new QLabel(this);
-    QLabel *textLabel = new QLabel(text.c_str(), this);
-    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString((*message->timestamp).c_str()), Qt::ISODate).toLocalTime()), this);
-
-    spacer->setFixedWidth(28);
-    arrow->setFixedWidth(44);
-    arrow->setPixmap(QPixmap(("res/images/svg/" + arrowName).c_str()));
-
-    textLabel->setStyleSheet("color: #8E9297;");
-    timestampLabel->setStyleSheet("color: #72767D;");
-    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    textLabel->setCursor(QCursor(Qt::IBeamCursor));
-    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-
-    layout->addWidget(spacer);
-    layout->addWidget(arrow);
-    layout->addWidget(textLabel);
-    layout->addWidget(timestampLabel);
-    layout->addStretch();
-
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    this->setMinimumHeight(26);
 }
 
 void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
@@ -278,6 +240,127 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
     mainLayout->addWidget(data);
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
+}
+
+void MessageWidget::recipientMessage(Api::Message *message)
+{
+    std::string arrowName;
+    std::string text;
+
+    if (message->type == Api::RecipientAdd) {
+        arrowName = "green-right-arrow.svg";
+        text = *(*message->mentions)[0]->username + " added " +
+                *message->author->username + " to the group.";
+    } else {
+        arrowName = "red-left-arrow.svg";
+        text = *(*message->mentions)[0]->username + " left the group.";
+    }
+
+    QHBoxLayout *layout = new QHBoxLayout(this);
+    QWidget *spacer = new QWidget(this);
+    QLabel *arrow = new QLabel(this);
+    QLabel *textLabel = new QLabel(text.c_str(), this);
+    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString((*message->timestamp).c_str()), Qt::ISODate).toLocalTime()), this);
+
+    spacer->setFixedWidth(28);
+    arrow->setFixedWidth(44);
+    arrow->setPixmap(QPixmap(("res/images/svg/" + arrowName).c_str()));
+
+    textLabel->setStyleSheet("color: #8E9297;");
+    timestampLabel->setStyleSheet("color: #72767D;");
+    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    textLabel->setCursor(QCursor(Qt::IBeamCursor));
+    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+    layout->addWidget(spacer);
+    layout->addWidget(arrow);
+    layout->addWidget(textLabel);
+    layout->addWidget(timestampLabel);
+    layout->addStretch();
+
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    this->setMinimumHeight(26);
+}
+
+void MessageWidget::callMessage(Api::Message *message)
+{
+    rm->getClient([message, this](void *clientPtr){
+
+    std::string phoneName;
+    std::string text;
+    std::string clientId = *reinterpret_cast<Api::Client *>(clientPtr)->id;
+    QDateTime dateTime = QDateTime::fromString(QString((*message->timestamp).c_str()), Qt::ISODate).toLocalTime();
+
+    std::vector<std::string> participants = *message->call->participants;
+    bool participated = false;
+    for (unsigned int i = 0 ; i < participants.size() ; i++) {
+        if (participants[i] == clientId) participated = true;
+    }
+
+    if (!participated) {
+        text = "You missed a call from " + *message->author->username;
+    } else {
+        text = *message->author->username + " started a call";
+    }
+    std::string *endedTimestampStr = message->call->endedTimestamp;
+    if (endedTimestampStr != nullptr && *endedTimestampStr != "") {
+        phoneName = "gray-phone.svg";
+        qint64 duration = QDateTime::fromString(endedTimestampStr->c_str(), Qt::ISODate)
+                .toLocalTime().toSecsSinceEpoch() -
+                dateTime.toLocalTime().toSecsSinceEpoch();
+        if (duration < 60) {
+            text += " that lasted a few seconds";
+        } else if (duration < 3600) {
+            text += " that lasted ";
+            if (duration < 120)
+                text += "a minute";
+            else
+                text += std::to_string(duration / 60) + " minutes";
+        } else {
+            text += " that lasted ";
+            if (duration < 7200)
+                text += "a hour";
+            else
+                text += std::to_string(duration / 3600) + " hours";
+        }
+    } else {
+        phoneName = "green-phone.svg";
+    }
+    text += ".";
+
+    if (clientId == *message->author->id)
+        phoneName = "green-phone.svg";
+
+    QHBoxLayout *layout = new QHBoxLayout(this);
+    QWidget *spacer = new QWidget(this);
+    QLabel *phone = new QLabel(this);
+    QLabel *textLabel = new QLabel(text.c_str(), this);
+    QLabel *timestampLabel = new QLabel(processTimestamp(dateTime), this);
+
+    spacer->setFixedWidth(28);
+    phone->setFixedWidth(44);
+    phone->setPixmap(QPixmap(("res/images/svg/" + phoneName).c_str()));
+
+    textLabel->setStyleSheet("color: #8E9297;");
+    timestampLabel->setStyleSheet("color: #72767D;");
+    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    textLabel->setCursor(QCursor(Qt::IBeamCursor));
+    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+    layout->addWidget(spacer);
+    layout->addWidget(phone);
+    layout->addWidget(textLabel);
+    layout->addWidget(timestampLabel);
+    layout->addStretch();
+
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    this->setMinimumHeight(26);
+
+    });
 }
 
 } // namespace Ui

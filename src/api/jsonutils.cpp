@@ -520,6 +520,7 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
     GuildMessageMember *member = new GuildMessageMember;
     Channel *thread = new Channel;
     MessageInteraction *interaction = new MessageInteraction;
+    Call *call = new Call;
     std::vector<Reaction *> *reactions = new std::vector<Reaction *>;
     std::vector<User *> *mentions = new std::vector<User *>;
     std::vector<Attachment *> *attachments = new std::vector<Attachment *>;
@@ -534,6 +535,7 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
     unmarshal<GuildMessageMember>(jsonObj, "member", &member);
     unmarshal<Channel>(jsonObj, "thread", &thread);
     unmarshal<MessageInteraction>(jsonObj, "interaction", &interaction);
+    unmarshal<Call>(jsonObj, "call", &call);
     unmarshalMultiple<Reaction>(jsonObj, "reactions", &reactions);
     unmarshalMultiple<User>(jsonObj, "mentions", &mentions);
     unmarshalMultiple<Attachment>(jsonObj, "attachments", &attachments);
@@ -555,6 +557,7 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
         nullptr,
         thread,
         interaction,
+        call,
 
         reactions,
         nullptr,
@@ -596,6 +599,7 @@ void unmarshal<Message>(QJsonObject jsonObj, Message **object)
     GuildMessageMember *member = new GuildMessageMember;
     Channel *thread = new Channel;
     MessageInteraction *interaction = new MessageInteraction;
+    Call *call = new Call;
     std::vector<Reaction *> *reactions = new std::vector<Reaction *>;
     std::vector<User *> *mentions = new std::vector<User *>;
     std::vector<Attachment *> *attachments = new std::vector<Attachment *>;
@@ -610,6 +614,7 @@ void unmarshal<Message>(QJsonObject jsonObj, Message **object)
     unmarshal<GuildMessageMember>(jsonObj, "member", &member);
     unmarshal<Channel>(jsonObj, "thread", &thread);
     unmarshal<MessageInteraction>(jsonObj, "interaction", &interaction);
+    unmarshal<Call>(jsonObj, "call", &call);
     unmarshalMultiple<Reaction>(jsonObj, "reactions", &reactions);
     unmarshalMultiple<User>(jsonObj, "mentions", &mentions);
     unmarshalMultiple<Attachment>(jsonObj, "attachments", &attachments);
@@ -626,6 +631,7 @@ void unmarshal<Message>(QJsonObject jsonObj, Message **object)
         getPartialMessage(jsonObj, "referenced_message"),
         thread,
         interaction,
+        call,
 
         reactions,
         nullptr,
@@ -1045,6 +1051,15 @@ void unmarshal<Presence>(QJsonObject jsonObj, Presence **object)
         getString(jsonObj, "user_id"),
         getString(jsonObj, "guild_id"),
         getString(jsonObj, "status")
+    };
+}
+
+template <>
+void unmarshal<Call>(QJsonObject jsonObj, Call **object)
+{
+    *object = new Call {
+        getStringsFromJson(jsonObj["participants"].toArray()),
+        getString(jsonObj, "ended_timestamp")
     };
 }
 

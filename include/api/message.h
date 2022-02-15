@@ -13,6 +13,7 @@
 #include <QObject>
 
 #include <string>
+#include <vector>
 
 namespace Api {
 
@@ -22,7 +23,7 @@ enum MessageType {
     Default,
     RecipientAdd,
     RecipientRemove,
-    Call,
+    CallT,
     ChannelNameChange,
     ChannelIconChange,
     ChannelPinnedMessage,
@@ -101,6 +102,12 @@ struct MessageComponent
     bool                             disabled;
 };
 
+struct Call
+{
+    std::vector<std::string>        *participants;
+    std::string                     *endedTimestamp;
+};
+
 struct Message
 {
     ~Message();
@@ -112,6 +119,7 @@ struct Message
     Message                         *referencedMessage;
     Channel                         *thread;
     MessageInteraction              *interaction;
+    Call                            *call;
     std::vector<Reaction *>         *reactions;
     std::vector<Embed *>            *embeds;
     std::vector<User *>             *mentions;
