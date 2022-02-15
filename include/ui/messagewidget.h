@@ -23,6 +23,8 @@ private:
     void defaultMessage(Api::Message *message, bool separatorBefore);
     void recipientMessage(Api::Message *message);
     void callMessage(Api::Message *message);
+    void channelNameChangeMessage(Api::Message *message);
+    void channelIconChangeMessage(Api::Message *message);
 
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;

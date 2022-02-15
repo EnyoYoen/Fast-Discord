@@ -35,6 +35,14 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
             callMessage(message);
             break;
 
+        case Api::ChannelNameChange:
+            channelNameChangeMessage(message);
+            break;
+
+        case Api::ChannelIconChange:
+            channelIconChangeMessage(message);
+            break;
+
         default:
             defaultMessage(message, separatorBefore);
     }
@@ -143,7 +151,7 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
     QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
 
     // Get the date and time of the message
-    QDateTime dateTime = QDateTime::fromString(QString((*message->timestamp).c_str()), Qt::ISODate).toLocalTime();
+    QDateTime dateTime = QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime();
 
     if (isFirst) {
         // The message is not grouped to another message
@@ -260,7 +268,7 @@ void MessageWidget::recipientMessage(Api::Message *message)
     QWidget *spacer = new QWidget(this);
     QLabel *arrow = new QLabel(this);
     QLabel *textLabel = new QLabel(text.c_str(), this);
-    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString((*message->timestamp).c_str()), Qt::ISODate).toLocalTime()), this);
+    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime()), this);
 
     spacer->setFixedWidth(28);
     arrow->setFixedWidth(44);
@@ -291,7 +299,7 @@ void MessageWidget::callMessage(Api::Message *message)
     std::string phoneName;
     std::string text;
     std::string clientId = *reinterpret_cast<Api::Client *>(clientPtr)->id;
-    QDateTime dateTime = QDateTime::fromString(QString((*message->timestamp).c_str()), Qt::ISODate).toLocalTime();
+    QDateTime dateTime = QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime();
 
     std::vector<std::string> participants = *message->call->participants;
     bool participated = false;
@@ -361,6 +369,66 @@ void MessageWidget::callMessage(Api::Message *message)
     this->setMinimumHeight(26);
 
     });
+}
+
+void MessageWidget::channelNameChangeMessage(Api::Message *message)
+{
+    QHBoxLayout *layout = new QHBoxLayout(this);
+    QWidget *spacer = new QWidget(this);
+    QLabel *pen = new QLabel(this);
+    QLabel *textLabel = new QLabel((*message->author->username + " changed the channel name: " + *message->content).c_str(), this);
+    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime()), this);
+
+    spacer->setFixedWidth(28);
+    pen->setFixedWidth(44);
+    pen->setPixmap(QPixmap("res/images/svg/pen.svg"));
+
+    textLabel->setStyleSheet("color: #8E9297;");
+    timestampLabel->setStyleSheet("color: #72767D;");
+    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    textLabel->setCursor(QCursor(Qt::IBeamCursor));
+    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+    layout->addWidget(spacer);
+    layout->addWidget(pen);
+    layout->addWidget(textLabel);
+    layout->addWidget(timestampLabel);
+    layout->addStretch();
+
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    this->setMinimumHeight(26);
+}
+
+void MessageWidget::channelIconChangeMessage(Api::Message *message)
+{
+    QHBoxLayout *layout = new QHBoxLayout(this);
+    QWidget *spacer = new QWidget(this);
+    QLabel *pen = new QLabel(this);
+    QLabel *textLabel = new QLabel((*message->author->username + " changed the channel icon.").c_str(), this);
+    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime()), this);
+
+    spacer->setFixedWidth(28);
+    pen->setFixedWidth(44);
+    pen->setPixmap(QPixmap("res/images/svg/pen.svg"));
+
+    textLabel->setStyleSheet("color: #8E9297;");
+    timestampLabel->setStyleSheet("color: #72767D;");
+    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    textLabel->setCursor(QCursor(Qt::IBeamCursor));
+    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+    layout->addWidget(spacer);
+    layout->addWidget(pen);
+    layout->addWidget(textLabel);
+    layout->addWidget(timestampLabel);
+    layout->addStretch();
+
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    this->setMinimumHeight(26);
 }
 
 } // namespace Ui
