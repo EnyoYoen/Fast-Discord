@@ -33,7 +33,7 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
         avatar = new RoundedImage(32, 32, 16, container);
 
         // Request the icon
-        channelIconFileName = *client->id + (client->avatar->rfind("a_") == 0 ? ".gif" : ".webp");
+        channelIconFileName = *client->id + (client->avatar->rfind("a_") == 0 ? ".gif" : ".png");
         rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, channelIconFileName);
     }
 

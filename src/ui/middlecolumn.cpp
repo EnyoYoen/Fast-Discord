@@ -216,7 +216,8 @@ void MiddleColumn::updateChannel(const Api::Channel *channel, const Api::Private
         }
         displayPrivateChannels();
     } else {
-        openGuild(*channel->guildId);
+        if (openedGuildId == *channel->guildId) 
+            openGuild(*channel->guildId);
     }
 }
 
@@ -230,7 +231,8 @@ void MiddleColumn::createChannel(const Api::Channel *channel, const Api::Private
         }
         displayPrivateChannels();
     } else {
-        openGuild(*channel->guildId);
+        if (openedGuildId == *channel->guildId) 
+            openGuild(*channel->guildId);
     }
 }
 
@@ -246,7 +248,8 @@ void MiddleColumn::deleteChannel(const std::string& id, const std::string& guild
             }
         }
     } else {
-        openGuild(guildId);
+        if (openedGuildId == guildId) 
+            openGuild(guildId);
     }
 }
 

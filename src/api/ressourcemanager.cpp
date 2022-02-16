@@ -158,15 +158,10 @@ void RessourceManager::getGuilds(std::function<void(void *)> callback)
 
 void RessourceManager::getGuildChannels(std::function<void(void *)> callback, const std::string& id)
 {
-    openedGuildsChannels[id];
-    if (guildsChannels->find(id) == guildsChannels->end()) {
-        requester->getGuildChannels([&, callback](void *guildChannelsPtr) {
-            (*guildsChannels)[id] = *reinterpret_cast<std::vector<Channel *> *>(guildChannelsPtr);
-            callback(guildChannelsPtr);
-        }, id);
-    } else {
-        callback(reinterpret_cast<void *>(&(*guildsChannels)[id]));
-    }
+    requester->getGuildChannels([&, callback](void *guildChannelsPtr) {
+        (*guildsChannels)[id] = *reinterpret_cast<std::vector<Channel *> *>(guildChannelsPtr);
+        callback(guildChannelsPtr);
+    }, id);
 }
 
 void RessourceManager::getGuildChannel(std::function<void(void *)> callback, const std::string& guildId, const std::string& id)

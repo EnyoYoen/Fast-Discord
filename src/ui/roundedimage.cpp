@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QMovie>
+#include <QFileInfo>
 
 #include <string>
 #include <iostream>
@@ -65,6 +66,8 @@ void RoundedImage::setImage(const std::string& imagePath)
     } else {
         // Not animated
         image = QPixmap(imagePath.c_str()).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        if (image.isNull())
+            image = QPixmap(imagePath.c_str(), "JPG").scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         this->setPixmap(image);
         animatedImage = nullptr;
     }

@@ -56,7 +56,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
                 icon = new RoundedImage(32, 32, 16, container);
 
                 // Request the icon image
-                channelIconFileName = *dmUser->id + (avatar->rfind("a_") == 0 ? ".gif" : ".webp");
+                channelIconFileName = *dmUser->id + (avatar->rfind("a_") == 0 ? ".gif" : ".png");
                 rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *dmUser->id + "/" + *avatar, channelIconFileName);
             }
 
@@ -175,9 +175,9 @@ void PrivateChannelWidget::setStatus(std::string *status)
     statusIcon->setStatus(*status);
 }
 
-void PrivateChannelWidget::setIcon(const std::string& guildIconFileName)
+void PrivateChannelWidget::setIcon(const std::string& iconFileName)
 {
-    icon->setImage(guildIconFileName);
+    icon->setImage(iconFileName);
 }
 
 void PrivateChannelWidget::closeChannel()
