@@ -1,17 +1,14 @@
 #pragma once
 
-#include <QWidget>
+#include <QLabel>
 
 namespace Ui {
 
-class GuildPill : public QWidget
+class GuildPill : public QLabel
 {
 public:
     GuildPill(QWidget *parent);
     void setHeight(unsigned int height);
-
-private:
-    void paintEvent(QPaintEvent *) override;
 };
 
 } // namespace Ui

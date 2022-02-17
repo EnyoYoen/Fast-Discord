@@ -50,6 +50,7 @@ void MessageArea::setMessages(const std::vector<Api::Message *>& messages)
     this->show();
 
     if (messages.size() > 0) {
+        qDebug() << messages.size();
         lock.lock();
         // Loop through the messages starting by the end (the most recents)
         messageQueue.push(QueuedMessage{messages.back(), nullptr, false, false});

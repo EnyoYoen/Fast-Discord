@@ -2,11 +2,12 @@
 
 #include <QPainter>
 #include <QPaintEvent>
+#include <QPixmap>
 
 namespace Ui {
 
 GuildPill::GuildPill(QWidget *parent)
-    : QWidget(parent)
+    : QLabel(parent)
 {
     this->setFixedSize(4, 0);
     this->setStyleSheet("background-color: #FFF;");
@@ -14,23 +15,23 @@ GuildPill::GuildPill(QWidget *parent)
 
 void GuildPill::setHeight(unsigned int height)
 {
-    this->setFixedHeight(height);
-}
+    QPixmap image;
+    switch (height) {
+        case 8:
+            image.load("res/images/png/short-pill.png");
+            break;
 
-void GuildPill::paintEvent(QPaintEvent *)
-{
-    int h = height();
-    if (h != 0) {
-        QPainter p(this);
-        p.setRenderHint(QPainter::Antialiasing);
-        p.setRenderHint(QPainter::SmoothPixmapTransform);
+        case 20:
+            image.load("res/images/png/hover-pill.png");
+            break;
 
-        p.drawArc(0, 0, 4, 4, 0, 90*16);
-        p.drawArc(0, h - 4, 4, 4, 0, -90*16);
-
-        p.drawArc(1, 0, 4, 4, 0, 90*16);
-        p.drawArc(1, h - 4, 4, 4, 0, -90*16);
+        case 40:
+            image.load("res/images/png/long-pill.png");
+            break;
     }
+
+    this->setFixedHeight(height);
+    this->setPixmap(image);
 }
 
 } // namespace Ui

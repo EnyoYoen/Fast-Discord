@@ -200,7 +200,7 @@ void RightColumn::addMessage(const Api::Message& message)
         Api::Message *messagep = const_cast<Api::Message *>(&message);
         rm->getMessages([this, messagep](void *messagePtr) {
             std::vector<Api::Message *> channelMessages = *reinterpret_cast<std::vector<Api::Message *> *>(messagePtr);
-            messageArea->addMessage(messagep, channelMessages[0]);
+            messageArea->addMessage(messagep, channelMessages[1]);
         }, currentOpenedChannel, 1, false);
     }
 }
@@ -231,7 +231,8 @@ void RightColumn::sendMessage(const std::string& content)
     // Send a new message to the API and add it to the opened channel
     rm->requester->sendMessage(content, currentOpenedChannel);
     std::string messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
-    Api::Message *newMessage = new Api::Message {nullptr, new Api::User{new std::string(client->username->c_str()), new std::string(""), new std::string(client->avatar->c_str()), new std::string(""), new std::string(""), new std::string(client->id->c_str()), -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, new std::string(""), new std::string(""), new std::string(""), new std::string(content), new std::string(messageTimestamp), new std::string(""), new std::string(""), new std::string(""), new std::string(""), -1, -1, -1, -1, false, false, false};
+    std::string *fakeStr = new std::string("");
+    Api::Message *newMessage = new Api::Message {nullptr, new Api::User{new std::string(client->username->c_str()), fakeStr, new std::string(client->avatar->c_str()), fakeStr, fakeStr, new std::string(client->id->c_str()), -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, fakeStr, new std::string(currentOpenedChannel), fakeStr, new std::string(content), new std::string(messageTimestamp), fakeStr, fakeStr, fakeStr, fakeStr, -1, -1, -1, -1, false, false, false};
     this->addMessage(*newMessage);
     rm->pushFrontMessage(currentOpenedChannel, newMessage);
 }

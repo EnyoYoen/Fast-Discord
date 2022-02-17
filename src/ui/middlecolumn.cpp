@@ -111,6 +111,8 @@ void MiddleColumn::setGuildChannels(const std::vector<Api::Channel *> *channels)
             GuildChannelWidget *channelWidget = new GuildChannelWidget(*(*channels)[i], guildChannelList);
             guildChannelListLayout->addWidget(channelWidget);
             guildChannelWidgets.push_back(channelWidget);
+            // Connect the clicked signal to open the channel
+            QObject::connect(channelWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicGuildChannel(const std::string&)));
             count++;
         }
     }
@@ -124,18 +126,21 @@ void MiddleColumn::setGuildChannels(const std::vector<Api::Channel *> *channels)
             count++;
             // Loop another time to find channels belonging to this category
             for (size_t j = 0 ; j < channelsLen ; j++) {
-                if (*(*(*channels)[j]).parentId == "") continue;
-                    // Category or 'orphan' channel
+                if (*(*channels)[j]->parentId == "") { // Category or 'orphan' channel
+                    if ((*channels)[j]->type != Api::GuildCategory) {
+                        // Connect the clicked signal to open the channel
+                        QObject::connect(channelWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicGuildChannel(const std::string&)));
+                    }
+                }
                 if (*(*(*channels)[j]).parentId == *(*(*channels)[i]).id) {
                     // This channel belongs to the category
                     // Create and add the channel widget
                     GuildChannelWidget *channelWidget = new GuildChannelWidget(*(*channels)[j], guildChannelList);
                     guildChannelWidgets.push_back(channelWidget);
                     guildChannelListLayout->addWidget(channelWidget);
-                    count++;
-
                     // Connect the clicked signal to open the channel
                     QObject::connect(channelWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicGuildChannel(const std::string&)));
+                    count++;
                 }
             }
         }

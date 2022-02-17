@@ -132,6 +132,7 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
         // We received a message
         Api::Message *message;
         Api::unmarshal<Api::Message>(data.toObject(), &message);
+        (*messages)[*message->channelId].insert((*messages)[*message->channelId].begin(), message);
         if (*message->author->id != *client->id) emit messageReceived(*message);
     } else if (eventName == "PRESENCE_UPDATE") {
         Api::Presence *presence;
@@ -253,6 +254,8 @@ void RessourceManager::getMessages(std::function<void(void *)> callback, const s
             callback(reinterpret_cast<void *>(&(*messages)[channelId]));
         }, channelId, *(*messages)[channelId].back()->id, limit - (*messages)[channelId].size());
     } else {
+        std::vector<Api::Message *> m = (*messages)[channelId];
+        qDebug() << m.size();
         callback(reinterpret_cast<void *>(&(*messages)[channelId]));
     }
 }
