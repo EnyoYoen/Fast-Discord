@@ -254,8 +254,6 @@ void RessourceManager::getMessages(std::function<void(void *)> callback, const s
             callback(reinterpret_cast<void *>(&(*messages)[channelId]));
         }, channelId, *(*messages)[channelId].back()->id, limit - (*messages)[channelId].size());
     } else {
-        std::vector<Api::Message *> m = (*messages)[channelId];
-        qDebug() << m.size();
         callback(reinterpret_cast<void *>(&(*messages)[channelId]));
     }
 }

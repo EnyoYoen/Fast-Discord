@@ -7,10 +7,12 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QDateTime>
+#include <QTextStream>
 
 #include <fstream>
 #include <cstring>
 #include <iostream>
+#include <cstdlib>
 
 namespace Ui {
 
@@ -41,6 +43,10 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
 
         case Api::ChannelIconChange:
             channelIconChangeMessage(message);
+            break;
+        
+        case Api::GuildMemberJoin:
+            guildMemberJoinMessage(message);
             break;
 
         case Api::UserPremiumGuildSubscription:
@@ -472,6 +478,50 @@ void MessageWidget::userPremiumGuildSubscriptionMessage(Api::Message *message)
 
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
+
+    this->setMinimumHeight(26);
+}
+
+void MessageWidget::guildMemberJoinMessage(Api::Message *message)
+{
+    int randInt = rand() % 39;
+    QFile messageFile("res/text/welcome-messages.txt");
+    messageFile.open(QIODevice::ReadOnly);
+    for (int i = 0 ; i < randInt ; i++) {
+        messageFile.readLine();
+    }
+    std::string text = messageFile.readLine().toStdString();
+    std::string::size_type index = text.find("{}");
+    while (index != std::string::npos){
+        text.replace(index, 2, *message->author->username);
+        index = text.find("{}");
+    }
+
+    QHBoxLayout *layout = new QHBoxLayout(this);
+    QWidget *spacer = new QWidget(this);
+    QLabel *icon = new QLabel(this);
+    QLabel *textLabel = new QLabel(text.c_str(), this);
+    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime()), this);
+
+    spacer->setFixedWidth(28);
+    icon->setFixedWidth(44);
+    icon->setPixmap(QPixmap("res/images/svg/green-right-arrow.svg"));
+
+    textLabel->setStyleSheet("color: #8E9297;");
+    timestampLabel->setStyleSheet("color: #72767D;");
+    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    textLabel->setCursor(QCursor(Qt::IBeamCursor));
+    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+    layout->addWidget(spacer);
+    layout->addWidget(icon);
+    layout->addWidget(textLabel);
+    layout->addWidget(timestampLabel);
+    layout->addStretch();
+
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setAlignment(Qt::AlignVCenter);
 
     this->setMinimumHeight(26);
 }
