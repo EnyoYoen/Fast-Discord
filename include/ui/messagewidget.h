@@ -20,6 +20,8 @@ public:
     Api::RessourceManager *rm; // To request the API
 
 private:
+    void iconMessage(Api::Message *message, const std::string &text, const std::string& iconName);
+
     void defaultMessage(Api::Message *message, bool separatorBefore);
     void recipientMessage(Api::Message *message);
     void callMessage(Api::Message *message);

@@ -263,20 +263,8 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
     mainLayout->setContentsMargins(0, 0, 0, 0);
 }
 
-void MessageWidget::recipientMessage(Api::Message *message)
+void MessageWidget::iconMessage(Api::Message *message, const std::string &text, const std::string& iconName)
 {
-    std::string arrowName;
-    std::string text;
-
-    if (message->type == Api::RecipientAdd) {
-        arrowName = "green-right-arrow.svg";
-        text = *(*message->mentions)[0]->username + " added " +
-                *message->author->username + " to the group.";
-    } else {
-        arrowName = "red-left-arrow.svg";
-        text = *(*message->mentions)[0]->username + " left the group.";
-    }
-
     QHBoxLayout *layout = new QHBoxLayout(this);
     QWidget *spacer = new QWidget(this);
     QLabel *icon = new QLabel(this);
@@ -285,7 +273,7 @@ void MessageWidget::recipientMessage(Api::Message *message)
 
     spacer->setFixedWidth(28);
     icon->setFixedWidth(44);
-    icon->setPixmap(QPixmap(("res/images/svg/" + arrowName).c_str()));
+    icon->setPixmap(QPixmap(("res/images/svg/" + iconName).c_str()));
 
     textLabel->setStyleSheet("color: #8E9297;");
     timestampLabel->setStyleSheet("color: #72767D;");
@@ -303,6 +291,23 @@ void MessageWidget::recipientMessage(Api::Message *message)
     layout->setContentsMargins(0, 0, 0, 0);
 
     this->setMinimumHeight(26);
+}
+
+void MessageWidget::recipientMessage(Api::Message *message)
+{
+    std::string arrowName;
+    std::string text;
+
+    if (message->type == Api::RecipientAdd) {
+        arrowName = "green-right-arrow.svg";
+        text = *(*message->mentions)[0]->username + " added " +
+                *message->author->username + " to the group.";
+    } else {
+        arrowName = "red-left-arrow.svg";
+        text = *(*message->mentions)[0]->username + " left the group.";
+    }
+
+    iconMessage(message, text, arrowName);
 }
 
 void MessageWidget::callMessage(Api::Message *message)
@@ -354,94 +359,19 @@ void MessageWidget::callMessage(Api::Message *message)
     if (clientId == *message->author->id)
         phoneName = "green-phone.svg";
 
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    QWidget *spacer = new QWidget(this);
-    QLabel *icon = new QLabel(this);
-    QLabel *textLabel = new QLabel(text.c_str(), this);
-    QLabel *timestampLabel = new QLabel(processTimestamp(dateTime), this);
-
-    spacer->setFixedWidth(28);
-    icon->setFixedWidth(44);
-    icon->setPixmap(QPixmap(("res/images/svg/" + phoneName).c_str()));
-
-    textLabel->setStyleSheet("color: #8E9297;");
-    timestampLabel->setStyleSheet("color: #72767D;");
-    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    textLabel->setCursor(QCursor(Qt::IBeamCursor));
-    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-
-    layout->addWidget(spacer);
-    layout->addWidget(icon);
-    layout->addWidget(textLabel);
-    layout->addWidget(timestampLabel);
-    layout->addStretch();
-
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    this->setMinimumHeight(26);
+    iconMessage(message, text, phoneName);
 
     });
 }
 
 void MessageWidget::channelNameChangeMessage(Api::Message *message)
 {
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    QWidget *spacer = new QWidget(this);
-    QLabel *icon = new QLabel(this);
-    QLabel *textLabel = new QLabel((*message->author->username + " changed the channel name: " + *message->content).c_str(), this);
-    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime()), this);
-
-    spacer->setFixedWidth(28);
-    icon->setFixedWidth(44);
-    icon->setPixmap(QPixmap("res/images/svg/pen.svg"));
-
-    textLabel->setStyleSheet("color: #8E9297;");
-    timestampLabel->setStyleSheet("color: #72767D;");
-    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    textLabel->setCursor(QCursor(Qt::IBeamCursor));
-    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-
-    layout->addWidget(spacer);
-    layout->addWidget(icon);
-    layout->addWidget(textLabel);
-    layout->addWidget(timestampLabel);
-    layout->addStretch();
-
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    this->setMinimumHeight(26);
+    iconMessage(message, *message->author->username + " changed the channel name: " + *message->content, "pen.svg");
 }
 
 void MessageWidget::channelIconChangeMessage(Api::Message *message)
 {
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    QWidget *spacer = new QWidget(this);
-    QLabel *icon = new QLabel(this);
-    QLabel *textLabel = new QLabel((*message->author->username + " changed the channel icon.").c_str(), this);
-    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime()), this);
-
-    spacer->setFixedWidth(28);
-    icon->setFixedWidth(44);
-    icon->setPixmap(QPixmap("res/images/svg/pen.svg"));
-
-    textLabel->setStyleSheet("color: #8E9297;");
-    timestampLabel->setStyleSheet("color: #72767D;");
-    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    textLabel->setCursor(QCursor(Qt::IBeamCursor));
-    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-
-    layout->addWidget(spacer);
-    layout->addWidget(icon);
-    layout->addWidget(textLabel);
-    layout->addWidget(timestampLabel);
-    layout->addStretch();
-
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    this->setMinimumHeight(26);
+    iconMessage(message, *message->author->username + " changed the channel icon.", "pen.svg");
 }
 
 void MessageWidget::userPremiumGuildSubscriptionMessage(Api::Message *message)
@@ -454,32 +384,7 @@ void MessageWidget::userPremiumGuildSubscriptionMessage(Api::Message *message)
     else if (message->type == Api::UserPremiumGuildSubscriptionTier3)
         text += "(Tier 3)";
 
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    QWidget *spacer = new QWidget(this);
-    QLabel *icon = new QLabel(this);
-    QLabel *textLabel = new QLabel(text.c_str(), this);
-    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime()), this);
-
-    spacer->setFixedWidth(28);
-    icon->setFixedWidth(44);
-    icon->setPixmap(QPixmap("res/images/svg/boost.svg"));
-
-    textLabel->setStyleSheet("color: #8E9297;");
-    timestampLabel->setStyleSheet("color: #72767D;");
-    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    textLabel->setCursor(QCursor(Qt::IBeamCursor));
-    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-
-    layout->addWidget(spacer);
-    layout->addWidget(icon);
-    layout->addWidget(textLabel);
-    layout->addWidget(timestampLabel);
-    layout->addStretch();
-
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    this->setMinimumHeight(26);
+    iconMessage(message, text, "boost.svg");
 }
 
 void MessageWidget::guildMemberJoinMessage(Api::Message *message)
@@ -497,33 +402,7 @@ void MessageWidget::guildMemberJoinMessage(Api::Message *message)
         index = text.find("{}");
     }
 
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    QWidget *spacer = new QWidget(this);
-    QLabel *icon = new QLabel(this);
-    QLabel *textLabel = new QLabel(text.c_str(), this);
-    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime()), this);
-
-    spacer->setFixedWidth(28);
-    icon->setFixedWidth(44);
-    icon->setPixmap(QPixmap("res/images/svg/green-right-arrow.svg"));
-
-    textLabel->setStyleSheet("color: #8E9297;");
-    timestampLabel->setStyleSheet("color: #72767D;");
-    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    textLabel->setCursor(QCursor(Qt::IBeamCursor));
-    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-
-    layout->addWidget(spacer);
-    layout->addWidget(icon);
-    layout->addWidget(textLabel);
-    layout->addWidget(timestampLabel);
-    layout->addStretch();
-
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setAlignment(Qt::AlignVCenter);
-
-    this->setMinimumHeight(26);
+    iconMessage(message, text, "green-right-arrow.svg");
 }
 
 } // namespace Ui
