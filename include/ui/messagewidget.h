@@ -27,8 +27,10 @@ private:
     void callMessage(Api::Message *message);
     void channelNameChangeMessage(Api::Message *message);
     void channelIconChangeMessage(Api::Message *message);
+    void channelPinnedMessage(Api::Message *message);
     void guildMemberJoinMessage(Api::Message *message);
     void userPremiumGuildSubscriptionMessage(Api::Message *message);
+    void channelFollowAdd(Api::Message *message);
 
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;

@@ -44,9 +44,17 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
         case Api::ChannelIconChange:
             channelIconChangeMessage(message);
             break;
+
+        case Api::ChannelPinnedMessage:
+            channelPinnedMessage(message);
+            break;
         
         case Api::GuildMemberJoin:
             guildMemberJoinMessage(message);
+            break;
+
+        case Api::ChannelFollowAdd:
+            channelFollowAdd(message);
             break;
 
         case Api::UserPremiumGuildSubscription:
@@ -374,6 +382,11 @@ void MessageWidget::channelIconChangeMessage(Api::Message *message)
     iconMessage(message, *message->author->username + " changed the channel icon.", "pen.svg");
 }
 
+void MessageWidget::channelPinnedMessage(Api::Message *message)
+{
+    iconMessage(message, *message->author->username + " pinned a message to this channel. See all pinned messages.", "pin.svg");
+}
+
 void MessageWidget::userPremiumGuildSubscriptionMessage(Api::Message *message)
 {
     std::string text = (*message->author->username + " just boosted the server.");
@@ -403,6 +416,12 @@ void MessageWidget::guildMemberJoinMessage(Api::Message *message)
     }
 
     iconMessage(message, text, "green-right-arrow.svg");
+}
+
+void MessageWidget::channelFollowAdd(Api::Message *message)
+{
+    iconMessage(message, *message->author->username + " has added " + *message->content
+     + " to this channel. Its most important updates will show up here.", "green-right-arrow.svg");
 }
 
 } // namespace Ui
