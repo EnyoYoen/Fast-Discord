@@ -514,6 +514,11 @@ void unmarshal<Sticker>(QJsonObject jsonObj, Sticker **object)
 
 Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
 {
+    if (key == QString("") && jsonObj[key].type() == QJsonValue::Undefined) {
+        return nullptr;
+    }
+    jsonObj = key == QString("") ? jsonObj : jsonObj[key].toObject();
+
     Application *application = new Application;
     User *author = new User;
     MessageActivity *activity = new MessageActivity;
@@ -543,11 +548,6 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
     unmarshalMultiple<MessageComponent>(jsonObj, "components", &components);
     unmarshalMultiple<StickerItem>(jsonObj, "sticker_items", &stickerItems);
     unmarshalMultiple<Sticker>(jsonObj, "stickers", &stickers);
-
-    if (key == QString("") && jsonObj[key].type() == QJsonValue::Undefined) {
-        return nullptr;
-    }
-    jsonObj = key == QString("") ? jsonObj : jsonObj[key].toObject();
 
     return new Message {
         application,

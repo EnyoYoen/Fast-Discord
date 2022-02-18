@@ -132,17 +132,13 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
         // We received a message
         Api::Message *message;
         Api::unmarshal<Api::Message>(data.toObject(), &message);
-        (*messages)[*message->channelId].insert((*messages)[*message->channelId].begin(), message);
+        if (messages->find(*message->channelId) != messages->end())
+            (*messages)[*message->channelId].insert((*messages)[*message->channelId].begin(), message);
         if (*message->author->id != *client->id) emit messageReceived(*message);
     } else if (eventName == "PRESENCE_UPDATE") {
         Api::Presence *presence;
         Api::unmarshal<Api::Presence>(data.toObject(), &presence);
         emit presenceReceived(*presence);
-    } else if (eventName == "TYPING_START") {
-        // Someone is typing
-        /*gatewayData = data;
-        QThread *typingThread = QThread::create([this](){rightColumn->userTyping(gatewayData);});
-        typingThread->start();*/
     }
 }
 
