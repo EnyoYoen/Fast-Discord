@@ -35,13 +35,15 @@ private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
     void setAvatar(const std::string& avatarFileName);
+    void setReplyAvatar(const std::string& avatarFileName);
     void addImage(const std::string& filename, int width, int height);
     QString processTime(QTime time);
     QString processTimestamp(QDateTime dateTime);
 
-    QString hoveredTimestamp;           // The timestamp we show
-    RoundedImage *avatar = nullptr;     // The avatar if there is one
-    QLabel *timestampLabel = nullptr;   // The label of the timestamp
+    QString hoveredTimestamp;         // The timestamp we show
+    RoundedImage *avatar = nullptr;   // The avatar if there is one
+    RoundedImage *replyAvatar = nullptr;
+    QLabel *timestampLabel = nullptr; // The label of the timestamp
     MarkdownLabel *content = nullptr;
     QVBoxLayout *dataLayout = nullptr;
     bool isFirst;             // Is the message is not grouped

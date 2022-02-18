@@ -64,6 +64,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
             userPremiumGuildSubscriptionMessage(message);
             break;
 
+        case Api::Reply:
         default:
             defaultMessage(message, separatorBefore);
     }
@@ -77,6 +78,11 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
 void MessageWidget::setAvatar(const std::string& avatarFileName)
 {
     avatar->setImage(avatarFileName);
+}
+
+void MessageWidget::setReplyAvatar(const std::string& avatarFileName)
+{
+    replyAvatar->setImage(avatarFileName);
 }
 
 void MessageWidget::addImage(const std::string& filename, int width, int height)
@@ -165,14 +171,58 @@ QString MessageWidget::processTimestamp(QDateTime dateTime)
 void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
 {
     // Create the main widgets
-    QHBoxLayout *mainLayout = new QHBoxLayout(this);
-    QWidget *data = new QWidget(this);
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    QWidget *mainMessage = new QWidget(this);
+    QHBoxLayout *mainLayout = new QHBoxLayout(mainMessage);
+    QWidget *data = new QWidget(mainMessage);
     dataLayout = new QVBoxLayout(data);
-    QWidget *iconContainer = new QWidget(this);
+    QWidget *iconContainer = new QWidget(mainMessage);
     QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
 
     // Get the date and time of the message
     QDateTime dateTime = QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime();
+
+    if (message->referencedMessage != nullptr && *message->referencedMessage->id != "") {
+        Api::Message *ref = message->referencedMessage;
+        isFirst = true;
+
+        QWidget *reply = new QWidget(this);
+        QHBoxLayout *replyLayout = new QHBoxLayout(reply);
+
+        QLabel *replyIcon = new QLabel(reply);
+        replyIcon->setPixmap(QPixmap("res/images/png/reply2.png"));
+        replyIcon->setFixedSize(68, 22);
+        replyLayout->addWidget(replyIcon);
+
+        // Get the icon of the message
+        if (ref->author->avatar == nullptr || *ref->author->avatar == "") {
+            // Use an asset if the user doesn't have an icon
+            replyLayout->addWidget(new RoundedImage("res/images/png/user-icon-asset0.png", 16, 16, 8, reply));
+        } else {
+            // Request the avatar
+            std::string avatarFileName = *ref->author->avatar + (ref->author->avatar->rfind("a_") == 0 ? ".gif" : ".png");
+            replyAvatar = new RoundedImage(16, 16, 8, reply);
+            replyLayout->addWidget(replyAvatar);
+            rm->getImage([this](void *avatarFileName) {this->setReplyAvatar(*reinterpret_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *ref->author->id + "/" + avatarFileName, avatarFileName);
+        }
+
+        QLabel *username = new QLabel(ref->author->username->c_str(), reply);
+        username->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+        username->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        username->setCursor(QCursor(Qt::PointingHandCursor));
+
+        QLabel *content = new QLabel(ref->content->c_str());
+        content->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        content->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        content->setCursor(QCursor(Qt::PointingHandCursor));
+        content->setStyleSheet("color: #B9BBBE;");
+
+        replyLayout->addWidget(username);
+        replyLayout->addWidget(content);
+        replyLayout->setSpacing(4);
+
+        layout->addWidget(reply);
+    }
 
     if (isFirst) {
         // The message is not grouped to another message
@@ -184,12 +234,15 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
         // Get the icon of the message
         if (avatarId == nullptr || *avatarId == "") {
             // Use an asset if the user doesn't have an icon
-            iconLayout->addWidget(new RoundedImage("res/images/png/user-icon-asset0.png", 40, 40, 20, iconContainer));
+            avatar = new RoundedImage("res/images/png/user-icon-asset0.png", 40, 40, 20, iconContainer);
+            iconLayout->addWidget(avatar);
+            iconLayout->setAlignment(avatar, Qt::AlignHCenter);
         } else {
-            // Request the icon
+            // Request the avatar
             std::string avatarFileName = *author.avatar + (author.avatar->rfind("a_") == 0 ? ".gif" : ".png");
             avatar = new RoundedImage(40, 40, 20, iconContainer);
             iconLayout->addWidget(avatar);
+            iconLayout->setAlignment(avatar, Qt::AlignHCenter);
             rm->getImage([this](void *avatarFileName) {this->setAvatar(*reinterpret_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
         }
 
@@ -269,6 +322,10 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
     mainLayout->addWidget(data);
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    layout->addWidget(mainMessage);
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 }
 
 void MessageWidget::iconMessage(Api::Message *message, const std::string &text, const std::string& iconName)
