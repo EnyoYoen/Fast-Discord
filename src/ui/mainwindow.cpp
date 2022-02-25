@@ -4,8 +4,12 @@
 
 #include <QThread>
 #include <QInputDialog>
+#include <QListWidget>
 #include <QLineEdit>
 #include <QSettings>
+#include <QDialogButtonBox>
+#include <QFormLayout>
+#include <QDialog>
 
 namespace Ui {
 
@@ -18,8 +22,8 @@ MainWindow::MainWindow() : QWidget()
                         "padding: 0px;"
                         "border: none;");
 
-    // Get token from config if exists and get it from user input if not
-    std::string token = getToken();
+    // Get account token from accounts list
+    std::string token = getAccountToken();
 
     // Create the ressource manager
     rm = new Api::RessourceManager(token);
@@ -37,20 +41,92 @@ MainWindow::MainWindow() : QWidget()
     });
 }
 
-std::string MainWindow::getToken() {
-    QSettings* settings = new QSettings("Fast-Discord", "config");
-    std::string token = "";
+void MainWindow::addAccountInConfig(QSettings *settings, QMap<QString, std::string> accountMap) {
+    settings->beginGroup("Accounts");
+    QMap<QString, std::string>::const_iterator i = accountMap.constBegin();
+    while (i != accountMap.constEnd()) {
+         settings->setValue(i.key(), i.value().c_str());
+         ++i;
+     }
+    settings->endGroup();
+}
 
-    if (settings->value("token", "") == "") {
-        // Add token if it's empty
-        token = QInputDialog::getText(nullptr, "Token", "Enter your Discord token", QLineEdit::Normal, QString(), nullptr).toUtf8().constData();
+QMap<QString, std::string> MainWindow::getNewAccount() {
+    QDialog dlg(nullptr);
+    dlg.setWindowTitle(tr("Add new account"));
+
+    QLineEdit *ledit1 = new QLineEdit(&dlg);
+    QLineEdit *ledit2 = new QLineEdit(&dlg);
+
+    QDialogButtonBox *btn_box = new QDialogButtonBox(&dlg);
+    btn_box->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+    connect(btn_box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(btn_box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+
+    QFormLayout *layout = new QFormLayout();
+    layout->addRow(tr("Account name:"), ledit1);
+    layout->addRow(tr("Account token:"), ledit2);
+    layout->addWidget(btn_box);
+
+    dlg.setLayout(layout);
+
+    // if user press 'ok' button
+    if(dlg.exec() == QDialog::Accepted) {
+        std::string token = ledit2->text().toUtf8().constData();
         token.erase(std::remove_if(token.begin(), token.end(), ::isspace), token.end());
 
-        settings->setValue("token", token.c_str());
+        return { {ledit1->text().toUtf8(), token} };
+    }
+
+    return {};
+}
+
+QMap<QString, std::string> MainWindow::getAccountsMap(QSettings *settings) {
+    QMap<QString, std::string> accountsMap;
+
+    settings->beginGroup("Accounts");
+    QStringList keys = settings->childKeys();
+    foreach (QString key, keys) {
+         accountsMap[key] = settings->value(key).toString().toStdString();
+    }
+    settings->endGroup();
+
+    return accountsMap;
+}
+
+std::string MainWindow::getAccountToken() {
+    QSettings* settings = new QSettings("Fast-Discord", "config");
+    std::string token = "";
+    QString name = "";
+
+    QMap<QString, std::string> accountsMap = getAccountsMap(settings);
+
+    if (accountsMap.isEmpty()) {
+        // Add token if it's empty
+        QMap<QString, std::string> tknmp = getNewAccount();
+        name = tknmp.firstKey();
+        token = tknmp.first();
+
+        addAccountInConfig(settings, tknmp);
     }
     else {
-        // Get token from config file
-        token = settings->value("token", token.c_str()).toString().toStdString();
+        // Get account from list
+        bool ok;
+        QString accountName = QInputDialog::getItem(nullptr, "Accounts", "Choice your account", accountsMap.keys(), 0, false, &ok);
+
+        // if user pick normal account - return account token
+        if (ok && !accountName.isEmpty()) {
+            return accountsMap[accountName];
+        }
+        // if user push 'cancel' button - add new account and then set token from new account
+        else {
+            QMap<QString, std::string> tknmp = getNewAccount();
+
+            token = tknmp.first();
+
+            addAccountInConfig(settings, tknmp);
+        }
     }
 
     return token;
