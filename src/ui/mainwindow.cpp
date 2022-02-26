@@ -54,6 +54,7 @@ void MainWindow::addAccountInConfig(QSettings *settings, QMap<QString, std::stri
 QMap<QString, std::string> MainWindow::getNewAccount() {
     QDialog dlg(nullptr);
     dlg.setWindowTitle(tr("Add new account"));
+    dlg.setWindowIcon(QIcon("res/images/png/icon.png"));
 
     QLineEdit *ledit1 = new QLineEdit(&dlg);
     QLineEdit *ledit2 = new QLineEdit(&dlg);
@@ -113,7 +114,7 @@ std::string MainWindow::getAccountToken() {
     else {
         // Get account from list
         bool ok;
-        QString accountName = QInputDialog::getItem(nullptr, "Accounts", "Choice your account", accountsMap.keys(), 0, false, &ok);
+        QString accountName = QInputDialog::getItem(nullptr, "Accounts", "Choose your account", accountsMap.keys(), 0, false, &ok);
 
         // if user pick normal account - return account token
         if (ok && !accountName.isEmpty()) {
@@ -148,6 +149,8 @@ void MainWindow::setup()
     // Style the layout
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    this->setWindowIcon(QIcon("res/images/png/icon.png"));
 
     // Connect signals to slots of the columns
     QObject::connect(leftColumn, SIGNAL(guildClicked(const std::string&)), middleColumn, SLOT(openGuild(const std::string&)));
