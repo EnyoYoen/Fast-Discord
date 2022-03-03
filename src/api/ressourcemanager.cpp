@@ -22,8 +22,10 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
 {
     // Process gateway events
     if (eventName == "READY") {
+        std::vector<Api::GuildFolder *> *folders;
+        Api::unmarshalMultiple<Api::GuildFolder>(data["user_settings"]["guild_folders"].toArray(), &folders);
         Api::unmarshalMultiple<Api::Guild>(data["guilds"].toArray(), &guilds);
-        emit guildsReceived(*guilds);
+        emit guildsReceived(*guilds, *getStringsFromJson(data["user_settings"]["guild_positions"].toArray()), *folders);
 
         Api::unmarshalMultiple<Api::PrivateChannel>(data["private_channels"].toArray(), &privateChannels);
         Api::unmarshalMultiple<Api::User>(data["users"].toArray(), &users);

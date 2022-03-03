@@ -1,7 +1,8 @@
 #pragma once
 
-#include "homebutton.h"
+#include "ui/homebutton.h"
 #include "ui/guildwidget.h"
+#include "ui/guildfolder.h"
 #include "api/guild.h"
 #include "api/ressourcemanager.h"
 
@@ -25,7 +26,7 @@ signals:
     void guildClicked(const std::string&);
 
 public slots:
-    void displayGuilds(const std::vector<Api::Guild *>& guilds);
+    void displayGuilds(const std::vector<Api::Guild *>& guilds, const std::vector<std::string>& positions, const std::vector<Api::GuildFolder *>& folders);
 
 private slots:
     void clicHomeButton();
@@ -40,6 +41,7 @@ private:
     Api::RessourceManager *rm; // To request the API
 
     std::vector<GuildWidget *> guildWidgets;
+    std::vector<GuildFolder *> guildFolders;
 
     bool homePageShown; // If the home page is shown
 };

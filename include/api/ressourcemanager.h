@@ -35,12 +35,12 @@ public:
     std::vector<Api::Message *> getAllMessages(std::string& channelId);
     bool hasMessages(const std::string& channelId);
     void pushFrontMessage(const std::string& channelId, Api::Message *message);
-
+    
     Requester *requester;
 
 signals:
     void typingReceived();
-    void guildsReceived(const std::vector<Api::Guild *>&);
+    void guildsReceived(const std::vector<Api::Guild *>&, const std::vector<std::string>&, const std::vector<Api::GuildFolder *>&);
     void presencesReceived(const std::vector<Api::Presence *>&);
     void privateChannelsReceived(const std::vector<Api::PrivateChannel *>&);
     void unreadUpdateReceived(const std::string&);

@@ -50,18 +50,35 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     QObject::connect(homeButton, SIGNAL(clicked()), this, SLOT(clicHomeButton()));
 }
 
-void LeftColumn::displayGuilds(const std::vector<Api::Guild *>& guilds)
+void LeftColumn::displayGuilds(const std::vector<Api::Guild *>& guilds, const std::vector<std::string>& positions, const std::vector<Api::GuildFolder *>& folders)
 {
-    // Loop through every guild object
-    for (size_t i = 0 ; i < guilds.size() ; i++) {
-        // Create the guild widget and add it the guild storage and the layout
-        GuildWidget *guildWidget = new GuildWidget(rm, *guilds[i], this);
-        guildWidgets.push_back(guildWidget);
-
-        layout->insertWidget(i + 3, guildWidget);
-
-        // Connect the clic signal
-        QObject::connect(guildWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicGuild(const std::string&)));
+    unsigned int widgetCounter = 0;
+    for (unsigned int i = 0 ; i < folders.size() ; i++) {
+        Api::GuildFolder *folder = folders[i];
+        std::vector<Api::Guild *> folderGuilds;
+        for (unsigned int j = 0 ; j < folder->guildIds->size() ; j++) {
+            for (unsigned int k = 0 ; k < guilds.size() ; k++) {
+                if ((*folder->guildIds)[j] == *(guilds[k]->id)) {
+                    if (folder->guildIds->size() == 1) {
+                        GuildWidget *guildWidget = new GuildWidget(rm, *guilds[k], this);
+                        guildWidgets.push_back(guildWidget);
+                        layout->insertWidget(widgetCounter + 3, guildWidget);
+                        QObject::connect(guildWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicGuild(const std::string&)));
+                        widgetCounter++;
+                        break;
+                    } else {
+                        folderGuilds.push_back(guilds[k]);
+                    }
+                }
+            }
+        }
+        if (folder->guildIds->size() > 1) {
+            GuildFolder *folder = new GuildFolder(rm, folderGuilds, this);
+            guildFolders.push_back(folder);
+            layout->insertWidget(widgetCounter + 3, folder);
+            QObject::connect(folder, SIGNAL(guildClicked(const std::string&)), this, SLOT(clicGuild(const std::string&)));
+            widgetCounter++;
+        }
     }
 }
 
@@ -74,6 +91,9 @@ void LeftColumn::clicHomeButton()
         // Reset the stylesheet of the actual clicked guild
         for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
             guildWidgets[i]->unclicked();
+        }
+        for (size_t i = 0 ; i < guildFolders.size() ; i++) {
+            guildFolders[i]->unclicked();
         }
 
         // Emit signals
@@ -97,6 +117,9 @@ void LeftColumn::clicGuild(const std::string& guildId)
         if (guildWidgets[i]->id != guildId) {
             guildWidgets[i]->unclicked();
         }
+    }
+    for (size_t i = 0 ; i < guildFolders.size() ; i++) {
+        guildFolders[i]->unclickedExcept(guildId);
     }
 
     // Emit signals

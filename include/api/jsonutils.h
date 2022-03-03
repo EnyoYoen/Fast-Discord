@@ -8,6 +8,8 @@
 
 namespace Api {
 
+std::vector<std::string> *getStringsFromJson(QJsonArray jsonArray);
+
 // Template function that we specialize with all Discord's API JSON objects that we can recieve, to unmarshal them
 template <typename T>
 void unmarshal(QJsonObject jsonObj, T **object);
