@@ -43,6 +43,8 @@ SOURCES += \
     ../src/ui/downloadbutton.cpp \
     ../src/ui/downloadlink.cpp \
     ../src/ui/guildchannelwidget.cpp \
+    ../src/ui/guildfolder.cpp \
+    ../src/ui/guildicon.cpp \
     ../src/ui/guildpill.cpp \
     ../src/ui/guildwidget.cpp \
     ../src/ui/homebutton.cpp \
@@ -88,6 +90,8 @@ HEADERS += \
     ../include/ui/downloadbutton.h \
     ../include/ui/downloadlink.h \
     ../include/ui/guildchannelwidget.h \
+    ../include/ui/guildfolder.h \
+    ../include/ui/guildicon.h \
     ../include/ui/guildpill.h \
     ../include/ui/guildwidget.h \
     ../include/ui/homebutton.h \
