@@ -134,19 +134,20 @@ void LeftColumn::clicGuild(const std::string& guildId)
 
 void LeftColumn::setUnreadGuild(const std::string& guildId)
 {
-    rm->getGuilds([&](void *guilds){
-        for (size_t i = 0 ; i < reinterpret_cast<std::vector<Api::Guild *> *>(guilds)->size() ; i++) {
-            if (*(*reinterpret_cast<std::vector<Api::Guild *> *>(guilds))[i]->id == guildId)
-                guildWidgets[i]->setUnread(true);
-                return;
+    for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
+        if (guildWidgets[i]->id == guildId) {
+            guildWidgets[i]->setUnread(true);
+            return;
         }
-    });
+    }
 
     for (unsigned int i = 0 ; i < guildFolders.size() ; i++) {
         std::vector<std::string> guildIds = guildFolders[i]->guildIds;
         for (unsigned int j = 0 ; j < guildIds.size() ; j++) {
-            if (guildIds[j] == guildId)
+            if (guildIds[j] == guildId) {
                 guildFolders[i]->setUnread(guildId);
+                return;
+            }
         }
     }
 }
