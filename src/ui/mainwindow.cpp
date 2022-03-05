@@ -124,6 +124,9 @@ std::string MainWindow::getAccountToken() {
         else {
             QMap<QString, std::string> tknmp = getNewAccount();
 
+            if (tknmp.isEmpty())
+                exit(0);
+
             token = tknmp.first();
 
             addAccountInConfig(settings, tknmp);
@@ -158,6 +161,7 @@ void MainWindow::setup()
     QObject::connect(leftColumn, SIGNAL(cleanRightColumn()), rightColumn, SLOT(clean()));
     QObject::connect(middleColumn, SIGNAL(guildChannelClicked(const std::string&, const std::string&)), rightColumn, SLOT(openGuildChannel(const std::string&, const std::string&)));
     QObject::connect(middleColumn, SIGNAL(privateChannelClicked(const std::string&)), rightColumn, SLOT(openPrivateChannel(const std::string&)));
+    QObject::connect(rightColumn, SIGNAL(messageAdded(const std::string&)), middleColumn, SLOT(putChannelFirst(const std::string&)));
     QObject::connect(rm, SIGNAL(unreadUpdateReceived(const std::string&)), leftColumn, SLOT(setUnreadGuild(const std::string&)));
     QObject::connect(rm, SIGNAL(messageReceived(const Api::Message&)), rightColumn, SLOT(addMessage(const Api::Message&)));
     QObject::connect(rm, SIGNAL(presenceReceived(const Api::Presence&)), middleColumn, SLOT(updatePresence(const Api::Presence&)));

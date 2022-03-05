@@ -30,6 +30,7 @@ signals:
     void userTypingReceived(const Api::User *user);
     void messagesReceived(std::vector<Api::Message *> *messages);
     void moreMessagesReceived(const std::vector<Api::Message *>& messages);
+    void messageAdded(const std::string& channelId);
 
 public slots:
     void clean();

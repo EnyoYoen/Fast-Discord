@@ -232,7 +232,7 @@ void MiddleColumn::createChannel(const Api::Channel *channel, const Api::Private
     if (channel == nullptr) {
         for (unsigned int i = 0 ; i < privateChannelWidgets.size() ; i++) {
             if (*privateChannel->id == (*privateChannelWidgets[i]).id) {
-                privateChannelWidgets.push_back(new PrivateChannelWidget(rm, *privateChannel, this));
+                privateChannelWidgets.insert(privateChannelWidgets.begin(), new PrivateChannelWidget(rm, *privateChannel, this));
             }
         }
         displayPrivateChannels();
@@ -257,6 +257,19 @@ void MiddleColumn::deleteChannel(const std::string& id, const std::string& guild
         if (openedGuildId == guildId) 
             openGuild(guildId);
     }
+}
+
+void MiddleColumn::putChannelFirst(const std::string& id)
+{
+    for (auto it = privateChannelWidgets.begin() ; it != privateChannelWidgets.end() ; it++) {
+        if (id == (*it)->id) {
+            PrivateChannelWidget *tmp = *it;
+            privateChannelWidgets.erase(it);
+            privateChannelWidgets.insert(privateChannelWidgets.begin(), tmp);
+            break;
+        }
+    }
+    displayPrivateChannels();
 }
 
 } // namespace Ui

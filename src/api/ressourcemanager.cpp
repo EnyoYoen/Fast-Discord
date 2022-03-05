@@ -60,7 +60,12 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
                 channel->ownerId,
                 channel->type
             };
-            privateChannels->push_back(privateChannel);
+            privateChannels->insert(std::upper_bound(privateChannels->begin(), privateChannels->end(), privateChannel,
+            [](const Api::PrivateChannel *a, const Api::PrivateChannel *b) {
+                if (a->lastMessageId == nullptr || *a->lastMessageId == "") return false;
+                if (b->lastMessageId == nullptr || *b->lastMessageId == "") return true;
+                return ((std::stol(*a->lastMessageId) >> 22) + 1420070400000) > ((std::stol(*b->lastMessageId) >> 22) + 1420070400000);
+            }), privateChannel);
 
             emit channelCreated(nullptr, privateChannel);
         } else {
@@ -97,7 +102,12 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
                 channel->ownerId,
                 channel->type
             };
-            privateChannels->push_back(privateChannel);
+            privateChannels->insert(std::upper_bound(privateChannels->begin(), privateChannels->end(), privateChannel,
+            [](const Api::PrivateChannel *a, const Api::PrivateChannel *b) {
+                if (a->lastMessageId == nullptr || *a->lastMessageId == "") return false;
+                if (b->lastMessageId == nullptr || *b->lastMessageId == "") return true;
+                return ((std::stol(*a->lastMessageId) >> 22) + 1420070400000) > ((std::stol(*b->lastMessageId) >> 22) + 1420070400000);
+            }), privateChannel);
 
             emit channelUpdated(nullptr, privateChannel);
         } else {

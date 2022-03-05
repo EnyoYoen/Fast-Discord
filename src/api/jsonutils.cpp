@@ -17,6 +17,8 @@
 #include <string>
 
 #include <QJsonObject>
+#include <QJsonDocument>
+#include <QDebug>
 
 namespace Api {
 
@@ -855,8 +857,9 @@ void unmarshal<GuildFolder>(QJsonObject jsonObj, GuildFolder **object)
         getStringsFromJson(jsonObj["guild_ids"].toArray()),
 
         getString(jsonObj, "name"),
+        getString(jsonObj, "id"),
 
-        jsonObj["id"].toInt(-1),
+        jsonObj["id"].toVariant().toLongLong(),
         jsonObj["color"].toInt(0x005865F2)
     };
 }

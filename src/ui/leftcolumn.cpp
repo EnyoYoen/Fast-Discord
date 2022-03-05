@@ -63,7 +63,7 @@ void LeftColumn::displayGuilds(const std::vector<Api::Guild *>& guilds)
             for (unsigned int j = 0 ; j < folder->guildIds->size() ; j++) {
                 for (unsigned int k = 0 ; k < guilds.size() ; k++) {
                     if ((*folder->guildIds)[j] == *(guilds[k]->id)) {
-                        if (folder->guildIds->size() == 1) {
+                        if (folder->intId == 0 && (folder->strId == nullptr || *folder->strId == "")) {
                             GuildWidget *guildWidget = new GuildWidget(rm, *guilds[k], this);
                             guildWidgets.push_back(guildWidget);
                             layout->insertWidget(widgetCounter + 3, guildWidget);
@@ -76,7 +76,7 @@ void LeftColumn::displayGuilds(const std::vector<Api::Guild *>& guilds)
                     }
                 }
             }
-            if (folder->guildIds->size() > 1) {
+            if ((folder->intId != 0) || (folder->strId != nullptr && *folder->strId != "")) {
                 GuildFolder *folderWidget = new GuildFolder(rm, folder, folderGuilds, this);
                 guildFolders.push_back(folderWidget);
                 layout->insertWidget(widgetCounter + 3, folderWidget);

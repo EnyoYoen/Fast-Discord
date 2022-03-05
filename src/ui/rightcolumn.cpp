@@ -202,6 +202,7 @@ void RightColumn::addMessage(const Api::Message& message)
             std::vector<Api::Message *> channelMessages = *reinterpret_cast<std::vector<Api::Message *> *>(messagePtr);
             messageArea->addMessage(messagep, channelMessages[1]);
         }, currentOpenedChannel, 1, false);
+        emit messageAdded(currentOpenedChannel);
     }
 }
 

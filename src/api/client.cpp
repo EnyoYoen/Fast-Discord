@@ -14,6 +14,7 @@ GuildFolder::~GuildFolder()
 {
     delete guildIds;
     delete name;
+    delete strId;
 }
 
 ClientSettings::~ClientSettings()

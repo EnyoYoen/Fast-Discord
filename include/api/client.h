@@ -32,7 +32,8 @@ struct GuildFolder
 
     std::vector<std::string> *guildIds;
     std::string              *name;
-    int                       id;
+    std::string              *strId;
+    long long                 intId;
     int                       color;
 };
 
