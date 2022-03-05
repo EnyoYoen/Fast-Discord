@@ -22,15 +22,17 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
 {
     // Process gateway events
     if (eventName == "READY") {
-        std::vector<Api::GuildFolder *> *folders;
-        Api::unmarshalMultiple<Api::GuildFolder>(data["user_settings"]["guild_folders"].toArray(), &folders);
+        std::ofstream f("data.json", std::ios_base::openmode::_S_app);
+        f << QString(QJsonDocument(data.toObject()).toJson()).toStdString();
         Api::unmarshalMultiple<Api::Guild>(data["guilds"].toArray(), &guilds);
-        emit guildsReceived(*guilds, *getStringsFromJson(data["user_settings"]["guild_positions"].toArray()), *folders);
+        emit guildsReceived(*guilds);
 
         Api::unmarshalMultiple<Api::PrivateChannel>(data["private_channels"].toArray(), &privateChannels);
         Api::unmarshalMultiple<Api::User>(data["users"].toArray(), &users);
         emit privateChannelsReceived(*privateChannels);
     } else if (eventName == "READY_SUPPLEMENTAL") {
+        std::ofstream f("data.json", std::ios_base::openmode::_S_app);
+        f << QString(QJsonDocument(data.toObject()).toJson()).toStdString();
         Api::unmarshalMultiple<Api::Presence>(data["merged_presences"]["friends"].toArray(), &presences);
         emit presencesReceived(*presences);
     } else if (eventName == "CHANNEL_CREATE") {

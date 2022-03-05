@@ -50,36 +50,41 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     QObject::connect(homeButton, SIGNAL(clicked()), this, SLOT(clicHomeButton()));
 }
 
-void LeftColumn::displayGuilds(const std::vector<Api::Guild *>& guilds, const std::vector<std::string>& positions, const std::vector<Api::GuildFolder *>& folders)
+void LeftColumn::displayGuilds(const std::vector<Api::Guild *>& guilds)
 {
-    unsigned int widgetCounter = 0;
-    for (unsigned int i = 0 ; i < folders.size() ; i++) {
-        Api::GuildFolder *folder = folders[i];
-        std::vector<Api::Guild *> folderGuilds;
-        for (unsigned int j = 0 ; j < folder->guildIds->size() ; j++) {
-            for (unsigned int k = 0 ; k < guilds.size() ; k++) {
-                if ((*folder->guildIds)[j] == *(guilds[k]->id)) {
-                    if (folder->guildIds->size() == 1) {
-                        GuildWidget *guildWidget = new GuildWidget(rm, *guilds[k], this);
-                        guildWidgets.push_back(guildWidget);
-                        layout->insertWidget(widgetCounter + 3, guildWidget);
-                        QObject::connect(guildWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicGuild(const std::string&)));
-                        widgetCounter++;
-                        break;
-                    } else {
-                        folderGuilds.push_back(guilds[k]);
+    rm->getClientSettings([this, guilds](void *clientPtr) {
+        const std::vector<std::string>& positions = *reinterpret_cast<Api::ClientSettings *>(clientPtr)->guildPositions;
+        const std::vector<Api::GuildFolder *>& folders = *reinterpret_cast<Api::ClientSettings *>(clientPtr)->guildFolders;
+
+        unsigned int widgetCounter = 0;
+        for (unsigned int i = 0 ; i < folders.size() ; i++) {
+            Api::GuildFolder *folder = folders[i];
+            std::vector<Api::Guild *> folderGuilds;
+            for (unsigned int j = 0 ; j < folder->guildIds->size() ; j++) {
+                for (unsigned int k = 0 ; k < guilds.size() ; k++) {
+                    if ((*folder->guildIds)[j] == *(guilds[k]->id)) {
+                        if (folder->guildIds->size() == 1) {
+                            GuildWidget *guildWidget = new GuildWidget(rm, *guilds[k], this);
+                            guildWidgets.push_back(guildWidget);
+                            layout->insertWidget(widgetCounter + 3, guildWidget);
+                            QObject::connect(guildWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicGuild(const std::string&)));
+                            widgetCounter++;
+                            break;
+                        } else {
+                            folderGuilds.push_back(guilds[k]);
+                        }
                     }
                 }
             }
+            if (folder->guildIds->size() > 1) {
+                GuildFolder *folderWidget = new GuildFolder(rm, folder, folderGuilds, this);
+                guildFolders.push_back(folderWidget);
+                layout->insertWidget(widgetCounter + 3, folderWidget);
+                QObject::connect(folderWidget, SIGNAL(guildClicked(const std::string&)), this, SLOT(clicGuild(const std::string&)));
+                widgetCounter++;
+            }
         }
-        if (folder->guildIds->size() > 1) {
-            GuildFolder *folder = new GuildFolder(rm, folderGuilds, this);
-            guildFolders.push_back(folder);
-            layout->insertWidget(widgetCounter + 3, folder);
-            QObject::connect(folder, SIGNAL(guildClicked(const std::string&)), this, SLOT(clicGuild(const std::string&)));
-            widgetCounter++;
-        }
-    }
+    });
 }
 
 void LeftColumn::clicHomeButton()
@@ -130,11 +135,20 @@ void LeftColumn::clicGuild(const std::string& guildId)
 void LeftColumn::setUnreadGuild(const std::string& guildId)
 {
     rm->getGuilds([&](void *guilds){
-        for (size_t i = 0 ; i < static_cast<std::vector<Api::Guild *> *>(guilds)->size() ; i++) {
-            if (*(*static_cast<std::vector<Api::Guild *> *>(guilds))[i]->id == guildId)
+        for (size_t i = 0 ; i < reinterpret_cast<std::vector<Api::Guild *> *>(guilds)->size() ; i++) {
+            if (*(*reinterpret_cast<std::vector<Api::Guild *> *>(guilds))[i]->id == guildId)
                 guildWidgets[i]->setUnread(true);
+                return;
         }
     });
+
+    for (unsigned int i = 0 ; i < guildFolders.size() ; i++) {
+        std::vector<std::string> guildIds = guildFolders[i]->guildIds;
+        for (unsigned int j = 0 ; j < guildIds.size() ; j++) {
+            if (guildIds[j] == guildId)
+                guildFolders[i]->setUnread(guildId);
+        }
+    }
 }
 
 } // namespace Ui

@@ -14,9 +14,12 @@ class GuildFolder : public QLabel
 {
     Q_OBJECT
 public:
-    GuildFolder(Api::RessourceManager *rm, const std::vector<Api::Guild *>& guilds, QWidget *parent);
+    GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolder, const std::vector<Api::Guild *>& guilds, QWidget *parent);
     void unclicked();
     void unclickedExcept(const std::string& id);
+    void setUnread(const std::string& id);
+
+    std::vector<std::string> guildIds;
 
 signals:
     void guildClicked(const std::string& id);
@@ -26,6 +29,8 @@ private slots:
 
 private:
     void mouseReleaseEvent(QMouseEvent *event) override;
+    void enterEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
 
     QLabel *closedContent;
     GuildPill *pill;
@@ -35,6 +40,8 @@ private:
     std::vector<GuildWidget *> guildWidgets;
     std::vector<QLabel *> guildsIcon;
     bool opened = false;
+    bool clicked = false;
+    bool unread = false;
 };
 
 }

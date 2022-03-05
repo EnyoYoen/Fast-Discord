@@ -857,7 +857,7 @@ void unmarshal<GuildFolder>(QJsonObject jsonObj, GuildFolder **object)
         getString(jsonObj, "name"),
 
         jsonObj["id"].toInt(-1),
-        jsonObj["color"].toInt(-1)
+        jsonObj["color"].toInt(0x005865F2)
     };
 }
 

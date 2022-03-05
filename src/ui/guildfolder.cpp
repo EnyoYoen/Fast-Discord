@@ -7,9 +7,12 @@
 
 namespace Ui {
 
-GuildFolder::GuildFolder(Api::RessourceManager *rm, const std::vector<Api::Guild *>& guilds, QWidget *parent)
+GuildFolder::GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolder, const std::vector<Api::Guild *>& guilds, QWidget *parent)
     : QLabel(parent)
 {
+    int color = guildFolder->color;
+    guildIds = *guildFolder->guildIds;
+
     QHBoxLayout *closedLayout = new QHBoxLayout(this);
     closedLayout->setSpacing(6);
     closedLayout->setContentsMargins(0, 0, 0, 0);
@@ -17,8 +20,11 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const std::vector<Api::Guild
     closedContent = new QLabel(this);
     QGridLayout *contentLayout = new QGridLayout(closedContent);
     closedContent->setFixedSize(48, 48);
-    closedContent->setStyleSheet("background-color: rgba(100, 100, 100, 0.3);"
-                                 "border-radius: 16px;");
+    closedContent->setStyleSheet(("background-color: rgba(" 
+                                  + std::to_string((color & 0x00FF0000) >> 16)
+                                  + ", " + std::to_string((color & 0x0000FF00) >> 8)
+                                  + ", " + std::to_string(color & 0x000000FF) + ", 0.4);"
+                                  "border-radius: 16px;").c_str());
 
     pill = new GuildPill(this);
     closedLayout->addWidget(pill);
@@ -27,9 +33,12 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const std::vector<Api::Guild
 
     openedContent = new QWidget(this);
     openedContent->hide();
-    openedContent->setFixedHeight(guilds.size() * (48 + 6) + 48 - 6);
-    openedContent->setStyleSheet("background-color: rgba(60, 60, 60, 0.3);"
-                                 "border-radius: 16px;");
+    openedContent->setFixedHeight(guilds.size() * (48 + 10) + 48 - 10);
+    openedContent->setStyleSheet(("background-color: rgba(" 
+                                  + std::to_string((color & 0x00FF0000) >> 16)
+                                  + ", " + std::to_string((color & 0x0000FF00) >> 8)
+                                  + ", " + std::to_string(color & 0x000000FF) + ", 0.4);"
+                                  "border-radius: 16px;").c_str());
 
     closeButton = new QLabel(openedContent);
     closeButton->setFixedSize(72, 48);
@@ -39,7 +48,7 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const std::vector<Api::Guild
                                "background-color: none;");
 
     QVBoxLayout *openedLayout = new QVBoxLayout(openedContent);
-    openedLayout->setSpacing(6);
+    openedLayout->setSpacing(10);
     openedLayout->setContentsMargins(0, 0, 0, 10);
     openedLayout->addWidget(closeButton);
 
@@ -63,8 +72,8 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const std::vector<Api::Guild
 void GuildFolder::mouseReleaseEvent(QMouseEvent *event)
 {
     if (!opened) {
-        this->setFixedHeight(guildWidgets.size() * (48 + 6) + 48 - 6);
-        this->setContentsMargins(0, 0, 0, 0);
+        this->setFixedHeight(guildWidgets.size() * (48 + 10) + 48);
+        this->setContentsMargins(0, 0, 0, 10);
 
         closedContent->hide();
         pill->hide();
@@ -85,22 +94,69 @@ void GuildFolder::mouseReleaseEvent(QMouseEvent *event)
 
 void GuildFolder::unclicked()
 {
+    clicked = false;
+    if (unread)
+        pill->setHeight(8);
+    else 
+        pill->setHeight(0);
+
     for (unsigned int i = 0 ; i < guildWidgets.size() ; i++)
         guildWidgets[i]->unclicked();
 }
 
 void GuildFolder::unclickedExcept(const std::string& id)
 {
+    clicked = false;
     for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
         if (guildWidgets[i]->id != id) {
             guildWidgets[i]->unclicked();
+        } else {
+            clicked = true;
         }
     }
+    if (!clicked) {
+        if (unread)
+            pill->setHeight(8);
+        else 
+            pill->setHeight(0);
+    }
+}
+
+void GuildFolder::setUnread(const std::string& id)
+{
+    unread = true;
+    if (!clicked) 
+        pill->setHeight(8);
+    
+    for (unsigned int i = 0 ; i < guildIds.size() ; i++) {
+        if (guildWidgets[i]->id == id)
+            guildWidgets[i]->setUnread(true);
+    }
+
 }
 
 void GuildFolder::propagateGuildClic(const std::string& id)
 {
+    clicked = true;
+    pill->setHeight(40);
+
     emit guildClicked(id);
+}
+
+void GuildFolder::enterEvent(QEvent *)
+{
+    if (!clicked)
+        pill->setHeight(20);
+}
+
+void GuildFolder::leaveEvent(QEvent *)
+{
+    if (clicked)
+        pill->setHeight(40);
+    else if (unread)
+        pill->setHeight(8);
+    else
+        pill->setHeight(0);
 }
 
 } // namespace Ui

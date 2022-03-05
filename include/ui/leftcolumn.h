@@ -26,7 +26,7 @@ signals:
     void guildClicked(const std::string&);
 
 public slots:
-    void displayGuilds(const std::vector<Api::Guild *>& guilds, const std::vector<std::string>& positions, const std::vector<Api::GuildFolder *>& folders);
+    void displayGuilds(const std::vector<Api::Guild *>& guilds);
 
 private slots:
     void clicHomeButton();

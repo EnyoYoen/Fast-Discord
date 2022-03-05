@@ -40,7 +40,7 @@ public:
 
 signals:
     void typingReceived();
-    void guildsReceived(const std::vector<Api::Guild *>&, const std::vector<std::string>&, const std::vector<Api::GuildFolder *>&);
+    void guildsReceived(const std::vector<Api::Guild *>&);
     void presencesReceived(const std::vector<Api::Presence *>&);
     void privateChannelsReceived(const std::vector<Api::PrivateChannel *>&);
     void unreadUpdateReceived(const std::string&);
