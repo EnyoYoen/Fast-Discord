@@ -26,6 +26,13 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
         emit guildsReceived(*guilds);
 
         Api::unmarshalMultiple<Api::PrivateChannel>(data["private_channels"].toArray(), &privateChannels);
+        std::sort(privateChannels->begin(), privateChannels->end(),
+            [](const Api::PrivateChannel *a, const Api::PrivateChannel *b) {
+                if (a->lastMessageId == nullptr || *a->lastMessageId == "") return false;
+                if (b->lastMessageId == nullptr || *b->lastMessageId == "") return true;
+                return ((std::stol(*a->lastMessageId) >> 22) + 1420070400000) > ((std::stol(*b->lastMessageId) >> 22) + 1420070400000);
+            });
+
         Api::unmarshalMultiple<Api::User>(data["users"].toArray(), &users);
         emit privateChannelsReceived(*privateChannels);
     } else if (eventName == "READY_SUPPLEMENTAL") {

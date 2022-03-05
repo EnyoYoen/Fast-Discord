@@ -163,7 +163,7 @@ void MainWindow::setup()
     QObject::connect(rm, SIGNAL(presenceReceived(const Api::Presence&)), middleColumn, SLOT(updatePresence(const Api::Presence&)));
     QObject::connect(rm, SIGNAL(guildsReceived(const std::vector<Api::Guild *>&)), leftColumn, SLOT(displayGuilds(const std::vector<Api::Guild *>&)));
     QObject::connect(rm, SIGNAL(presencesReceived(const std::vector<Api::Presence *>&)), middleColumn, SLOT(setPresences(const std::vector<Api::Presence *>&)));
-    QObject::connect(rm, SIGNAL(privateChannelsReceived(const std::vector<Api::PrivateChannel *>&)), middleColumn, SLOT(setPrivateChannels(const std::vector<Api::PrivateChannel *>&)));
+    QObject::connect(rm, SIGNAL(privateChannelsReceived(std::vector<Api::PrivateChannel *>)), middleColumn, SLOT(setPrivateChannels(std::vector<Api::PrivateChannel *>)));
     QObject::connect(rm, SIGNAL(channelCreated(const Api::Channel *, const Api::PrivateChannel *)), middleColumn, SLOT(createChannel(const Api::Channel *, const Api::PrivateChannel *)));
     QObject::connect(rm, SIGNAL(channelUpdated(const Api::Channel *, const Api::PrivateChannel *)), middleColumn, SLOT(updateChannel(const Api::Channel *, const Api::PrivateChannel *)));
     QObject::connect(rm, SIGNAL(channelDeleted(const std::string&, const std::string&, int)), middleColumn, SLOT(deleteChannel(const std::string&, const std::string&, int)));

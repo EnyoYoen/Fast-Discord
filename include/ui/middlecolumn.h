@@ -30,7 +30,7 @@ signals:
 
 public slots:
     void setPresences(const std::vector<Api::Presence *>& presences);
-    void setPrivateChannels(const std::vector<Api::PrivateChannel *>& channels);
+    void setPrivateChannels(std::vector<Api::PrivateChannel *> channels);
     void updatePresence(const Api::Presence& presence);
     void displayPrivateChannels();
     void openGuild(const std::string&);

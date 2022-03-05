@@ -2,6 +2,7 @@
 
 #include "ui/usermenu.h"
 
+#include <algorithm>
 #include <fstream>
 
 namespace Ui {
@@ -64,7 +65,7 @@ void MiddleColumn::updatePresence(const Api::Presence& presence)
     });
 }
 
-void MiddleColumn::setPrivateChannels(const std::vector<Api::PrivateChannel *>& privateChannels)
+void MiddleColumn::setPrivateChannels(std::vector<Api::PrivateChannel *> privateChannels)
 {
     // Create the widgets
     QWidget *privateChannelList = new QWidget(this);
