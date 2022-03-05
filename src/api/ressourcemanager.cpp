@@ -22,8 +22,6 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
 {
     // Process gateway events
     if (eventName == "READY") {
-        std::ofstream f("data.json", std::ios_base::openmode::_S_app);
-        f << QString(QJsonDocument(data.toObject()).toJson()).toStdString();
         Api::unmarshalMultiple<Api::Guild>(data["guilds"].toArray(), &guilds);
         emit guildsReceived(*guilds);
 
@@ -31,8 +29,6 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
         Api::unmarshalMultiple<Api::User>(data["users"].toArray(), &users);
         emit privateChannelsReceived(*privateChannels);
     } else if (eventName == "READY_SUPPLEMENTAL") {
-        std::ofstream f("data.json", std::ios_base::openmode::_S_app);
-        f << QString(QJsonDocument(data.toObject()).toJson()).toStdString();
         Api::unmarshalMultiple<Api::Presence>(data["merged_presences"]["friends"].toArray(), &presences);
         emit presencesReceived(*presences);
     } else if (eventName == "CHANNEL_CREATE") {
