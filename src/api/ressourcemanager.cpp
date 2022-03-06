@@ -28,9 +28,14 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
         Api::unmarshalMultiple<Api::PrivateChannel>(data["private_channels"].toArray(), &privateChannels);
         std::sort(privateChannels->begin(), privateChannels->end(),
             [](const Api::PrivateChannel *a, const Api::PrivateChannel *b) {
-                if (a->lastMessageId == nullptr || *a->lastMessageId == "") return false;
-                if (b->lastMessageId == nullptr || *b->lastMessageId == "") return true;
-                return ((std::stol(*a->lastMessageId) >> 22) + 1420070400000) > ((std::stol(*b->lastMessageId) >> 22) + 1420070400000);
+                if ((a->lastMessageId == nullptr || *a->lastMessageId == "")
+                 && (b->lastMessageId == nullptr || *b->lastMessageId == "")) 
+                    return (std::stol(*a->id) >> 22) > (std::stol(*b->id) >> 22);
+                if (a->lastMessageId == nullptr || *a->lastMessageId == "") 
+                    return (std::stol(*a->id) >> 22) > (std::stol(*b->lastMessageId) >> 22);
+                if (b->lastMessageId == nullptr || *b->lastMessageId == "")
+                    return (std::stol(*a->lastMessageId) >> 22) > (std::stol(*b->id) >> 22);
+                return (std::stol(*a->lastMessageId) >> 22) > (std::stol(*b->lastMessageId) >> 22);
             });
 
         Api::unmarshalMultiple<Api::User>(data["users"].toArray(), &users);
@@ -62,9 +67,14 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
             };
             privateChannels->insert(std::upper_bound(privateChannels->begin(), privateChannels->end(), privateChannel,
             [](const Api::PrivateChannel *a, const Api::PrivateChannel *b) {
-                if (a->lastMessageId == nullptr || *a->lastMessageId == "") return false;
-                if (b->lastMessageId == nullptr || *b->lastMessageId == "") return true;
-                return ((std::stol(*a->lastMessageId) >> 22) + 1420070400000) > ((std::stol(*b->lastMessageId) >> 22) + 1420070400000);
+                if ((a->lastMessageId == nullptr || *a->lastMessageId == "")
+                 && (b->lastMessageId == nullptr || *b->lastMessageId == "")) 
+                    return (std::stol(*a->id) >> 22) > (std::stol(*b->id) >> 22);
+                if (a->lastMessageId == nullptr || *a->lastMessageId == "") 
+                    return (std::stol(*a->id) >> 22) > (std::stol(*b->lastMessageId) >> 22);
+                if (b->lastMessageId == nullptr || *b->lastMessageId == "")
+                    return (std::stol(*a->lastMessageId) >> 22) > (std::stol(*b->id) >> 22);
+                return (std::stol(*a->lastMessageId) >> 22) > (std::stol(*b->lastMessageId) >> 22);
             }), privateChannel);
 
             emit channelCreated(nullptr, privateChannel);
@@ -104,9 +114,14 @@ void RessourceManager::gatewayDispatchHandler(std::string& eventName, json& data
             };
             privateChannels->insert(std::upper_bound(privateChannels->begin(), privateChannels->end(), privateChannel,
             [](const Api::PrivateChannel *a, const Api::PrivateChannel *b) {
-                if (a->lastMessageId == nullptr || *a->lastMessageId == "") return false;
-                if (b->lastMessageId == nullptr || *b->lastMessageId == "") return true;
-                return ((std::stol(*a->lastMessageId) >> 22) + 1420070400000) > ((std::stol(*b->lastMessageId) >> 22) + 1420070400000);
+                if ((a->lastMessageId == nullptr || *a->lastMessageId == "")
+                 && (b->lastMessageId == nullptr || *b->lastMessageId == "")) 
+                    return (std::stol(*a->id) >> 22) > (std::stol(*b->id) >> 22);
+                if (a->lastMessageId == nullptr || *a->lastMessageId == "") 
+                    return (std::stol(*a->id) >> 22) > (std::stol(*b->lastMessageId) >> 22);
+                if (b->lastMessageId == nullptr || *b->lastMessageId == "")
+                    return (std::stol(*a->lastMessageId) >> 22) > (std::stol(*b->id) >> 22);
+                return (std::stol(*a->lastMessageId) >> 22) > (std::stol(*b->lastMessageId) >> 22);
             }), privateChannel);
 
             emit channelUpdated(nullptr, privateChannel);
