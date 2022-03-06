@@ -348,11 +348,6 @@ bool RessourceManager::hasMessages(const std::string& channelId)
     return messages->find(channelId) == messages->end();
 }
 
-void RessourceManager::pushFrontMessage(const std::string& channelId, Api::Message *message)
-{
-    (*messages)[channelId].insert((*messages)[channelId].cbegin(), message);
-}
-
 
 RessourceManager::~RessourceManager()
 {

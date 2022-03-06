@@ -84,6 +84,15 @@ void LeftColumn::displayGuilds(const std::vector<Api::Guild *>& guilds)
                 widgetCounter++;
             }
         }
+        
+        if (folders.empty() && !guilds.empty()) {
+            for (unsigned int i = 0 ; i < guilds.size() ; i++) {
+                GuildWidget *guildWidget = new GuildWidget(rm, *guilds[i], this);
+                guildWidgets.push_back(guildWidget);
+                layout->insertWidget(i + 3, guildWidget);
+                QObject::connect(guildWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(clicGuild(const std::string&)));
+            }
+        }
     });
 }
 

@@ -34,7 +34,6 @@ public:
 
     std::vector<Api::Message *> getAllMessages(std::string& channelId);
     bool hasMessages(const std::string& channelId);
-    void pushFrontMessage(const std::string& channelId, Api::Message *message);
     
     Requester *requester;
 
