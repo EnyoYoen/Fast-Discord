@@ -10,6 +10,8 @@ namespace Ui {
 MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, const Api::Client *client, QWidget *parent)
     : QWidget(parent)
 {
+    openedGuildId = "";
+
     // Set the requester
     rm = rmp;
 
@@ -186,6 +188,8 @@ void MiddleColumn::clicPrivateChannel(const std::string& id)
 
 void MiddleColumn::displayPrivateChannels()
 {
+    openedGuildId = "";
+
     // Create the widgets
     QWidget *privateChannelList = new QWidget(this);
     QVBoxLayout *privateChannelListLayout = new QVBoxLayout(privateChannelList);
@@ -261,15 +265,17 @@ void MiddleColumn::deleteChannel(const std::string& id, const std::string& guild
 
 void MiddleColumn::putChannelFirst(const std::string& id)
 {
-    for (auto it = privateChannelWidgets.begin() ; it != privateChannelWidgets.end() ; it++) {
-        if (id == (*it)->id) {
-            PrivateChannelWidget *tmp = *it;
-            privateChannelWidgets.erase(it);
-            privateChannelWidgets.insert(privateChannelWidgets.begin(), tmp);
-            break;
+    if (openedGuildId == "") {
+        for (auto it = privateChannelWidgets.begin() ; it != privateChannelWidgets.end() ; it++) {
+            if (id == (*it)->id) {
+                PrivateChannelWidget *tmp = *it;
+                privateChannelWidgets.erase(it);
+                privateChannelWidgets.insert(privateChannelWidgets.begin(), tmp);
+                break;
+            }
         }
+        displayPrivateChannels();
     }
-    displayPrivateChannels();
 }
 
 } // namespace Ui
