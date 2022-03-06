@@ -235,7 +235,6 @@ void RightColumn::sendMessage(const std::string& content)
     std::string *fakeStr = new std::string("");
     Api::Message *newMessage = new Api::Message {nullptr, new Api::User{new std::string(client->username->c_str()), fakeStr, new std::string(client->avatar->c_str()), fakeStr, fakeStr, new std::string(client->id->c_str()), -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, fakeStr, new std::string(currentOpenedChannel), fakeStr, new std::string(content), new std::string(messageTimestamp), fakeStr, fakeStr, fakeStr, fakeStr, -1, -1, -1, -1, false, false, false};
     this->addMessage(*newMessage);
-    rm->pushFrontMessage(currentOpenedChannel, newMessage);
 }
 
 void RightColumn::loadMoreMessages()
