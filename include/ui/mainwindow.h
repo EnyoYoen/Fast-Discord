@@ -25,10 +25,10 @@ private slots:
     void setup();
 
 private:
-    void addAccountInConfig(QSettings *settings, QMap<QString, std::string> accountMap);
-    QMap<QString, std::string> getAccountsMap(QSettings *settings);
-    QMap<QString, std::string> getNewAccount();
-    std::string getAccountToken();
+    void addAccountInConfig(QSettings *settings, QMap<QString, QString> accountMap);
+    QMap<QString, QString> getAccountsMap(QSettings *settings);
+    QMap<QString, QString> getNewAccount();
+    QString getAccountToken();
 
     //All the widget that need to be accessed from different functions
     QHBoxLayout  *mainLayout;

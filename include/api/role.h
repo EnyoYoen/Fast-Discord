@@ -8,26 +8,27 @@ namespace Api {
 
 struct RoleTags
 {
-    ~RoleTags();
-
-    std::string *botId;
-    std::string *integrationId;
+    QString botId;
+    QString integrationId;
 };
 
 
 struct Role
 {
-    ~Role();
+    ~Role()
+    {
+        delete tags;
+    }
 
-    RoleTags    *tags;
-    std::string *id;
-    std::string *name;
-    std::string *permissions;
-    int          color;
-    int          position;
-    bool         hoist;
-    bool         managed;
-    bool         mentionable;
+    RoleTags *tags;
+    QString   id;
+    QString   name;
+    QString   permissions;
+    qint32    color;
+    qint32    position;
+    bool      hoist;
+    bool      managed;
+    bool      mentionable;
 };
 
 } // namespace Api

@@ -6,7 +6,7 @@
 
 namespace Api {
 
-Gateway::Gateway(Api::Requester *requester, const std::string& tokenp)
+Gateway::Gateway(Api::Requester *requester, const QString& tokenp)
     : QObject()
 {
     // Member initialization
@@ -18,7 +18,7 @@ Gateway::Gateway(Api::Requester *requester, const std::string& tokenp)
     // Getting the websocket URL
     requester->requestApi({
         [this](void *urlp) {
-            url = *static_cast<std::string *>(urlp);
+            url = *static_cast<QString *>(urlp);
             this->start();
         },
         "https://discord.com/api/v9/gateway",
@@ -39,7 +39,7 @@ void Gateway::start()
     QObject::connect(&client, SIGNAL(binaryMessageReceived(const QByteArray&)), this, SLOT(processBinaryMessage(const QByteArray&)));
     QObject::connect(&client, SIGNAL(textMessageReceived(const QString&)), this, SLOT(processTextMessage(const QString&)));
 
-    client.open(QUrl(QString(url.c_str()) + "/" + QString("?v=9&encoding=json")));
+    client.open(QUrl(url + "/?v=9&encoding=json"));
 }
 
 void Gateway::closeHandler()
@@ -47,30 +47,30 @@ void Gateway::closeHandler()
     // Reconnect when the connection is closed
     if (connected) {
         connected = false;
-        client.open(QUrl(QString(url.c_str()) + QString("?v=9&encoding=json")));
+        client.open(QUrl(url + "?v=9&encoding=json"));
     }
 }
 
 // Set the callback function called when the gateway recieve events
-void Gateway::onDispatch(std::function<void(std::string&, json&)> callback)
+void Gateway::onDispatch(std::function<void(QString&, json&)> callback)
 {
     onDispatchHandler = callback;
 }
 
-void Gateway::sendGuildChannelOpened(const std::map<std::string, std::vector<std::vector<int>>> channels, const std::string& guildId, bool activities, bool threads, bool typing)
+void Gateway::sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<int>>> channels, const Snowflake& guildId, bool activities, bool threads, bool typing)
 {
-    std::string data = "{\"guild_id\":\"" + guildId + "\"" + (typing ? ",\"typing\":true" : "") + (activities ? ",\"activities\":true" : "") + (threads ? ",\"threads\":true" : "") + ",\"channels\":{";
+    QString data = "{\"guild_id\":\"" + guildId.toString() + "\"" + (typing ? ",\"typing\":true" : "") + (activities ? ",\"activities\":true" : "") + (threads ? ",\"threads\":true" : "") + ",\"channels\":{";
 
     unsigned int counter = 0;
     for (auto it = channels.begin() ; it != channels.end() ; it++, counter++) {
-        data += std::string(counter > 0 ? "," : "") + "\"" + it->first + "\":[";
-        std::vector<std::vector<int>> messagesNumbers = it->second;
+        data += QString(counter > 0 ? "," : "") + "\"" + it->first.toString() + "\":[";
+        QVector<QVector<int>> messagesNumbers = it->second;
         for (unsigned int i = 0 ; i < messagesNumbers.size() ; i++) {
             data += "[";
             for (unsigned int j = 0 ; j < messagesNumbers[i].size() ; j++) {
-                data += std::to_string(messagesNumbers[i][j]) + (j + 1 < messagesNumbers[i].size() ? "," : "");
+                data += QString::number(messagesNumbers[i][j]) + (j + 1 < messagesNumbers[i].size() ? "," : "");
             }
-            data += "]" + std::string(i + 1 < messagesNumbers.size() ? "," : "");
+            data += "]" + QString(i + 1 < messagesNumbers.size() ? "," : "");
         }
         data += "]";
     }
@@ -78,19 +78,19 @@ void Gateway::sendGuildChannelOpened(const std::map<std::string, std::vector<std
     send(GuildChannelOpened, data + "}}");
 }
 
-void Gateway::sendDMChannelOpened(const std::string& channelId)
+void Gateway::sendDMChannelOpened(const Snowflake& channelId)
 {
-    send(DMChannelOpened, "{\"channel_id\":\"" + channelId + "\"}");
+    send(DMChannelOpened, "{\"channel_id\":\"" + channelId.toString() + "\"}");
 }
 
 // Send data through the gateway
-void Gateway::send(int op, const std::string& data)
+void Gateway::send(int op, const QString& data)
 {
     //qDebug() << "⇧" << data.substr(0, 198).c_str();
     // Build the payload string
-    std::string payload = "{\"op\":" + std::to_string(op) + ",\"d\":" + data + "}";
+    QString payload = "{\"op\":" + QString::number(op) + ",\"d\":" + data + "}";
     // Send the message
-    client.sendTextMessage(QString(payload.c_str()));
+    client.sendTextMessage(payload);
 }
 
 // Process a binary message that the gateway recieves
@@ -118,7 +118,7 @@ void Gateway::processBinaryMessage(const QByteArray& message)
             heartbeatInterval = data["heartbeat_interval"].toInt(45000);
             QThread *heartbeatThread = QThread::create([this](){
                 while (connected) {
-                    send(1, std::to_string(seq));
+                    send(1, QString::number(seq));
 
                     QThread::msleep(heartbeatInterval);
                 }
@@ -160,7 +160,7 @@ void Gateway::processTextMessage(const QString& message)
             heartbeatInterval = data["heartbeat_interval"].toInt(45000);
             QThread *heartbeatThread = QThread::create([this](){
                 while (connected) {
-                    send(1, std::to_string(seq));
+                    send(1, QString::number(seq));
 
                     QThread::msleep(heartbeatInterval);
                 }
@@ -217,14 +217,14 @@ void Gateway::resume()
 {
     send(Resume, "{\"token\":\""+ token +"\","
                  "\"session_id\":,"
-                 "\"seq\":" + std::to_string(seq) + "}");
+                 "\"seq\":" + QString::number(seq) + "}");
 }
 
 // Internal function used to process some messages
-void Gateway::dispatch(std::string eventName, json& data)
+void Gateway::dispatch(QString eventName, json& data)
 {
     if (eventName == "READY") {
-        sessionId = data["session_id"].toString().toUtf8().constData();
+        sessionId = data["session_id"].toString();
     }
     onDispatchHandler(eventName, data);
 }

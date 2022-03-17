@@ -7,11 +7,11 @@
 
 namespace Ui {
 
-GuildFolder::GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolder, const std::vector<Api::Guild *>& guilds, QWidget *parent)
+GuildFolder::GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolder, const QVector<Api::Guild *>& guilds, QWidget *parent)
     : QLabel(parent)
 {
     int color = guildFolder->color;
-    guildIds = *guildFolder->guildIds;
+    guildIds = guildFolder->guildIds;
 
     QHBoxLayout *closedLayout = new QHBoxLayout(this);
     closedLayout->setSpacing(6);
@@ -56,12 +56,12 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolde
         Api::Guild actualGuild = *guilds[i];
 
         GuildWidget *guildWidget = new GuildWidget(rm, *guilds[i], openedContent);
-        QObject::connect(guildWidget, SIGNAL(leftClicked(const std::string&)), this, SLOT(propagateGuildClic(const std::string&)));
+        QObject::connect(guildWidget, SIGNAL(leftClicked(const Api::Snowflake&)), this, SLOT(propagateGuildClic(const Api::Snowflake&)));
         openedLayout->addWidget(guildWidget);
         guildWidgets.push_back(guildWidget);
 
         if (i < 4) {
-            contentLayout->addWidget(new GuildIcon(rm, *actualGuild.id, *actualGuild.name, actualGuild.icon, true, closedContent), (i < 2 ? 0 : 1), i%2);
+            contentLayout->addWidget(new GuildIcon(rm, actualGuild.id, actualGuild.name, actualGuild.icon, true, closedContent), (i < 2 ? 0 : 1), i%2);
         }
     }
 
@@ -104,7 +104,7 @@ void GuildFolder::unclicked()
         guildWidgets[i]->unclicked();
 }
 
-void GuildFolder::unclickedExcept(const std::string& id)
+void GuildFolder::unclickedExcept(const Api::Snowflake& id)
 {
     clicked = false;
     for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
@@ -122,7 +122,7 @@ void GuildFolder::unclickedExcept(const std::string& id)
     }
 }
 
-void GuildFolder::setUnread(const std::string& id)
+void GuildFolder::setUnread(const Api::Snowflake& id)
 {
     unread = true;
     if (!clicked) 
@@ -135,7 +135,7 @@ void GuildFolder::setUnread(const std::string& id)
 
 }
 
-void GuildFolder::propagateGuildClic(const std::string& id)
+void GuildFolder::propagateGuildClic(const Api::Snowflake& id)
 {
     clicked = true;
     pill->setHeight(40);

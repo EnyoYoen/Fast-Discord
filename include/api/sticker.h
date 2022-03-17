@@ -1,8 +1,9 @@
 #pragma once
 
-#include "user.h"
+#include "api/user.h"
+#include "api/snowflake.h"
 
-#include <string>
+#include <QString>
 
 namespace Api {
 
@@ -10,29 +11,30 @@ namespace Api {
 
 struct StickerItem
 {
-    ~StickerItem();
-
-    std::string *id;
-    std::string *name;
-    int          formatType;
+    QString   name;
+    Snowflake id;
+    qint32    formatType;
 };
 
 struct Sticker
 {
-    ~Sticker();
+    ~Sticker()
+    {
+        delete user;
+    }
 
-    User        *user;
-    std::string *id;
-    std::string *packId;
-    std::string *name;
-    std::string *description;
-    std::string *tags;
-    std::string *asset;
-    std::string *guildId;
-    int          type;
-    int          formatType;
-    int          sortValue;
-    bool         available;
+    User      *user;
+    QString    name;
+    QString    description;
+    QString    tags;
+    QString    asset;
+    Snowflake  id;
+    Snowflake  packId;
+    Snowflake  guildId;
+    qint32     type;
+    qint32     formatType;
+    qint32     sortValue;
+    optbool    available;
 };
 
 } // namespace Api

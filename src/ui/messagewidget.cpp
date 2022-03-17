@@ -75,17 +75,17 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
                         "margin: 0px;");
 }
 
-void MessageWidget::setAvatar(const std::string& avatarFileName)
+void MessageWidget::setAvatar(const QString& avatarFileName)
 {
     avatar->setImage(avatarFileName);
 }
 
-void MessageWidget::setReplyAvatar(const std::string& avatarFileName)
+void MessageWidget::setReplyAvatar(const QString& avatarFileName)
 {
     replyAvatar->setImage(avatarFileName);
 }
 
-void MessageWidget::addImage(const std::string& filename, int width, int height)
+void MessageWidget::addImage(const QString& filename, int width, int height)
 {
     QLabel *imageLabel = new QLabel(this);
 
@@ -100,7 +100,7 @@ void MessageWidget::addImage(const std::string& filename, int width, int height)
     }
     imageLabel->setFixedSize(width, height);
 
-    QPixmap pixmap(QString(filename.c_str()));
+    QPixmap pixmap(filename);
     imageLabel->setPixmap(pixmap.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     dataLayout->addWidget(imageLabel);
 }
@@ -133,10 +133,10 @@ QString MessageWidget::processTime(QTime time)
     int hour = time.hour();
     int minute = time.minute();
     // Process the hours and minutes
-    std::string hourString = hour > 12 ? std::to_string(hour - 12) : std::to_string(hour);
-    std::string minuteString = minute < 10 ? "0" + std::to_string(minute) : std::to_string(minute);
+    QString hourString = hour > 12 ? QString::number(hour - 12) : QString::number(hour);
+    QString minuteString = minute < 10 ? "0" + QString::number(minute) : QString::number(minute);
     // Create the final timestamp format
-    QString messageTime = QString((hourString + ":" + minuteString + " ").c_str());
+    QString messageTime = hourString + ":" + minuteString + " ";
     hour / 12 == 1 ? messageTime += "PM" : messageTime += "AM";
     return messageTime;
 }
@@ -180,9 +180,9 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
     QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
 
     // Get the date and time of the message
-    QDateTime dateTime = QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime();
+    QDateTime dateTime = QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime();
 
-    if (message->referencedMessage != nullptr && *message->referencedMessage->id != "") {
+    if (message->referencedMessage != nullptr && message->referencedMessage->id != 0) {
         Api::Message *ref = message->referencedMessage;
         isFirst = true;
 
@@ -195,23 +195,23 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
         replyLayout->addWidget(replyIcon);
 
         // Get the icon of the message
-        if (ref->author->avatar == nullptr || *ref->author->avatar == "") {
+        if (ref->author.avatar.isNull()) {
             // Use an asset if the user doesn't have an icon
             replyLayout->addWidget(new RoundedImage("res/images/png/user-icon-asset0.png", 16, 16, 8, reply));
         } else {
             // Request the avatar
-            std::string avatarFileName = *ref->author->avatar + (ref->author->avatar->rfind("a_") == 0 ? ".gif" : ".png");
+            QString avatarFileName = ref->author.avatar + (ref->author.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
             replyAvatar = new RoundedImage(16, 16, 8, reply);
             replyLayout->addWidget(replyAvatar);
-            rm->getImage([this](void *avatarFileName) {this->setReplyAvatar(*reinterpret_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *ref->author->id + "/" + avatarFileName, avatarFileName);
+            rm->getImage([this](void *avatarFileName) {this->setReplyAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + ref->author.id.toString() + "/" + avatarFileName, avatarFileName);
         }
 
-        QLabel *username = new QLabel(ref->author->username->c_str(), reply);
+        QLabel *username = new QLabel(ref->author.username, reply);
         username->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
         username->setTextInteractionFlags(Qt::TextSelectableByMouse);
         username->setCursor(QCursor(Qt::PointingHandCursor));
 
-        QLabel *content = new QLabel(ref->content->c_str());
+        QLabel *content = new QLabel(ref->content);
         content->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         content->setTextInteractionFlags(Qt::TextSelectableByMouse);
         content->setCursor(QCursor(Qt::PointingHandCursor));
@@ -228,28 +228,28 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
         // The message is not grouped to another message
 
         // Variable creation
-        Api::User& author = *message->author;
-        std::string *avatarId = author.avatar;
+        Api::User& author = message->author;
+        QString avatarId = author.avatar;
 
         // Get the icon of the message
-        if (avatarId == nullptr || *avatarId == "") {
+        if (avatarId.isNull()) {
             // Use an asset if the user doesn't have an icon
             avatar = new RoundedImage("res/images/png/user-icon-asset0.png", 40, 40, 20, iconContainer);
             iconLayout->addWidget(avatar);
             iconLayout->setAlignment(avatar, Qt::AlignHCenter);
         } else {
             // Request the avatar
-            std::string avatarFileName = *author.avatar + (author.avatar->rfind("a_") == 0 ? ".gif" : ".png");
+            QString avatarFileName = avatarId + (avatarId.indexOf("a_") == 0 ? ".gif" : ".png");
             avatar = new RoundedImage(40, 40, 20, iconContainer);
             iconLayout->addWidget(avatar);
             iconLayout->setAlignment(avatar, Qt::AlignHCenter);
-            rm->getImage([this](void *avatarFileName) {this->setAvatar(*reinterpret_cast<std::string *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + *author.id + "/" + avatarFileName, avatarFileName);
+            rm->getImage([this](void *avatarFileName) {this->setAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + author.id.toString() + "/" + avatarFileName, avatarFileName);
         }
 
         // Widget to show some infos of the message
         QWidget *messageInfos = new QWidget(data);
         QHBoxLayout *infosLayout = new QHBoxLayout(messageInfos);
-        QLabel *name = new QLabel((*author.username).c_str(), messageInfos);
+        QLabel *name = new QLabel(author.username, messageInfos);
         QLabel *date = new QLabel(processTimestamp(dateTime), messageInfos);
 
         // Style the name label
@@ -291,26 +291,26 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
 
     // Create and style the content label
     content = nullptr;
-    if (message->content != nullptr && *message->content != "") {
-        content = new MarkdownLabel(*message->content, rm, this);
+    if (!message->content.isNull()) {
+        content = new MarkdownLabel(message->content, rm, this);
         dataLayout->addWidget(content);
     }
 
     // Style the data layout
     dataLayout->setContentsMargins(0, 0, 0, 0);
 
-    if (message->attachments != nullptr) {
-        std::vector<Api::Attachment *> attachments = *message->attachments;
+    if (!message->attachments.empty()) {
+        QVector<Api::Attachment *> attachments = message->attachments;
         for (unsigned int i = 0 ; i < attachments.size() ; i++) {
             Api::Attachment *attachment = attachments[i];
             if (attachments[i]->contentType != nullptr
-              && attachments[i]->contentType->find("image") != std::string::npos
-              && attachments[i]->contentType->find("svg") == std::string::npos) {
-                std::string filename = *attachments[i]->id +
-                        attachments[i]->filename->substr(attachments[i]->filename->find_last_of('.'));
+              && attachments[i]->contentType.indexOf("image") != -1
+              && attachments[i]->contentType.indexOf("svg") == -1) {
+                QString filename = attachments[i]->id.toString() +
+                        attachments[i]->filename.mid(0, attachments[i]->filename.lastIndexOf('.'));
                 rm->getImage([this, attachment](void *filename) {
-                    this->addImage(*reinterpret_cast<std::string *>(filename), attachment->width, attachment->height);
-                }, *attachments[i]->proxyUrl, filename);
+                    this->addImage(*reinterpret_cast<QString *>(filename), attachment->width, attachment->height);
+                }, attachments[i]->proxyUrl, filename);
             } else {
                 dataLayout->addWidget(new AttachmentFile(rm->requester, attachment, data));
             }
@@ -328,17 +328,17 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
     layout->setContentsMargins(0, 0, 0, 0);
 }
 
-void MessageWidget::iconMessage(Api::Message *message, const std::string &text, const std::string& iconName)
+void MessageWidget::iconMessage(Api::Message *message, const QString &text, const QString& iconName)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     QWidget *spacer = new QWidget(this);
     QLabel *icon = new QLabel(this);
-    QLabel *textLabel = new QLabel(text.c_str(), this);
-    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime()), this);
+    QLabel *textLabel = new QLabel(text, this);
+    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime()), this);
 
     spacer->setFixedWidth(28);
     icon->setFixedWidth(44);
-    icon->setPixmap(QPixmap(("res/images/svg/" + iconName).c_str()));
+    icon->setPixmap(QPixmap("res/images/svg/" + iconName));
 
     textLabel->setStyleSheet("color: #8E9297;");
     timestampLabel->setStyleSheet("color: #72767D;");
@@ -360,16 +360,16 @@ void MessageWidget::iconMessage(Api::Message *message, const std::string &text, 
 
 void MessageWidget::recipientMessage(Api::Message *message)
 {
-    std::string arrowName;
-    std::string text;
+    QString arrowName;
+    QString text;
 
     if (message->type == Api::RecipientAdd) {
         arrowName = "green-right-arrow.svg";
-        text = *(*message->mentions)[0]->username + " added " +
-                *message->author->username + " to the group.";
+        text = message->mentions[0]->username + " added " +
+                message->author.username + " to the group.";
     } else {
         arrowName = "red-left-arrow.svg";
-        text = *(*message->mentions)[0]->username + " left the group.";
+        text = message->mentions[0]->username + " left the group.";
     }
 
     iconMessage(message, text, arrowName);
@@ -379,26 +379,26 @@ void MessageWidget::callMessage(Api::Message *message)
 {
     rm->getClient([message, this](void *clientPtr){
 
-    std::string phoneName;
-    std::string text;
-    std::string clientId = *reinterpret_cast<Api::Client *>(clientPtr)->id;
-    QDateTime dateTime = QDateTime::fromString(QString(message->timestamp->c_str()), Qt::ISODate).toLocalTime();
+    QString phoneName;
+    QString text;
+    Api::Snowflake clientId = reinterpret_cast<Api::Client *>(clientPtr)->id;
+    QDateTime dateTime = QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime();
 
-    std::vector<std::string> participants = *message->call->participants;
+    QVector<Api::Snowflake> participants = message->call->participants;
     bool participated = false;
     for (unsigned int i = 0 ; i < participants.size() ; i++) {
         if (participants[i] == clientId) participated = true;
     }
 
     if (!participated) {
-        text = "You missed a call from " + *message->author->username;
+        text = "You missed a call from " + message->author.username;
     } else {
-        text = *message->author->username + " started a call";
+        text = message->author.username + " started a call";
     }
-    std::string *endedTimestampStr = message->call->endedTimestamp;
-    if (endedTimestampStr != nullptr && *endedTimestampStr != "") {
+    QString endedTimestampStr = message->call->endedTimestamp;
+    if (!endedTimestampStr.isNull()) {
         phoneName = "gray-phone.svg";
-        qint64 duration = QDateTime::fromString(endedTimestampStr->c_str(), Qt::ISODate)
+        qint64 duration = QDateTime::fromString(endedTimestampStr, Qt::ISODate)
                 .toLocalTime().toSecsSinceEpoch() -
                 dateTime.toLocalTime().toSecsSinceEpoch();
         if (duration < 60) {
@@ -408,20 +408,20 @@ void MessageWidget::callMessage(Api::Message *message)
             if (duration < 120)
                 text += "a minute";
             else
-                text += std::to_string(duration / 60) + " minutes";
+                text += QString::number(duration / 60) + " minutes";
         } else {
             text += " that lasted ";
             if (duration < 7200)
                 text += "a hour";
             else
-                text += std::to_string(duration / 3600) + " hours";
+                text += QString::number(duration / 3600) + " hours";
         }
     } else {
         phoneName = "green-phone.svg";
     }
     text += ".";
 
-    if (clientId == *message->author->id)
+    if (clientId == message->author.id)
         phoneName = "green-phone.svg";
 
     iconMessage(message, text, phoneName);
@@ -431,22 +431,22 @@ void MessageWidget::callMessage(Api::Message *message)
 
 void MessageWidget::channelNameChangeMessage(Api::Message *message)
 {
-    iconMessage(message, *message->author->username + " changed the channel name: " + *message->content, "pen.svg");
+    iconMessage(message, message->author.username + " changed the channel name: " + message->content, "pen.svg");
 }
 
 void MessageWidget::channelIconChangeMessage(Api::Message *message)
 {
-    iconMessage(message, *message->author->username + " changed the channel icon.", "pen.svg");
+    iconMessage(message, message->author.username + " changed the channel icon.", "pen.svg");
 }
 
 void MessageWidget::channelPinnedMessage(Api::Message *message)
 {
-    iconMessage(message, *message->author->username + " pinned a message to this channel. See all pinned messages.", "pin.svg");
+    iconMessage(message, message->author.username + " pinned a message to this channel. See all pinned messages.", "pin.svg");
 }
 
 void MessageWidget::userPremiumGuildSubscriptionMessage(Api::Message *message)
 {
-    std::string text = (*message->author->username + " just boosted the server.");
+    QString text = message->author.username + " just boosted the server.";
     if (message->type == Api::UserPremiumGuildSubscriptionTier1)
         text += "(Tier 1)";
     else if (message->type == Api::UserPremiumGuildSubscriptionTier2)
@@ -465,11 +465,11 @@ void MessageWidget::guildMemberJoinMessage(Api::Message *message)
     for (int i = 0 ; i < randInt ; i++) {
         messageFile.readLine();
     }
-    std::string text = messageFile.readLine().toStdString();
-    std::string::size_type index = text.find("{}");
-    while (index != std::string::npos){
-        text.replace(index, 2, *message->author->username);
-        index = text.find("{}");
+    QString text = messageFile.readLine();
+    int index = text.indexOf("{}");
+    while (index != -1){
+        text.replace(index, 2, message->author.username);
+        index = text.indexOf("{}");
     }
 
     iconMessage(message, text, "green-right-arrow.svg");
@@ -477,7 +477,7 @@ void MessageWidget::guildMemberJoinMessage(Api::Message *message)
 
 void MessageWidget::channelFollowAdd(Api::Message *message)
 {
-    iconMessage(message, *message->author->username + " has added " + *message->content
+    iconMessage(message, message->author.username + " has added " + message->content
      + " to this channel. Its most important updates will show up here.", "green-right-arrow.svg");
 }
 

@@ -6,14 +6,14 @@
 #include "client.h"
 #include "ui/roundedimage.h"
 
+#include <QString>
+#include <QVector>
 #include <QThread>
 #include <QBoxLayout>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 
-#include <string>
-#include <vector>
 #include <queue>
 #include <condition_variable>
 #include <mutex>
@@ -49,11 +49,11 @@ enum RequestTypes {
 struct RequestParameters
 {
     std::function<void(void *)> callback;
-    const std::string url;
-    const std::string postDatas;
-    const std::string customRequest;
-    const std::string fileName;
-    const std::string outputFile;
+    const QString url;
+    const QString postDatas;
+    const QString customRequest;
+    const QString fileName;
+    const QString outputFile;
     int type;
     bool json;
 };
@@ -70,7 +70,7 @@ class Requester : public QObject
 {
     Q_OBJECT
 public:
-    Requester(const std::string& token);
+    Requester(const QString& token);
     ~Requester();
 
     // Function that request the API
@@ -79,23 +79,23 @@ public:
 
     // Functions that request the API to retrieve data
     void getGuilds(std::function<void(void *)> callback);
-    void getGuildChannels(std::function<void(void *)> callback, const std::string& id);
+    void getGuildChannels(std::function<void(void *)> callback, const Snowflake& id);
     void getPrivateChannels(std::function<void(void *)> callback);
-    void getMessages(std::function<void(void *)> callback, const std::string& channelId, const std::string& beforeId, unsigned int limit);
+    void getMessages(std::function<void(void *)> callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit);
     void getClient(std::function<void(void *)> callback);
     void getClientSettings(std::function<void(void *)> callback);
-    void getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName);
-    void getUser(std::function<void(void *)> callback, const std::string& userId);
-    void getFile(const std::string& url, const std::string& filename);
+    void getImage(std::function<void(void *)> callback, const QString& url, const QString& fileName);
+    void getUser(std::function<void(void *)> callback, const Snowflake& userId);
+    void getFile(const QString& url, const QString& filename);
 
     // Functions that request the API to send data
-    void setStatus(const std::string& status);
-    void sendTyping(const std::string& channelId);
-    void sendMessage(const std::string& content, const std::string& channelId);
-    void sendMessageWithFile(const std::string& content, const std::string& channelId, const std::string& filePath);
-    void deleteMessage(const std::string& channelId, const std::string& messageId);
-    void pinMessage(const std::string& channelId, const std::string& messageId);
-    void unpinMessage(const std::string& channelId, const std::string& messageId);
+    void setStatus(const QString& status);
+    void sendTyping(const Snowflake& channelId);
+    void sendMessage(const QString& content, const Snowflake& channelId);
+    void sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath);
+    void deleteMessage(const Snowflake& channelId, const Snowflake& messageId);
+    void pinMessage(const Snowflake& channelId, const Snowflake& messageId);
+    void unpinMessage(const Snowflake& channelId, const Snowflake& messageId);
 
 signals:
     void requestEmit(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);
@@ -113,7 +113,7 @@ private:
     std::condition_variable requestWaiter;      // The loop waits when there is no request
     std::condition_variable finishWaiter;       // The loop waits when there is no request
     QThread *loop;                              // Request loop
-    std::string token;                          // Authorization token
+    QString token;                          // Authorization token
     double rateLimitEnd;                        // Unix time that represents the moment of the end of the rate limit
     unsigned int requestsToCheck;               // The number of requests that we have to check when we need to remove
                                                 // callbacks for image requests

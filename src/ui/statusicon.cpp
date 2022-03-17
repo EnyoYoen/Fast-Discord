@@ -13,7 +13,7 @@ StatusIcon::StatusIcon(QWidget *parent)
     this->setStyleSheet("background-color: rgb(90, 90, 90);");
 }
 
-void StatusIcon::setStatus(const std::string& status)
+void StatusIcon::setStatus(const QString& status)
 {
     if (status == "online") this->setStyleSheet("background-color: rgb(0, 224, 71);");
     else if (status == "idle") this->setStyleSheet("background-color: rgb(255, 169, 21);");

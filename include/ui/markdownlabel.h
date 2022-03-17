@@ -9,7 +9,7 @@ namespace Ui {
 class MarkdownLabel : public QLabel
 {
 public:
-    MarkdownLabel(const std::string& content, Api::RessourceManager *rm, QWidget *parent);
+    MarkdownLabel(const QString& content, Api::RessourceManager *rm, QWidget *parent);
 };
 
 } // namespace Ui

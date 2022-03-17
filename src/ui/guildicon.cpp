@@ -6,24 +6,24 @@
 
 namespace Ui {
 
-GuildIcon::GuildIcon(Api::RessourceManager *rm, const std::string& guildId, std::string guildName, std::string *guildIcon, bool smallp, QWidget *parent)
+GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, QString guildName, QString guildIcon, bool smallp, QWidget *parent)
     : QWidget(parent)
 {
     small = smallp;
-    QObject::connect(this, SIGNAL(iconRecieved(std::string)), this, SLOT(setIcon(std::string)));
+    QObject::connect(this, SIGNAL(iconRecieved(QString)), this, SLOT(setIcon(QString)));
 
     // Create the guild icon
-    if (guildIcon == nullptr || *guildIcon == "") {
+    if (guildIcon.isNull()) {
         // The guild doesn't have icon : we need to create one with the name
 
         // Split the name for every space in it
 
-        std::vector<std::string> nameSplit;
-        size_t pos = 0;
+        std::vector<QString> nameSplit;
+        int pos = 0;
         // Loop through the name to find spaces
-        while ((pos = guildName.find(' ')) != std::string::npos) {
-            nameSplit.push_back(guildName.substr(0, pos));
-            guildName.erase(0, pos + 1);
+        while ((pos = guildName.indexOf(' ')) != -1) {
+            nameSplit.push_back(guildName.left(pos));
+            guildName.remove(0, pos + 1);
         }
         nameSplit.push_back(guildName);
 
@@ -31,20 +31,20 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const std::string& guildId, std:
         // The loop that will create the text of the icon
 
         // Variables creation
-        std::string iconText;
+        QString iconText;
         bool firstLetterFound;
         bool nonLetterFound;
 
         // Loop through the different words (word = 1 split of the name)
         for (size_t i = 0 ; i < nameSplit.size() ; i++) {
             // Variables
-            std::string actualSplit = nameSplit[i]; // The actual word
-            std::string firstLetter;
+            QString actualSplit = nameSplit[i]; // The actual word
+            QString firstLetter;
             firstLetterFound = false;
             nonLetterFound = false;
 
             // Loop through the word for every caracter
-            for (size_t j = 0 ; j < actualSplit.length() ; j++) {
+            for (uint j = 0 ; j < actualSplit.length() ; j++) {
                 if (!(actualSplit[j] >= 'a' && actualSplit[j] <= 'z')
                         && !(actualSplit[j] >= 'A' && actualSplit[j] <= 'Z')
                         && actualSplit[j] != '\'') {
@@ -57,7 +57,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const std::string& guildId, std:
                     // We insert a new split for the next turn if we are not
                     // at the end and if this is not the only caracter
                     if (j != actualSplit.length() && actualSplit.length() > 1) {
-                        nameSplit.insert(nameSplit.begin() + i + 1, actualSplit.substr(j + 1, actualSplit.length()));
+                        nameSplit.insert(nameSplit.begin() + i + 1, actualSplit.mid(j + 1, actualSplit.length()));
                     }
 
                     nonLetterFound = true;
@@ -77,27 +77,27 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const std::string& guildId, std:
 
         textIcon = new QLabel(this);
         QHBoxLayout *iconTextLayout = new QHBoxLayout(textIcon);
-        QLabel *text = new QLabel(iconText.c_str(), textIcon);
+        QLabel *text = new QLabel(iconText, textIcon);
 
         iconTextLayout->setContentsMargins(0, 0, 0, 0);
         iconTextLayout->addWidget(text, 0, Qt::AlignHCenter);
 
         text->setFixedHeight(small ? 10 : 40);
         textIcon->setFixedSize(small ? 16 : 48, small ? 16 : 48);
-        textIcon->setStyleSheet(("border-radius: " + std::to_string(small ? 8 : 24) + "px;"
-                                 "color: #DCDDDE;"
-                                 + (small ? "background-color: #5865F2;" : "background-color: #36393F;")).c_str());
+        textIcon->setStyleSheet("border-radius: " + QString::number(small ? 8 : 24) + "px;"
+                                "color: #DCDDDE;"
+                                + (small ? "background-color: #5865F2;" : "background-color: #36393F;"));
         icon = nullptr;
 
     } else {
         // This guild has an icon
 
         // Request the icon and cache it
-        std::string guildIconFileName(*guildIcon);
+        QString guildIconFileName(guildIcon);
         guildIconFileName += ".png";
-        if (!std::ifstream(("cache/" + guildIconFileName).c_str()).good()) {
+        if (!std::ifstream(("cache/" + guildIconFileName).toUtf8().constData()).good()) {
             icon = new RoundedImage(small ? 16 : 48, small ? 16 : 48, small ? 8 : 24, this);
-            rm->getImage([this](void *iconFileName) {emit iconRecieved(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + guildId + "/" + guildIconFileName, guildIconFileName);
+            rm->getImage([this](void *iconFileName) {emit iconRecieved(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + guildId.toString() + "/" + guildIconFileName, guildIconFileName);
         } else {
             guildIconFileName = "cache/" + guildIconFileName;
 
@@ -108,7 +108,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const std::string& guildId, std:
     }
 }
 
-void GuildIcon::setIcon(const std::string& guildIconFileName)
+void GuildIcon::setIcon(const QString& guildIconFileName)
 {
     icon->setImage(guildIconFileName);
 }
@@ -116,17 +116,17 @@ void GuildIcon::setIcon(const std::string& guildIconFileName)
 void GuildIcon::setActive()
 {
     if (!icon)
-        textIcon->setStyleSheet(("border-radius: " + std::to_string(small ? 6 : 16) + "px;"
-                                 "color: #FFF;"
-                                 "background-color: #5865F2;").c_str());
+        textIcon->setStyleSheet("border-radius: " + QString::number(small ? 6 : 16) + "px;"
+                                "color: #FFF;"
+                                "background-color: #5865F2;");
 }
 
 void GuildIcon::setInactive()
 {
     if (!icon)
-        textIcon->setStyleSheet(("border-radius: " + std::to_string(small ? 8 : 24) + "px;"
-                                 "color: #DCDDDE;"
-                                 "background-color: #36393F;").c_str());
+        textIcon->setStyleSheet("border-radius: " + QString::number(small ? 8 : 24) + "px;"
+                                "color: #DCDDDE;"
+                                "background-color: #36393F;");
 }
 
 }

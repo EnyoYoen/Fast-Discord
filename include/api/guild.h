@@ -1,14 +1,16 @@
 #pragma once
 
-#include "role.h"
-#include "emoji.h"
-#include "user.h"
-#include "channel.h"
-#include "voice.h"
-#include "sticker.h"
-#include "guildmember.h"
+#include "api/role.h"
+#include "api/emoji.h"
+#include "api/user.h"
+#include "api/channel.h"
+#include "api/voice.h"
+#include "api/sticker.h"
+#include "api/guildmember.h"
+#include "api/snowflake.h"
 
-#include <string>
+#include <QString>
+#include <QVector>
 
 namespace Api {
 
@@ -16,86 +18,85 @@ namespace Api {
 
 struct WelcomeScreenChannel
 {
-    ~WelcomeScreenChannel();
-
-    std::string *channelId;
-    std::string *description;
-    std::string *emojiId;
-    std::string *emojiName;
+    QString   description;
+    QString   emojiName;
+    Snowflake channelId;
+    Snowflake emojiId;
 };
 
 struct WelcomeScreen
 {
-    ~WelcomeScreen();
-
-    std::vector<WelcomeScreenChannel *> *welcomeChannels;
-    std::string                         *description;
+    QVector<WelcomeScreenChannel *> welcomeChannels;
+    QString                         description;
 };
 
 struct StageInstance
 {
-    ~StageInstance();
-
-    std::string *id;
-    std::string *guildId;
-    std::string *channelId;
-    std::string *topic;
-    int          privacyLevel;
-    bool         discoverableDisabled;
+    QString   topic;
+    Snowflake id;
+    Snowflake guildId;
+    Snowflake channelId;
+    Snowflake guildScheduledEventId;
+    qint32    privacyLevel;
+    bool      discoverableDisabled;
 };
 
 struct Guild
 {
-    ~Guild();
+    ~Guild()
+    {
+        delete welcomeScreen;
+    }
 
-    WelcomeScreen                *welcomeScreen;
-    std::vector<std::string>     *guildFeatures;
-    std::vector<VoiceState *>    *voiceStates;
-    std::vector<GuildMember *>   *members;
-    std::vector<Channel *>       *channels;
-    std::vector<Channel *>       *threads;
-    void                         *presences; // TODO
-    std::vector<StageInstance *> *stageInstances;
-    std::vector<Sticker *>       *stickers;
-    std::string                  *id;
-    std::string                  *name;
-    std::string                  *icon;
-    std::string                  *iconHash;
-    std::string                  *splash;
-    std::string                  *discoverySplash;
-    std::string                  *ownerId;
-    std::string                  *permissions;
-    std::string                  *region;
-    std::string                  *afkChannelId;
-    std::string                  *widgetChannelId;
-    std::string                  *applicationId;
-    std::string                  *systemChannelId;
-    std::string                  *rulesChannelId;
-    std::string                  *joinedAt;
-    std::string                  *vanityUrlCode;
-    std::string                  *description;
-    std::string                  *banner;
-    std::string                  *preferredLocale;
-    std::string                  *publicUpdatesChannelId;
-    int                           afkTimeout;
-    int                           verificationLevel;
-    int                           defaultMessageNotifications;
-    int                           explicitContentFilter;
-    int                           mfaLevel;
-    int                           systemChannelFlags;
-    int                           memberCount;
-    int                           maxPresences;
-    int                           maxMembers;
-    int                           premiumTier;
-    int                           premiumSubscriptionCount;
-    int                           maxVideoChannelUsers;
-    int                           approximateMemberCount;
-    int                           approximatePresenceCount;
-    int                           nsfwLevel;
-    bool                          owner;
-    bool                          widgetEnabled;
-    bool                          large;
-    bool                          unavailable;
+    WelcomeScreen            *welcomeScreen;
+    QVector<QString>          guildFeatures;
+    QVector<VoiceState *>     voiceStates;
+    QVector<GuildMember *>    members;
+    QVector<Channel *>        channels;
+    QVector<Channel *>        threads;
+    void                     *presences; // TODO
+    QVector<StageInstance *>  stageInstances;
+    QVector<Sticker *>        stickers;
+    QString                   name;
+    QString                   icon;
+    QString                   iconHash;
+    QString                   splash;
+    QString                   discoverySplash;
+    QString                   permissions;
+    QString                   region;
+    QString                   joinedAt;
+    QString                   vanityUrlCode;
+    QString                   description;
+    QString                   banner;
+    QString                   preferredLocale;
+    Snowflake                 id;
+    Snowflake                 ownerId;
+    Snowflake                 afkChannelId;
+    Snowflake                 widgetChannelId;
+    Snowflake                 applicationId;
+    Snowflake                 systemChannelId;
+    Snowflake                 rulesChannelId;
+    Snowflake                 publicUpdatesChannelId;
+    qint32                    afkTimeout;
+    qint32                    verificationLevel;
+    qint32                    defaultMessageNotifications;
+    qint32                    explicitContentFilter;
+    qint32                    mfaLevel;
+    qint32                    systemChannelFlags;
+    qint32                    memberCount;
+    qint32                    maxPresences;
+    qint32                    maxMembers;
+    qint32                    premiumTier;
+    qint32                    premiumSubscriptionCount;
+    qint32                    maxVideoChannelUsers;
+    qint32                    approximateMemberCount;
+    qint32                    approximatePresenceCount;
+    qint32                    nsfwLevel;
+    optbool                   owner;
+    optbool                   widgetEnabled;
+    optbool                   large;
+    optbool                   unavailable;
+    bool                      premiumProgressBarEnabled;
 };
 
 } // namespace Api

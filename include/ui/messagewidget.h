@@ -20,7 +20,7 @@ public:
     Api::RessourceManager *rm; // To request the API
 
 private:
-    void iconMessage(Api::Message *message, const std::string &text, const std::string& iconName);
+    void iconMessage(Api::Message *message, const QString &text, const QString& iconName);
 
     void defaultMessage(Api::Message *message, bool separatorBefore);
     void recipientMessage(Api::Message *message);
@@ -34,9 +34,9 @@ private:
 
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
-    void setAvatar(const std::string& avatarFileName);
-    void setReplyAvatar(const std::string& avatarFileName);
-    void addImage(const std::string& filename, int width, int height);
+    void setAvatar(const QString& avatarFileName);
+    void setReplyAvatar(const QString& avatarFileName);
+    void addImage(const QString& filename, int width, int height);
     QString processTime(QTime time);
     QString processTimestamp(QDateTime dateTime);
 

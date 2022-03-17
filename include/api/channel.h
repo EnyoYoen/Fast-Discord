@@ -1,11 +1,12 @@
 #pragma once
 
-#include "thread.h"
-#include "user.h"
-#include "overwrite.h"
+#include "api/thread.h"
+#include "api/user.h"
+#include "api/overwrite.h"
+#include "api/snowflake.h"
 
-#include <string>
-#include <vector>
+#include <QString>
+#include <QVector>
 
 namespace Api {
 
@@ -26,57 +27,58 @@ enum ChannelTypes {
 //https://discord.com/developers/docs/resources/channel
 struct Channel
 {
-        ~Channel();
-        std::vector<User *>      *recipients;
-        std::vector<Overwrite *> *permissionOverwrites;
-        ThreadMember             *member;
-        ThreadMetadata           *threadMetadata;
-        std::string              *id;
-        std::string              *name;
-        std::string              *topic;
-        std::string              *icon;
-        std::string              *lastPinTimestamp;
-        std::string              *rtcRegion;
-        std::string              *permissions;
-        std::string              *guildId;
-        std::string              *lastMessageId;
-        std::string              *ownerId;
-        std::string              *applicationId;
-        std::string              *parentId;
-        int                       type;
-        int                       position;
-        int                       bitrate;
-        int                       userLimit;
-        int                       rateLimitPerUser;
-        int                       videoQualityMode;
-        int                       messageCount;
-        int                       memberCount;
-        int                       defaultAutoArchiveDuration;
-        bool                      nsfw;
+    ~Channel()
+    {
+        delete member;
+        delete threadMetadata;
+    }
+
+    QVector<User *>       recipients;
+    QVector<Overwrite *>  permissionOverwrites;
+    ThreadMember         *member;
+    ThreadMetadata       *threadMetadata;
+    QString               name;
+    QString               topic;
+    QString               icon;
+    QString               lastPinTimestamp;
+    QString               rtcRegion;
+    QString               permissions;
+    Snowflake             id;
+    Snowflake             guildId;
+    Snowflake             lastMessageId;
+    Snowflake             ownerId;
+    Snowflake             applicationId;
+    Snowflake             parentId;
+    qint32                type;
+    qint32                position;
+    qint32                bitrate;
+    qint32                userLimit;
+    qint32                rateLimitPerUser;
+    qint32                videoQualityMode;
+    qint32                messageCount;
+    qint32                memberCount;
+    qint32                defaultAutoArchiveDuration;
+    bool                  nsfw;
 };
 
 //https://discord.com/developers/docs/resources/channel#channel-mention-object
 struct ChannelMention
 {
-    ~ChannelMention();
-
-    std::string *id;
-    std::string *guilId;
-    std::string *name;
-    int          type;
+    QString   name;
+    Snowflake id;
+    Snowflake guilId;
+    qint32    type;
 };
 
 struct PrivateChannel
 {
-    ~PrivateChannel();
-
-    std::vector<std::string> *recipientIds;
-    std::string *icon;
-    std::string *id;
-    std::string *lastMessageId;
-    std::string *name;
-    std::string *ownerId;
-    int          type;
+    QVector<Snowflake> recipientIds;
+    QString            icon;
+    QString            name;
+    Snowflake          id;
+    Snowflake          lastMessageId;
+    Snowflake          ownerId;
+    qint32             type;
 };
 
 } // namespace Api

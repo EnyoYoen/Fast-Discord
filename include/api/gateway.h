@@ -4,8 +4,8 @@
 
 #include <QtWebSockets/QtWebSockets>
 #include <QJsonValue>
+#include <QString>
 
-#include <string>
 #include <map>
 
 using json = QJsonValue;
@@ -34,12 +34,12 @@ class Gateway : public QObject
 {
     Q_OBJECT
 public:
-    Gateway(Api::Requester *requester, const std::string& token);
-    void onDispatch(std::function<void(std::string&, json&)> callback);
+    Gateway(Api::Requester *requester, const QString& token);
+    void onDispatch(std::function<void(QString&, json&)> callback);
         //Sets the callback function called when the gateway recieve events
 
-    void sendGuildChannelOpened(const std::map<std::string, std::vector<std::vector<int>>> channels, const std::string& guildId, bool activities, bool threads, bool typing);
-    void sendDMChannelOpened(const std::string& channelId);
+    void sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<int>>> channels, const Snowflake& guildId, bool activities, bool threads, bool typing);
+    void sendDMChannelOpened(const Snowflake& channelId);
 
 private slots:
     void closeHandler();
@@ -51,19 +51,19 @@ private slots:
 
 private:
     void start();
-    void send(int op, const std::string& data);
+    void send(int op, const QString& data);
                           //Send data through the gateway
     void resume();        //Resume connection
     void heartbeat();     //Send Heartbeat message to stay connected
-    void dispatch(std::string eventName, json& data);
+    void dispatch(QString eventName, json& data);
                           //Internal function used to process some messages
 
     QWebSocket client;    // websocket client
-    std::function<void(std::string&, json&)> onDispatchHandler;
+    std::function<void(QString&, json&)> onDispatchHandler;
          //Function called when when the gateway recieve events
-    std::string url;      //websocket URL
-    std::string sessionId;
-    std::string token;
+    QString url;      //websocket URL
+    QString sessionId;
+    QString token;
     int heartbeatInterval;
     int seq;
     bool connected;

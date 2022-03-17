@@ -10,7 +10,7 @@
 
 namespace Ui {
 
-RoundedImage::RoundedImage(const std::string& imagePath, int width, int height, int radius, QWidget *parent)
+RoundedImage::RoundedImage(const QString& imagePath, int width, int height, int radius, QWidget *parent)
     : QLabel(parent)
 {
     // Attributes initialization
@@ -20,16 +20,16 @@ RoundedImage::RoundedImage(const std::string& imagePath, int width, int height, 
     hasImage = true;
 
     // Determine if the image is animated and set the image to the widget
-    if (imagePath.compare(imagePath.length() - 4, 4, ".gif") == 0) {
+    if (imagePath.mid(imagePath.length() - 4, 4).compare(".gif") == 0) {
         // This is an animated image
-        image = QPixmap(imagePath.c_str()).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        animatedImage = new QMovie(imagePath.c_str());
+        image = QPixmap(imagePath).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        animatedImage = new QMovie(imagePath);
         animatedImage->start();
         animatedImage->setPaused(true);
         this->setMovie(animatedImage);
     } else {
         // Not animated
-        image = QPixmap(imagePath.c_str()).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        image = QPixmap(imagePath).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         this->setPixmap(image);
         animatedImage = nullptr;
     }
@@ -51,23 +51,23 @@ RoundedImage::RoundedImage(int width, int height, int radius, QWidget *parent)
     this->setFixedSize(width, height);
 }
 
-void RoundedImage::setImage(const std::string& imagePath)
+void RoundedImage::setImage(const QString& imagePath)
 {
     hasImage = true;
 
     // Determine if the image is animated and set the image to the widget
-    if (imagePath.compare(imagePath.length() - 4, 4, ".gif") == 0) {
+    if (imagePath.mid(imagePath.length() - 4, 4).compare(".gif") == 0) {
         // This is an animated image
-        image = QPixmap(imagePath.c_str()).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        animatedImage = new QMovie(imagePath.c_str());
+        image = QPixmap(imagePath).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        animatedImage = new QMovie(imagePath);
         animatedImage->start();
         animatedImage->setPaused(true);
         this->setMovie(animatedImage);
     } else {
         // Not animated
-        image = QPixmap(imagePath.c_str()).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        image = QPixmap(imagePath).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         if (image.isNull())
-            image = QPixmap(imagePath.c_str(), "JPG").scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            image = QPixmap(imagePath, "JPG").scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         this->setPixmap(image);
         animatedImage = nullptr;
     }

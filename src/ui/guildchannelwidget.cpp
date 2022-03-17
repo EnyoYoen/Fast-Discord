@@ -6,12 +6,12 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     : QWidget(parent)
 {
     // Attributes initialization
-    id = *guildChannel.id;
+    id = guildChannel.id;
     type = guildChannel.type;
     clicked = false;
 
     //  Determine the icon of this channel with its type
-    std::string iconName;
+    QString iconName;
     switch (type) {
     case Api::GuildText:
         iconName = "0";
@@ -53,12 +53,12 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
 
     // Create the icon
     icon = new QLabel(this);
-    icon->setPixmap(QPixmap(std::string("res/images/svg/guild-channel-icon" + iconName + ".svg").c_str()));
+    icon->setPixmap(QPixmap("res/images/svg/guild-channel-icon" + iconName + ".svg"));
     icon->setFixedSize(32, 32);
     icon->setStyleSheet("color: #8E9297");
 
     // Create the name label
-    name = new QLabel((*guildChannel.name).c_str(), this);
+    name = new QLabel(guildChannel.name, this);
     name->setStyleSheet("color: #8E9297");
 
     // Add widgets to layout and style it

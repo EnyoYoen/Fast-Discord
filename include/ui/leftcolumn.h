@@ -5,11 +5,10 @@
 #include "ui/guildfolder.h"
 #include "api/guild.h"
 #include "api/ressourcemanager.h"
+#include "api/snowflake.h"
 
 #include <QScrollArea>
 #include <QVBoxLayout>
-
-#include <vector>
 
 namespace Ui {
 
@@ -23,15 +22,15 @@ public:
 signals:
     void cleanRightColumn();
     void homeButtonClicked();
-    void guildClicked(const std::string&);
+    void guildClicked(const Api::Snowflake&);
 
 public slots:
-    void displayGuilds(const std::vector<Api::Guild *>& guilds);
+    void displayGuilds(const QVector<Api::Guild *>& guilds);
 
 private slots:
     void clicHomeButton();
-    void clicGuild(const std::string&);
-    void setUnreadGuild(const std::string& guildId);
+    void clicGuild(const Api::Snowflake&);
+    void setUnreadGuild(const Api::Snowflake& guildId);
 
 private:
     // Main widgets
@@ -40,8 +39,8 @@ private:
 
     Api::RessourceManager *rm; // To request the API
 
-    std::vector<GuildWidget *> guildWidgets;
-    std::vector<GuildFolder *> guildFolders;
+    QVector<GuildWidget *> guildWidgets;
+    QVector<GuildFolder *> guildFolders;
 
     bool homePageShown; // If the home page is shown
 };

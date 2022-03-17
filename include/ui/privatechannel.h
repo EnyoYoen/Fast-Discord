@@ -20,14 +20,14 @@ class PrivateChannelWidget : public QWidget
 public:
     PrivateChannelWidget(Api::RessourceManager *rm, const Api::PrivateChannel& privateChannel, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
-    void setStatus(std::string *status);
+    void setStatus(QString status);
 
-    std::string id;
+    Api::Snowflake id;
 
 signals:
-    void leftClicked(const std::string&);
-    void rightClicked(const std::string&);
-    void closeButtonClicked(const std::string&, const std::string&, int);
+    void leftClicked(const Api::Snowflake&);
+    void rightClicked(const Api::Snowflake&);
+    void closeButtonClicked(const Api::Snowflake&, const Api::Snowflake&, int);
 
 public slots:
     void closeChannel();
@@ -37,7 +37,7 @@ private:
     void mousePressEvent (QMouseEvent *) override;
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
-    void setIcon(const std::string& iconFileName);
+    void setIcon(const QString& iconFileName);
 
     Api::RessourceManager *rm; // To request the API
 

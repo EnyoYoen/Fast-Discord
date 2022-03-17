@@ -33,16 +33,16 @@ RightColumn::RightColumn(Api::RessourceManager *rmp, Api::Client *clientp, QWidg
     // Style the column
     this->setStyleSheet("background-color: #36393F;");
 
-    QObject::connect(this, SIGNAL(messagesReceived(std::vector<Api::Message *> *)), this, SLOT(setMessages(std::vector<Api::Message *> *)));
+    QObject::connect(this, SIGNAL(messagesReceived(QVector<Api::Message *>)), this, SLOT(setMessages(QVector<Api::Message *>)));
     QObject::connect(this, SIGNAL(userTypingReceived(const Api::User *)), this, SLOT(setUserTyping(const Api::User *)));
-    QObject::connect(this, SIGNAL(moreMessagesReceived(const std::vector<Api::Message *>&)), messageArea, SLOT(addMessages(const std::vector<Api::Message *>&)));
+    QObject::connect(this, SIGNAL(moreMessagesReceived(const QVector<Api::Message *>&)), messageArea, SLOT(addMessages(const QVector<Api::Message *>&)));
     QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
 }
 
-void RightColumn::setMessages(std::vector<Api::Message *> *messages)
+void RightColumn::setMessages(QVector<Api::Message *> messages)
 {
     messageArea->clear();
-    messageArea->setMessages(*messages);
+    messageArea->setMessages(messages);
     messagesLayout->insertWidget(0, messageArea);
 }
 
@@ -52,13 +52,13 @@ void RightColumn::setUserTyping(const Api::User *user)
     time_t currentTimestamp = std::time(nullptr);
 
     // Get the user name and the text of the typing label
-    std::string username = *(*user).username;
-    std::string text = typingLabel->text().toUtf8().constData();
+    QString username = user->username;
+    QString text = typingLabel->text().toUtf8().constData();
 
     // Change the text of the typing label
     if (text != "") {
         // Somemone is already typing, so we change with the new user
-        size_t index = (text.find(" is typing") != std::string::npos) ? text.find(" is typing") : text.find(" are typing");
+        size_t index = (text.indexOf(" is typing") != -1) ? text.indexOf(" is typing") : text.indexOf(" are typing");
         text.resize(text.size() - index);
         text += " " + username + " are typing";
     } else {
@@ -67,7 +67,7 @@ void RightColumn::setUserTyping(const Api::User *user)
     }
 
     // Change the text on the label and wait 8 seconds
-    typingLabel->setText(QString::fromUtf8(text.c_str()));
+    typingLabel->setText(text);
     QThread::sleep(typingTimestamp + 8 - currentTimestamp);
     typingLabel->setText("");
 }
@@ -90,21 +90,21 @@ void RightColumn::clean()
     layout->addWidget(placeholderWidget);
 }
 
-void RightColumn::openGuildChannel(const std::string& guildId, const std::string& id)
+void RightColumn::openGuildChannel(const Api::Snowflake& guildId, const Api::Snowflake& id)
 {
     rm->getGuildChannel([&](void *channel){
         openChannel(id, reinterpret_cast<Api::Channel *>(channel)->type);
     }, guildId, id);
 }
 
-void RightColumn::openPrivateChannel(const std::string& id)
+void RightColumn::openPrivateChannel(const Api::Snowflake& id)
 {
     rm->getPrivateChannel([&](void *channel){
         openChannel(id, reinterpret_cast<Api::PrivateChannel *>(channel)->type);
     }, id);
 }
 
-void RightColumn::openChannel(const std::string& channelId, int type)
+void RightColumn::openChannel(const Api::Snowflake& channelId, int type)
 {
     if (type != Api::GuildVoice) {
         rm->requester->removeImageRequests();
@@ -124,11 +124,11 @@ void RightColumn::openChannel(const std::string& channelId, int type)
         if (!rm->hasMessages(channelId)) {
             QWidget *messageAreaPlaceholder = new QWidget(messagesContainer);
             messagesLayout->addWidget(messageAreaPlaceholder);
-            rm->getMessages([this](void *messages) {emit messagesReceived(static_cast<std::vector<Api::Message *> *>(messages));}, channelId, 50, false);
+            rm->getMessages([this](void *messages) {emit messagesReceived(*static_cast<QVector<Api::Message *> *>(messages));}, channelId, 50, false);
         } else {
             rm->getMessages([this](void *messagePtr) {
-                std::vector<Api::Message *> *messages = reinterpret_cast<std::vector<Api::Message *> *>(messagePtr);
-                messageArea->setMessages(*messages);
+                QVector<Api::Message *> messages = *reinterpret_cast<QVector<Api::Message *> *>(messagePtr);
+                messageArea->setMessages(messages);
             }, channelId, 50, false);
         }
 
@@ -188,7 +188,7 @@ void RightColumn::openChannel(const std::string& channelId, int type)
         }*/
 
         // Connect signals to slots
-        QObject::connect(textInput, SIGNAL(returnPressed(std::string)), this, SLOT(sendMessage(const std::string&)));
+        QObject::connect(textInput, SIGNAL(returnPressed(QString)), this, SLOT(sendMessage(const QString&)));
         QObject::connect(textInput, SIGNAL(typing()), this, SLOT(sendTyping()));
     }
 }
@@ -196,10 +196,10 @@ void RightColumn::openChannel(const std::string& channelId, int type)
 void RightColumn::addMessage(const Api::Message& message)
 {
     // Add the message if it belongs to this channels
-    if (*message.channelId == currentOpenedChannel) {
+    if (message.channelId == currentOpenedChannel) {
         Api::Message *messagep = const_cast<Api::Message *>(&message);
         rm->getMessages([this, messagep](void *messagePtr) {
-            std::vector<Api::Message *> channelMessages = *reinterpret_cast<std::vector<Api::Message *> *>(messagePtr);
+            QVector<Api::Message *> channelMessages = *reinterpret_cast<QVector<Api::Message *> *>(messagePtr);
             messageArea->addMessage(messagep, channelMessages[1]);
         }, currentOpenedChannel, 1, false);
         emit messageAdded(currentOpenedChannel);
@@ -209,7 +209,7 @@ void RightColumn::addMessage(const Api::Message& message)
 void RightColumn::userTyping(const json& data)
 {
     // TODO : it's showing typing only for the current opened channel, other typing events are ignored
-    std::string channelId = data["channel_id"].toString().toUtf8().constData();
+    Api::Snowflake channelId(data["channel_id"].toVariant().toULongLong());
     if (currentOpenedChannel == channelId) {
         // A user is typing in this channel
 
@@ -217,7 +217,7 @@ void RightColumn::userTyping(const json& data)
         typingTimestamp = data["timestamp"].toInt(-1);
 
         // Get the user that is typing
-        rm->getUser([this](void *user) {emit userTypingReceived(static_cast<Api::User *>(user));}, data["user_id"].toString().toUtf8().constData());
+        rm->getUser([this](void *user) {emit userTypingReceived(static_cast<Api::User *>(user));}, Api::Snowflake(data["user_id"].toVariant().toULongLong()));
     }
 }
 
@@ -227,20 +227,20 @@ void RightColumn::sendTyping()
     rm->requester->sendTyping(currentOpenedChannel);
 }
 
-void RightColumn::sendMessage(const std::string& content)
+void RightColumn::sendMessage(const QString& content)
 {
     // Send a new message to the API and add it to the opened channel
     rm->requester->sendMessage(content, currentOpenedChannel);
-    std::string messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
-    std::string *fakeStr = new std::string("");
-    Api::Message *newMessage = new Api::Message {nullptr, new Api::User{new std::string(client->username->c_str()), fakeStr, new std::string(client->avatar->c_str()), fakeStr, fakeStr, new std::string(client->id->c_str()), -1, -1, -1, false, false, false, false}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, fakeStr, new std::string(currentOpenedChannel), fakeStr, new std::string(content), new std::string(messageTimestamp), fakeStr, fakeStr, fakeStr, fakeStr, -1, -1, -1, -1, false, false, false};
+    QString messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
+    QString fakeStr;
+    Api::Message *newMessage = new Api::Message {Api::User{QString(client->username), fakeStr, QString(client->avatar), fakeStr, fakeStr, fakeStr, Api::Snowflake(client->id), 0, 0, 0, 0, 2, 2, 2, 2}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, QVector<Api::Reaction *>(), QVector<Api::Embed *>(), QVector<Api::User *>(), QVector<Api::Attachment *>(), QVector<Api::ChannelMention *>(), QVector<QString>(), QVector<Api::MessageComponent *>(), QVector<Api::StickerItem *>(), QVector<Api::Sticker *>(), QString(content), QString(messageTimestamp), fakeStr, fakeStr, 0, Api::Snowflake(currentOpenedChannel), 0, 0, 0, 0, 0, 0, 0, false, false, false};
     this->addMessage(*newMessage);
 }
 
 void RightColumn::loadMoreMessages()
 {
    rm->getMessages([this](void *messages){
-       emit moreMessagesReceived(*static_cast<std::vector<Api::Message *> *>(messages));
+       emit moreMessagesReceived(*static_cast<QVector<Api::Message *> *>(messages));
    }, currentOpenedChannel, 50, true);
 }
 

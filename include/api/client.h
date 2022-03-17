@@ -1,7 +1,9 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include "api/snowflake.h"
+
+#include <QString>
+#include <QVector>
 
 namespace Api {
 
@@ -9,18 +11,14 @@ namespace Api {
 
 struct CustomStatus
 {
-    ~CustomStatus();
-
-    std::string *text;
-    std::string *expiresAt;
-    std::string *emojiName;
-    std::string *emojiId;
+    QString   text;
+    QString   expiresAt;
+    QString   emojiName;
+    Snowflake emojiId;
 };
 
 struct FriendSourceFlags
 {
-    ~FriendSourceFlags();
-
     bool all;
     bool mutualFriends;
     bool mutualGuilds;
@@ -28,74 +26,74 @@ struct FriendSourceFlags
 
 struct GuildFolder
 {
-    ~GuildFolder();
-
-    std::vector<std::string> *guildIds;
-    std::string              *name;
-    std::string              *strId;
-    long long                 intId;
-    int                       color;
+    QVector<Api::Snowflake> guildIds;
+    QString                 name;
+    QString                 strId;
+    qint64                  intId;
+    qint32                  color;
 };
 
 struct ClientSettings
 {
-    ~ClientSettings();
+    ~ClientSettings()
+    {
+        delete customStatus;
+        delete friendSourceFlags;
+    }
 
-    CustomStatus               *customStatus;
-    FriendSourceFlags          *friendSourceFlags;
-    std::vector<GuildFolder *> *guildFolders;
-    std::vector<std::string>   *guildPositions;
-    std::vector<std::string>   *restrictedGuilds;
-    std::string                *locale;
-    std::string                *status;
-    std::string                *theme;
-    int                         afkTimeout;
-    int                         animateStickers;
-    int                         explicitContentFilter;
-    int                         friendDiscoveryFlags;
-    int                         timezoneOffset;
-    bool                        allowAccessibilityDetection;
-    bool                        animateEmoji;
-    bool                        contactSyncEnabled;
-    bool                        convertEmoticons;
-    bool                        defaultGuildsRestricted;
-    bool                        detectPlatformAccounts;
-    bool                        developerMode;
-    bool                        disableGamesTab;
-    bool                        enableTtsCommand;
-    bool                        gifAutoPlay;
-    bool                        inlineAttachmentMedia;
-    bool                        inlineEmbedMedia;
-    bool                        messageDisplayCompact;
-    bool                        nativePhoneIntegrationEnabled;
-    bool                        renderEmbeds;
-    bool                        renderReactions;
-    bool                        showCurrentGame;
-    bool                        streamNotificationsEnabled;
-    bool                        viewNsfwGuilds;
+    CustomStatus           *customStatus;
+    FriendSourceFlags      *friendSourceFlags;
+    QVector<GuildFolder *>  guildFolders;
+    QVector<QString>        guildPositions;
+    QVector<QString>        restrictedGuilds;
+    QString                 locale;
+    QString                 status;
+    QString                 theme;
+    qint32                  afkTimeout;
+    qint32                  animateStickers;
+    qint32                  explicitContentFilter;
+    qint32                  friendDiscoveryFlags;
+    qint32                  timezoneOffset;
+    bool                    allowAccessibilityDetection;
+    bool                    animateEmoji;
+    bool                    contactSyncEnabled;
+    bool                    convertEmoticons;
+    bool                    defaultGuildsRestricted;
+    bool                    detectPlatformAccounts;
+    bool                    developerMode;
+    bool                    disableGamesTab;
+    bool                    enableTtsCommand;
+    bool                    gifAutoPlay;
+    bool                    inlineAttachmentMedia;
+    bool                    inlineEmbedMedia;
+    bool                    messageDisplayCompact;
+    bool                    nativePhoneIntegrationEnabled;
+    bool                    renderEmbeds;
+    bool                    renderReactions;
+    bool                    showCurrentGame;
+    bool                    streamNotificationsEnabled;
+    bool                    viewNsfwGuilds;
 };
 
 struct Client
 {
-    ~Client();
-
-    std::string *id;
-    std::string *username;
-    std::string *avatar;
-    std::string *discriminator;
-    std::string *banner;
-    std::string *bio;
-    std::string *locale;
-    std::string *email;
-    std::string *phone;
-    int          publicFlags;
-    int          flags;
-    int          purchased_flags;
-    int          bannerColor;
-    int          accentColor;
-    bool         nfswAllowed;
-    bool         mfaEnabled;
-    bool         verified;
+    QString   username;
+    QString   avatar;
+    QString   discriminator;
+    QString   banner;
+    QString   bio;
+    QString   locale;
+    QString   email;
+    QString   phone;
+    Snowflake id;
+    qint32    publicFlags;
+    qint32    flags;
+    qint32    purchased_flags;
+    qint32    bannerColor;
+    qint32    accentColor;
+    bool      nfswAllowed;
+    bool      mfaEnabled;
+    bool      verified;
 };
 
 } // namespace Api

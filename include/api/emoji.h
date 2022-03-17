@@ -1,34 +1,36 @@
 #pragma once
 
-#include "user.h"
+#include "api/user.h"
+#include "api/snowflake.h"
 
-#include <string>
-#include <vector>
+#include <QString>
+#include <QVector>
 
 namespace Api {
 
 //https://discord.com/developers/docs/resources/emoji
 struct Emoji
 {
-    ~Emoji();
+    ~Emoji()
+    {
+        delete user;
+    }
 
-    User                     *user;
-    std::vector<std::string> *roles;
-    std::string              *id;
-    std::string              *name;
-    bool                      requireColons;
-    bool                      managed;
-    bool                      animated;
-    bool                      available;
+    User               *user;
+    QVector<Snowflake>  roles;
+    QString             name;
+    Snowflake           id;
+    optbool             requireColons;
+    optbool             managed;
+    optbool             animated;
+    optbool             available;
 };
 
 struct Reaction
 {
-    ~Reaction();
-
-    Emoji *emoji;
-    int   count;
-    bool  me;
+    Emoji  emoji;
+    qint32 count;
+    bool   me;
 };
 
 } // namespace Api

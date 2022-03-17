@@ -1,22 +1,24 @@
 #pragma once
 
-#include "guildmember.h"
-
-#include <string>
+#include "api/guildmember.h"
+#include "api/snowflake.h"
 
 namespace Api {
 
 //https://discord.com/developers/docs/resources/voice#voice-state-object
 struct VoiceState
 {
-    ~VoiceState();
+    ~VoiceState()
+    {
+        delete member;
+    }
 
     GuildMember *member;
-    std::string *guildId;
-    std::string *channelId;
-    std::string *userId;
-    std::string *sessionId;
-    std::string *requestToSpeakTimestamp;
+    QString      sessionId;
+    QString      requestToSpeakTimestamp;
+    Snowflake    guildId;
+    Snowflake    channelId;
+    Snowflake    userId;
     bool         deaf;
     bool         mute;
     bool         selfDeaf;

@@ -3,8 +3,6 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
-#include <string>
-
 namespace Ui {
 
 MessageSeparator::MessageSeparator(QDate date, QWidget *parent)
@@ -16,7 +14,7 @@ MessageSeparator::MessageSeparator(QDate date, QWidget *parent)
     QWidget *line2 = new QWidget(this);
 
     // Determine the month of the separator timestamp
-    std::string month("");
+    QString month("");
     switch(date.month()) {
         case 1:
             month = "January";
@@ -56,7 +54,7 @@ MessageSeparator::MessageSeparator(QDate date, QWidget *parent)
             break;
     }
     // Create the label with the timestamp
-    QLabel *dateLabel = new QLabel((month + " " + std::to_string(date.day()) + ", " + std::to_string(date.year())).c_str(), this);
+    QLabel *dateLabel = new QLabel(month + " " + QString::number(date.day()) + ", " + QString::number(date.year()), this);
 
     // Add the widgets to the layout
     layout->addWidget(line1);

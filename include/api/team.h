@@ -1,9 +1,10 @@
 #pragma once
 
-#include "user.h"
+#include "api/user.h"
+#include "api/snowflake.h"
 
-#include <string>
-#include <vector>
+#include <QString>
+#include <QVector>
 
 namespace Api {
 
@@ -11,23 +12,19 @@ namespace Api {
 
 struct TeamMember
 {
-    ~TeamMember();
-
-    User                     *user;
-    std::vector<std::string> *permissions;
-    std::string              *teamId;
-    int                       memberShipState;
+    User             user;
+    QVector<QString> permissions;
+    Snowflake        teamId;
+    qint32           memberShipState;
 };
 
 struct Team
 {
-    ~Team();
-
-    std::vector<TeamMember *> *members;
-    std::string               *icon;
-    std::string               *id;
-    std::string               *name;
-    std::string               *ownerUserId;
+    QVector<TeamMember *> members;
+    QString               icon;
+    QString               name;
+    Snowflake             id;
+    Snowflake             ownerUserId;
 };
 
 } // namespace Api

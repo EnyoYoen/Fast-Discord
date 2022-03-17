@@ -13,31 +13,42 @@
 #include "api/guild.h"
 #include "api/client.h"
 #include "api/presence.h"
+#include "api/optional.h"
 
-#include <string>
-
+#include <QVariant>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QDebug>
 
 namespace Api {
 
-std::string *getString(QJsonObject jsonObj, const char *key)
+QString getString(QJsonObject object, const char *key)
 {
-    std::string str = jsonObj[QString(key)].toString().toUtf8().constData();
-    return new std::string(str);
+    return object[key].toString();
 }
 
-std::vector<std::string> *getStringsFromJson(QJsonArray jsonArray)
+QVector<QString> getStringsFromJson(QJsonArray jsonArray)
 {
-    std::vector<std::string> *strings = new std::vector<std::string>;
+    QVector<QString> strings;
 
     // Filling the vector
     for (int i = 0 ; i < jsonArray.size() ; i++) {
-        strings->push_back(jsonArray[i].toString().toUtf8().constData());
+        strings.push_back(jsonArray[i].toString());
     }
 
     return strings;
+}
+
+QVector<Snowflake> getSnowflakesFromJson(QJsonArray jsonArray)
+{
+    QVector<Snowflake> snowflakes;
+
+    // Filling the vector
+    for (int i = 0 ; i < jsonArray.size() ; i++) {
+        snowflakes.push_back(jsonArray[i].toVariant().toULongLong());
+    }
+
+    return snowflakes;
 }
 
 // All the specialization of 'unmarshal'
@@ -49,18 +60,21 @@ void unmarshal<User>(QJsonObject jsonObj, User **object)
         getString(jsonObj, "username"),
         getString(jsonObj, "discriminator"),
         getString(jsonObj, "avatar"),
+        getString(jsonObj, "banner"),
         getString(jsonObj, "locale"),
         getString(jsonObj, "email"),
-        getString(jsonObj, "id"),
 
-        jsonObj["flags"].toInt(-1),
-        jsonObj["premium_type"].toInt(-1),
-        jsonObj["public_flags"].toInt(-1),
+        jsonObj["id"].toVariant().toULongLong(),
 
-        jsonObj["bot"].toBool(),
-        jsonObj["system"].toBool(),
-        jsonObj["mfa_enabled"].toBool(),
-        jsonObj["verified"].toBool()
+        jsonObj["accent_color"].toInt(),
+        jsonObj["flags"].toInt(),
+        jsonObj["premium_type"].toInt(),
+        jsonObj["public_flags"].toInt(),
+
+        jsonObj["bot"].isNull() ? (optbool)jsonObj["bot"].toBool() : (optbool)Optional::None,
+        jsonObj["system"].isNull() ? (optbool)jsonObj["system"].toBool() : (optbool)Optional::None,
+        jsonObj["mfa_enabled"].isNull() ? (optbool)jsonObj["mfa_enabled"].toBool() : (optbool)Optional::None,
+        jsonObj["verified"].isNull() ? (optbool)jsonObj["verified"].toBool() : (optbool)Optional::None
     };
 }
 
@@ -68,11 +82,12 @@ template <>
 void unmarshal<Overwrite>(QJsonObject jsonObj, Overwrite **object)
 {
     *object = new Overwrite {
-        getString(jsonObj, "id"),
         getString(jsonObj, "allow"),
         getString(jsonObj, "deny"),
 
-        jsonObj["type"].toInt(-1)
+        jsonObj["id"].toVariant().toULongLong(),
+
+        jsonObj["type"].toInt()
     };
 }
 
@@ -81,10 +96,11 @@ void unmarshal<ThreadMember>(QJsonObject jsonObj, ThreadMember **object)
 {
     *object = new ThreadMember {
         getString(jsonObj, "join_timestamp"),
-        getString(jsonObj, "id"),
-        getString(jsonObj, "user_id"),
 
-        jsonObj["flags"].toInt(-1)
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["user_id"].toVariant().toULongLong(),
+
+        jsonObj["flags"].toInt()
     };
 }
 
@@ -93,9 +109,11 @@ void unmarshal<ThreadMetadata>(QJsonObject jsonObj, ThreadMetadata **object)
 {
     *object = new ThreadMetadata {
         getString(jsonObj, "archive_timestamp"),
+        getString(jsonObj, "create_timestamp"),
 
-        jsonObj["auto_archive_duration"].toInt(-1),
+        jsonObj["auto_archive_duration"].toInt(),
 
+        (optbool)jsonObj["invitable"].isNull() ? (optbool)jsonObj["invitable"].toBool() : (optbool)Optional::None,
         jsonObj["archived"].toBool(),
         jsonObj["locked"].toBool()
     };
@@ -104,44 +122,41 @@ void unmarshal<ThreadMetadata>(QJsonObject jsonObj, ThreadMetadata **object)
 template <>
 void unmarshal<Channel>(QJsonObject jsonObj, Channel **object)
 {
-    std::vector<User *> *recipients = new std::vector<User *>;
-    std::vector<Overwrite *> *permissionOverwrites = new std::vector<Overwrite *>;
     ThreadMember *member = new ThreadMember;
     ThreadMetadata *threadMetadata = new ThreadMetadata;
 
-    unmarshalMultiple<User>(jsonObj["recipients"].toArray(), &recipients);
-    unmarshalMultiple<Overwrite>(jsonObj["permission_overwrites"].toArray(), &permissionOverwrites);
     unmarshal<ThreadMember>(jsonObj["member"].toObject(), &member);
     unmarshal<ThreadMetadata>(jsonObj["thread_metadata"].toObject(), &threadMetadata);
 
     *object = new Channel {
-        recipients,
-        permissionOverwrites,
+        unmarshalMultiple<User>(jsonObj["recipients"].toArray()),
+        unmarshalMultiple<Overwrite>(jsonObj["permission_overwrites"].toArray()),
         member,
         threadMetadata,
 
-        getString(jsonObj, "id"),
         getString(jsonObj, "name"),
         getString(jsonObj, "topic"),
         getString(jsonObj, "icon"),
         getString(jsonObj, "last_pin_timestamp"),
         getString(jsonObj, "rtc_region"),
         getString(jsonObj, "permissions"),
-        getString(jsonObj, "guild_id"),
-        getString(jsonObj, "last_message_id"),
-        getString(jsonObj, "owner_id"),
-        getString(jsonObj, "application_id"),
-        getString(jsonObj, "parent_id"),
 
-        jsonObj["type"].toInt(-1),
-        jsonObj["position"].toInt(-1),
-        jsonObj["bitrate"].toInt(-1),
-        jsonObj["user_limit"].toInt(-1),
-        jsonObj["rate_limit_per_user"].toInt(-1),
-        jsonObj["video_quality_mode"].toInt(-1),
-        jsonObj["message_count"].toInt(-1),
-        jsonObj["member_count"].toInt(-1),
-        jsonObj["default_auto_archive_duration"].toInt(-1),
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["guild_id"].toVariant().toULongLong(),
+        jsonObj["last_message_id"].toVariant().toULongLong(),
+        jsonObj["owner_id"].toVariant().toULongLong(),
+        jsonObj["application_id"].toVariant().toULongLong(),
+        jsonObj["parent_id"].toVariant().toULongLong(),
+
+        jsonObj["type"].toInt(),
+        jsonObj["position"].toInt(),
+        jsonObj["bitrate"].toInt(),
+        jsonObj["user_limit"].toInt(),
+        jsonObj["rate_limit_per_user"].toInt(),
+        jsonObj["video_quality_mode"].toInt(),
+        jsonObj["message_count"].toInt(),
+        jsonObj["member_count"].toInt(),
+        jsonObj["default_auto_archive_duration"].toInt(),
 
         jsonObj["nsfw"].toBool()
     };
@@ -150,16 +165,18 @@ void unmarshal<Channel>(QJsonObject jsonObj, Channel **object)
 template <>
 void unmarshal<PrivateChannel>(QJsonObject jsonObj, PrivateChannel **object)
 {
+    qDebug() << QJsonDocument(jsonObj).toJson(QJsonDocument::Compact);
     *object = new PrivateChannel {
-        getStringsFromJson(jsonObj["recipient_ids"].toArray()),
+        getSnowflakesFromJson(jsonObj["recipient_ids"].toArray()),
 
         getString(jsonObj, "icon"),
-        getString(jsonObj, "id"),
-        getString(jsonObj, "last_message_id"),
         getString(jsonObj, "name"),
-        getString(jsonObj, "owner_id"),
 
-        jsonObj["type"].toInt(-1)
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["last_message_id"].toVariant().toULongLong(),
+        jsonObj["owner_id"].toVariant().toULongLong(),
+
+        jsonObj["type"].toInt()
     };
 }
 
@@ -171,29 +188,26 @@ void unmarshal<TeamMember>(QJsonObject jsonObj, TeamMember **object)
     unmarshal<User>(jsonObj, "user", &user);
 
     *object = new TeamMember {
-        user,
+        *user,
         getStringsFromJson(jsonObj["permissions"].toArray()),
 
-        getString(jsonObj, "team_id"),
+        jsonObj["team_id"].toVariant().toULongLong(),
 
-        jsonObj["member_ship_state"].toInt(-1)
+        jsonObj["member_ship_state"].toInt()
     };
 }
 
 template <>
 void unmarshal<Team>(QJsonObject jsonObj, Team **object)
 {
-    std::vector<TeamMember *> *members = new std::vector<TeamMember *>;
-
-    unmarshalMultiple<TeamMember>(jsonObj, "members", &members);
-
     *object = new Team {
-        members,
+        unmarshalMultiple<TeamMember>(jsonObj, "members"),
 
         getString(jsonObj, "icon"),
-        getString(jsonObj, "id"),
         getString(jsonObj, "name"),
-        getString(jsonObj, "owner_user_id")
+
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["owner_user_id"].toVariant().toULongLong()
     };
 }
 
@@ -211,7 +225,6 @@ void unmarshal<Application>(QJsonObject jsonObj, Application **object)
         team,
         getStringsFromJson(jsonObj["rpc_origins"].toArray()),
 
-        getString(jsonObj, "id"),
         getString(jsonObj, "name"),
         getString(jsonObj, "icon"),
         getString(jsonObj, "description"),
@@ -219,12 +232,14 @@ void unmarshal<Application>(QJsonObject jsonObj, Application **object)
         getString(jsonObj, "privacy_policy_url"),
         getString(jsonObj, "summary"),
         getString(jsonObj, "verify_key"),
-        getString(jsonObj, "guild_id"),
-        getString(jsonObj, "primary_sku_id"),
         getString(jsonObj, "slug"),
         getString(jsonObj, "cover_image"),
 
-        jsonObj["flags"].toInt(-1),
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["guild_id"].toVariant().toULongLong(),
+        jsonObj["primary_sku_id"].toVariant().toULongLong(),
+
+        jsonObj["flags"].toInt(),
 
         jsonObj["bot_public"].toBool(),
         jsonObj["bot_require_code_grant"].toBool()
@@ -237,7 +252,7 @@ void unmarshal<MessageActivity>(QJsonObject jsonObj, MessageActivity **object)
     *object = new MessageActivity {
         getString(jsonObj, "party_id"),
 
-        jsonObj["type"].toInt(-1)
+        jsonObj["type"].toInt()
     };
 }
 
@@ -262,16 +277,20 @@ template <>
 void unmarshal<MessageInteraction>(QJsonObject jsonObj, MessageInteraction **object)
 {
     User *user = new User;
+    GuildMember *member = new GuildMember;
 
     unmarshal<User>(jsonObj, "user", &user);
+    unmarshal<GuildMember>(jsonObj, "member", &member);
 
     *object = new MessageInteraction {
-        user,
+        *user,
+        member,
 
-        getString(jsonObj, "id"),
         getString(jsonObj, "name"),
 
-        jsonObj["type"].toInt(-1)
+        jsonObj["id"].toVariant().toULongLong(),
+
+        jsonObj["type"].toInt()
     };
 }
 
@@ -284,15 +303,16 @@ void unmarshal<Emoji>(QJsonObject jsonObj, Emoji **object)
 
     *object = new Emoji {
         user,
-        getStringsFromJson(jsonObj["roles"].toArray()),
+        getSnowflakesFromJson(jsonObj["roles"].toArray()),
 
-        getString(jsonObj, "id"),
         getString(jsonObj, "name"),
 
-        jsonObj["requireColons"].toBool(),
-        jsonObj["managed"].toBool(),
-        jsonObj["animated"].toBool(),
-        jsonObj["available"].toBool()
+        jsonObj["id"].toVariant().toULongLong(),
+
+        (optbool)jsonObj["requireColons"].isNull() ? (optbool)jsonObj["requireColons"].toBool() : (optbool)Optional::None,
+        (optbool)jsonObj["managed"].isNull() ? (optbool)jsonObj["managed"].toBool() : (optbool)Optional::None,
+        (optbool)jsonObj["animated"].isNull() ? (optbool)jsonObj["animated"].toBool() : (optbool)Optional::None,
+        (optbool)jsonObj["available"].isNull() ? (optbool)jsonObj["available"].toBool() : (optbool)Optional::None
     };
 }
 
@@ -304,9 +324,9 @@ void unmarshal<Reaction>(QJsonObject jsonObj, Reaction **object)
     unmarshal<Emoji>(jsonObj, "emoji", &emoji);
 
     *object = new Reaction {
-        emoji,
+        *emoji,
 
-        jsonObj["count"].toInt(-1),
+        jsonObj["count"].toInt(),
 
         jsonObj["me"].toBool()
     };
@@ -319,7 +339,7 @@ void unmarshal<EmbedField>(QJsonObject jsonObj, EmbedField **object)
         getString(jsonObj, "name"),
         getString(jsonObj, "value"),
 
-        jsonObj["inline"].toBool()
+        (optbool)jsonObj["inline"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None
     };
 }
 
@@ -340,8 +360,8 @@ void unmarshal<EmbedTVI>(QJsonObject jsonObj, EmbedTVI **object)
         getString(jsonObj, "url"),
         getString(jsonObj, "proxy_url"),
 
-        jsonObj["height"].toInt(-1),
-        jsonObj["width"].toInt(-1)
+        jsonObj["height"].toInt(),
+        jsonObj["width"].toInt()
     };
 }
 
@@ -361,14 +381,13 @@ void unmarshal<EmbedAuthor>(QJsonObject jsonObj, EmbedAuthor **object)
         getString(jsonObj, "name"),
         getString(jsonObj, "url"),
         getString(jsonObj, "icon_url"),
-        getString(jsonObj, "proxy_icon_url")
+        getString(jsonObj, "proxy_icon_url"),
     };
 }
 
 template <>
 void unmarshal<Embed>(QJsonObject jsonObj, Embed **object)
 {
-    std::vector<EmbedField *> *fields = new std::vector<EmbedField *>;
     EmbedFooter *footer = new EmbedFooter;
     EmbedTVI *image = new EmbedTVI;
     EmbedTVI *thumbnail = new EmbedTVI;
@@ -376,7 +395,6 @@ void unmarshal<Embed>(QJsonObject jsonObj, Embed **object)
     EmbedProvider *provider = new EmbedProvider;
     EmbedAuthor *author = new EmbedAuthor;
 
-    unmarshalMultiple<EmbedField>(jsonObj, "fields", &fields);
     unmarshal<EmbedFooter>(jsonObj, "footer", &footer);
     unmarshal<EmbedTVI>(jsonObj, "image", &image);
     unmarshal<EmbedTVI>(jsonObj, "thumbnail", &thumbnail);
@@ -385,7 +403,7 @@ void unmarshal<Embed>(QJsonObject jsonObj, Embed **object)
     unmarshal<EmbedAuthor>(jsonObj, "author", &author);
 
     *object = new Embed {
-        fields,
+        unmarshalMultiple<EmbedField>(jsonObj, "fields"),
         footer,
         image,
         thumbnail,
@@ -407,15 +425,19 @@ template <>
 void unmarshal<Attachment>(QJsonObject jsonObj, Attachment **object)
 {
     *object = new Attachment {
-        getString(jsonObj, "id"),
         getString(jsonObj, "filename"),
         getString(jsonObj, "content_type"),
+        getString(jsonObj, "description"),
         getString(jsonObj, "url"),
         getString(jsonObj, "proxy_url"),
 
-        jsonObj["size"].toInt(-1),
-        jsonObj["height"].toInt(-1),
-        jsonObj["width"].toInt(-1)
+        jsonObj["id"].toVariant().toULongLong(),
+
+        jsonObj["size"].toInt(),
+        jsonObj["height"].toInt(),
+        jsonObj["width"].toInt(),
+
+        (optbool)jsonObj["ephemeral"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None
     };
 }
 
@@ -423,11 +445,12 @@ template <>
 void unmarshal<ChannelMention>(QJsonObject jsonObj, ChannelMention **object)
 {
     *object = new ChannelMention {
-        getString(jsonObj, "id"),
-        getString(jsonObj, "guild_id"),
         getString(jsonObj, "name"),
 
-        jsonObj["type"].toInt(-1)
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["guild_id"].toVariant().toULongLong(),
+
+        jsonObj["type"].toInt()
     };
 }
 
@@ -445,7 +468,7 @@ void unmarshal<SelectOption>(QJsonObject jsonObj, SelectOption **object)
         getString(jsonObj, "value"),
         getString(jsonObj, "description"),
 
-        jsonObj["default"].toBool()
+        (optbool)jsonObj["default"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None
     };
 }
 
@@ -453,27 +476,25 @@ template <>
 void unmarshal<MessageComponent>(QJsonObject jsonObj, MessageComponent **object)
 {
     Emoji *emoji = new Emoji;
-    std::vector<SelectOption *> *components = new std::vector<SelectOption *>;
 
     unmarshal<Emoji>(jsonObj, "emoji", &emoji);
-    unmarshalMultiple<SelectOption>(jsonObj, "components", &components);
 
     *object = new MessageComponent {
         emoji,
-        components,
-        nullptr,
+        unmarshalMultiple<SelectOption>(jsonObj, "components"),
+        QVector<MessageComponent *>(),
 
         getString(jsonObj, "custom_id"),
         getString(jsonObj, "label"),
         getString(jsonObj, "url"),
         getString(jsonObj, "placeholder"),
 
-        jsonObj["type"].toInt(-1),
-        jsonObj["style"].toInt(-1),
-        jsonObj["min_values"].toInt(-1),
-        jsonObj["max_values"].toInt(-1),
+        jsonObj["type"].toInt(),
+        jsonObj["style"].toInt(),
+        jsonObj["min_values"].toInt(),
+        jsonObj["max_values"].toInt(),
 
-        jsonObj["disabled"].toBool()
+        (optbool)jsonObj["disabled"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None
     };
 }
 
@@ -481,10 +502,11 @@ template <>
 void unmarshal<StickerItem>(QJsonObject jsonObj, StickerItem **object)
 {
     *object = new StickerItem {
-        getString(jsonObj, "id"),
         getString(jsonObj, "name"),
 
-        jsonObj["format_type"].toInt(-1)
+        jsonObj["id"].toVariant().toULongLong(),
+
+        jsonObj["format_type"].toInt()
     };
 }
 
@@ -498,19 +520,20 @@ void unmarshal<Sticker>(QJsonObject jsonObj, Sticker **object)
     *object = new Sticker {
         user,
 
-        getString(jsonObj, "id"),
-        getString(jsonObj, "pack_id"),
         getString(jsonObj, "name"),
         getString(jsonObj, "description"),
         getString(jsonObj, "tags"),
         getString(jsonObj, "asset"),
-        getString(jsonObj, "guild_id"),
 
-        jsonObj["type"].toInt(-1),
-        jsonObj["format_type"].toInt(-1),
-        jsonObj["sort_value"].toInt(-1),
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["pack_id"].toVariant().toULongLong(),
+        jsonObj["guild_id"].toVariant().toULongLong(),
 
-        jsonObj["available"].toBool()
+        jsonObj["type"].toInt(),
+        jsonObj["format_type"].toInt(),
+        jsonObj["sort_value"].toInt(),
+
+        (optbool)jsonObj["available"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None
     };
 }
 
@@ -528,13 +551,6 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
     Channel *thread = new Channel;
     MessageInteraction *interaction = new MessageInteraction;
     Call *call = new Call;
-    std::vector<Reaction *> *reactions = new std::vector<Reaction *>;
-    std::vector<User *> *mentions = new std::vector<User *>;
-    std::vector<Attachment *> *attachments = new std::vector<Attachment *>;
-    std::vector<ChannelMention *> *mentionChannels = new std::vector<ChannelMention *>;
-    std::vector<MessageComponent *> *components = new std::vector<MessageComponent *>;
-    std::vector<StickerItem *> *stickerItems = new std::vector<StickerItem *>;
-    std::vector<Sticker *> *stickers = new std::vector<Sticker *>;
 
     unmarshal<Application>(jsonObj, "application", &application);
     unmarshal<User>(jsonObj, "author", &author);
@@ -543,17 +559,10 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
     unmarshal<Channel>(jsonObj, "thread", &thread);
     unmarshal<MessageInteraction>(jsonObj, "interaction", &interaction);
     unmarshal<Call>(jsonObj, "call", &call);
-    unmarshalMultiple<Reaction>(jsonObj, "reactions", &reactions);
-    unmarshalMultiple<User>(jsonObj, "mentions", &mentions);
-    unmarshalMultiple<Attachment>(jsonObj, "attachments", &attachments);
-    unmarshalMultiple<ChannelMention>(jsonObj, "mention_channels", &mentionChannels);
-    unmarshalMultiple<MessageComponent>(jsonObj, "components", &components);
-    unmarshalMultiple<StickerItem>(jsonObj, "sticker_items", &stickerItems);
-    unmarshalMultiple<Sticker>(jsonObj, "stickers", &stickers);
 
     return new Message {
+        *author,
         application,
-        author,
         activity,
         member,
         nullptr,
@@ -561,30 +570,31 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
         interaction,
         call,
 
-        reactions,
-        nullptr,
-        mentions,
-        attachments,
-        mentionChannels,
+        unmarshalMultiple<Reaction>(jsonObj, "reactions"),
+        unmarshalMultiple<Embed>(jsonObj, "embeds"),
+        unmarshalMultiple<User>(jsonObj, "mentions"),
+        unmarshalMultiple<Attachment>(jsonObj, "attachments"),
+        unmarshalMultiple<ChannelMention>(jsonObj, "mention_channels"),
         getStringsFromJson(jsonObj["mention_roles"].toArray()),
-        components,
-        stickerItems,
-        stickers,
+        unmarshalMultiple<MessageComponent>(jsonObj, "components"),
+        unmarshalMultiple<StickerItem>(jsonObj, "sticker_items"),
+        unmarshalMultiple<Sticker>(jsonObj, "stickers"),
 
-        getString(jsonObj, "id"),
-        getString(jsonObj, "channel_id"),
-        getString(jsonObj, "guild_id"),
         getString(jsonObj, "content"),
         getString(jsonObj, "timestamp"),
         getString(jsonObj, "edited_timestamp"),
-        getString(jsonObj, "webhook_id"),
-        getString(jsonObj, "application_id"),
         getString(jsonObj, "nonce"),
 
-        jsonObj["nonce"].toInt(-1),
-        jsonObj["author_public_flags"].toInt(-1),
-        jsonObj["type"].toInt(-1),
-        jsonObj["flags"].toInt(-1),
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["channel_id"].toVariant().toULongLong(),
+        jsonObj["guild_id"].toVariant().toULongLong(),
+        jsonObj["webhook_id"].toVariant().toULongLong(),
+        jsonObj["application_id"].toVariant().toULongLong(),
+
+        jsonObj["nonce"].toInt(),
+        jsonObj["author_public_flags"].toInt(),
+        jsonObj["type"].toInt(),
+        jsonObj["flags"].toInt(),
 
         jsonObj["tts"].toBool(),
         jsonObj["pinned"].toBool(),
@@ -602,13 +612,6 @@ void unmarshal<Message>(QJsonObject jsonObj, Message **object)
     Channel *thread = new Channel;
     MessageInteraction *interaction = new MessageInteraction;
     Call *call = new Call;
-    std::vector<Reaction *> *reactions = new std::vector<Reaction *>;
-    std::vector<User *> *mentions = new std::vector<User *>;
-    std::vector<Attachment *> *attachments = new std::vector<Attachment *>;
-    std::vector<ChannelMention *> *mentionChannels = new std::vector<ChannelMention *>;
-    std::vector<MessageComponent *> *components = new std::vector<MessageComponent *>;
-    std::vector<StickerItem *> *stickerItems = new std::vector<StickerItem *>;
-    std::vector<Sticker *> *stickers = new std::vector<Sticker *>;
 
     unmarshal<Application>(jsonObj, "application", &application);
     unmarshal<User>(jsonObj, "author", &author);
@@ -617,17 +620,10 @@ void unmarshal<Message>(QJsonObject jsonObj, Message **object)
     unmarshal<Channel>(jsonObj, "thread", &thread);
     unmarshal<MessageInteraction>(jsonObj, "interaction", &interaction);
     unmarshal<Call>(jsonObj, "call", &call);
-    unmarshalMultiple<Reaction>(jsonObj, "reactions", &reactions);
-    unmarshalMultiple<User>(jsonObj, "mentions", &mentions);
-    unmarshalMultiple<Attachment>(jsonObj, "attachments", &attachments);
-    unmarshalMultiple<ChannelMention>(jsonObj, "mention_channels", &mentionChannels);
-    unmarshalMultiple<MessageComponent>(jsonObj, "components", &components);
-    unmarshalMultiple<StickerItem>(jsonObj, "sticker_items", &stickerItems);
-    unmarshalMultiple<Sticker>(jsonObj, "stickers", &stickers);
 
     *object = new Message {
+        *author,
         application,
-        author,
         activity,
         member,
         getPartialMessage(jsonObj, "referenced_message"),
@@ -635,30 +631,31 @@ void unmarshal<Message>(QJsonObject jsonObj, Message **object)
         interaction,
         call,
 
-        reactions,
-        nullptr,
-        mentions,
-        attachments,
-        mentionChannels,
+        unmarshalMultiple<Reaction>(jsonObj, "reactions"),
+        unmarshalMultiple<Embed>(jsonObj, "embeds"),
+        unmarshalMultiple<User>(jsonObj, "mentions"),
+        unmarshalMultiple<Attachment>(jsonObj, "attachments"),
+        unmarshalMultiple<ChannelMention>(jsonObj, "mention_channels"),
         getStringsFromJson(jsonObj["mention_roles"].toArray()),
-        components,
-        stickerItems,
-        stickers,
+        unmarshalMultiple<MessageComponent>(jsonObj, "components"),
+        unmarshalMultiple<StickerItem>(jsonObj, "sticker_items"),
+        unmarshalMultiple<Sticker>(jsonObj, "stickers"),
 
-        getString(jsonObj, "id"),
-        getString(jsonObj, "channel_id"),
-        getString(jsonObj, "guild_id"),
         getString(jsonObj, "content"),
         getString(jsonObj, "timestamp"),
         getString(jsonObj, "edited_timestamp"),
-        getString(jsonObj, "webhook_id"),
-        getString(jsonObj, "application_id"),
         getString(jsonObj, "nonce"),
 
-        jsonObj["nonce"].toInt(-1),
-        jsonObj["author_public_flags"].toInt(-1),
-        jsonObj["type"].toInt(-1),
-        jsonObj["flags"].toInt(-1),
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["channel_id"].toVariant().toULongLong(),
+        jsonObj["guild_id"].toVariant().toULongLong(),
+        jsonObj["webhook_id"].toVariant().toULongLong(),
+        jsonObj["application_id"].toVariant().toULongLong(),
+
+        jsonObj["nonce"].toInt(),
+        jsonObj["author_public_flags"].toInt(),
+        jsonObj["type"].toInt(),
+        jsonObj["flags"].toInt(),
 
         jsonObj["tts"].toBool(),
         jsonObj["pinned"].toBool(),
@@ -682,6 +679,7 @@ void unmarshal<GuildMember>(QJsonObject jsonObj, GuildMember **object)
         getString(jsonObj, "joined_at"),
         getString(jsonObj, "premium_since"),
         getString(jsonObj, "permissions"),
+        getString(jsonObj, "communication_disabled_until"),
 
         jsonObj["deaf"].toBool(),
         jsonObj["mute"].toBool(),
@@ -699,11 +697,12 @@ void unmarshal<VoiceState>(QJsonObject jsonObj, VoiceState **object)
     *object = new VoiceState {
         member,
 
-        getString(jsonObj, "guild_id"),
-        getString(jsonObj, "channel_id"),
-        getString(jsonObj, "user_id"),
         getString(jsonObj, "session_id"),
         getString(jsonObj, "request_to_speak_timestamp"),
+
+        jsonObj["guild_id"].toVariant().toULongLong(),
+        jsonObj["channel_id"].toVariant().toULongLong(),
+        jsonObj["user_id"].toVariant().toULongLong(),
 
         jsonObj["deaf"].toBool(),
         jsonObj["mute"].toBool(),
@@ -719,22 +718,19 @@ template <>
 void unmarshal<WelcomeScreenChannel>(QJsonObject jsonObj, WelcomeScreenChannel **object)
 {
     *object = new WelcomeScreenChannel {
-        getString(jsonObj, "channel_id"),
         getString(jsonObj, "description"),
-        getString(jsonObj, "emoji_id"),
         getString(jsonObj, "emoji_name"),
+
+        jsonObj["channel_id"].toVariant().toULongLong(),
+        jsonObj["emoji_id"].toVariant().toULongLong(),
     };
 }
 
 template <>
 void unmarshal<WelcomeScreen>(QJsonObject jsonObj, WelcomeScreen **object)
 {
-    std::vector<WelcomeScreenChannel *> *welcomeChannels = new std::vector<WelcomeScreenChannel *>;
-
-    unmarshalMultiple<WelcomeScreenChannel>(jsonObj, "welcome_channels", &welcomeChannels);
-
     *object = new WelcomeScreen {
-        welcomeChannels,
+        unmarshalMultiple<WelcomeScreenChannel>(jsonObj, "welcome_channels"),
 
         getString(jsonObj, "description"),
     };
@@ -744,12 +740,14 @@ template <>
 void unmarshal<StageInstance>(QJsonObject jsonObj, StageInstance **object)
 {
     *object = new StageInstance {
-        getString(jsonObj, "id"),
-        getString(jsonObj, "guild_id"),
-        getString(jsonObj, "channel_id"),
         getString(jsonObj, "topic"),
 
-        jsonObj["privacy_level"].toInt(-1),
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["guild_id"].toVariant().toULongLong(),
+        jsonObj["channel_id"].toVariant().toULongLong(),
+        jsonObj["guild_scheduled_event_id"].toVariant().toULongLong(),
+
+        jsonObj["privacy_level"].toInt(),
 
         jsonObj["discoverable_disabled"].toBool()
     };
@@ -759,73 +757,63 @@ template <>
 void unmarshal<Guild>(QJsonObject jsonObj, Guild **object)
 {
     WelcomeScreen *welcomeScreen = new WelcomeScreen;
-    std::vector<VoiceState *> *voiceStates = new std::vector<VoiceState *>;
-    std::vector<GuildMember *> *members = new std::vector<GuildMember *>;
-    std::vector<Channel *> *channels = new std::vector<Channel *>;
-    std::vector<Channel *> *threads = new std::vector<Channel *>;
-    std::vector<StageInstance *> *stageInstances = new std::vector<StageInstance *>;
-    std::vector<Sticker *> *stickers = new std::vector<Sticker *>;
 
     unmarshal<WelcomeScreen>(jsonObj["welcome_screen"].toObject(), &welcomeScreen);
-    unmarshalMultiple<VoiceState>(jsonObj["voice_states"].toArray(), &voiceStates);
-    unmarshalMultiple<GuildMember>(jsonObj["members"].toArray(), &members);
-    unmarshalMultiple<Channel>(jsonObj["channels"].toArray(), &channels);
-    unmarshalMultiple<Channel>(jsonObj["threads"].toArray(), &threads);
-    unmarshalMultiple<StageInstance>(jsonObj["stage_instances"].toArray(), &stageInstances);
-    unmarshalMultiple<Sticker>(jsonObj["stickers"].toArray(), &stickers);
 
     *object = new Guild {
         welcomeScreen,
         getStringsFromJson(jsonObj["guild_features"].toArray()),
-        voiceStates,
-        members,
-        channels,
-        threads,
+        unmarshalMultiple<VoiceState>(jsonObj["voice_states"].toArray()),
+        unmarshalMultiple<GuildMember>(jsonObj["members"].toArray()),
+        unmarshalMultiple<Channel>(jsonObj["channels"].toArray()),
+        unmarshalMultiple<Channel>(jsonObj["threads"].toArray()),
         nullptr,
-        stageInstances,
-        stickers,
+        unmarshalMultiple<StageInstance>(jsonObj["stage_instances"].toArray()),
+        unmarshalMultiple<Sticker>(jsonObj["stickers"].toArray()),
 
-        getString(jsonObj, "id"),
         getString(jsonObj, "name"),
         getString(jsonObj, "icon"),
         getString(jsonObj, "icon_hash"),
         getString(jsonObj, "splash"),
         getString(jsonObj, "discovery_splash"),
-        getString(jsonObj, "owner_id"),
         getString(jsonObj, "permissions"),
         getString(jsonObj, "region"),
-        getString(jsonObj, "afk_channel_id"),
-        getString(jsonObj, "widget_channel_id"),
-        getString(jsonObj, "application_id"),
-        getString(jsonObj, "system_channel_id"),
-        getString(jsonObj, "rules_channel_id"),
         getString(jsonObj, "joined_at"),
         getString(jsonObj, "vanity_url_code"),
         getString(jsonObj, "description"),
         getString(jsonObj, "banner"),
         getString(jsonObj, "preferred_locale"),
-        getString(jsonObj, "public_updates_channel_id"),
 
-        jsonObj["afk_timeout"].toInt(-1),
-        jsonObj["verification_level"].toInt(-1),
-        jsonObj["default_message_notifications"].toInt(-1),
-        jsonObj["explicit_content_filter"].toInt(-1),
-        jsonObj["mfa_level"].toInt(-1),
-        jsonObj["system_channel_flags"].toInt(-1),
-        jsonObj["member_count"].toInt(-1),
-        jsonObj["max_presences"].toInt(-1),
-        jsonObj["max_members"].toInt(-1),
-        jsonObj["premium_tier"].toInt(-1),
-        jsonObj["premium_subscription_count"].toInt(-1),
-        jsonObj["max_video_channel_users"].toInt(-1),
-        jsonObj["approximate_member_count"].toInt(-1),
-        jsonObj["approximate_presence_count"].toInt(-1),
-        jsonObj["nsfw_level"].toInt(-1),
+        jsonObj["id"].toVariant().toULongLong(),
+        jsonObj["owner_id"].toVariant().toULongLong(),
+        jsonObj["afk_channel_id"].toVariant().toULongLong(),
+        jsonObj["widget_channel_id"].toVariant().toULongLong(),
+        jsonObj["application_id"].toVariant().toULongLong(),
+        jsonObj["system_channel_id"].toVariant().toULongLong(),
+        jsonObj["rules_channel_id"].toVariant().toULongLong(),
+        jsonObj["public_updates_channel_id"].toVariant().toULongLong(),
 
-        jsonObj["owner"].toBool(),
-        jsonObj["widget_enabled"].toBool(),
-        jsonObj["large"].toBool(),
-        jsonObj["unavailable"].toBool()
+        jsonObj["afk_timeout"].toInt(),
+        jsonObj["verification_level"].toInt(),
+        jsonObj["default_message_notifications"].toInt(),
+        jsonObj["explicit_content_filter"].toInt(),
+        jsonObj["mfa_level"].toInt(),
+        jsonObj["system_channel_flags"].toInt(),
+        jsonObj["member_count"].toInt(),
+        jsonObj["max_presences"].toInt(),
+        jsonObj["max_members"].toInt(),
+        jsonObj["premium_tier"].toInt(),
+        jsonObj["premium_subscription_count"].toInt(),
+        jsonObj["max_video_channel_users"].toInt(),
+        jsonObj["approximate_member_count"].toInt(),
+        jsonObj["approximate_presence_count"].toInt(),
+        jsonObj["nsfw_level"].toInt(),
+
+        (optbool)jsonObj["owner"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
+        (optbool)jsonObj["widget_enabled"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
+        (optbool)jsonObj["large"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
+        (optbool)jsonObj["unavailable"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
+        jsonObj["premium_progress_bar_enabled"].toBool()
     };
 }
 
@@ -836,7 +824,8 @@ void unmarshal<CustomStatus>(QJsonObject jsonObj, CustomStatus **object)
         getString(jsonObj, "text"),
         getString(jsonObj, "expires_at"),
         getString(jsonObj, "emoji_name"),
-        getString(jsonObj, "emoji_id")
+
+        jsonObj["emoji_id"].toVariant().toULongLong()
     };
 }
 
@@ -854,7 +843,7 @@ template <>
 void unmarshal<GuildFolder>(QJsonObject jsonObj, GuildFolder **object)
 {
     *object = new GuildFolder {
-        getStringsFromJson(jsonObj["guild_ids"].toArray()),
+        getSnowflakesFromJson(jsonObj["guild_ids"].toArray()),
 
         getString(jsonObj, "name"),
         getString(jsonObj, "id"),
@@ -869,16 +858,14 @@ void unmarshal<ClientSettings>(QJsonObject jsonObj, ClientSettings **object)
 {
     CustomStatus *customStatus = new CustomStatus;
     FriendSourceFlags *friendSourceFlags = new FriendSourceFlags;
-    std::vector<GuildFolder *> *guildFolders = new std::vector<GuildFolder *>;
 
     unmarshal<CustomStatus>(jsonObj, "custom_status", &customStatus);
     unmarshal<FriendSourceFlags>(jsonObj, "friend_source_flags", &friendSourceFlags);
-    unmarshalMultiple<GuildFolder>(jsonObj, "guild_folders", &guildFolders);
 
     *object = new ClientSettings {
         customStatus,
         friendSourceFlags,
-        guildFolders,
+        unmarshalMultiple<GuildFolder>(jsonObj, "guild_folders"),
         getStringsFromJson(jsonObj["guild_positions"].toArray()),
         getStringsFromJson(jsonObj["restricted_guilds"].toArray()),
 
@@ -886,11 +873,11 @@ void unmarshal<ClientSettings>(QJsonObject jsonObj, ClientSettings **object)
         getString(jsonObj, "status"),
         getString(jsonObj, "theme"),
 
-        jsonObj["afk_timeout"].toInt(-1),
-        jsonObj["animate_stickers"].toInt(-1),
-        jsonObj["explicit_content_filter"].toInt(-1),
-        jsonObj["friend_discovery_flags"].toInt(-1),
-        jsonObj["timezone_offset"].toInt(-1),
+        jsonObj["afk_timeout"].toInt(),
+        jsonObj["animate_stickers"].toInt(),
+        jsonObj["explicit_content_filter"].toInt(),
+        jsonObj["friend_discovery_flags"].toInt(),
+        jsonObj["timezone_offset"].toInt(),
 
         jsonObj["allow_accessibility_detection"].toBool(),
         jsonObj["animate_emoji"].toBool(),
@@ -918,7 +905,6 @@ template <>
 void unmarshal<Client>(QJsonObject jsonObj, Client **object)
 {
     *object = new Client {
-        getString(jsonObj, "id"),
         getString(jsonObj, "username"),
         getString(jsonObj, "avatar"),
         getString(jsonObj, "discriminator"),
@@ -928,11 +914,13 @@ void unmarshal<Client>(QJsonObject jsonObj, Client **object)
         getString(jsonObj, "email"),
         getString(jsonObj, "phone"),
 
-        jsonObj["public_flags"].toInt(-1),
-        jsonObj["flags"].toInt(-1),
-        jsonObj["purchased_flags"].toInt(-1),
-        jsonObj["banner_color"].toInt(-1),
-        jsonObj["accent_color"].toInt(-1),
+        jsonObj["id"].toVariant().toULongLong(),
+
+        jsonObj["public_flags"].toInt(),
+        jsonObj["flags"].toInt(),
+        jsonObj["purchased_flags"].toInt(),
+        jsonObj["banner_color"].toInt(),
+        jsonObj["accent_color"].toInt(),
 
         jsonObj["nsfw_allowed"].toBool(),
         jsonObj["mfa_enabled"].toBool(),
@@ -944,8 +932,8 @@ template <>
 void unmarshal<ActivityTimestamps>(QJsonObject jsonObj, ActivityTimestamps **object)
 {
     *object = new ActivityTimestamps {
-        jsonObj["start"].toInt(-1),
-        jsonObj["end"].toInt(-1)
+        jsonObj["start"].toInt(),
+        jsonObj["end"].toInt()
     };
 }
 
@@ -956,7 +944,7 @@ void unmarshal<ActivityAssets>(QJsonObject jsonObj, ActivityAssets **object)
         getString(jsonObj, "large_image"),
         getString(jsonObj, "large_text"),
         getString(jsonObj, "small_image"),
-        getString(jsonObj, "small_text")
+        getString(jsonObj, "small_text"),
     };
 }
 
@@ -964,8 +952,8 @@ template <>
 void unmarshal<PartySize>(QJsonObject jsonObj, PartySize **object)
 {
     *object = new PartySize {
-        jsonObj["current_size"].toInt(-1),
-        jsonObj["max_size"].toInt(-1)
+        jsonObj["current_size"].toInt(),
+        jsonObj["max_size"].toInt()
     };
 }
 
@@ -979,7 +967,7 @@ void unmarshal<ActivityParty>(QJsonObject jsonObj, ActivityParty **object)
     *object = new ActivityParty {
         size,
 
-        getString(jsonObj, "id")
+        getString(jsonObj, "id"),
     };
 }
 
@@ -989,7 +977,7 @@ void unmarshal<ActivitySecrets>(QJsonObject jsonObj, ActivitySecrets **object)
     *object = new ActivitySecrets {
         getString(jsonObj, "match"),
         getString(jsonObj, "join"),
-        getString(jsonObj, "spectate")
+        getString(jsonObj, "spectate"),
     };
 }
 
@@ -1012,14 +1000,11 @@ void unmarshal<Activity>(QJsonObject jsonObj, Activity **object)
         party,
         secrets,
 
-        getString(jsonObj, "application_id"),
-        getString(jsonObj, "id"),
         getString(jsonObj, "name"),
         getString(jsonObj, "state"),
         getString(jsonObj, "details"),
 
-        jsonObj["created_at"].toInt(-1),
-        jsonObj["type"].toInt(-1),
+        jsonObj["application_id"].toVariant().toLongLong(),
 
         jsonObj["instance"].toBool(false)
     };
@@ -1031,7 +1016,7 @@ void unmarshal<ClientStatus>(QJsonObject jsonObj, ClientStatus **object)
     *object = new ClientStatus {
         getString(jsonObj, "desktop"),
         getString(jsonObj, "mobile"),
-        getString(jsonObj, "web")
+        getString(jsonObj, "web"),
     };
 }
 
@@ -1040,20 +1025,19 @@ void unmarshal<Presence>(QJsonObject jsonObj, Presence **object)
 {
     User *user = new User;
     ClientStatus *clientStatus = new ClientStatus;
-    std::vector<Activity *> *activities = new std::vector<Activity *>;
 
     unmarshal<User>(jsonObj, "user", &user);
     unmarshal<ClientStatus>(jsonObj, "client_status", &clientStatus);
-    unmarshalMultiple<Activity>(jsonObj, "activities", &activities);
 
     *object = new Presence {
         user,
         clientStatus,
-        activities,
+        unmarshalMultiple<Activity>(jsonObj, "activities"),
 
-        getString(jsonObj, "user_id"),
-        getString(jsonObj, "guild_id"),
-        getString(jsonObj, "status")
+        getString(jsonObj, "status"),
+
+        jsonObj["user_id"].toVariant().toULongLong(),
+        jsonObj["guild_id"].toVariant().toULongLong()
     };
 }
 
@@ -1061,8 +1045,9 @@ template <>
 void unmarshal<Call>(QJsonObject jsonObj, Call **object)
 {
     *object = new Call {
-        getStringsFromJson(jsonObj["participants"].toArray()),
-        getString(jsonObj, "ended_timestamp")
+        getSnowflakesFromJson(jsonObj["participants"].toArray()),
+
+        getString(jsonObj, "ended_timestamp"),
     };
 }
 

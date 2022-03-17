@@ -1,27 +1,36 @@
 #pragma once
 
-#include <string>
+#include "api/snowflake.h"
+#include "api/optional.h"
+
+#include <QString>
 
 namespace Api {
 
 //https://discord.com/developers/docs/resources/user#user-object
 struct User
 {
-    ~User();
+    ~User() {
+        int a = 0;
+        a++;
+        int b = a +1;
+    }
 
-    std::string *username;
-    std::string *discriminator;
-    std::string *avatar;
-    std::string *locale;
-    std::string *email;
-    std::string *id;
-    int          flags;
-    int          premiumType;
-    int          publicFlags;
-    bool         bot;
-    bool         system;
-    bool         mfaEnabled;
-    bool         verified;
+    QString   username;
+    QString   discriminator;
+    QString   avatar;
+    QString   banner;
+    QString   locale;
+    QString   email;
+    Snowflake id;
+    qint32    accentColor;
+    qint32    flags;
+    qint32    premiumType;
+    qint32    publicFlags;
+    optbool   bot;
+    optbool   system;
+    optbool   mfaEnabled;
+    optbool   verified;
 };
 
 } // namespace Api

@@ -2,8 +2,8 @@
 
 #include "user.h"
 
-#include <vector>
-#include <string>
+#include <QVector>
+#include <QString>
 
 namespace Api {
 
@@ -19,86 +19,80 @@ enum class ActivityTypes
 
 struct ActivityTimestamps
 {
-    int start;
-    int end;
+    qint64 start;
+    qint64 end;
 };
 
 struct ActivityAssets
 {
-    ~ActivityAssets();
-
-    std::string *largeImage;
-    std::string *largeText;
-    std::string *smallImage;
-    std::string *smallText;
+    QString largeImage;
+    QString largeText;
+    QString smallImage;
+    QString smallText;
 };
 
 struct PartySize
 {
-    int currentSize;
-    int maxSize;
+    qint32 currentSize;
+    qint32 maxSize;
 };
 
 struct ActivityParty
 {
-    ~ActivityParty();
-
-    PartySize   *size;
-    std::string *id;
+    PartySize *size;
+    QString    id;
 };
 
 struct ActivitySecrets
 {
-    ~ActivitySecrets();
-
-    std::string *match;
-    std::string *join;
-    std::string *spectate;
+    QString match;
+    QString join;
+    QString spectate;
 };
 
 struct Activity
 {
-    ~Activity();
+    ~Activity()
+    {
+        delete timestamps;
+        delete assets;
+        delete party;
+        delete secrets;
+    }
 
     ActivityTimestamps *timestamps;
     ActivityAssets     *assets;
     ActivityParty      *party;
     ActivitySecrets    *secrets;
-
-    std::string *applicationId;
-    std::string *id;
-    std::string *name;
-    std::string *state;
-    std::string *details;
-
-    int createdAt;
-    int type;
-
-    bool instance;
+    QString             name;
+    QString             state;
+    QString             details;
+    qint64              applicationId;
+    bool                instance;
 
 };
 
 struct ClientStatus
 {
-    ~ClientStatus();
-
-    std::string *desktop;
-    std::string *mobile;
-    std::string *web;
+    QString desktop;
+    QString mobile;
+    QString web;
 };
 
 struct Presence
 {
-    ~Presence();
+    ~Presence()
+    {
+        delete user;
+        delete clientStatus;
+    }
 
-    User         *user;
-    ClientStatus *clientStatus;
-
-    std::vector<Activity *> *activities;
-
-    std::string *userId;
-    std::string *guildId;
-    std::string *status;
+    User                *user;
+    ClientStatus        *clientStatus;
+    QVector<Activity *>  activities;
+    QString              status;
+    Snowflake            userId;
+    Snowflake            guildId;
 };
 
 } // namespace Api

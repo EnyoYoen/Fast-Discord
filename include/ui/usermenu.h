@@ -21,7 +21,7 @@ private slots:
     void clicButton(int type, bool active);
 
 private:
-    void setIcon(const std::string& iconFileName);
+    void setIcon(const QString& iconFileName);
 
     Api::RessourceManager *rm; // To request the API
 

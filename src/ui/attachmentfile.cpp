@@ -37,14 +37,14 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, Api::Attachment *attac
     filesize->setTextInteractionFlags(Qt::TextSelectableByMouse);
     filesize->setCursor(Qt::IBeamCursor);
 
-    infosLayout->addWidget(new DownloadLink(*attachment->url, *attachment->filename, requester, container));
+    infosLayout->addWidget(new DownloadLink(attachment->url, attachment->filename, requester, container));
     infosLayout->addWidget(filesize);
     infosLayout->setContentsMargins(0, 0, 0, 0);
     infosLayout->setSpacing(0);
 
     layout->addWidget(image);
     layout->addWidget(infos);
-    layout->addWidget(new DownloadButton(*attachment->url, requester, container));
+    layout->addWidget(new DownloadButton(attachment->url, requester, container));
     layout->setContentsMargins(10, 10, 10, 10);
     layout->setSpacing(8);
 

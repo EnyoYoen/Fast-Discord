@@ -5,10 +5,10 @@
 
 namespace Ui {
 
-DownloadButton::DownloadButton(const std::string& urlp, Api::Requester *request, QWidget *parent)
+DownloadButton::DownloadButton(const QString& urlp, Api::Requester *request, QWidget *parent)
     : QLabel(parent)
 {
-    url = std::string(urlp);
+    url = QString(urlp);
     requester = request;
 
     this->setFixedSize(24, 24);
@@ -28,7 +28,7 @@ void DownloadButton::mouseReleaseEvent(QMouseEvent *)
     downloadsFolder = QFileDialog::getExistingDirectory(this, "Download", downloadsFolder) + "/";
 
     if (downloadsFolder != "/")
-        requester->getFile(url, downloadsFolder.toStdString() + url.substr(url.find_last_of('/') + 1));
+        requester->getFile(url, downloadsFolder + url.left(url.lastIndexOf('/') + 1));
 }
 
 }

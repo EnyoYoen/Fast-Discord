@@ -35,11 +35,12 @@ void MessageTextInput::keyPressEvent(QKeyEvent *event)
         content = start == std::string::npos ? "" : content.substr(start);
         unsigned long end = content.find_last_not_of(" \n\r\t\f\v");
         content = end == std::string::npos ? "" : content.substr(0, end + 1);
+        QString qcontent(content.c_str());
 
         // Emit signals if the message is not empty
-        if (content != "") {
+        if (!qcontent.isEmpty()) {
             emit clear();
-            emit returnPressed(content);
+            emit returnPressed(qcontent);
         }
     } else {
         // Compare the last timestamp and the actual time

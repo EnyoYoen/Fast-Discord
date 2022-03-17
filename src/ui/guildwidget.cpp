@@ -9,7 +9,6 @@
 #include <QString>
 
 #include <fstream>
-#include <string>
 
 namespace Ui {
 
@@ -19,7 +18,7 @@ GuildWidget::GuildWidget(Api::RessourceManager *rmp, const Api::Guild& guild, QW
     // Attributes initialization
     clicked = false;
     unreadMessages = false;
-    id = *guild.id;
+    id = guild.id;
     rm = rmp;
 
     // Style the widget
@@ -36,7 +35,7 @@ GuildWidget::GuildWidget(Api::RessourceManager *rmp, const Api::Guild& guild, QW
     pill = new GuildPill(this);
     layout->addWidget(pill);
     
-    icon = new GuildIcon(rm, *guild.id, *guild.name, guild.icon, false, this);
+    icon = new GuildIcon(rm, guild.id, guild.name, guild.icon, false, this);
     layout->addWidget(icon);
 }
 

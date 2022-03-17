@@ -23,8 +23,8 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
     QHBoxLayout *layout = new QHBoxLayout(container);
 
     // Get the icon of the actual user
-    std::string channelIconFileName;
-    if (client->avatar == nullptr || *client->avatar == "") {
+    QString channelIconFileName;
+    if (client->avatar.isNull()) {
         // Use an asset if the user doesn't have an icon
         channelIconFileName = "res/images/png/user-icon-asset0.png";
 
@@ -33,8 +33,8 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
         avatar = new RoundedImage(32, 32, 16, container);
 
         // Request the icon
-        channelIconFileName = *client->id + (client->avatar->rfind("a_") == 0 ? ".gif" : ".png");
-        rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *client->id + "/" + *client->avatar, channelIconFileName);
+        channelIconFileName = client->id.toString() + (client->avatar.indexOf("a_") == 0 ? ".gif" : ".png");
+        rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + client->id.toString() + "/" + client->avatar, channelIconFileName);
     }
 
     // Set the background of the status icon
@@ -50,7 +50,7 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
     statusIcon->setStyleSheet("border-radius: 5px;");
     statusIcon->move(31, 32);
     rm->getClientSettings([&](void *settingsPtr){
-        std::string status = *reinterpret_cast<Api::ClientSettings *>(settingsPtr)->status;
+        QString status = reinterpret_cast<Api::ClientSettings *>(settingsPtr)->status;
         if (status == "online") statusIcon->setStyleSheet("border-radius: 5px;"
                                                           "background-color: rgb(0, 224, 71);");
         else if (status == "idle") statusIcon->setStyleSheet("border-radius: 5px;"
@@ -64,14 +64,14 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
     // Create the widgets of the user menu
     QWidget *userInfos = new QWidget(container);
     QVBoxLayout *userInfosLayout = new QVBoxLayout(userInfos);
-    QLabel *name = new QLabel((*client->username).c_str(), userInfos);
+    QLabel *name = new QLabel(client->username, userInfos);
 
     // Style the name label
     name->setFixedSize(84, 18);
     name->setStyleSheet("color: #DCDDDE;");
 
     // Create and style the discriminator label
-    QLabel *discriminator = new QLabel(("#" + *client->discriminator).c_str(), userInfos);
+    QLabel *discriminator = new QLabel("#" + client->discriminator, userInfos);
     discriminator->setFixedSize(84, 13);
     discriminator->setStyleSheet("color: #B9BBBE;");
 
@@ -108,7 +108,7 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
     QObject::connect(settingsButton, SIGNAL(leftClicked(int, bool)), this, SLOT(clicButton(int, bool)));
 }
 
-void UserMenu::setIcon(const std::string& iconFileName)
+void UserMenu::setIcon(const QString& iconFileName)
 {
     avatar->setImage(iconFileName);
 }

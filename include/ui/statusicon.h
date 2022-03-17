@@ -9,7 +9,7 @@ class StatusIcon : public QWidget
 {
 public:
     StatusIcon(QWidget *parent);
-    void setStatus(const std::string& status);
+    void setStatus(const QString& status);
 
 private:
     void paintEvent(QPaintEvent *);

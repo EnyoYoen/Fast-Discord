@@ -2,11 +2,10 @@
 
 #include "ui/guildwidget.h"
 #include "api/ressourcemanager.h"
+#include "api/snowflake.h"
 
 #include <QLabel>
 #include <QMouseEvent>
-
-#include <vector>
 
 namespace Ui {
 
@@ -14,18 +13,18 @@ class GuildFolder : public QLabel
 {
     Q_OBJECT
 public:
-    GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolder, const std::vector<Api::Guild *>& guilds, QWidget *parent);
+    GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolder, const QVector<Api::Guild *>& guilds, QWidget *parent);
     void unclicked();
-    void unclickedExcept(const std::string& id);
-    void setUnread(const std::string& id);
+    void unclickedExcept(const Api::Snowflake& id);
+    void setUnread(const Api::Snowflake& id);
 
-    std::vector<std::string> guildIds;
+    QVector<Api::Snowflake> guildIds;
 
 signals:
-    void guildClicked(const std::string& id);
+    void guildClicked(const Api::Snowflake& id);
 
 private slots:
-    void propagateGuildClic(const std::string& id);
+    void propagateGuildClic(const Api::Snowflake& id);
 
 private:
     void mouseReleaseEvent(QMouseEvent *event) override;
@@ -37,8 +36,8 @@ private:
     QWidget *openedContent;
     QLabel *closeButton;
 
-    std::vector<GuildWidget *> guildWidgets;
-    std::vector<QLabel *> guildsIcon;
+    QVector<GuildWidget *> guildWidgets;
+    QVector<QLabel *> guildsIcon;
     bool opened = false;
     bool clicked = false;
     bool unread = false;

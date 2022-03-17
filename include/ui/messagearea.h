@@ -8,7 +8,6 @@
 #include <QVBoxLayout>
 #include <QThread>
 
-#include <vector>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
@@ -31,7 +30,7 @@ public:
     ~MessageArea();
 
     // Add messages
-    void setMessages(const std::vector<Api::Message *>& messages);
+    void setMessages(const QVector<Api::Message *>& messages);
     void addMessage(Api::Message *newMessage, Api::Message *lastMessage);
     void clear();
 
@@ -42,7 +41,7 @@ signals:
     void messageCreate(Api::Message *, bool, bool, bool);
 
 public slots:
-    void addMessages(const std::vector<Api::Message *>& messages);
+    void addMessages(const QVector<Api::Message *>& messages);
 
 private slots:
     void scrollBottom();

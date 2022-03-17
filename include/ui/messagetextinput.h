@@ -14,7 +14,7 @@ public:
     MessageTextInput(QWidget *parent = 0);
 
 signals:
-    void returnPressed(std::string);
+    void returnPressed(QString);
     void typing();
 
 private:

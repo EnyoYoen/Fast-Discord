@@ -1,19 +1,19 @@
 #pragma once
 
-#include "user.h"
-#include "guildmember.h"
-#include "role.h"
-#include "channel.h"
-#include "emoji.h"
-#include "application.h"
-#include "attachment.h"
-#include "embed.h"
-#include "sticker.h"
+#include "api/user.h"
+#include "api/guildmember.h"
+#include "api/role.h"
+#include "api/channel.h"
+#include "api/emoji.h"
+#include "api/application.h"
+#include "api/attachment.h"
+#include "api/embed.h"
+#include "api/sticker.h"
+#include "api/snowflake.h"
 
 #include <QObject>
-
-#include <string>
-#include <vector>
+#include <QString>
+#include <QVector>
 
 namespace Api {
 
@@ -47,104 +47,118 @@ enum MessageType {
 
 struct MessageActivity
 {
-    ~MessageActivity();
-
-    std::string *partyId;
-    int          type;
+    QString partyId;
+    qint32  type;
 };
 
 struct MessageReference
 {
-    ~MessageReference();
-
-    std::string *messageId;
-    std::string *channelId;
-    std::string *guildId;
-    bool         failIfNotExists;
+    Snowflake messageId;
+    Snowflake channelId;
+    Snowflake guildId;
+    bool      failIfNotExists;
 };
 
 struct MessageInteraction
 {
-    ~MessageInteraction();
+    ~MessageInteraction()
+    {
+        delete member;
+    }
 
-    User        *user;
-    std::string *id;
-    std::string *name;
-    int          type;
+    User         user;
+    GuildMember *member;
+    QString      name;
+    Snowflake    id;
+    qint32          type;
 };
 
 struct SelectOption
 {
-    ~SelectOption();
+    ~SelectOption()
+    {
+        delete emoji;
+    }
 
-    Emoji       *emoji;
-    std::string *label;
-    std::string *value;
-    std::string *description;
-    bool         sodefault;
+    Emoji   *emoji;
+    QString  label;
+    QString  value;
+    QString  description;
+    optbool  sodefault;
 };
 
 struct MessageComponent
 {
-    ~MessageComponent();
+    ~MessageComponent()
+    {
+        delete emoji;
+    }
 
-    Emoji                           *emoji;
-    std::vector<SelectOption *>     *options;
-    std::vector<MessageComponent *> *components;
-    std::string                     *customId;
-    std::string                     *label;
-    std::string                     *url;
-    std::string                     *placeholder;
-    int                              type;
-    int                              style;
-    int                              minValues;
-    int                              maxValues;
-    bool                             disabled;
+    Emoji                       *emoji;
+    QVector<SelectOption *>      options;
+    QVector<MessageComponent *>  components;
+    QString                      customId;
+    QString                      label;
+    QString                      url;
+    QString                      placeholder;
+    qint32                       type;
+    qint32                       style;
+    qint32                       minValues;
+    qint32                       maxValues;
+    optbool                      disabled;
 };
 
 struct Call
 {
-    std::vector<std::string>        *participants;
-    std::string                     *endedTimestamp;
+    QVector<Snowflake> participants;
+    QString          endedTimestamp;
 };
 
 struct Message
 {
-    ~Message();
+    ~Message()
+    {
+        delete application;
+        delete activity;
+        delete member;
+        delete referencedMessage;
+        delete thread;
+        delete interaction;
+    }
 
-    Application                     *application;
-    User                            *author;
-    MessageActivity                 *activity;
-    GuildMessageMember              *member;
-    Message                         *referencedMessage;
-    Channel                         *thread;
-    MessageInteraction              *interaction;
-    Call                            *call;
-    std::vector<Reaction *>         *reactions;
-    std::vector<Embed *>            *embeds;
-    std::vector<User *>             *mentions;
-    std::vector<Attachment *>       *attachments;
-    std::vector<ChannelMention *>   *mentionChannels;
-    std::vector<std::string>        *mentionRoles;
-    std::vector<MessageComponent *> *components;
-    std::vector<StickerItem *>      *stickerItems;
-    std::vector<Sticker *>          *stickers;
-    std::string                     *id;
-    std::string                     *channelId;
-    std::string                     *guildId;
-    std::string                     *content;
-    std::string                     *timestamp;
-    std::string                     *editedTimestamp;
-    std::string                     *webhookId;
-    std::string                     *applicationId;
-    std::string                     *nonceStr;
-    int                              nonceInt;
-    int                              authorPublicFlags;
-    int                              type;
-    int                              flags;
-    bool                             tts;
-    bool                             pinned;
-    bool                             mentionEveryone;
+    User                         author;
+    Application                 *application;
+    MessageActivity             *activity;
+    GuildMessageMember          *member;
+    Message                     *referencedMessage;
+    Channel                     *thread;
+    MessageInteraction          *interaction;
+    Call                        *call;
+    QVector<Reaction *>          reactions;
+    QVector<Embed *>             embeds;
+    QVector<User *>              mentions;
+    QVector<Attachment *>        attachments;
+    QVector<ChannelMention *>    mentionChannels;
+    QVector<QString>             mentionRoles;
+    QVector<MessageComponent *>  components;
+    QVector<StickerItem *>       stickerItems;
+    QVector<Sticker *>           stickers;
+    QString                      content;
+    QString                      timestamp;
+    QString                      editedTimestamp;
+    QString                      nonceStr;
+    Snowflake                    id;
+    Snowflake                    channelId;
+    Snowflake                    guildId;
+    Snowflake                    webhookId;
+    Snowflake                    applicationId;
+    qint32                       nonceint;
+    qint32                       authorPublicFlags;
+    qint32                       type;
+    qint32                       flags;
+    bool                         tts;
+    bool                         pinned;
+    bool                         mentionEveryone;
 };
 
 } // namespace Api

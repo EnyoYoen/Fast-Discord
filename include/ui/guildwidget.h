@@ -5,6 +5,7 @@
 #include "ui/guildicon.h"
 #include "api/guild.h"
 #include "api/ressourcemanager.h"
+#include "api/snowflake.h"
 
 #include <QFrame>
 #include <QLabel>
@@ -23,11 +24,11 @@ public:
     void unclicked(); // Reset the stylesheet of the widget
     void setUnread(bool unread);
 
-    std::string  id;       // The id of the guild
+    Api::Snowflake id; // The id of the guild
 
 signals:
-    void leftClicked(const std::string&);
-    void rightClicked(const std::string&);
+    void leftClicked(const Api::Snowflake&);
+    void rightClicked(const Api::Snowflake&);
 
 private:
     void mouseReleaseEvent(QMouseEvent *event) override;

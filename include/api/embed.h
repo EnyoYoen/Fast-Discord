@@ -1,7 +1,9 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include "api/optional.h"
+
+#include <QString>
+#include <QVector>
 
 namespace Api {
 
@@ -9,48 +11,38 @@ namespace Api {
 
 struct EmbedFooter
 {
-    ~EmbedFooter();
-
-    std::string *text;
-    std::string *iconUrl;
-    std::string *proxyIconUrl;
+    QString text;
+    QString iconUrl;
+    QString proxyIconUrl;
 };
 
 struct EmbedProvider
 {
-    ~EmbedProvider();
-
-    std::string *name;
-    std::string *url;
+    QString name;
+    QString url;
 };
 
 struct EmbedAuthor
 {
-    ~EmbedAuthor();
-
-    std::string *name;
-    std::string *url;
-    std::string *iconUrl;
-    std::string *proxyIconUrl;
+    QString name;
+    QString url;
+    QString iconUrl;
+    QString proxyIconUrl;
 };
 
 struct EmbedField
 {
-    ~EmbedField();
-
-    std::string *name;
-    std::string *value;
-    bool         einline;
+    QString name;
+    QString value;
+    optbool einline;
 };
 
 struct EmbedTVI
 {
-    ~EmbedTVI();
-
-    std::string *url;
-    std::string *proxyUrl;
-    int          height;
-    int          width;
+    QString url;
+    QString proxyUrl;
+    qint32  height;
+    qint32  width;
 };
 typedef EmbedTVI EmbedThumbnail;
 typedef EmbedTVI EmbedVideo;
@@ -58,21 +50,29 @@ typedef EmbedTVI EmbedImage;
 
 struct Embed
 {
-    ~Embed();
+    ~Embed()
+    {
+        delete footer;
+        delete image;
+        delete thumbnail;
+        delete video;
+        delete provider;
+        delete author;
+    }
 
-    std::vector<EmbedField *> *fields;
-    EmbedFooter               *footer;
-    EmbedImage                *image;
-    EmbedThumbnail            *thumbnail;
-    EmbedVideo                *video;
-    EmbedProvider             *provider;
-    EmbedAuthor               *author;
-    std::string               *title;
-    std::string               *type;
-    std::string               *description;
-    std::string               *url;
-    std::string               *timestamp;
-    int                        color;
+    QVector<EmbedField *>  fields;
+    EmbedFooter           *footer;
+    EmbedImage            *image;
+    EmbedThumbnail        *thumbnail;
+    EmbedVideo            *video;
+    EmbedProvider         *provider;
+    EmbedAuthor           *author;
+    QString                title;
+    QString                type;
+    QString                description;
+    QString                url;
+    QString                timestamp;
+    qint32                 color;
 };
 
 } // namespace Api

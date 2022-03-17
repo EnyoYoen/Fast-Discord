@@ -5,10 +5,10 @@
 
 namespace Ui {
 
-DownloadLink::DownloadLink(const std::string& urlp, const std::string& filename, Api::Requester *request, QWidget *parent)
-    : QLabel(filename.c_str(), parent)
+DownloadLink::DownloadLink(const QString& urlp, const QString& filename, Api::Requester *request, QWidget *parent)
+    : QLabel(filename, parent)
 {
-    url = std::string(urlp);
+    url = urlp;
     requester = request;
 
     this->setCursor(Qt::PointingHandCursor);
@@ -27,7 +27,7 @@ void DownloadLink::mouseReleaseEvent(QMouseEvent *)
     downloadsFolder = QFileDialog::getExistingDirectory(this, "Download", downloadsFolder) + "/";
 
     if (downloadsFolder != "/")
-        requester->getFile(url, downloadsFolder.toStdString() + url.substr(url.find_last_of('/') + 1));
+        requester->getFile(url, downloadsFolder + url.left(url.lastIndexOf('/') + 1));
 }
 
 }

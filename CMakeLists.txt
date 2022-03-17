@@ -10,7 +10,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(lib/)
 include_directories(include/)
 
 find_package(Qt5 COMPONENTS Widgets Network WebSockets REQUIRED)
@@ -19,25 +18,10 @@ if (NOT WIN32)
 endif (NOT WIN32)
 
 set(SOURCES
-    "src/api/application.cpp"
-    "src/api/attachment.cpp"
-    "src/api/channel.cpp"
-    "src/api/embed.cpp"
-    "src/api/emoji.cpp"
     "src/api/gateway.cpp"
-    "src/api/guild.cpp"
-    "src/api/guildmember.cpp"
     "src/api/jsonutils.cpp"
-    "src/api/message.cpp"
-    "src/api/overwrite.cpp"
     "src/api/request.cpp"
     "src/api/ressourcemanager.cpp"
-    "src/api/role.cpp"
-    "src/api/sticker.cpp"
-    "src/api/team.cpp"
-    "src/api/thread.cpp"
-    "src/api/user.cpp"
-    "src/api/voice.cpp"
     "src/main.cpp"
     "src/ui/attachmentfile.cpp"
     "src/ui/closechannelbutton.cpp"
@@ -80,6 +64,7 @@ set(HEADERS
     "include/api/request.h"
     "include/api/ressourcemanager.h"
     "include/api/role.h"
+    "include/api/snowflake.h"
     "include/api/sticker.h"
     "include/api/team.h"
     "include/api/thread.h"

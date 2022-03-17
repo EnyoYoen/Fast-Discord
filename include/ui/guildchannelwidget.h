@@ -1,14 +1,13 @@
 #pragma once
 
 #include "api/channel.h"
+#include "api/snowflake.h"
 
 #include <QWidget>
 #include <QPixmap>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMouseEvent>
-
-#include <string>
 
 namespace Ui {
 
@@ -20,11 +19,11 @@ public:
     GuildChannelWidget(const Api::Channel& guildChannel, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
 
-    std::string id;      // The id that we assign to the widget
+    Api::Snowflake id;     // The id that we assign to the widget
 
 signals:
-    void leftClicked(const std::string& id);
-    void rightClicked(const std::string& id);
+    void leftClicked(const Api::Snowflake& id);
+    void rightClicked(const Api::Snowflake& id);
 
 private:
     void mouseReleaseEvent(QMouseEvent *event) override;

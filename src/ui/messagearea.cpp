@@ -8,7 +8,7 @@
 
 namespace Ui {
 
-MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget */*parent*/)
+MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget * /*parent*/)
     : QScrollArea(/*parent*/) // TODO stylesheet bug
 {
     // Set the ressource manager
@@ -45,7 +45,7 @@ MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget */*parent*/)
     QObject::connect(this, SIGNAL(messagesEnd()), this, SLOT(scrollBottom()));
 }
 
-void MessageArea::setMessages(const std::vector<Api::Message *>& messages)
+void MessageArea::setMessages(const QVector<Api::Message *>& messages)
 {
     this->show();
 
@@ -103,7 +103,7 @@ void MessageArea::clear()
     this->hide();
 }
 
-void MessageArea::addMessages(const std::vector<Api::Message *>& messages)
+void MessageArea::addMessages(const QVector<Api::Message *>& messages)
 {
     int size = messages.size();
     if (size != 0) {
@@ -158,8 +158,8 @@ void MessageArea::loop()
                     Api::Message *lastMessage = queuedMessage.lastMessage;
 
                     // Get date and time of the messages
-                    QDateTime firstDateTime = QDateTime::fromString(QString((*lastMessage->timestamp).c_str()), Qt::ISODate);
-                    QDateTime secondDateTime = QDateTime::fromString(QString((*message->timestamp).c_str()), Qt::ISODate);
+                    QDateTime firstDateTime = QDateTime::fromString(lastMessage->timestamp, Qt::ISODate);
+                    QDateTime secondDateTime = QDateTime::fromString(message->timestamp, Qt::ISODate);
 
                     // Determine if we need a separator (messages not sent the same day)
                     bool separator;
@@ -180,7 +180,7 @@ void MessageArea::loop()
                     bool first;
                     // If the messages are separated by more than 7.30 minutes
                     // or the authors are not the same
-                    if (secondTime - firstTime > 450 || *lastMessage->author->id != *message->author->id) {
+                    if (secondTime - firstTime > 450 || lastMessage->author.id != message->author.id) {
                         // The message is not grouped to another message
                         first = true;
                     } else {

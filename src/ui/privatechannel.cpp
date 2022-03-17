@@ -21,7 +21,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 {
     // Attributes initialization
     rm = rmp;
-    id = *privateChannel.id;
+    id = privateChannel.id;
     statusIcon = nullptr;
     statusBackground = nullptr;
 
@@ -36,7 +36,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     layout->setVerticalSpacing(4);
 
     // Variables initialization
-    std::string channelIconFileName;
+    QString channelIconFileName;
     int channelType = privateChannel.type;
 
     if (channelType == Api::DM) {
@@ -44,8 +44,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             subtext = new QLabel("", container);
 
             Api::User *dmUser = static_cast<Api::User *>(user);
-            std::string *avatar = dmUser->avatar;
-            if (avatar == nullptr || *avatar == "") {
+            QString avatar = dmUser->avatar;
+            if (avatar.isNull()) {
                 // Use an asset if the other user doesn't have an icon
                 channelIconFileName = "res/images/png/user-icon-asset0.png";
 
@@ -56,8 +56,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
                 icon = new RoundedImage(32, 32, 16, container);
 
                 // Request the icon image
-                channelIconFileName = *dmUser->id + (avatar->rfind("a_") == 0 ? ".gif" : ".png");
-                rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + *dmUser->id + "/" + *avatar, channelIconFileName);
+                channelIconFileName = dmUser->id.toString() + (avatar.indexOf("a_") == 0 ? ".gif" : ".png");
+                rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + dmUser->id.toString() + "/" + avatar, channelIconFileName);
             }
 
             // Set the background of the status icon
@@ -72,7 +72,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             statusIcon->move(31, 27);
 
             // Set the DM name to the other user name
-            name = new QLabel((*dmUser->username).c_str(), container);
+            name = new QLabel(dmUser->username, container);
 
             // Style the widgets
             if (name) name->setFixedSize(145, 14);
@@ -96,28 +96,28 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             this->setFixedSize(224, 44);
             this->setStyleSheet("border-radius: 4px;"
                                 "color: #8E9297;");
-        }, (*privateChannel.recipientIds)[0]);
+        }, privateChannel.recipientIds[0]);
     } else if (channelType == Api::GroupDM) {
         // Get the subtext of the group DM with the number of people in it
-        size_t nMember = privateChannel.recipientIds->size();
-        std::string str_member = " member";
+        size_t nMember = privateChannel.recipientIds.size();
+        QString str_member = " member";
         // Plural
         if (nMember + 1 > 1) {
             str_member += "s";
         }
-        subtext = new QLabel((std::to_string(nMember+1) + str_member).c_str(), container);
+        subtext = new QLabel(QString::number(nMember+1) + str_member, container);
 
         // Get the name of the group
-        std::string *channelName = privateChannel.name;
-        if (channelName == nullptr || *channelName == "") {
+        QString channelName = privateChannel.name;
+        if (channelName.isNull()) {
             // There is no name
             if (nMember == 1) {
                 // Get the name of the other user if there is only two person
                 rm->getUser([&](void *user){
-                    name = new QLabel((*static_cast<Api::User *>(user)->username).c_str());
+                    name = new QLabel(static_cast<Api::User *>(user)->username);
                     name->setFixedSize(145, 14);
                     layout->addWidget(name, 0, 1);
-                }, (*privateChannel.recipientIds)[0]);
+                }, privateChannel.recipientIds[0]);
             } else {
                 // Set it with 'Unnamed'
                 name = new QLabel("Unnamed");
@@ -125,14 +125,14 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
                 layout->addWidget(name, 0, 1);
             }
         } else {
-            name = new QLabel(channelName->c_str());
+            name = new QLabel(channelName);
             name->setFixedSize(145, 14);
             layout->addWidget(name, 0, 1);
         }
 
         // Set the icon of the channel
-        std::string *channelIcon = privateChannel.icon;
-        if (channelIcon == nullptr || *channelIcon == "") {
+        QString channelIcon = privateChannel.icon;
+        if (channelIcon.isNull()) {
             // Use an asset if there is none
             channelIconFileName = "res/images/png/group-icon-asset1.png";
 
@@ -143,8 +143,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             icon = new RoundedImage(32, 32, 16, container);
 
             // Request the icon image
-            channelIconFileName = *channelIcon + ".png";
-            rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<std::string *>(iconFileName));}, "https://cdn.discordapp.com/channel-icons/" + *privateChannel.id + "/" + channelIconFileName, channelIconFileName);
+            channelIconFileName = channelIcon + ".png";
+            rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/channel-icons/" + privateChannel.id.toString() + "/" + channelIconFileName, channelIconFileName);
         }
 
         // Style the subtext
@@ -170,19 +170,19 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     }
 }
 
-void PrivateChannelWidget::setStatus(std::string *status)
+void PrivateChannelWidget::setStatus(QString status)
 {
-    statusIcon->setStatus(*status);
+    statusIcon->setStatus(status);
 }
 
-void PrivateChannelWidget::setIcon(const std::string& iconFileName)
+void PrivateChannelWidget::setIcon(const QString& iconFileName)
 {
     icon->setImage(iconFileName);
 }
 
 void PrivateChannelWidget::closeChannel()
 {
-    emit closeButtonClicked(id, "", Api::DM);
+    emit closeButtonClicked(id, 0, Api::DM);
 }
 
 void PrivateChannelWidget::unclicked()

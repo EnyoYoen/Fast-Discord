@@ -23,7 +23,7 @@ MainWindow::MainWindow() : QWidget()
                         "border: none;");
 
     // Get account token from accounts list
-    std::string token = getAccountToken();
+    QString token = getAccountToken();
 
     // Create the ressource manager
     rm = new Api::RessourceManager(token);
@@ -41,17 +41,17 @@ MainWindow::MainWindow() : QWidget()
     });
 }
 
-void MainWindow::addAccountInConfig(QSettings *settings, QMap<QString, std::string> accountMap) {
+void MainWindow::addAccountInConfig(QSettings *settings, QMap<QString, QString> accountMap) {
     settings->beginGroup("Accounts");
-    QMap<QString, std::string>::const_iterator i = accountMap.constBegin();
+    QMap<QString, QString>::const_iterator i = accountMap.constBegin();
     while (i != accountMap.constEnd()) {
-         settings->setValue(i.key(), i.value().c_str());
+         settings->setValue(i.key(), i.value());
          ++i;
      }
     settings->endGroup();
 }
 
-QMap<QString, std::string> MainWindow::getNewAccount() {
+QMap<QString, QString> MainWindow::getNewAccount() {
     QDialog dlg(nullptr);
     dlg.setWindowTitle(tr("Add new account"));
     dlg.setWindowIcon(QIcon("res/images/png/icon.png"));
@@ -74,38 +74,38 @@ QMap<QString, std::string> MainWindow::getNewAccount() {
 
     // if user press 'ok' button
     if(dlg.exec() == QDialog::Accepted) {
-        std::string token = ledit2->text().toUtf8().constData();
-        token.erase(std::remove_if(token.begin(), token.end(), ::isspace), token.end());
+        QString token = ledit2->text();
+        token = token.trimmed();
 
-        return { {ledit1->text().toUtf8(), token} };
+        return { {ledit1->text(), token} };
     }
 
     return {};
 }
 
-QMap<QString, std::string> MainWindow::getAccountsMap(QSettings *settings) {
-    QMap<QString, std::string> accountsMap;
+QMap<QString, QString> MainWindow::getAccountsMap(QSettings *settings) {
+    QMap<QString, QString> accountsMap;
 
     settings->beginGroup("Accounts");
     QStringList keys = settings->childKeys();
     foreach (QString key, keys) {
-         accountsMap[key] = settings->value(key).toString().toStdString();
+         accountsMap[key] = settings->value(key).toString();
     }
     settings->endGroup();
 
     return accountsMap;
 }
 
-std::string MainWindow::getAccountToken() {
+QString MainWindow::getAccountToken() {
     QSettings* settings = new QSettings("Fast-Discord", "config");
-    std::string token = "";
+    QString token = "";
     QString name = "";
 
-    QMap<QString, std::string> accountsMap = getAccountsMap(settings);
+    QMap<QString, QString> accountsMap = getAccountsMap(settings);
 
     if (accountsMap.isEmpty()) {
         // Add token if it's empty
-        QMap<QString, std::string> tknmp = getNewAccount();
+        QMap<QString, QString> tknmp = getNewAccount();
         name = tknmp.firstKey();
         token = tknmp.first();
 
@@ -122,7 +122,7 @@ std::string MainWindow::getAccountToken() {
         }
         // if user push 'cancel' button - add new account and then set token from new account
         else {
-            QMap<QString, std::string> tknmp = getNewAccount();
+            QMap<QString, QString> tknmp = getNewAccount();
 
             if (tknmp.isEmpty())
                 exit(0);
@@ -156,21 +156,21 @@ void MainWindow::setup()
     this->setWindowIcon(QIcon("res/images/png/icon.png"));
 
     // Connect signals to slots of the columns
-    QObject::connect(leftColumn, SIGNAL(guildClicked(const std::string&)), middleColumn, SLOT(openGuild(const std::string&)));
+    QObject::connect(leftColumn, SIGNAL(guildClicked(const Api::Snowflake&)), middleColumn, SLOT(openGuild(const Api::Snowflake&)));
     QObject::connect(leftColumn, SIGNAL(homeButtonClicked()), middleColumn, SLOT(displayPrivateChannels()));
     QObject::connect(leftColumn, SIGNAL(cleanRightColumn()), rightColumn, SLOT(clean()));
-    QObject::connect(middleColumn, SIGNAL(guildChannelClicked(const std::string&, const std::string&)), rightColumn, SLOT(openGuildChannel(const std::string&, const std::string&)));
-    QObject::connect(middleColumn, SIGNAL(privateChannelClicked(const std::string&)), rightColumn, SLOT(openPrivateChannel(const std::string&)));
-    QObject::connect(rightColumn, SIGNAL(messageAdded(const std::string&)), middleColumn, SLOT(putChannelFirst(const std::string&)));
-    QObject::connect(rm, SIGNAL(unreadUpdateReceived(const std::string&)), leftColumn, SLOT(setUnreadGuild(const std::string&)));
+    QObject::connect(middleColumn, SIGNAL(guildChannelClicked(const Api::Snowflake&, const Api::Snowflake&)), rightColumn, SLOT(openGuildChannel(const Api::Snowflake&, const Api::Snowflake&)));
+    QObject::connect(middleColumn, SIGNAL(privateChannelClicked(const Api::Snowflake&)), rightColumn, SLOT(openPrivateChannel(const Api::Snowflake&)));
+    QObject::connect(rightColumn, SIGNAL(messageAdded(const Api::Snowflake&)), middleColumn, SLOT(putChannelFirst(const Api::Snowflake&)));
+    QObject::connect(rm, SIGNAL(unreadUpdateReceived(const Api::Snowflake&)), leftColumn, SLOT(setUnreadGuild(const Api::Snowflake&)));
     QObject::connect(rm, SIGNAL(messageReceived(const Api::Message&)), rightColumn, SLOT(addMessage(const Api::Message&)));
     QObject::connect(rm, SIGNAL(presenceReceived(const Api::Presence&)), middleColumn, SLOT(updatePresence(const Api::Presence&)));
-    QObject::connect(rm, SIGNAL(guildsReceived(const std::vector<Api::Guild *>&)), leftColumn, SLOT(displayGuilds(const std::vector<Api::Guild *>&)));
-    QObject::connect(rm, SIGNAL(presencesReceived(const std::vector<Api::Presence *>&)), middleColumn, SLOT(setPresences(const std::vector<Api::Presence *>&)));
-    QObject::connect(rm, SIGNAL(privateChannelsReceived(std::vector<Api::PrivateChannel *>)), middleColumn, SLOT(setPrivateChannels(std::vector<Api::PrivateChannel *>)));
+    QObject::connect(rm, SIGNAL(guildsReceived(const QVector<Api::Guild *>&)), leftColumn, SLOT(displayGuilds(const QVector<Api::Guild *>&)));
+    QObject::connect(rm, SIGNAL(presencesReceived(const QVector<Api::Presence *>&)), middleColumn, SLOT(setPresences(const QVector<Api::Presence *>&)));
+    QObject::connect(rm, SIGNAL(privateChannelsReceived(QVector<Api::PrivateChannel *>)), middleColumn, SLOT(setPrivateChannels(QVector<Api::PrivateChannel *>)));
     QObject::connect(rm, SIGNAL(channelCreated(const Api::Channel *, const Api::PrivateChannel *)), middleColumn, SLOT(createChannel(const Api::Channel *, const Api::PrivateChannel *)));
     QObject::connect(rm, SIGNAL(channelUpdated(const Api::Channel *, const Api::PrivateChannel *)), middleColumn, SLOT(updateChannel(const Api::Channel *, const Api::PrivateChannel *)));
-    QObject::connect(rm, SIGNAL(channelDeleted(const std::string&, const std::string&, int)), middleColumn, SLOT(deleteChannel(const std::string&, const std::string&, int)));
+    QObject::connect(rm, SIGNAL(channelDeleted(const Api::Snowflake&, const Api::Snowflake&, int)), middleColumn, SLOT(deleteChannel(const Api::Snowflake&, const Api::Snowflake&, int)));
 }
 
 } // namespace Ui

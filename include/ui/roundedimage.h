@@ -10,9 +10,9 @@ class RoundedImage : public QLabel
 {
     Q_OBJECT
 public:
-    RoundedImage(const std::string& imagePath, int width, int height, int radius, QWidget *parent);
+    RoundedImage(const QString& imagePath, int width, int height, int radius, QWidget *parent);
     RoundedImage(int width, int height, int radius, QWidget *parent);
-    void setImage(const std::string& imagePath);
+    void setImage(const QString& imagePath);
 
 private:
     void paintEvent(QPaintEvent *) override;

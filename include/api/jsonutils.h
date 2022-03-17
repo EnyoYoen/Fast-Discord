@@ -1,14 +1,14 @@
 #pragma once
 
+#include <QString>
+#include <QVector>
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QJsonObject>
 
-#include <vector>
-
 namespace Api {
 
-std::vector<std::string> *getStringsFromJson(QJsonArray jsonArray);
+QVector<QString> getStringsFromJson(QJsonArray jsonArray);
 
 // Template function that we specialize with all Discord's API JSON objects that we can recieve, to unmarshal them
 template <typename T>
@@ -22,22 +22,24 @@ void unmarshal(QJsonValue jsonVal, const QString& key, T **object)
 
 // Unmarshal arrays of JSON objects
 template <typename T>
-void unmarshalMultiple(QJsonArray jsonArray, std::vector<T *> **objects)
+QVector<T*> unmarshalMultiple(QJsonArray jsonArray)
 {
-    *objects = new std::vector<T *>;
+    QVector<T*> objects;
 
     for (int i = 0 ; i < jsonArray.size() ; i++) {
         T *object;
         unmarshal<T>(jsonArray[i].toObject(), &object);
-        (*objects)->push_back(object);
+        objects.push_back(object);
     }
+
+    return objects;
 }
 
 // Unmarshal arrays of JSON objects
 template <typename T>
-void unmarshalMultiple(QJsonObject jsonObj, QString key, std::vector<T *> **objects)
+QVector<T*> unmarshalMultiple(QJsonObject jsonObj, QString key)
 {
-    *objects = new std::vector<T *>;
+    QVector<T*> objects;
 
     // Getting the JSON array at 'key'
     QJsonArray jsonArray = jsonObj[key].toArray();
@@ -45,8 +47,10 @@ void unmarshalMultiple(QJsonObject jsonObj, QString key, std::vector<T *> **obje
     for (int i = 0 ; i < jsonArray.size() ; i++) {
         T *object;
         unmarshal<T>(jsonArray[i].toObject(), &object);
-        (*objects)->push_back(object);
+        objects.push_back(object);
     }
+
+    return objects;
 }
 
 } // namespace Api

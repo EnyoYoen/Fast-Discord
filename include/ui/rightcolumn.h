@@ -28,25 +28,25 @@ public:
 
 signals:
     void userTypingReceived(const Api::User *user);
-    void messagesReceived(std::vector<Api::Message *> *messages);
-    void moreMessagesReceived(const std::vector<Api::Message *>& messages);
-    void messageAdded(const std::string& channelId);
+    void messagesReceived(QVector<Api::Message *> messages);
+    void moreMessagesReceived(const QVector<Api::Message *>& messages);
+    void messageAdded(const Api::Snowflake& channelId);
 
 public slots:
     void clean();
-    void openGuildChannel(const std::string& guildId, const std::string& id);
-    void openPrivateChannel(const std::string& id);
+    void openGuildChannel(const Api::Snowflake& guildId, const Api::Snowflake& id);
+    void openPrivateChannel(const Api::Snowflake& id);
     void addMessage(const Api::Message& message);
 
 private slots:
-    void setMessages(std::vector<Api::Message *> *messages);
+    void setMessages(QVector<Api::Message *> messages);
     void setUserTyping(const Api::User *user);
     void sendTyping();
-    void sendMessage(const std::string& content);
+    void sendMessage(const QString& content);
     void loadMoreMessages();
 
 private:
-    void openChannel(const std::string& channelId, int type);
+    void openChannel(const Api::Snowflake& channelId, int type);
 
     // Main widgets
     QHBoxLayout *layout;
@@ -57,9 +57,9 @@ private:
 
     Api::RessourceManager *rm; // To request the API
 
-    Api::Client *client;              // Store the actual user
-    std::string currentOpenedChannel; // Current channel ID
-    long typingTimestamp;             // The timestamp of the start of the typing
+    Api::Client *client;                 // Store the actual user
+    Api::Snowflake currentOpenedChannel; // Current channel ID
+    long typingTimestamp;                // The timestamp of the start of the typing
 };
 
 } // namespace Ui

@@ -16,7 +16,7 @@
 
 namespace Api {
 
-Requester::Requester(const std::string& tokenp)
+Requester::Requester(const QString& tokenp)
     : QObject()
 {
     // Attributes initialization
@@ -43,7 +43,7 @@ Requester::~Requester()
 
 void Requester::writeFile()
 {
-    QFile file(QString(requestQueue.front().outputFile.c_str()));
+    QFile file(requestQueue.front().outputFile);
     file.open(QIODevice::WriteOnly | QIODevice::Append);
     file.write(reply->readAll());
     file.close();
@@ -57,7 +57,7 @@ void Requester::readReply()
         QDir dir("cache/");
         if (!dir.exists()) dir.mkpath(".");
 
-        QFile file(QString(parameters.outputFile.c_str()));
+        QFile file(parameters.outputFile);
         file.open(QIODevice::WriteOnly);
         file.write(reply->readAll());
         file.close();
@@ -79,30 +79,26 @@ void Requester::readReply()
                 }
             case GetGuilds:
                 {
-                    std::vector<Guild *> *guilds;
-                    unmarshalMultiple<Guild>(QJsonDocument::fromJson(ba).array(), &guilds);
-                    parameters.callback(static_cast<void *>(guilds));
+                    QVector<Guild *> guilds = unmarshalMultiple<Guild>(QJsonDocument::fromJson(ba).array());
+                    parameters.callback(static_cast<void *>(&guilds));
                     break;
                 }
             case GetGuildChannels:
                 {
-                    std::vector<Channel *> *channels;
-                    unmarshalMultiple<Channel>(QJsonDocument::fromJson(ba).array(), &channels);
-                    parameters.callback(static_cast<void *>(channels));
+                    QVector<Channel *> channels = unmarshalMultiple<Channel>(QJsonDocument::fromJson(ba).array());
+                    parameters.callback(static_cast<void *>(&channels));
                     break;
                 }
             case GetPrivateChannels:
                 {
-                    std::vector<Channel *> *privateChannels;
-                    unmarshalMultiple<Channel>(QJsonDocument::fromJson(ba).array(), &privateChannels);
-                    parameters.callback(static_cast<void *>(privateChannels));
+                    QVector<Channel *> privateChannels = unmarshalMultiple<Channel>(QJsonDocument::fromJson(ba).array());
+                    parameters.callback(static_cast<void *>(&privateChannels));
                     break;
                 }
             case GetMessages:
                 {
-                    std::vector<Message *> *messages;
-                    unmarshalMultiple<Message>(QJsonDocument::fromJson(ba).array(), &messages);
-                    parameters.callback(static_cast<void *>(messages));
+                    QVector<Message *> messages = unmarshalMultiple<Message>(QJsonDocument::fromJson(ba).array());
+                    parameters.callback(static_cast<void *>(&messages));
                     break;
                 }
             case GetClient:
@@ -123,7 +119,7 @@ void Requester::readReply()
                 {
                     try {
                         QJsonValue jsonUrl = QJsonDocument::fromJson(ba)["url"];
-                        std::string url = jsonUrl.toString().toUtf8().constData();
+                        QString url = jsonUrl.toString();
                         parameters.callback(static_cast<void *>(&url));
                     } catch(std::exception&) {
                         break;
@@ -132,7 +128,7 @@ void Requester::readReply()
                 }
             case GetImage:
                 {
-                    std::string imageFileName = parameters.outputFile;
+                    QString imageFileName = parameters.outputFile;
                     lock.lock();
                     if (requestsToCheck == 0) parameters.callback(static_cast<void *>(&imageFileName));
                     lock.unlock();
@@ -165,20 +161,20 @@ void Requester::RequestLoop()
                     rateLimitEnd = 0; // Reset rate limit
                 }
 
-                QNetworkRequest request(QUrl(QString(parameters.url.c_str())));
+                QNetworkRequest request(QUrl(parameters.url));
 
                 /* Set the headers */
                 if (parameters.type != GetFile)
-                    request.setRawHeader(QByteArray("Authorization"), QByteArray(token.c_str()));
+                    request.setRawHeader(QByteArray("Authorization"), token.toUtf8());
                 if (parameters.json) {
                     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
                 }
 
                 if (parameters.customRequest != "") {
                     if (parameters.customRequest == "POST") {
-                        emit requestEmit(Post, request, new QByteArray(parameters.postDatas.c_str(), parameters.postDatas.length()), nullptr);
+                        emit requestEmit(Post, request, new QByteArray(parameters.postDatas.toUtf8()), nullptr);
                     } else if (parameters.customRequest == "PUT") {
-                        emit requestEmit(Put, request, new QByteArray(parameters.postDatas.c_str(), parameters.postDatas.length()), nullptr);
+                        emit requestEmit(Put, request, new QByteArray(parameters.postDatas.toUtf8()), nullptr);
                     } else if (parameters.customRequest == "DELETE") {
                         emit requestEmit(Delete, request, nullptr, nullptr);
                     }
@@ -186,8 +182,8 @@ void Requester::RequestLoop()
                     QHttpMultiPart multiPart(QHttpMultiPart::FormDataType);
                     QHttpPart part;
 
-                    part.setHeader(QNetworkRequest::ContentTypeHeader, QVariant(QMimeDatabase().mimeTypeForFile(QString(parameters.fileName.c_str())).name()));
-                    QFile file(QString(parameters.fileName.c_str()));
+                    part.setHeader(QNetworkRequest::ContentTypeHeader, QVariant(QMimeDatabase().mimeTypeForFile(parameters.fileName).name()));
+                    QFile file(parameters.fileName);
                     part.setBody(file.readAll());
 
                     multiPart.append(part);
@@ -255,7 +251,7 @@ void Requester::removeImageRequests()
 
 // Functions that request the API to retrieve data
 
-void Requester::getImage(std::function<void(void *)> callback, const std::string& url, const std::string& fileName)
+void Requester::getImage(std::function<void(void *)> callback, const QString& url, const QString& fileName)
 {
     requestApi({
         callback,
@@ -294,11 +290,11 @@ void Requester::getGuilds(std::function<void(void *)> callback)
         false});
 }
 
-void Requester::getGuildChannels(std::function<void(void *)> callback, const std::string& id)
+void Requester::getGuildChannels(std::function<void(void *)> callback, const Snowflake& id)
 {
     requestApi({
         callback,
-        "https://discord.com/api/v9/guilds/" + id + "/channels",
+        "https://discord.com/api/v9/guilds/" + id.toString() + "/channels",
         "",        
         "",
         "",
@@ -307,13 +303,13 @@ void Requester::getGuildChannels(std::function<void(void *)> callback, const std
         false});
 }
 
-void Requester::getMessages(std::function<void(void *)> callback, const std::string& channelId, const std::string& beforeId, unsigned int limit)
+void Requester::getMessages(std::function<void(void *)> callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit)
 {
     limit = limit >= 50 ? 50 : limit;
 
     requestApi({
         callback,
-        "https://discord.com/api/v9/channels/" + channelId + "/messages?" + (beforeId != "" ? "before=" + beforeId + "&" : "" ) + "limit=" + std::to_string(limit),
+        "https://discord.com/api/v9/channels/" + channelId.toString() + "/messages?" + (beforeId != 0 ? "before=" + beforeId.toString() + "&" : "" ) + "limit=" + QString::number(limit),
         "",        
         "",
         "",
@@ -348,11 +344,11 @@ void Requester::getClientSettings(std::function<void(void *)> callback)
         false});
 }
 
-void Requester::getUser(std::function<void(void *)> callback, const std::string& userId)
+void Requester::getUser(std::function<void(void *)> callback, const Snowflake& userId)
 {
     requestApi({
         callback,
-        "https://discord.com/api/v9/users/" + userId,
+        "https://discord.com/api/v9/users/" + userId.toString(),
         "",
         "",
         "",
@@ -363,7 +359,7 @@ void Requester::getUser(std::function<void(void *)> callback, const std::string&
 
 // Functions that request the API to send data
 
-void Requester::setStatus(const std::string& status)
+void Requester::setStatus(const QString& status)
 {
     requestApi({
         nullptr,
@@ -376,11 +372,11 @@ void Requester::setStatus(const std::string& status)
         false});
 }
 
-void Requester::sendTyping(const std::string& channelId)
+void Requester::sendTyping(const Snowflake& channelId)
 {
     requestApi({
             nullptr,
-            "https://discord.com/api/v9/channels/" + channelId + "/typing",
+            "https://discord.com/api/v9/channels/" + channelId.toString() + "/typing",
             "",
             "POST",
             "",
@@ -389,11 +385,11 @@ void Requester::sendTyping(const std::string& channelId)
             false});
 }
 
-void Requester::sendMessage(const std::string& content, const std::string& channelId)
+void Requester::sendMessage(const QString& content, const Snowflake& channelId)
 {
     requestApi({
             nullptr,
-            "https://discord.com/api/v9/channels/" + channelId + "/messages",
+            "https://discord.com/api/v9/channels/" + channelId.toString() + "/messages",
             "{\"content\":\"" + content + "\"}",
             "POST",
             "",
@@ -402,11 +398,11 @@ void Requester::sendMessage(const std::string& content, const std::string& chann
             true});
 }
 
-void Requester::sendMessageWithFile(const std::string& content, const std::string& channelId, const std::string& filePath)
+void Requester::sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath)
 {
     requestApi({
             nullptr,
-            "https://discord.com/api/v9/channels/" + channelId + "/messages",
+            "https://discord.com/api/v9/channels/" + channelId.toString() + "/messages",
             "{\"content\":\"" + content + "\"}",
             "POST",
             filePath,
@@ -415,11 +411,11 @@ void Requester::sendMessageWithFile(const std::string& content, const std::strin
             false});
 }
 
-void Requester::deleteMessage(const std::string& channelId, const std::string& messageId)
+void Requester::deleteMessage(const Snowflake& channelId, const Snowflake& messageId)
 {
     requestApi({
         nullptr,
-        "https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId,
+        "https://discord.com/api/v9/channels/" + channelId.toString() + "/messages/" + messageId.toString(),
         "",
         "DELETE",
         "",
@@ -428,11 +424,11 @@ void Requester::deleteMessage(const std::string& channelId, const std::string& m
         false});
 }
 
-void Requester::pinMessage(const std::string& channelId, const std::string& messageId)
+void Requester::pinMessage(const Snowflake& channelId, const Snowflake& messageId)
 {
     requestApi({
         nullptr,
-        "https://discord.com/api/v9/channels/" + channelId + "/pins/" + messageId,
+        "https://discord.com/api/v9/channels/" + channelId.toString() + "/pins/" + messageId.toString(),
         "",
         "PUT",
         "",
@@ -441,11 +437,11 @@ void Requester::pinMessage(const std::string& channelId, const std::string& mess
         false});
 }
 
-void Requester::unpinMessage(const std::string& channelId, const std::string& messageId)
+void Requester::unpinMessage(const Snowflake& channelId, const Snowflake& messageId)
 {
     requestApi({
         nullptr,
-        "https://discord.com/api/v9/channels/" + channelId + "/pins/" + messageId,
+        "https://discord.com/api/v9/channels/" + channelId.toString() + "/pins/" + messageId.toString(),
         "",
         "PUT",
         "",
@@ -454,7 +450,7 @@ void Requester::unpinMessage(const std::string& channelId, const std::string& me
         false});
 }
 
-void Requester::getFile(const std::string& url, const std::string& filename)
+void Requester::getFile(const QString& url, const QString& filename)
 {
     requestApi({
         nullptr,

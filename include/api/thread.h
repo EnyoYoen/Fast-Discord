@@ -1,29 +1,30 @@
 #pragma once
 
-#include <string>
+#include "api/snowflake.h"
+#include "api/optional.h"
+
+#include <QString>
 
 namespace Api {
 
 //https://discord.com/developers/docs/resources/channel#thread-metadata-object
 struct ThreadMetadata
 {
-    ~ThreadMetadata();
-
-    std::string *archiveTimestamp;
-    int          autoArchiveDuration;
-    bool         archived;
-    bool         locked;
+    QString archiveTimestamp;
+    QString createTimestamp;
+    qint32  autoArchiveDuration;
+    optbool invitable;
+    bool    archived;
+    bool    locked;
 };
 
 //https://discord.com/developers/docs/resources/channel#thread-member-object
 struct ThreadMember
 {
-    ~ThreadMember();
-
-    std::string *joinTimestamp;
-    std::string *id;
-    std::string *userId;
-    int          flags;
+    QString   joinTimestamp;
+    Snowflake id;
+    Snowflake userId;
+    qint32    flags;
 };
 
 } // namespace Api
