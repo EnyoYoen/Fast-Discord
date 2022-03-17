@@ -2,7 +2,6 @@
 
 #include <QPainterPath>
 #include <QPainter>
-#include <QDebug>
 
 namespace Ui {
 

@@ -16,27 +16,10 @@ UI_DIR = $${DESTDIR}
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
-    ../src/api/application.cpp \
-    ../src/api/attachment.cpp \
-    ../src/api/channel.cpp \
-    ../src/api/client.cpp \
-    ../src/api/embed.cpp \
-    ../src/api/emoji.cpp \
     ../src/api/gateway.cpp \
-    ../src/api/guild.cpp \
-    ../src/api/guildmember.cpp \
     ../src/api/jsonutils.cpp \
-    ../src/api/message.cpp \
-    ../src/api/overwrite.cpp \
-    ../src/api/presence.cpp \
     ../src/api/request.cpp \
     ../src/api/ressourcemanager.cpp \
-    ../src/api/role.cpp \
-    ../src/api/sticker.cpp \
-    ../src/api/team.cpp \
-    ../src/api/thread.cpp \
-    ../src/api/user.cpp \
-    ../src/api/voice.cpp \
     ../src/main.cpp \
     ../src/ui/attachmentfile.cpp \
     ../src/ui/closechannelbutton.cpp \

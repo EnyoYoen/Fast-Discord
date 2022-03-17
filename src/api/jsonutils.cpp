@@ -18,7 +18,6 @@
 #include <QVariant>
 #include <QJsonObject>
 #include <QJsonDocument>
-#include <QDebug>
 
 namespace Api {
 
@@ -165,7 +164,6 @@ void unmarshal<Channel>(QJsonObject jsonObj, Channel **object)
 template <>
 void unmarshal<PrivateChannel>(QJsonObject jsonObj, PrivateChannel **object)
 {
-    qDebug() << QJsonDocument(jsonObj).toJson(QJsonDocument::Compact);
     *object = new PrivateChannel {
         getSnowflakesFromJson(jsonObj["recipient_ids"].toArray()),
 

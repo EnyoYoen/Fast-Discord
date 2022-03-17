@@ -5,7 +5,6 @@
 #include <QMovie>
 #include <QFileInfo>
 
-#include <string>
 #include <iostream>
 
 namespace Ui {

@@ -11,8 +11,6 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
-#include <string>
-#include <vector>
 #include <map>
 
 namespace Ui {

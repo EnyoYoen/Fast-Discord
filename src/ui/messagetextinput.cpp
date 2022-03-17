@@ -5,8 +5,6 @@
 #include <algorithm>
 #include <ctime>
 
-#include <QDebug>
-
 namespace Ui {
 
 MessageTextInput::MessageTextInput(QWidget *parent) : QTextEdit(parent)

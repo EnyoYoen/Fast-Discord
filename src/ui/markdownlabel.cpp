@@ -1,7 +1,6 @@
 #include "ui/markdownlabel.h"
 
 #include <QFontMetrics>
-#include <QDebug>
 
 namespace Ui {
 

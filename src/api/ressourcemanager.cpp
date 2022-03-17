@@ -2,7 +2,6 @@
 
 #include <QFile>
 #include <QJsonDocument>
-#include <QDebug>
 
 #include <fstream>
 

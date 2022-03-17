@@ -18,7 +18,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
 
         // Split the name for every space in it
 
-        std::vector<QString> nameSplit;
+        QVector<QString> nameSplit;
         int pos = 0;
         // Loop through the name to find spaces
         while ((pos = guildName.indexOf(' ')) != -1) {

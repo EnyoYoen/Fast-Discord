@@ -11,8 +11,6 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
-#include <string>
-
 namespace Ui {
 
 // A widget to show a guild (in the left column)
