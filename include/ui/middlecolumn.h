@@ -2,11 +2,11 @@
 
 #include "privatechannel.h"
 #include "guildchannelwidget.h"
-#include "api/client.h"
-#include "api/channel.h"
-#include "api/guild.h"
 #include "api/ressourcemanager.h"
-#include "api/presence.h"
+#include "api/objects/client.h"
+#include "api/objects/channel.h"
+#include "api/objects/guild.h"
+#include "api/objects/presence.h"
 
 #include <QWidget>
 #include <QVBoxLayout>

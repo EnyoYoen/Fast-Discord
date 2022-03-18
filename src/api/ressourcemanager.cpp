@@ -27,8 +27,6 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
         emit guildsReceived(guilds);
 
         privateChannels = Api::unmarshalMultiple<Api::PrivateChannel>(data["private_channels"].toArray());
-        for (unsigned int i = 0 ; i < privateChannels.size() ; i++)
-            qDebug() << privateChannels[i]->lastMessageId.toString();
         qSort(privateChannels.begin(), privateChannels.end(),
             [](const Api::PrivateChannel *a, const Api::PrivateChannel *b) {
                 if (a->lastMessageId == 0 && b->lastMessageId == 0)

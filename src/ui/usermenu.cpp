@@ -33,8 +33,8 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
         avatar = new RoundedImage(32, 32, 16, container);
 
         // Request the icon
-        channelIconFileName = client->id.toString() + (client->avatar.indexOf("a_") == 0 ? ".gif" : ".png");
-        rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + client->id.toString() + "/" + client->avatar, channelIconFileName);
+        channelIconFileName = client->id + (client->avatar.indexOf("a_") == 0 ? ".gif" : ".png");
+        rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + client->id + "/" + client->avatar, channelIconFileName);
     }
 
     // Set the background of the status icon
@@ -104,8 +104,8 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
     this->setStyleSheet("background-color: #292B2F;");
 
     // Connect buttons clicked signals
-    QObject::connect(deafenButton, SIGNAL(leftClicked(int, bool)), this, SLOT(clicButton(int, bool)));
-    QObject::connect(settingsButton, SIGNAL(leftClicked(int, bool)), this, SLOT(clicButton(int, bool)));
+    QObject::connect(deafenButton, &UserMenuButton::leftClicked, this, &UserMenu::clicButton);
+    QObject::connect(settingsButton, &UserMenuButton::leftClicked, this, &UserMenu::clicButton);
 }
 
 void UserMenu::setIcon(const QString& iconFileName)

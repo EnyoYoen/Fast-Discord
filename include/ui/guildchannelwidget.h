@@ -1,7 +1,7 @@
 #pragma once
 
-#include "api/channel.h"
-#include "api/snowflake.h"
+#include "api/objects/channel.h"
+#include "api/objects/snowflake.h"
 
 #include <QWidget>
 #include <QPixmap>

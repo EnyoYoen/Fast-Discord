@@ -3,9 +3,9 @@
 #include "ui/homebutton.h"
 #include "ui/guildwidget.h"
 #include "ui/guildfolder.h"
-#include "api/guild.h"
 #include "api/ressourcemanager.h"
-#include "api/snowflake.h"
+#include "api/objects/guild.h"
+#include "api/objects/snowflake.h"
 
 #include <QScrollArea>
 #include <QVBoxLayout>
@@ -26,11 +26,11 @@ signals:
 
 public slots:
     void displayGuilds(const QVector<Api::Guild *>& guilds);
+    void setUnreadGuild(const Api::Snowflake& guildId);
 
 private slots:
     void clicHomeButton();
     void clicGuild(const Api::Snowflake&);
-    void setUnreadGuild(const Api::Snowflake& guildId);
 
 private:
     // Main widgets

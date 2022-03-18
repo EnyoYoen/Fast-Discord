@@ -1,10 +1,10 @@
 #pragma once
 
-#include "gateway.h"
-#include "request.h"
-#include "jsonutils.h"
-#include "presence.h"
-#include "client.h"
+#include "api/gateway.h"
+#include "api/request.h"
+#include "api/jsonutils.h"
+#include "api/objects/presence.h"
+#include "api/objects/client.h"
 
 #include <QObject>
 

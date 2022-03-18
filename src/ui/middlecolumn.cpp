@@ -26,7 +26,7 @@ MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, const Api::Client *client
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    QObject::connect(this, SIGNAL(guildChannelsReceived(const QVector<Api::Channel *>)), this, SLOT(setGuildChannels(const QVector<Api::Channel *>)));
+    QObject::connect(this, &MiddleColumn::guildChannelsReceived, this, &MiddleColumn::setGuildChannels);
 
     // Style this column
     this->setFixedWidth(240);
@@ -76,8 +76,8 @@ void MiddleColumn::setPrivateChannels(QVector<Api::PrivateChannel *> privateChan
         PrivateChannelWidget *privateChannelWidget = new PrivateChannelWidget(rm, *privateChannels[i], privateChannelList);
         privateChannelWidgets.push_back(privateChannelWidget);
         privateChannelListLayout->insertWidget(i, privateChannelWidget);
-        QObject::connect(privateChannelWidget, SIGNAL(leftClicked(const Api::Snowflake&)), this, SLOT(clicPrivateChannel(const Api::Snowflake&)));
-        QObject::connect(privateChannelWidget, SIGNAL(closeButtonClicked(const Api::Snowflake&, const Api::Snowflake&, int)), this, SLOT(deleteChannel(const Api::Snowflake&, const Api::Snowflake&, int)));
+        QObject::connect(privateChannelWidget, &PrivateChannelWidget::leftClicked, this, &MiddleColumn::clicPrivateChannel);
+        QObject::connect(privateChannelWidget, &PrivateChannelWidget::closeButtonClicked, this, &MiddleColumn::deleteChannel);
     }
     privateChannelListLayout->insertStretch(-1, 1);
     privateChannelListLayout->setSpacing(2);
@@ -113,7 +113,7 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *> channels)
             guildChannelListLayout->addWidget(channelWidget);
             guildChannelWidgets.push_back(channelWidget);
             // Connect the clicked signal to open the channel
-            QObject::connect(channelWidget, SIGNAL(leftClicked(const Api::Snowflake&)), this, SLOT(clicGuildChannel(const Api::Snowflake&)));
+            QObject::connect(channelWidget, &GuildChannelWidget::leftClicked, this, &MiddleColumn::clicGuildChannel);
             count++;
         }
     }
@@ -130,7 +130,7 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *> channels)
                 if (channels[j]->parentId == 0) { // Category or 'orphan' channel
                     if (channels[j]->type != Api::GuildCategory) {
                         // Connect the clicked signal to open the channel
-                        QObject::connect(channelWidget, SIGNAL(leftClicked(const Api::Snowflake&)), this, SLOT(clicGuildChannel(const Api::Snowflake&)));
+                        QObject::connect(channelWidget, &GuildChannelWidget::leftClicked, this, &MiddleColumn::clicGuildChannel);
                     }
                 }
                 if (channels[j]->parentId == channels[i]->id) {
@@ -140,7 +140,7 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *> channels)
                     guildChannelWidgets.push_back(channelWidget);
                     guildChannelListLayout->addWidget(channelWidget);
                     // Connect the clicked signal to open the channel
-                    QObject::connect(channelWidget, SIGNAL(leftClicked(const Api::Snowflake&)), this, SLOT(clicGuildChannel(const Api::Snowflake&)));
+                    QObject::connect(channelWidget, &GuildChannelWidget::leftClicked, this, &MiddleColumn::clicGuildChannel);
                     count++;
                 }
             }

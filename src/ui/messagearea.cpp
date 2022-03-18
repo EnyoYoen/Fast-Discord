@@ -38,11 +38,11 @@ MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget * /*parent*/)
                         "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 16px;}"
                         "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
 
-    QObject::connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(scrollBarMoved(int)));
-    QObject::connect(this->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(changeSliderValue(int, int)));
-    QObject::connect(this, SIGNAL(messageCreate(Api::Message *, bool, bool, bool)), this, SLOT(displayMessage(Api::Message *, bool, bool, bool)));
-    QObject::connect(this, SIGNAL(separatorCreate(const QDate&, bool)), this, SLOT(displaySeparator(const QDate&, bool)));
-    QObject::connect(this, SIGNAL(messagesEnd()), this, SLOT(scrollBottom()));
+    QObject::connect(this->verticalScrollBar(), &QScrollBar::valueChanged, this, &MessageArea::scrollBarMoved);
+    QObject::connect(this->verticalScrollBar(), &QScrollBar::rangeChanged, this, &MessageArea::changeSliderValue);
+    QObject::connect(this, &MessageArea::messageCreate, this, &MessageArea::displayMessage);
+    QObject::connect(this, &MessageArea::separatorCreate, this, &MessageArea::displaySeparator);
+    QObject::connect(this, &MessageArea::messagesEnd, this, &MessageArea::scrollBottom);
 }
 
 void MessageArea::setMessages(const QVector<Api::Message *>& messages)
@@ -56,7 +56,8 @@ void MessageArea::setMessages(const QVector<Api::Message *>& messages)
         for (int i = messages.size() - 2; i >= 1 ; i--) {
             messageQueue.push(QueuedMessage{messages[i], messages[i + 1], false, false});
         }
-        messageQueue.push(QueuedMessage{messages[0], messages[1], true, false});
+        if (messages.size() > 1)
+            messageQueue.push(QueuedMessage{messages[0], messages[1], true, false});
         lock.unlock();
         messageWaiter.notify_one();
 

@@ -47,7 +47,7 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
                         "border: none;");
 
     // Connect the home button clic signal
-    QObject::connect(homeButton, SIGNAL(clicked()), this, SLOT(clicHomeButton()));
+    QObject::connect(homeButton, &HomeButton::clicked, this, &LeftColumn::clicHomeButton);
 }
 
 void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
@@ -67,7 +67,7 @@ void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
                             GuildWidget *guildWidget = new GuildWidget(rm, *guilds[k], this);
                             guildWidgets.push_back(guildWidget);
                             layout->insertWidget(widgetCounter + 3, guildWidget);
-                            QObject::connect(guildWidget, SIGNAL(leftClicked(const Api::Snowflake&)), this, SLOT(clicGuild(const Api::Snowflake&)));
+                            QObject::connect(guildWidget, &GuildWidget::leftClicked, this, &LeftColumn::clicGuild);
                             widgetCounter++;
                             break;
                         } else {
@@ -80,7 +80,7 @@ void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
                 GuildFolder *folderWidget = new GuildFolder(rm, folder, folderGuilds, this);
                 guildFolders.push_back(folderWidget);
                 layout->insertWidget(widgetCounter + 3, folderWidget);
-                QObject::connect(folderWidget, SIGNAL(guildClicked(const Api::Snowflake&)), this, SLOT(clicGuild(const Api::Snowflake&)));
+                QObject::connect(folderWidget, &GuildFolder::guildClicked, this, &LeftColumn::clicGuild);
                 widgetCounter++;
             }
         }
@@ -90,7 +90,7 @@ void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
                 GuildWidget *guildWidget = new GuildWidget(rm, *guilds[i], this);
                 guildWidgets.push_back(guildWidget);
                 layout->insertWidget(i + 3, guildWidget);
-                QObject::connect(guildWidget, SIGNAL(leftClicked(const Api::Snowflake&)), this, SLOT(clicGuild(const Api::Snowflake&)));
+                QObject::connect(guildWidget, &GuildWidget::leftClicked, this, &LeftColumn::clicGuild);
             }
         }
     });

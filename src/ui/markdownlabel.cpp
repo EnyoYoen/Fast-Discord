@@ -7,13 +7,15 @@ namespace Ui {
 MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, QWidget *parent)
     : QLabel(parent)
 {
-    if (content != "") {
+    if (!content.isNull() && !content.isEmpty()) {
         QString html = "<html>";
         bool block = false, firstCharFound = false;
         int boldEnd = 0, italicStarEnd = 0, italicUnderscoreEnd = 0, underlineEnd = 0
             , barredEnd = 0, simpleCodeBlockEnd = 0, multiCodeBlockEnd = 0;
 
-        for (unsigned int i = 0 ; i < content.size() ; i++) {
+        for (int i = 0 ; i < content.size() ; i++) {
+            if (i > content.size())
+                break;
             bool special = false;
             if (simpleCodeBlockEnd == 0 && multiCodeBlockEnd == 0) {
                 if (boldEnd != 0 && boldEnd == i) {
@@ -40,7 +42,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                     i++;
                     special = true;
                 } else if (content[i] == '`') {
-                    if (content[i + 1] == '`' && content[i + 2] == '`') {
+                    if (i + 2 < content.size() && content[i + 1] == '`' && content[i + 2] == '`') {
                         if ((multiCodeBlockEnd = content.indexOf("```", i + 1)) != -1) {
                             html += "<div>";
                             i += 2;
@@ -59,7 +61,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                         }
                     }
                 } else if (content[i] == '_') {
-                    if (content[i + 1] == '_') {
+                    if (i + 1 < content.size() && content[i + 1] == '_') {
                         if (underlineEnd == 0 && (underlineEnd = content.indexOf("__", i + 2)) != -1 && underlineEnd < content.indexOf('\n', i + 2)) {
                             html += "<u>";
                             i++;
@@ -79,8 +81,8 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                         }
                     }
                 } else if (content[i] == '*') {
-                    if (content[i + 1] == '*') {
-                        if (content[i + 2] == '*') {
+                    if (i + 1 < content.size() && content[i + 1] == '*') {
+                        if (i + 2 < content.size() && content[i + 2] == '*') {
                             unsigned int end = 0;
                             if (boldEnd == 0 && italicStarEnd == 0 && italicUnderscoreEnd == 0
                                     && (end = content.indexOf("***", i + 3)) != -1
@@ -108,7 +110,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                             italicStarEnd = 0;
                         }
                     }
-                } else if (content[i] == '~' && content[i + 1] == '~') {
+                } else if (i + 1 < content.size() && content[i] == '~' && content[i + 1] == '~') {
                     if (barredEnd == 0 && (barredEnd = content.indexOf("~~", i + 2)) != -1 && barredEnd < content.indexOf('\n', i + 2)) {
                         html += "<strike>";
                         i++;
@@ -150,7 +152,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                         firstCharFound = true;
                     }
                 } else if (content[i] == '>') {
-                    if (!firstCharFound && content[i + 1] == ' ') {
+                    if (i + 1 < content.size() && !firstCharFound && content[i + 1] == ' ') {
                         html += "<span>&nbsp;</span>&nbsp;&nbsp;&nbsp;&nbsp;";
                         block = true;
                         i++;

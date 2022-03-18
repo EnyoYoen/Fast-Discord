@@ -157,9 +157,9 @@ QString MessageWidget::processTimestamp(QDateTime dateTime)
             date = "Yesterday at " + processTime(dateTime.time());
         } else {
             // The message is older
-            date = QString(((messageDate.month() < 10 ? "0" + std::to_string(messageDate.month()) : std::to_string(messageDate.month())) + "/" +
-                    (messageDate.day() < 10 ? "0" + std::to_string(messageDate.day()) : std::to_string(messageDate.day())) + "/" +
-                    std::to_string(messageDate.year())).c_str());
+            date = (messageDate.month() < 10 ? "0" + QString::number(messageDate.month()) : QString::number(messageDate.month())) + "/" +
+                   (messageDate.day() < 10 ? "0" + QString::number(messageDate.day()) : QString::number(messageDate.day())) + "/" +
+                   QString::number(messageDate.year());
         }
     } else {
         date = "Today at " + processTime(dateTime.time());
@@ -203,7 +203,7 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
             QString avatarFileName = ref->author.avatar + (ref->author.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
             replyAvatar = new RoundedImage(16, 16, 8, reply);
             replyLayout->addWidget(replyAvatar);
-            rm->getImage([this](void *avatarFileName) {this->setReplyAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + ref->author.id.toString() + "/" + avatarFileName, avatarFileName);
+            rm->getImage([this](void *avatarFileName) {this->setReplyAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + ref->author.id + "/" + avatarFileName, avatarFileName);
         }
 
         QLabel *username = new QLabel(ref->author.username, reply);
@@ -243,7 +243,7 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
             avatar = new RoundedImage(40, 40, 20, iconContainer);
             iconLayout->addWidget(avatar);
             iconLayout->setAlignment(avatar, Qt::AlignHCenter);
-            rm->getImage([this](void *avatarFileName) {this->setAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + author.id.toString() + "/" + avatarFileName, avatarFileName);
+            rm->getImage([this](void *avatarFileName) {this->setAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + author.id + "/" + avatarFileName, avatarFileName);
         }
 
         // Widget to show some infos of the message
@@ -306,7 +306,7 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
             if (attachments[i]->contentType != nullptr
               && attachments[i]->contentType.indexOf("image") != -1
               && attachments[i]->contentType.indexOf("svg") == -1) {
-                QString filename = attachments[i]->id.toString() +
+                QString filename = attachments[i]->id +
                         attachments[i]->filename.mid(0, attachments[i]->filename.lastIndexOf('.'));
                 rm->getImage([this, attachment](void *filename) {
                     this->addImage(*reinterpret_cast<QString *>(filename), attachment->width, attachment->height);

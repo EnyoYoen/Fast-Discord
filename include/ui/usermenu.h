@@ -3,8 +3,8 @@
 #include "ui/usermenubutton.h"
 #include "ui/roundedimage.h"
 #include "ui/statusicon.h"
-#include "api/client.h"
 #include "api/ressourcemanager.h"
+#include "api/objects/client.h"
 
 #include <QWidget>
 

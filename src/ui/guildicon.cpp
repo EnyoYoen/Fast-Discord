@@ -10,7 +10,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
     : QWidget(parent)
 {
     small = smallp;
-    QObject::connect(this, SIGNAL(iconRecieved(QString)), this, SLOT(setIcon(QString)));
+    QObject::connect(this, &GuildIcon::iconRecieved, this, &GuildIcon::setIcon);
 
     // Create the guild icon
     if (guildIcon.isNull()) {
@@ -97,7 +97,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
         guildIconFileName += ".png";
         if (!std::ifstream(("cache/" + guildIconFileName).toUtf8().constData()).good()) {
             icon = new RoundedImage(small ? 16 : 48, small ? 16 : 48, small ? 8 : 24, this);
-            rm->getImage([this](void *iconFileName) {emit iconRecieved(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + guildId.toString() + "/" + guildIconFileName, guildIconFileName);
+            rm->getImage([this](void *iconFileName) {emit iconRecieved(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + guildId + "/" + guildIconFileName, guildIconFileName);
         } else {
             guildIconFileName = "cache/" + guildIconFileName;
 

@@ -20,11 +20,11 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolde
     closedContent = new QLabel(this);
     QGridLayout *contentLayout = new QGridLayout(closedContent);
     closedContent->setFixedSize(48, 48);
-    closedContent->setStyleSheet(("background-color: rgba(" 
-                                  + std::to_string((color & 0x00FF0000) >> 16)
-                                  + ", " + std::to_string((color & 0x0000FF00) >> 8)
-                                  + ", " + std::to_string(color & 0x000000FF) + ", 0.4);"
-                                  "border-radius: 16px;").c_str());
+    closedContent->setStyleSheet("background-color: rgba(" 
+                                 + QString::number((color & 0x00FF0000) >> 16)
+                                 + ", " + QString::number((color & 0x0000FF00) >> 8)
+                                 + ", " + QString::number(color & 0x000000FF) + ", 0.4);"
+                                 "border-radius: 16px;");
 
     pill = new GuildPill(this);
     closedLayout->addWidget(pill);
@@ -34,11 +34,11 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolde
     openedContent = new QWidget(this);
     openedContent->hide();
     openedContent->setFixedHeight(guilds.size() * (48 + 10) + 48 - 10);
-    openedContent->setStyleSheet(("background-color: rgba(" 
-                                  + std::to_string((color & 0x00FF0000) >> 16)
-                                  + ", " + std::to_string((color & 0x0000FF00) >> 8)
-                                  + ", " + std::to_string(color & 0x000000FF) + ", 0.4);"
-                                  "border-radius: 16px;").c_str());
+    openedContent->setStyleSheet("background-color: rgba(" 
+                                 + QString::number((color & 0x00FF0000) >> 16)
+                                 + ", " + QString::number((color & 0x0000FF00) >> 8)
+                                 + ", " + QString::number(color & 0x000000FF) + ", 0.4);"
+                                 "border-radius: 16px;");
 
     closeButton = new QLabel(openedContent);
     closeButton->setFixedSize(72, 48);
@@ -56,7 +56,7 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolde
         Api::Guild actualGuild = *guilds[i];
 
         GuildWidget *guildWidget = new GuildWidget(rm, *guilds[i], openedContent);
-        QObject::connect(guildWidget, SIGNAL(leftClicked(const Api::Snowflake&)), this, SLOT(propagateGuildClic(const Api::Snowflake&)));
+        QObject::connect(guildWidget, &GuildWidget::leftClicked, this, &GuildFolder::propagateGuildClic);
         openedLayout->addWidget(guildWidget);
         guildWidgets.push_back(guildWidget);
 

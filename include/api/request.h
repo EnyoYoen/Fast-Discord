@@ -1,9 +1,9 @@
 #pragma once
 
-#include "channel.h"
-#include "guild.h"
-#include "message.h"
-#include "client.h"
+#include "api/objects/channel.h"
+#include "api/objects/guild.h"
+#include "api/objects/message.h"
+#include "api/objects/client.h"
 #include "ui/roundedimage.h"
 
 #include <QString>

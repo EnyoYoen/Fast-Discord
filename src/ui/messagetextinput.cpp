@@ -1,6 +1,6 @@
 #include "ui/messagetextinput.h"
 
-#include "api/message.h"
+#include "api/objects/message.h"
 
 #include <algorithm>
 #include <ctime>

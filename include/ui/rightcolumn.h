@@ -1,11 +1,11 @@
 #pragma once
 
-#include "messagearea.h"
-#include "api/channel.h"
-#include "api/message.h"
-#include "api/client.h"
+#include "ui/messagearea.h"
 #include "api/jsonutils.h"
 #include "api/ressourcemanager.h"
+#include "api/objects/channel.h"
+#include "api/objects/message.h"
+#include "api/objects/client.h"
 
 #include <QWidget>
 #include <QHBoxLayout>

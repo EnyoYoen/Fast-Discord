@@ -2,9 +2,9 @@
 
 #include "roundedimage.h"
 #include "statusicon.h"
-#include "api/channel.h"
 #include "api/ressourcemanager.h"
-#include "api/user.h"
+#include "api/objects/channel.h"
+#include "api/objects/user.h"
 
 #include <QWidget>
 #include <QLabel>

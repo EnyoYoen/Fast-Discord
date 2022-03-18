@@ -2,7 +2,7 @@
 
 #include "ui/guildwidget.h"
 #include "api/ressourcemanager.h"
-#include "api/snowflake.h"
+#include "api/objects/snowflake.h"
 
 #include <QLabel>
 #include <QMouseEvent>

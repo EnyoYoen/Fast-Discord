@@ -35,10 +35,10 @@ class Gateway : public QObject
     Q_OBJECT
 public:
     Gateway(Api::Requester *requester, const QString& token);
-    void onDispatch(std::function<void(QString&, json&)> callback);
+    void onDispatch(const std::function<void(QString&, json&)>& callback);
         //Sets the callback function called when the gateway recieve events
 
-    void sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<int>>> channels, const Snowflake& guildId, bool activities, bool threads, bool typing);
+    void sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing);
     void sendDMChannelOpened(const Snowflake& channelId);
 
 private slots:

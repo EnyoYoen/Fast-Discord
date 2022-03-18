@@ -2,8 +2,8 @@
 
 #include "ui/roundedimage.h"
 #include "ui/markdownlabel.h"
-#include "api/message.h"
 #include "api/ressourcemanager.h"
+#include "api/objects/message.h"
 
 #include <QWidget>
 #include <QLabel>

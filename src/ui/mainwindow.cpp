@@ -29,7 +29,7 @@ MainWindow::MainWindow() : QWidget()
     rm = new Api::RessourceManager(token);
 
     // Connect the signal for the setup
-    QObject::connect(this, SIGNAL(clientSettingsReceived()), this, SLOT(setup()));
+    QObject::connect(this, &MainWindow::clientSettingsReceived, this, &MainWindow::setup);
 
     // Get user settings
     rm->getClient([this](void *clientp){
@@ -156,21 +156,21 @@ void MainWindow::setup()
     this->setWindowIcon(QIcon("res/images/png/icon.png"));
 
     // Connect signals to slots of the columns
-    QObject::connect(leftColumn, SIGNAL(guildClicked(const Api::Snowflake&)), middleColumn, SLOT(openGuild(const Api::Snowflake&)));
-    QObject::connect(leftColumn, SIGNAL(homeButtonClicked()), middleColumn, SLOT(displayPrivateChannels()));
-    QObject::connect(leftColumn, SIGNAL(cleanRightColumn()), rightColumn, SLOT(clean()));
-    QObject::connect(middleColumn, SIGNAL(guildChannelClicked(const Api::Snowflake&, const Api::Snowflake&)), rightColumn, SLOT(openGuildChannel(const Api::Snowflake&, const Api::Snowflake&)));
-    QObject::connect(middleColumn, SIGNAL(privateChannelClicked(const Api::Snowflake&)), rightColumn, SLOT(openPrivateChannel(const Api::Snowflake&)));
-    QObject::connect(rightColumn, SIGNAL(messageAdded(const Api::Snowflake&)), middleColumn, SLOT(putChannelFirst(const Api::Snowflake&)));
-    QObject::connect(rm, SIGNAL(unreadUpdateReceived(const Api::Snowflake&)), leftColumn, SLOT(setUnreadGuild(const Api::Snowflake&)));
-    QObject::connect(rm, SIGNAL(messageReceived(const Api::Message&)), rightColumn, SLOT(addMessage(const Api::Message&)));
-    QObject::connect(rm, SIGNAL(presenceReceived(const Api::Presence&)), middleColumn, SLOT(updatePresence(const Api::Presence&)));
-    QObject::connect(rm, SIGNAL(guildsReceived(const QVector<Api::Guild *>&)), leftColumn, SLOT(displayGuilds(const QVector<Api::Guild *>&)));
-    QObject::connect(rm, SIGNAL(presencesReceived(const QVector<Api::Presence *>&)), middleColumn, SLOT(setPresences(const QVector<Api::Presence *>&)));
-    QObject::connect(rm, SIGNAL(privateChannelsReceived(QVector<Api::PrivateChannel *>)), middleColumn, SLOT(setPrivateChannels(QVector<Api::PrivateChannel *>)));
-    QObject::connect(rm, SIGNAL(channelCreated(const Api::Channel *, const Api::PrivateChannel *)), middleColumn, SLOT(createChannel(const Api::Channel *, const Api::PrivateChannel *)));
-    QObject::connect(rm, SIGNAL(channelUpdated(const Api::Channel *, const Api::PrivateChannel *)), middleColumn, SLOT(updateChannel(const Api::Channel *, const Api::PrivateChannel *)));
-    QObject::connect(rm, SIGNAL(channelDeleted(const Api::Snowflake&, const Api::Snowflake&, int)), middleColumn, SLOT(deleteChannel(const Api::Snowflake&, const Api::Snowflake&, int)));
+    QObject::connect(leftColumn, &LeftColumn::guildClicked, middleColumn, &MiddleColumn::openGuild);
+    QObject::connect(leftColumn, &LeftColumn::homeButtonClicked, middleColumn, &MiddleColumn::displayPrivateChannels);
+    QObject::connect(leftColumn, &LeftColumn::cleanRightColumn, rightColumn, &RightColumn::clean);
+    QObject::connect(middleColumn, &MiddleColumn::guildChannelClicked, rightColumn, &RightColumn::openGuildChannel);
+    QObject::connect(middleColumn, &MiddleColumn::privateChannelClicked, rightColumn, &RightColumn::openPrivateChannel);
+    QObject::connect(rightColumn, &RightColumn::messageAdded, middleColumn, &MiddleColumn::putChannelFirst);
+    QObject::connect(rm, &Api::RessourceManager::unreadUpdateReceived, leftColumn, &LeftColumn::setUnreadGuild);
+    QObject::connect(rm, &Api::RessourceManager::messageReceived, rightColumn, &RightColumn::addMessage);
+    QObject::connect(rm, &Api::RessourceManager::presenceReceived, middleColumn, &MiddleColumn::updatePresence);
+    QObject::connect(rm, &Api::RessourceManager::guildsReceived, leftColumn, &LeftColumn::displayGuilds);
+    QObject::connect(rm, &Api::RessourceManager::presencesReceived, middleColumn, &MiddleColumn::setPresences);
+    QObject::connect(rm, &Api::RessourceManager::privateChannelsReceived, middleColumn, &MiddleColumn::setPrivateChannels);
+    QObject::connect(rm, &Api::RessourceManager::channelCreated, middleColumn, &MiddleColumn::createChannel);
+    QObject::connect(rm, &Api::RessourceManager::channelUpdated, middleColumn, &MiddleColumn::updateChannel);
+    QObject::connect(rm, &Api::RessourceManager::channelDeleted, middleColumn, &MiddleColumn::deleteChannel);
 }
 
 } // namespace Ui

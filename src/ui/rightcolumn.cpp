@@ -1,8 +1,8 @@
 #include "ui/rightcolumn.h"
 
 #include "ui/messagetextinput.h"
-#include "api/user.h"
 #include "api/jsonutils.h"
+#include "api/objects/user.h"
 
 #include <QDateTime>
 
@@ -33,10 +33,10 @@ RightColumn::RightColumn(Api::RessourceManager *rmp, Api::Client *clientp, QWidg
     // Style the column
     this->setStyleSheet("background-color: #36393F;");
 
-    QObject::connect(this, SIGNAL(messagesReceived(QVector<Api::Message *>)), this, SLOT(setMessages(QVector<Api::Message *>)));
-    QObject::connect(this, SIGNAL(userTypingReceived(const Api::User *)), this, SLOT(setUserTyping(const Api::User *)));
-    QObject::connect(this, SIGNAL(moreMessagesReceived(const QVector<Api::Message *>&)), messageArea, SLOT(addMessages(const QVector<Api::Message *>&)));
-    QObject::connect(messageArea, SIGNAL(scrollbarHigh()), this, SLOT(loadMoreMessages()));
+    QObject::connect(this, &RightColumn::messagesReceived, this, &RightColumn::setMessages);
+    QObject::connect(this, &RightColumn::userTypingReceived, this, &RightColumn::setUserTyping);
+    QObject::connect(this, &RightColumn::moreMessagesReceived, messageArea, &MessageArea::addMessages);
+    QObject::connect(messageArea, &MessageArea::scrollbarHigh, this, &RightColumn::loadMoreMessages);
 }
 
 void RightColumn::setMessages(QVector<Api::Message *> messages)
@@ -53,7 +53,7 @@ void RightColumn::setUserTyping(const Api::User *user)
 
     // Get the user name and the text of the typing label
     QString username = user->username;
-    QString text = typingLabel->text().toUtf8().constData();
+    QString text = typingLabel->text();
 
     // Change the text of the typing label
     if (text != "") {
@@ -188,8 +188,8 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, int type)
         }*/
 
         // Connect signals to slots
-        QObject::connect(textInput, SIGNAL(returnPressed(QString)), this, SLOT(sendMessage(const QString&)));
-        QObject::connect(textInput, SIGNAL(typing()), this, SLOT(sendTyping()));
+        QObject::connect(textInput, &MessageTextInput::returnPressed, this, &RightColumn::sendMessage);
+        QObject::connect(textInput, &MessageTextInput::typing, this, &RightColumn::sendTyping);
     }
 }
 
@@ -231,7 +231,7 @@ void RightColumn::sendMessage(const QString& content)
 {
     // Send a new message to the API and add it to the opened channel
     rm->requester->sendMessage(content, currentOpenedChannel);
-    QString messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs).toUtf8().constData();
+    QString messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs);
     QString fakeStr;
     Api::Message *newMessage = new Api::Message {Api::User{QString(client->username), fakeStr, QString(client->avatar), fakeStr, fakeStr, fakeStr, Api::Snowflake(client->id), 0, 0, 0, 0, 2, 2, 2, 2}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, QVector<Api::Reaction *>(), QVector<Api::Embed *>(), QVector<Api::User *>(), QVector<Api::Attachment *>(), QVector<Api::ChannelMention *>(), QVector<QString>(), QVector<Api::MessageComponent *>(), QVector<Api::StickerItem *>(), QVector<Api::Sticker *>(), QString(content), QString(messageTimestamp), fakeStr, fakeStr, 0, Api::Snowflake(currentOpenedChannel), 0, 0, 0, 0, 0, 0, 0, false, false, false};
     this->addMessage(*newMessage);

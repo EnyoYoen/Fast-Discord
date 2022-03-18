@@ -54,8 +54,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
                 icon = new RoundedImage(32, 32, 16, container);
 
                 // Request the icon image
-                channelIconFileName = dmUser->id.toString() + (avatar.indexOf("a_") == 0 ? ".gif" : ".png");
-                rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + dmUser->id.toString() + "/" + avatar, channelIconFileName);
+                channelIconFileName = dmUser->id + (avatar.indexOf("a_") == 0 ? ".gif" : ".png");
+                rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + dmUser->id + "/" + avatar, channelIconFileName);
             }
 
             // Set the background of the status icon
@@ -77,7 +77,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             subtext->setFixedSize(145, 14);
 
             CloseChannelButton *closeButton = new CloseChannelButton(container);
-            QObject::connect(closeButton, SIGNAL(clicked()), this, SLOT(closeChannel()));
+            QObject::connect(closeButton, &CloseChannelButton::clicked, this, &PrivateChannelWidget::closeChannel);
 
             // Add widgets to the layout
             layout->addWidget(icon, 0, 0, 2, 1);
@@ -142,14 +142,14 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 
             // Request the icon image
             channelIconFileName = channelIcon + ".png";
-            rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/channel-icons/" + privateChannel.id.toString() + "/" + channelIconFileName, channelIconFileName);
+            rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/channel-icons/" + privateChannel.id + "/" + channelIconFileName, channelIconFileName);
         }
 
         // Style the subtext
         subtext->setFixedSize(145, 14);
 
         CloseChannelButton *closeButton = new CloseChannelButton(container);
-        QObject::connect(closeButton, SIGNAL(clicked()), this, SLOT(closeChannel()));
+        QObject::connect(closeButton, &CloseChannelButton::clicked, this, &PrivateChannelWidget::closeChannel);
 
         // Add widgets to the layout
         layout->addWidget(icon, 0, 0, 2, 1);

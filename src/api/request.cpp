@@ -30,7 +30,7 @@ Requester::Requester(const QString& tokenp)
     loop = QThread::create([this](){RequestLoop();});
     loop->start();
 
-    QObject::connect(this, SIGNAL(requestEmit(int, QNetworkRequest, QByteArray *, QHttpMultiPart *)), this, SLOT(doRequest(int, QNetworkRequest, QByteArray *, QHttpMultiPart *)));
+    QObject::connect(this, &Requester::requestEmit, this, &Requester::doRequest);
 }
 
 Requester::~Requester()
@@ -224,9 +224,9 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *
     }
 
     // Connect the finished and read signals to process the reply
-    QObject::connect(reply, SIGNAL(finished()), this, SLOT(readReply()));
+    QObject::connect(reply, &QNetworkReply::finished, this, &Requester::readReply);
     if (requestQueue.front().type == GetFile)
-        QObject::connect(reply, SIGNAL(readyRead()), this, SLOT(writeFile()));
+        QObject::connect(reply, &QNetworkReply::readyRead, this, &Requester::writeFile);
 }
 
 void Requester::requestApi(const RequestParameters &parameters)
@@ -294,7 +294,7 @@ void Requester::getGuildChannels(std::function<void(void *)> callback, const Sno
 {
     requestApi({
         callback,
-        "https://discord.com/api/v9/guilds/" + id.toString() + "/channels",
+        "https://discord.com/api/v9/guilds/" + id + "/channels",
         "",        
         "",
         "",
@@ -305,11 +305,11 @@ void Requester::getGuildChannels(std::function<void(void *)> callback, const Sno
 
 void Requester::getMessages(std::function<void(void *)> callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit)
 {
-    limit = limit >= 50 ? 50 : limit;
+    limit = limit > 50 ? 50 : limit;
 
     requestApi({
         callback,
-        "https://discord.com/api/v9/channels/" + channelId.toString() + "/messages?" + (beforeId != 0 ? "before=" + beforeId.toString() + "&" : "" ) + "limit=" + QString::number(limit),
+        "https://discord.com/api/v9/channels/" + channelId + "/messages?" + (beforeId != 0 ? "before=" + beforeId + "&" : "" ) + "limit=" + QString::number(limit),
         "",        
         "",
         "",
@@ -348,7 +348,7 @@ void Requester::getUser(std::function<void(void *)> callback, const Snowflake& u
 {
     requestApi({
         callback,
-        "https://discord.com/api/v9/users/" + userId.toString(),
+        "https://discord.com/api/v9/users/" + userId,
         "",
         "",
         "",
@@ -376,7 +376,7 @@ void Requester::sendTyping(const Snowflake& channelId)
 {
     requestApi({
             nullptr,
-            "https://discord.com/api/v9/channels/" + channelId.toString() + "/typing",
+            "https://discord.com/api/v9/channels/" + channelId + "/typing",
             "",
             "POST",
             "",
@@ -389,7 +389,7 @@ void Requester::sendMessage(const QString& content, const Snowflake& channelId)
 {
     requestApi({
             nullptr,
-            "https://discord.com/api/v9/channels/" + channelId.toString() + "/messages",
+            "https://discord.com/api/v9/channels/" + channelId + "/messages",
             "{\"content\":\"" + content + "\"}",
             "POST",
             "",
@@ -402,7 +402,7 @@ void Requester::sendMessageWithFile(const QString& content, const Snowflake& cha
 {
     requestApi({
             nullptr,
-            "https://discord.com/api/v9/channels/" + channelId.toString() + "/messages",
+            "https://discord.com/api/v9/channels/" + channelId + "/messages",
             "{\"content\":\"" + content + "\"}",
             "POST",
             filePath,
@@ -415,7 +415,7 @@ void Requester::deleteMessage(const Snowflake& channelId, const Snowflake& messa
 {
     requestApi({
         nullptr,
-        "https://discord.com/api/v9/channels/" + channelId.toString() + "/messages/" + messageId.toString(),
+        "https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId,
         "",
         "DELETE",
         "",
@@ -428,7 +428,7 @@ void Requester::pinMessage(const Snowflake& channelId, const Snowflake& messageI
 {
     requestApi({
         nullptr,
-        "https://discord.com/api/v9/channels/" + channelId.toString() + "/pins/" + messageId.toString(),
+        "https://discord.com/api/v9/channels/" + channelId + "/pins/" + messageId,
         "",
         "PUT",
         "",
@@ -441,7 +441,7 @@ void Requester::unpinMessage(const Snowflake& channelId, const Snowflake& messag
 {
     requestApi({
         nullptr,
-        "https://discord.com/api/v9/channels/" + channelId.toString() + "/pins/" + messageId.toString(),
+        "https://discord.com/api/v9/channels/" + channelId + "/pins/" + messageId,
         "",
         "PUT",
         "",

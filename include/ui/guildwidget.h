@@ -3,9 +3,9 @@
 #include "ui/roundedimage.h"
 #include "ui/guildpill.h"
 #include "ui/guildicon.h"
-#include "api/guild.h"
 #include "api/ressourcemanager.h"
-#include "api/snowflake.h"
+#include "api/objects/guild.h"
+#include "api/objects/snowflake.h"
 
 #include <QFrame>
 #include <QLabel>

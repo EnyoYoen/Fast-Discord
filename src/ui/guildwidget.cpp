@@ -1,6 +1,6 @@
 #include "ui/guildwidget.h"
 
-#include "api/guild.h"
+#include "api/objects/guild.h"
 
 #include <QPixmap>
 #include <QBitmap>
