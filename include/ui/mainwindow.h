@@ -1,8 +1,8 @@
 #pragma once
 
-#include "leftcolumn.h"
-#include "middlecolumn.h"
-#include "rightcolumn.h"
+#include "ui/leftcolumn.h"
+#include "ui/middlecolumn.h"
+#include "ui/rightcolumn.h"
 #include "api/ressourcemanager.h"
 
 #include <QWidget>

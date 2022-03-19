@@ -12,9 +12,6 @@ RessourceManager::RessourceManager(const QString& token)
     requester = new Requester(token);
     gw = new Gateway(requester, token);
 
-    messages = new std::map<Snowflake, QVector<Message *>>();
-    guildsChannels = new std::map<Snowflake, QVector<Channel *>>();
-
     // Set the gateway event callback
     gw->onDispatch([this](QString& eventName, json& data){gatewayDispatchHandler(eventName, data);});
 }
@@ -77,7 +74,7 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
 
             emit channelCreated(nullptr, privateChannel);
         } else {
-            (*guildsChannels)[channel->guildId].push_back(channel);
+            guildsChannels[channel->guildId].push_back(channel);
 
             emit channelCreated(channel, nullptr);
         }
@@ -122,13 +119,13 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
 
             emit channelUpdated(nullptr, privateChannel);
         } else {
-            for (auto it = (*guildsChannels)[channel->guildId].begin() ; it != (*guildsChannels)[channel->guildId].end() ; it++) {
+            for (auto it = guildsChannels[channel->guildId].begin() ; it != guildsChannels[channel->guildId].end() ; it++) {
                 if ((*it)->id == channel->id) {
-                    (*guildsChannels)[channel->guildId].erase(it);
+                    guildsChannels[channel->guildId].erase(it);
                     break;
                 }
             }
-            (*guildsChannels)[channel->guildId].push_back(channel);
+            guildsChannels[channel->guildId].push_back(channel);
 
             emit channelUpdated(channel, nullptr);
         }
@@ -145,9 +142,9 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
 
             emit channelDeleted(channel->id, 0, channel->type);
         } else {
-            for (auto it = (*guildsChannels)[channel->guildId].begin() ; it != (*guildsChannels)[channel->guildId].end() ; it++) {
+            for (auto it = guildsChannels[channel->guildId].begin() ; it != guildsChannels[channel->guildId].end() ; it++) {
                 if ((*it)->id == channel->id) {
-                    (*guildsChannels)[channel->guildId].erase(it);
+                    guildsChannels[channel->guildId].erase(it);
                     break;
                 }
             }
@@ -160,8 +157,8 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
         // We received a message
         Api::Message *message;
         Api::unmarshal<Api::Message>(data.toObject(), &message);
-        if (messages->find(message->channelId) != messages->end())
-            (*messages)[message->channelId].insert((*messages)[message->channelId].begin(), message);
+        if (messages.find(message->channelId) != messages.end())
+            messages[message->channelId].insert(messages[message->channelId].begin(), message);
         if (message->author.id != client->id) emit messageReceived(*message);
     } else if (eventName == "PRESENCE_UPDATE") {
         Api::Presence *presence;
@@ -184,7 +181,7 @@ void RessourceManager::getGuilds(const std::function<void(void *)>& callback)
 void RessourceManager::getGuildChannels(const std::function<void(void *)>& callback, const Snowflake& id)
 {
     requester->getGuildChannels([&, callback](void *guildChannelsPtr) {
-        (*guildsChannels)[id] = *reinterpret_cast<QVector<Channel *> *>(guildChannelsPtr);
+        guildsChannels[id] = *reinterpret_cast<QVector<Channel *> *>(guildChannelsPtr);
         callback(guildChannelsPtr);
     }, id);
 }
@@ -193,14 +190,14 @@ void RessourceManager::getGuildChannel(const std::function<void(void *)>& callba
 {
     openedGuildsChannels[guildId][id];
 
-    if (guildsChannels->find(guildId) == guildsChannels->end()) {
+    if (guildsChannels.find(guildId) == guildsChannels.end()) {
         requester->getGuildChannels([&, callback](void *guildChannelsPtr) {
-            (*guildsChannels)[guildId] = *reinterpret_cast<QVector<Channel *> *>(guildChannelsPtr);
+            guildsChannels[guildId] = *reinterpret_cast<QVector<Channel *> *>(guildChannelsPtr);
             callback(guildChannelsPtr);
         }, guildId);
     } else {
-        for (unsigned int i = 0 ; i < (*guildsChannels)[guildId].size() ; i++) {
-            if ((*guildsChannels)[guildId][i]->id == id) callback(reinterpret_cast<void *>((*guildsChannels)[guildId][i]));
+        for (unsigned int i = 0 ; i < guildsChannels[guildId].size() ; i++) {
+            if (guildsChannels[guildId][i]->id == id) callback(reinterpret_cast<void *>(guildsChannels[guildId][i]));
         }
     }
 }
@@ -236,16 +233,16 @@ void RessourceManager::getMessages(const std::function<void(void *)>& callback, 
 {
     bool found = false;
     for (auto it = openedGuildsChannels.begin() ; it != openedGuildsChannels.end() ; it++) {
-        std::map<Snowflake, QVector<QVector<int>>> channels = it->second;
+        QMap<Snowflake, QVector<QVector<int>>> channels = it.value();
         if (channels.find(channelId) != channels.end()) {
             found = true;
-            unsigned int size = (*messages)[channelId].size();
+            unsigned int size = messages[channelId].size();
 
             QVector<int> indexes;
             indexes.push_back(size);
             indexes.push_back(size + limit);
             channels[channelId].push_back(indexes);
-            gw->sendGuildChannelOpened(channels, it->first, true, true, true);
+            gw->sendGuildChannelOpened(channels, it.key(), true, true, true);
             break;
         }
     }
@@ -254,31 +251,31 @@ void RessourceManager::getMessages(const std::function<void(void *)>& callback, 
     }
 
     if (newMessages) {
-        if ((*messages)[channelId].size() >= 50)
+        if (messages[channelId].size() >= 50)
             requester->getMessages([&, callback](void *messagesPtr) {
                 QVector<Message *> messagesVector = *reinterpret_cast<QVector<Message *> *>(messagesPtr);
                 if (messagesVector.size() > 0) {
                     for (unsigned int i = 0 ; i < messagesVector.size() ; i++)
-                        (*messages)[channelId].push_back(messagesVector[i]);
+                        messages[channelId].push_back(messagesVector[i]);
                     callback(messagesPtr);
                 }
-            }, channelId, (*messages)[channelId].back()->id, limit);
-    } else if (messages->find(channelId) == messages->end() || (*messages)[channelId].size() == 0) {
+            }, channelId, messages[channelId].back()->id, limit);
+    } else if (messages.find(channelId) == messages.end() || messages[channelId].size() == 0) {
         requester->getMessages([&, callback](void *messagesPtr) {
-            (*messages)[channelId] = *reinterpret_cast<QVector<Message *> *>(messagesPtr);
+            messages[channelId] = *reinterpret_cast<QVector<Message *> *>(messagesPtr);
             callback(messagesPtr);
         }, channelId, 0, limit);
-    } else if ((*messages)[channelId].size() < 50) {
-        callback(reinterpret_cast<void *>(&(*messages)[channelId]));
-    } else if ((*messages)[channelId].size() < limit) {
+    } else if (messages[channelId].size() < 50) {
+        callback(reinterpret_cast<void *>(&messages[channelId]));
+    } else if (messages[channelId].size() < limit) {
         requester->getMessages([&, callback](void *messagesPtr) {
             QVector<Message *> messagesVector = *reinterpret_cast<QVector<Message *> *>(messagesPtr);
             for (unsigned int i = 0 ; i < messagesVector.size() ; i++)
-                (*messages)[channelId].push_back(messagesVector[i]);
-            callback(reinterpret_cast<void *>(&(*messages)[channelId]));
-        }, channelId, (*messages)[channelId].back()->id, limit - (*messages)[channelId].size());
+                messages[channelId].push_back(messagesVector[i]);
+            callback(reinterpret_cast<void *>(&messages[channelId]));
+        }, channelId, messages[channelId].back()->id, limit - messages[channelId].size());
     } else {
-        callback(reinterpret_cast<void *>(&(*messages)[channelId]));
+        callback(reinterpret_cast<void *>(&messages[channelId]));
     }
 }
 
@@ -336,12 +333,12 @@ void RessourceManager::getPresences(const std::function<void(void *)>& callback)
 
 QVector<Api::Message *> const RessourceManager::getAllMessages(const Snowflake& channelId)
 {
-    return (*messages)[channelId];
+    return messages[channelId];
 }
 
 bool const RessourceManager::hasMessages(const Snowflake& channelId)
 {
-    return messages->find(channelId) == messages->end();
+    return messages.find(channelId) == messages.end();
 }
 
 

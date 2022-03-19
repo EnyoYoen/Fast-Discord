@@ -1,6 +1,6 @@
 #pragma once
 
-#include "guildpill.h"
+#include "ui/guildpill.h"
 
 #include <QLabel>
 

@@ -5,8 +5,7 @@
 #include <QtWebSockets/QtWebSockets>
 #include <QJsonValue>
 #include <QString>
-
-#include <map>
+#include <QMap>
 
 using json = QJsonValue;
 
@@ -38,7 +37,7 @@ public:
     void onDispatch(const std::function<void(QString&, json&)>& callback);
         //Sets the callback function called when the gateway recieve events
 
-    void const sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing);
+    void const sendGuildChannelOpened(const QMap<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing);
     void const sendDMChannelOpened(const Snowflake& channelId);
 
 private slots:

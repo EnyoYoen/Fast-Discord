@@ -7,9 +7,8 @@
 #include "api/objects/client.h"
 
 #include <QObject>
-
-#include <map>
 #include <QVector>
+#include <QMap>
 
 namespace Api {
 
@@ -55,8 +54,8 @@ private:
 
     Gateway *gw;
 
-    std::map<Snowflake, QVector<Message *>> *messages;
-    std::map<Snowflake, QVector<Channel *>> *guildsChannels;
+    QMap<Snowflake, QVector<Message *>> messages;
+    QMap<Snowflake, QVector<Channel *>> guildsChannels;
 
     QVector<User *>           users;
     QVector<Guild *>          guilds;
@@ -64,7 +63,7 @@ private:
     QVector<Presence *>       presences;
 
     QVector<Snowflake> openedDMChannels;
-    std::map<Snowflake, std::map<Snowflake, QVector<QVector<int>>>> openedGuildsChannels;
+    QMap<Snowflake, QMap<Snowflake, QVector<QVector<int>>>> openedGuildsChannels;
     //       ^ guild ID  ^ channels  ^ channel ID  ^ indexes of messages that we have
 
     Client         *client = nullptr;

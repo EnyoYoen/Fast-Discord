@@ -1,7 +1,7 @@
 #pragma once
 
-#include "privatechannel.h"
-#include "guildchannelwidget.h"
+#include "ui/privatechannel.h"
+#include "ui/guildchannelwidget.h"
 #include "api/ressourcemanager.h"
 #include "api/objects/client.h"
 #include "api/objects/channel.h"

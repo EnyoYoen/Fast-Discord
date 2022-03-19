@@ -57,14 +57,14 @@ void Gateway::onDispatch(const std::function<void(QString&, json&)>& callback)
     onDispatchHandler = callback;
 }
 
-void const Gateway::sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing)
+void const Gateway::sendGuildChannelOpened(const QMap<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing)
 {
     QString data = "{\"guild_id\":\"" + guildId + "\"" + (typing ? ",\"typing\":true" : "") + (activities ? ",\"activities\":true" : "") + (threads ? ",\"threads\":true" : "") + ",\"channels\":{";
 
     unsigned int counter = 0;
     for (auto it = channels.begin() ; it != channels.end() ; it++, counter++) {
-        data += QString(counter > 0 ? "," : "") + "\"" + it->first + "\":[";
-        QVector<QVector<int>> messagesNumbers = it->second;
+        data += QString(counter > 0 ? "," : "") + "\"" + it.key() + "\":[";
+        QVector<QVector<int>> messagesNumbers = it.value();
         for (unsigned int i = 0 ; i < messagesNumbers.size() ; i++) {
             data += "[";
             for (unsigned int j = 0 ; j < messagesNumbers[i].size() ; j++) {
