@@ -15,30 +15,30 @@ class MessageWidget : public QWidget
 {
     Q_OBJECT
 public:
-    MessageWidget(Api::RessourceManager *rm, Api::Message *message, bool isFirst, bool separatorBefore, QWidget *parent);
+    MessageWidget(Api::RessourceManager *rm, const Api::Message *message, bool isFirst, bool separatorBefore, QWidget *parent);
 
     Api::RessourceManager *rm; // To request the API
 
 private:
-    void iconMessage(Api::Message *message, const QString &text, const QString& iconName);
+    void iconMessage(const Api::Message *message, const QString &text, const QString& iconName);
 
-    void defaultMessage(Api::Message *message, bool separatorBefore);
-    void recipientMessage(Api::Message *message);
-    void callMessage(Api::Message *message);
-    void channelNameChangeMessage(Api::Message *message);
-    void channelIconChangeMessage(Api::Message *message);
-    void channelPinnedMessage(Api::Message *message);
-    void guildMemberJoinMessage(Api::Message *message);
-    void userPremiumGuildSubscriptionMessage(Api::Message *message);
-    void channelFollowAdd(Api::Message *message);
+    void defaultMessage(const Api::Message *message, bool separatorBefore);
+    void recipientMessage(const Api::Message *message);
+    void callMessage(const Api::Message *message);
+    void channelNameChangeMessage(const Api::Message *message);
+    void channelIconChangeMessage(const Api::Message *message);
+    void channelPinnedMessage(const Api::Message *message);
+    void guildMemberJoinMessage(const Api::Message *message);
+    void userPremiumGuildSubscriptionMessage(const Api::Message *message);
+    void channelFollowAdd(const Api::Message *message);
 
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
-    void setAvatar(const QString& avatarFileName);
-    void setReplyAvatar(const QString& avatarFileName);
+    void const setAvatar(const QString& avatarFileName);
+    void const setReplyAvatar(const QString& avatarFileName);
     void addImage(const QString& filename, int width, int height);
-    QString processTime(QTime time);
-    QString processTimestamp(QDateTime dateTime);
+    QString const processTime(const QTime& time);
+    QString const processTimestamp(const QDateTime& dateTime);
 
     QString hoveredTimestamp;         // The timestamp we show
     RoundedImage *avatar = nullptr;   // The avatar if there is one

@@ -5,7 +5,7 @@
 
 namespace Ui {
 
-MessageSeparator::MessageSeparator(QDate date, QWidget *parent)
+MessageSeparator::MessageSeparator(const QDate& date, QWidget *parent)
     : QWidget(parent)
 {
     // Create the widgets

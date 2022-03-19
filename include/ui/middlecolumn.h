@@ -28,7 +28,7 @@ signals:
 
 public slots:
     void setPresences(const QVector<Api::Presence *>& presences);
-    void setPrivateChannels(QVector<Api::PrivateChannel *> channels);
+    void setPrivateChannels(const QVector<Api::PrivateChannel *>& channels);
     void updatePresence(const Api::Presence& presence);
     void displayPrivateChannels();
     void openGuild(const Api::Snowflake& id);
@@ -38,7 +38,7 @@ public slots:
     void putChannelFirst(const Api::Snowflake& id);
 
 private slots:
-    void setGuildChannels(const QVector<Api::Channel *> channels);
+    void setGuildChannels(const QVector<Api::Channel *>& channels);
     void clicGuildChannel(const Api::Snowflake& id);
     void clicPrivateChannel(const Api::Snowflake& id);
 

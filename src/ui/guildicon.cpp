@@ -6,7 +6,7 @@
 
 namespace Ui {
 
-GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, QString guildName, QString guildIcon, bool smallp, QWidget *parent)
+GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, QString guildName, const QString& guildIcon, bool smallp, QWidget *parent)
     : QWidget(parent)
 {
     small = smallp;
@@ -108,7 +108,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
     }
 }
 
-void GuildIcon::setIcon(const QString& guildIconFileName)
+void const GuildIcon::setIcon(const QString& guildIconFileName)
 {
     icon->setImage(guildIconFileName);
 }

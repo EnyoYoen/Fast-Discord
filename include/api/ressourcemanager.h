@@ -20,20 +20,20 @@ public:
     RessourceManager(const QString& token);
     ~RessourceManager();
 
-    void getGuilds(std::function<void(void *)> callback);
-    void getGuildChannel(std::function<void(void *)> callback, const Snowflake& guildId, const Snowflake& id);
-    void getGuildChannels(std::function<void(void *)> callback, const Snowflake& id);
-    void getPrivateChannel(std::function<void(void *)> callback, const Snowflake& id);
-    void getPrivateChannels(std::function<void(void *)> callback);
-    void getMessages(std::function<void(void *)> callback, const Snowflake& channelId, unsigned int limit, bool newMessages);
-    void getClient(std::function<void(void *)> callback);
-    void getClientSettings(std::function<void(void *)> callback);
-    void getImage(std::function<void(void *)> callback, const QString& url, const QString& fileName);
-    void getUser(std::function<void(void *)> callback, const Snowflake& userId);
-    void getPresences(std::function<void(void *)> callback);
+    void getGuilds(const std::function<void(void *)>& callback);
+    void getGuildChannel(const std::function<void(void *)>& callback, const Snowflake& guildId, const Snowflake& id);
+    void getGuildChannels(const std::function<void(void *)>& callback, const Snowflake& id);
+    void getPrivateChannel(const std::function<void(void *)>& callback, const Snowflake& id);
+    void getPrivateChannels(const std::function<void(void *)>& callback);
+    void getMessages(const std::function<void(void *)>& callback, const Snowflake& channelId, unsigned int limit, bool newMessages);
+    void getClient(const std::function<void(void *)>& callback);
+    void getClientSettings(const std::function<void(void *)>& callback);
+    void getImage(const std::function<void(void *)>& callback, const QString& url, const QString& fileName);
+    void getUser(const std::function<void(void *)>& callback, const Snowflake& userId);
+    void getPresences(const std::function<void(void *)>& callback);
 
-    QVector<Api::Message *> getAllMessages(Snowflake& channelId);
-    bool hasMessages(const Snowflake& channelId);
+    QVector<Api::Message *> const getAllMessages(const Snowflake& channelId);
+    bool const hasMessages(const Snowflake& channelId);
     
     Requester *requester;
 
@@ -41,7 +41,7 @@ signals:
     void typingReceived();
     void guildsReceived(const QVector<Api::Guild *>&);
     void presencesReceived(const QVector<Api::Presence *>&);
-    void privateChannelsReceived(QVector<Api::PrivateChannel *>);
+    void privateChannelsReceived(const QVector<Api::PrivateChannel *>&);
     void unreadUpdateReceived(const Api::Snowflake&);
     void presenceReceived(const Api::Presence&);
     void messageReceived(const Api::Message&);

@@ -11,7 +11,7 @@ class AttachmentFile : public QLabel
 {
     Q_OBJECT
 public:
-    AttachmentFile(Api::Requester *requester, Api::Attachment *attachment, QWidget *parent);
+    AttachmentFile(Api::Requester *requester, const Api::Attachment *attachment, QWidget *parent);
 };
 
 } // namespace Ui

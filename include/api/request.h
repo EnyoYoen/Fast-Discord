@@ -48,7 +48,7 @@ enum RequestTypes {
 
 struct RequestParameters
 {
-    std::function<void(void *)> callback;
+    const std::function<void(void *)>& callback;
     const QString url;
     const QString postDatas;
     const QString customRequest;
@@ -78,32 +78,32 @@ public:
     void removeImageRequests();
 
     // Functions that request the API to retrieve data
-    void getGuilds(std::function<void(void *)> callback);
-    void getGuildChannels(std::function<void(void *)> callback, const Snowflake& id);
-    void getPrivateChannels(std::function<void(void *)> callback);
-    void getMessages(std::function<void(void *)> callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit);
-    void getClient(std::function<void(void *)> callback);
-    void getClientSettings(std::function<void(void *)> callback);
-    void getImage(std::function<void(void *)> callback, const QString& url, const QString& fileName);
-    void getUser(std::function<void(void *)> callback, const Snowflake& userId);
-    void getFile(const QString& url, const QString& filename);
+    void const getGuilds(const std::function<void(void *)>& callback);
+    void const getGuildChannels(const std::function<void(void *)>& callback, const Snowflake& id);
+    void const getPrivateChannels(const std::function<void(void *)>& callback);
+    void const getMessages(const std::function<void(void *)>& callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit);
+    void const getClient(const std::function<void(void *)>& callback);
+    void const getClientSettings(const std::function<void(void *)>& callback);
+    void const getImage(const std::function<void(void *)>& callback, const QString& url, const QString& fileName);
+    void const getUser(const std::function<void(void *)>& callback, const Snowflake& userId);
+    void const getFile(const QString& url, const QString& filename);
 
     // Functions that request the API to send data
-    void setStatus(const QString& status);
-    void sendTyping(const Snowflake& channelId);
-    void sendMessage(const QString& content, const Snowflake& channelId);
-    void sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath);
-    void deleteMessage(const Snowflake& channelId, const Snowflake& messageId);
-    void pinMessage(const Snowflake& channelId, const Snowflake& messageId);
-    void unpinMessage(const Snowflake& channelId, const Snowflake& messageId);
+    void const setStatus(const QString& status);
+    void const sendTyping(const Snowflake& channelId);
+    void const sendMessage(const QString& content, const Snowflake& channelId);
+    void const sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath);
+    void const deleteMessage(const Snowflake& channelId, const Snowflake& messageId);
+    void const pinMessage(const Snowflake& channelId, const Snowflake& messageId);
+    void const unpinMessage(const Snowflake& channelId, const Snowflake& messageId);
 
 signals:
-    void requestEmit(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);
+    void requestEmit(int requestType, const QNetworkRequest& request, QByteArray *query, QHttpMultiPart *multiPart);
 
 private slots:
-    void doRequest(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);
+    void doRequest(int requestType, const QNetworkRequest& request, const QByteArray *query, QHttpMultiPart *multiPart);
     void readReply();
-    void writeFile();
+    void const writeFile();
 
 private:
     QNetworkAccessManager netManager;

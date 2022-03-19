@@ -12,7 +12,7 @@ class GuildIcon : public QWidget
 {
     Q_OBJECT
 public:
-    GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, QString guildName, QString guildIcon, bool small, QWidget *parent);
+    GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, QString guildName, const QString& guildIcon, bool small, QWidget *parent);
     void setActive();
     void setInactive();
 
@@ -20,7 +20,7 @@ signals:
     void iconRecieved(const QString& iconFileName);
 
 private slots:
-    void setIcon(const QString& guildIconFileName);
+    void const setIcon(const QString& guildIconFileName);
 
 private:
     RoundedImage *icon;

@@ -13,7 +13,7 @@ class GuildFolder : public QLabel
 {
     Q_OBJECT
 public:
-    GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolder, const QVector<Api::Guild *>& guilds, QWidget *parent);
+    GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guildFolder, const QVector<Api::Guild *>& guilds, QWidget *parent);
     void unclicked();
     void unclickedExcept(const Api::Snowflake& id);
     void setUnread(const Api::Snowflake& id);

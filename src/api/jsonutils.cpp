@@ -21,12 +21,12 @@
 
 namespace Api {
 
-QString getString(QJsonObject object, const char *key)
+QString getString(const QJsonObject& object, const char *key)
 {
     return object[key].toString();
 }
 
-QVector<QString> getStringsFromJson(QJsonArray jsonArray)
+QVector<QString> getStringsFromJson(const QJsonArray& jsonArray)
 {
     QVector<QString> strings;
 
@@ -38,7 +38,7 @@ QVector<QString> getStringsFromJson(QJsonArray jsonArray)
     return strings;
 }
 
-QVector<Snowflake> getSnowflakesFromJson(QJsonArray jsonArray)
+QVector<Snowflake> getSnowflakesFromJson(const QJsonArray& jsonArray)
 {
     QVector<Snowflake> snowflakes;
 
@@ -53,7 +53,7 @@ QVector<Snowflake> getSnowflakesFromJson(QJsonArray jsonArray)
 // All the specialization of 'unmarshal'
 
 template <>
-void unmarshal<User>(QJsonObject jsonObj, User **object)
+void unmarshal<User>(const QJsonObject& jsonObj, User **object)
 {
     *object = new User {
         getString(jsonObj, "username"),
@@ -78,7 +78,7 @@ void unmarshal<User>(QJsonObject jsonObj, User **object)
 }
 
 template <>
-void unmarshal<Overwrite>(QJsonObject jsonObj, Overwrite **object)
+void unmarshal<Overwrite>(const QJsonObject& jsonObj, Overwrite **object)
 {
     *object = new Overwrite {
         getString(jsonObj, "allow"),
@@ -91,7 +91,7 @@ void unmarshal<Overwrite>(QJsonObject jsonObj, Overwrite **object)
 }
 
 template <>
-void unmarshal<ThreadMember>(QJsonObject jsonObj, ThreadMember **object)
+void unmarshal<ThreadMember>(const QJsonObject& jsonObj, ThreadMember **object)
 {
     *object = new ThreadMember {
         getString(jsonObj, "join_timestamp"),
@@ -104,7 +104,7 @@ void unmarshal<ThreadMember>(QJsonObject jsonObj, ThreadMember **object)
 }
 
 template <>
-void unmarshal<ThreadMetadata>(QJsonObject jsonObj, ThreadMetadata **object)
+void unmarshal<ThreadMetadata>(const QJsonObject& jsonObj, ThreadMetadata **object)
 {
     *object = new ThreadMetadata {
         getString(jsonObj, "archive_timestamp"),
@@ -119,7 +119,7 @@ void unmarshal<ThreadMetadata>(QJsonObject jsonObj, ThreadMetadata **object)
 }
 
 template <>
-void unmarshal<Channel>(QJsonObject jsonObj, Channel **object)
+void unmarshal<Channel>(const QJsonObject& jsonObj, Channel **object)
 {
     ThreadMember *member = new ThreadMember;
     ThreadMetadata *threadMetadata = new ThreadMetadata;
@@ -162,7 +162,7 @@ void unmarshal<Channel>(QJsonObject jsonObj, Channel **object)
 }
 
 template <>
-void unmarshal<PrivateChannel>(QJsonObject jsonObj, PrivateChannel **object)
+void unmarshal<PrivateChannel>(const QJsonObject& jsonObj, PrivateChannel **object)
 {
     *object = new PrivateChannel {
         getSnowflakesFromJson(jsonObj["recipient_ids"].toArray()),
@@ -179,7 +179,7 @@ void unmarshal<PrivateChannel>(QJsonObject jsonObj, PrivateChannel **object)
 }
 
 template <>
-void unmarshal<TeamMember>(QJsonObject jsonObj, TeamMember **object)
+void unmarshal<TeamMember>(const QJsonObject& jsonObj, TeamMember **object)
 {
     User *user = new User;
 
@@ -196,7 +196,7 @@ void unmarshal<TeamMember>(QJsonObject jsonObj, TeamMember **object)
 }
 
 template <>
-void unmarshal<Team>(QJsonObject jsonObj, Team **object)
+void unmarshal<Team>(const QJsonObject& jsonObj, Team **object)
 {
     *object = new Team {
         unmarshalMultiple<TeamMember>(jsonObj, "members"),
@@ -210,7 +210,7 @@ void unmarshal<Team>(QJsonObject jsonObj, Team **object)
 }
 
 template <>
-void unmarshal<Application>(QJsonObject jsonObj, Application **object)
+void unmarshal<Application>(const QJsonObject& jsonObj, Application **object)
 {
     User *owner = new User;
     Team *team = new Team;
@@ -245,7 +245,7 @@ void unmarshal<Application>(QJsonObject jsonObj, Application **object)
 }
 
 template <>
-void unmarshal<MessageActivity>(QJsonObject jsonObj, MessageActivity **object)
+void unmarshal<MessageActivity>(const QJsonObject& jsonObj, MessageActivity **object)
 {
     *object = new MessageActivity {
         getString(jsonObj, "party_id"),
@@ -255,7 +255,7 @@ void unmarshal<MessageActivity>(QJsonObject jsonObj, MessageActivity **object)
 }
 
 template <>
-void unmarshal<GuildMessageMember>(QJsonObject jsonObj, GuildMessageMember **object)
+void unmarshal<GuildMessageMember>(const QJsonObject& jsonObj, GuildMessageMember **object)
 {
     *object = new GuildMessageMember {
         getStringsFromJson(jsonObj["roles"].toArray()),
@@ -272,7 +272,7 @@ void unmarshal<GuildMessageMember>(QJsonObject jsonObj, GuildMessageMember **obj
 }
 
 template <>
-void unmarshal<MessageInteraction>(QJsonObject jsonObj, MessageInteraction **object)
+void unmarshal<MessageInteraction>(const QJsonObject& jsonObj, MessageInteraction **object)
 {
     User *user = new User;
     GuildMember *member = new GuildMember;
@@ -293,7 +293,7 @@ void unmarshal<MessageInteraction>(QJsonObject jsonObj, MessageInteraction **obj
 }
 
 template <>
-void unmarshal<Emoji>(QJsonObject jsonObj, Emoji **object)
+void unmarshal<Emoji>(const QJsonObject& jsonObj, Emoji **object)
 {
     User *user = new User;
 
@@ -315,7 +315,7 @@ void unmarshal<Emoji>(QJsonObject jsonObj, Emoji **object)
 }
 
 template <>
-void unmarshal<Reaction>(QJsonObject jsonObj, Reaction **object)
+void unmarshal<Reaction>(const QJsonObject& jsonObj, Reaction **object)
 {
     Emoji *emoji = new Emoji;
 
@@ -331,7 +331,7 @@ void unmarshal<Reaction>(QJsonObject jsonObj, Reaction **object)
 }
 
 template <>
-void unmarshal<EmbedField>(QJsonObject jsonObj, EmbedField **object)
+void unmarshal<EmbedField>(const QJsonObject& jsonObj, EmbedField **object)
 {
     *object = new EmbedField {
         getString(jsonObj, "name"),
@@ -342,7 +342,7 @@ void unmarshal<EmbedField>(QJsonObject jsonObj, EmbedField **object)
 }
 
 template <>
-void unmarshal<EmbedFooter>(QJsonObject jsonObj, EmbedFooter **object)
+void unmarshal<EmbedFooter>(const QJsonObject& jsonObj, EmbedFooter **object)
 {
     *object = new EmbedFooter {
         getString(jsonObj, "text"),
@@ -352,7 +352,7 @@ void unmarshal<EmbedFooter>(QJsonObject jsonObj, EmbedFooter **object)
 }
 
 template <>
-void unmarshal<EmbedTVI>(QJsonObject jsonObj, EmbedTVI **object)
+void unmarshal<EmbedTVI>(const QJsonObject& jsonObj, EmbedTVI **object)
 {
     *object = new EmbedTVI {
         getString(jsonObj, "url"),
@@ -364,7 +364,7 @@ void unmarshal<EmbedTVI>(QJsonObject jsonObj, EmbedTVI **object)
 }
 
 template <>
-void unmarshal<EmbedProvider>(QJsonObject jsonObj, EmbedProvider **object)
+void unmarshal<EmbedProvider>(const QJsonObject& jsonObj, EmbedProvider **object)
 {
     *object = new EmbedProvider {
         getString(jsonObj, "name"),
@@ -373,7 +373,7 @@ void unmarshal<EmbedProvider>(QJsonObject jsonObj, EmbedProvider **object)
 }
 
 template <>
-void unmarshal<EmbedAuthor>(QJsonObject jsonObj, EmbedAuthor **object)
+void unmarshal<EmbedAuthor>(const QJsonObject& jsonObj, EmbedAuthor **object)
 {
     *object = new EmbedAuthor {
         getString(jsonObj, "name"),
@@ -384,7 +384,7 @@ void unmarshal<EmbedAuthor>(QJsonObject jsonObj, EmbedAuthor **object)
 }
 
 template <>
-void unmarshal<Embed>(QJsonObject jsonObj, Embed **object)
+void unmarshal<Embed>(const QJsonObject& jsonObj, Embed **object)
 {
     EmbedFooter *footer = new EmbedFooter;
     EmbedTVI *image = new EmbedTVI;
@@ -420,7 +420,7 @@ void unmarshal<Embed>(QJsonObject jsonObj, Embed **object)
 }
 
 template <>
-void unmarshal<Attachment>(QJsonObject jsonObj, Attachment **object)
+void unmarshal<Attachment>(const QJsonObject& jsonObj, Attachment **object)
 {
     *object = new Attachment {
         getString(jsonObj, "filename"),
@@ -440,7 +440,7 @@ void unmarshal<Attachment>(QJsonObject jsonObj, Attachment **object)
 }
 
 template <>
-void unmarshal<ChannelMention>(QJsonObject jsonObj, ChannelMention **object)
+void unmarshal<ChannelMention>(const QJsonObject& jsonObj, ChannelMention **object)
 {
     *object = new ChannelMention {
         getString(jsonObj, "name"),
@@ -453,7 +453,7 @@ void unmarshal<ChannelMention>(QJsonObject jsonObj, ChannelMention **object)
 }
 
 template <>
-void unmarshal<SelectOption>(QJsonObject jsonObj, SelectOption **object)
+void unmarshal<SelectOption>(const QJsonObject& jsonObj, SelectOption **object)
 {
     Emoji *emoji = new Emoji;
 
@@ -471,7 +471,7 @@ void unmarshal<SelectOption>(QJsonObject jsonObj, SelectOption **object)
 }
 
 template <>
-void unmarshal<MessageComponent>(QJsonObject jsonObj, MessageComponent **object)
+void unmarshal<MessageComponent>(const QJsonObject& jsonObj, MessageComponent **object)
 {
     Emoji *emoji = new Emoji;
 
@@ -497,7 +497,7 @@ void unmarshal<MessageComponent>(QJsonObject jsonObj, MessageComponent **object)
 }
 
 template <>
-void unmarshal<StickerItem>(QJsonObject jsonObj, StickerItem **object)
+void unmarshal<StickerItem>(const QJsonObject& jsonObj, StickerItem **object)
 {
     *object = new StickerItem {
         getString(jsonObj, "name"),
@@ -509,7 +509,7 @@ void unmarshal<StickerItem>(QJsonObject jsonObj, StickerItem **object)
 }
 
 template <>
-void unmarshal<Sticker>(QJsonObject jsonObj, Sticker **object)
+void unmarshal<Sticker>(const QJsonObject& jsonObj, Sticker **object)
 {
     User *user = new User;
 
@@ -601,7 +601,7 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
 }
 
 template <>
-void unmarshal<Message>(QJsonObject jsonObj, Message **object)
+void unmarshal<Message>(const QJsonObject& jsonObj, Message **object)
 {
     Application *application = new Application;
     User *author = new User;
@@ -662,7 +662,7 @@ void unmarshal<Message>(QJsonObject jsonObj, Message **object)
 }
 
 template <>
-void unmarshal<GuildMember>(QJsonObject jsonObj, GuildMember **object)
+void unmarshal<GuildMember>(const QJsonObject& jsonObj, GuildMember **object)
 {
     User *user = new User;
 
@@ -686,7 +686,7 @@ void unmarshal<GuildMember>(QJsonObject jsonObj, GuildMember **object)
 }
 
 template <>
-void unmarshal<VoiceState>(QJsonObject jsonObj, VoiceState **object)
+void unmarshal<VoiceState>(const QJsonObject& jsonObj, VoiceState **object)
 {
     GuildMember *member = new GuildMember;
 
@@ -713,7 +713,7 @@ void unmarshal<VoiceState>(QJsonObject jsonObj, VoiceState **object)
 }
 
 template <>
-void unmarshal<WelcomeScreenChannel>(QJsonObject jsonObj, WelcomeScreenChannel **object)
+void unmarshal<WelcomeScreenChannel>(const QJsonObject& jsonObj, WelcomeScreenChannel **object)
 {
     *object = new WelcomeScreenChannel {
         getString(jsonObj, "description"),
@@ -725,7 +725,7 @@ void unmarshal<WelcomeScreenChannel>(QJsonObject jsonObj, WelcomeScreenChannel *
 }
 
 template <>
-void unmarshal<WelcomeScreen>(QJsonObject jsonObj, WelcomeScreen **object)
+void unmarshal<WelcomeScreen>(const QJsonObject& jsonObj, WelcomeScreen **object)
 {
     *object = new WelcomeScreen {
         unmarshalMultiple<WelcomeScreenChannel>(jsonObj, "welcome_channels"),
@@ -735,7 +735,7 @@ void unmarshal<WelcomeScreen>(QJsonObject jsonObj, WelcomeScreen **object)
 }
 
 template <>
-void unmarshal<StageInstance>(QJsonObject jsonObj, StageInstance **object)
+void unmarshal<StageInstance>(const QJsonObject& jsonObj, StageInstance **object)
 {
     *object = new StageInstance {
         getString(jsonObj, "topic"),
@@ -752,7 +752,7 @@ void unmarshal<StageInstance>(QJsonObject jsonObj, StageInstance **object)
 }
 
 template <>
-void unmarshal<Guild>(QJsonObject jsonObj, Guild **object)
+void unmarshal<Guild>(const QJsonObject& jsonObj, Guild **object)
 {
     WelcomeScreen *welcomeScreen = new WelcomeScreen;
 
@@ -816,7 +816,7 @@ void unmarshal<Guild>(QJsonObject jsonObj, Guild **object)
 }
 
 template <>
-void unmarshal<CustomStatus>(QJsonObject jsonObj, CustomStatus **object)
+void unmarshal<CustomStatus>(const QJsonObject& jsonObj, CustomStatus **object)
 {
     *object = new CustomStatus {
         getString(jsonObj, "text"),
@@ -828,7 +828,7 @@ void unmarshal<CustomStatus>(QJsonObject jsonObj, CustomStatus **object)
 }
 
 template <>
-void unmarshal<FriendSourceFlags>(QJsonObject jsonObj, FriendSourceFlags **object)
+void unmarshal<FriendSourceFlags>(const QJsonObject& jsonObj, FriendSourceFlags **object)
 {
     *object = new FriendSourceFlags {
         jsonObj["all"].toBool(),
@@ -838,7 +838,7 @@ void unmarshal<FriendSourceFlags>(QJsonObject jsonObj, FriendSourceFlags **objec
 }
 
 template <>
-void unmarshal<GuildFolder>(QJsonObject jsonObj, GuildFolder **object)
+void unmarshal<GuildFolder>(const QJsonObject& jsonObj, GuildFolder **object)
 {
     *object = new GuildFolder {
         getSnowflakesFromJson(jsonObj["guild_ids"].toArray()),
@@ -852,7 +852,7 @@ void unmarshal<GuildFolder>(QJsonObject jsonObj, GuildFolder **object)
 }
 
 template <>
-void unmarshal<ClientSettings>(QJsonObject jsonObj, ClientSettings **object)
+void unmarshal<ClientSettings>(const QJsonObject& jsonObj, ClientSettings **object)
 {
     CustomStatus *customStatus = new CustomStatus;
     FriendSourceFlags *friendSourceFlags = new FriendSourceFlags;
@@ -900,7 +900,7 @@ void unmarshal<ClientSettings>(QJsonObject jsonObj, ClientSettings **object)
 }
 
 template <>
-void unmarshal<Client>(QJsonObject jsonObj, Client **object)
+void unmarshal<Client>(const QJsonObject& jsonObj, Client **object)
 {
     *object = new Client {
         getString(jsonObj, "username"),
@@ -927,7 +927,7 @@ void unmarshal<Client>(QJsonObject jsonObj, Client **object)
 }
 
 template <>
-void unmarshal<ActivityTimestamps>(QJsonObject jsonObj, ActivityTimestamps **object)
+void unmarshal<ActivityTimestamps>(const QJsonObject& jsonObj, ActivityTimestamps **object)
 {
     *object = new ActivityTimestamps {
         jsonObj["start"].toInt(),
@@ -936,7 +936,7 @@ void unmarshal<ActivityTimestamps>(QJsonObject jsonObj, ActivityTimestamps **obj
 }
 
 template <>
-void unmarshal<ActivityAssets>(QJsonObject jsonObj, ActivityAssets **object)
+void unmarshal<ActivityAssets>(const QJsonObject& jsonObj, ActivityAssets **object)
 {
     *object = new ActivityAssets {
         getString(jsonObj, "large_image"),
@@ -947,7 +947,7 @@ void unmarshal<ActivityAssets>(QJsonObject jsonObj, ActivityAssets **object)
 }
 
 template <>
-void unmarshal<PartySize>(QJsonObject jsonObj, PartySize **object)
+void unmarshal<PartySize>(const QJsonObject& jsonObj, PartySize **object)
 {
     *object = new PartySize {
         jsonObj["current_size"].toInt(),
@@ -956,7 +956,7 @@ void unmarshal<PartySize>(QJsonObject jsonObj, PartySize **object)
 }
 
 template <>
-void unmarshal<ActivityParty>(QJsonObject jsonObj, ActivityParty **object)
+void unmarshal<ActivityParty>(const QJsonObject& jsonObj, ActivityParty **object)
 {
     PartySize *size = new PartySize;
 
@@ -970,7 +970,7 @@ void unmarshal<ActivityParty>(QJsonObject jsonObj, ActivityParty **object)
 }
 
 template <>
-void unmarshal<ActivitySecrets>(QJsonObject jsonObj, ActivitySecrets **object)
+void unmarshal<ActivitySecrets>(const QJsonObject& jsonObj, ActivitySecrets **object)
 {
     *object = new ActivitySecrets {
         getString(jsonObj, "match"),
@@ -980,7 +980,7 @@ void unmarshal<ActivitySecrets>(QJsonObject jsonObj, ActivitySecrets **object)
 }
 
 template <>
-void unmarshal<Activity>(QJsonObject jsonObj, Activity **object)
+void unmarshal<Activity>(const QJsonObject& jsonObj, Activity **object)
 {
     ActivityTimestamps *timestamps = new ActivityTimestamps;
     ActivityAssets *assets = new ActivityAssets;
@@ -1009,7 +1009,7 @@ void unmarshal<Activity>(QJsonObject jsonObj, Activity **object)
 }
 
 template <>
-void unmarshal<ClientStatus>(QJsonObject jsonObj, ClientStatus **object)
+void unmarshal<ClientStatus>(const QJsonObject& jsonObj, ClientStatus **object)
 {
     *object = new ClientStatus {
         getString(jsonObj, "desktop"),
@@ -1019,7 +1019,7 @@ void unmarshal<ClientStatus>(QJsonObject jsonObj, ClientStatus **object)
 }
 
 template <>
-void unmarshal<Presence>(QJsonObject jsonObj, Presence **object)
+void unmarshal<Presence>(const QJsonObject& jsonObj, Presence **object)
 {
     User *user = new User;
     ClientStatus *clientStatus = new ClientStatus;
@@ -1040,7 +1040,7 @@ void unmarshal<Presence>(QJsonObject jsonObj, Presence **object)
 }
 
 template <>
-void unmarshal<Call>(QJsonObject jsonObj, Call **object)
+void unmarshal<Call>(const QJsonObject& jsonObj, Call **object)
 {
     *object = new Call {
         getSnowflakesFromJson(jsonObj["participants"].toArray()),

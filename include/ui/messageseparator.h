@@ -10,7 +10,7 @@ class MessageSeparator : public QWidget
 {
     Q_OBJECT
 public:
-    MessageSeparator(QDate date, QWidget *parent);
+    MessageSeparator(const QDate& date, QWidget *parent);
 };
 
 } // namespace Ui

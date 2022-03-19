@@ -38,23 +38,23 @@ public:
     void onDispatch(const std::function<void(QString&, json&)>& callback);
         //Sets the callback function called when the gateway recieve events
 
-    void sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing);
-    void sendDMChannelOpened(const Snowflake& channelId);
+    void const sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing);
+    void const sendDMChannelOpened(const Snowflake& channelId);
 
 private slots:
-    void closeHandler();
-    void identify();
-    void processBinaryMessage(const QByteArray& message);
+    void const closeHandler();
+    void const identify();
+    void const processBinaryMessage(const QByteArray& message);
                           // Process a text message that the gateway recieves
-    void processTextMessage(const QString& message);
+    void const processTextMessage(const QString& message);
                           // Process a binary message that the gateway recieves
 
 private:
-    void start();
-    void send(int op, const QString& data);
+    void const start();
+    void const send(int op, const QString& data);
                           //Send data through the gateway
-    void resume();        //Resume connection
-    void heartbeat();     //Send Heartbeat message to stay connected
+    void const resume();        //Resume connection
+    void const heartbeat();     //Send Heartbeat message to stay connected
     void dispatch(QString eventName, json& data);
                           //Internal function used to process some messages
 

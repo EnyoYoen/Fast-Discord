@@ -65,7 +65,7 @@ void MiddleColumn::updatePresence(const Api::Presence& presence)
     });
 }
 
-void MiddleColumn::setPrivateChannels(QVector<Api::PrivateChannel *> privateChannels)
+void MiddleColumn::setPrivateChannels(const QVector<Api::PrivateChannel *>& privateChannels)
 {
     // Create the widgets
     QWidget *privateChannelList = new QWidget(this);
@@ -91,7 +91,7 @@ void MiddleColumn::setPrivateChannels(QVector<Api::PrivateChannel *> privateChan
                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
 }
 
-void MiddleColumn::setGuildChannels(const QVector<Api::Channel *> channels)
+void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
 {
     // Clear the whannels
     guildChannelWidgets.clear();

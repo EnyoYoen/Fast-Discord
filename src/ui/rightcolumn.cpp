@@ -8,7 +8,7 @@
 
 namespace Ui {
 
-RightColumn::RightColumn(Api::RessourceManager *rmp, Api::Client *clientp, QWidget *parent)
+RightColumn::RightColumn(Api::RessourceManager *rmp, const Api::Client *clientp, QWidget *parent)
     : QWidget(parent)
 {
     // Attribute initialization
@@ -39,14 +39,14 @@ RightColumn::RightColumn(Api::RessourceManager *rmp, Api::Client *clientp, QWidg
     QObject::connect(messageArea, &MessageArea::scrollbarHigh, this, &RightColumn::loadMoreMessages);
 }
 
-void RightColumn::setMessages(QVector<Api::Message *> messages)
+void const RightColumn::setMessages(const QVector<Api::Message *>& messages)
 {
     messageArea->clear();
     messageArea->setMessages(messages);
     messagesLayout->insertWidget(0, messageArea);
 }
 
-void RightColumn::setUserTyping(const Api::User *user)
+void const RightColumn::setUserTyping(const Api::User *user)
 {
     // Get the actual timestamp
     time_t currentTimestamp = std::time(nullptr);
@@ -193,7 +193,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, int type)
     }
 }
 
-void RightColumn::addMessage(const Api::Message& message)
+void const RightColumn::addMessage(const Api::Message& message)
 {
     // Add the message if it belongs to this channels
     if (message.channelId == currentOpenedChannel) {
@@ -221,13 +221,13 @@ void RightColumn::userTyping(const json& data)
     }
 }
 
-void RightColumn::sendTyping()
+void const RightColumn::sendTyping()
 {
     // Send typing to the API
     rm->requester->sendTyping(currentOpenedChannel);
 }
 
-void RightColumn::sendMessage(const QString& content)
+void const RightColumn::sendMessage(const QString& content)
 {
     // Send a new message to the API and add it to the opened channel
     rm->requester->sendMessage(content, currentOpenedChannel);
@@ -237,7 +237,7 @@ void RightColumn::sendMessage(const QString& content)
     this->addMessage(*newMessage);
 }
 
-void RightColumn::loadMoreMessages()
+void const RightColumn::loadMoreMessages()
 {
    rm->getMessages([this](void *messages){
        emit moreMessagesReceived(*static_cast<QVector<Api::Message *> *>(messages));

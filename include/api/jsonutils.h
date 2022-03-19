@@ -8,21 +8,21 @@
 
 namespace Api {
 
-QVector<QString> getStringsFromJson(QJsonArray jsonArray);
+QVector<QString> getStringsFromJson(const QJsonArray& jsonArray);
 
 // Template function that we specialize with all Discord's API JSON objects that we can recieve, to unmarshal them
 template <typename T>
-void unmarshal(QJsonObject jsonObj, T **object);
+void unmarshal(const QJsonObject& jsonObj, T **object);
 
 template <typename T>
-void unmarshal(QJsonValue jsonVal, const QString& key, T **object)
+void unmarshal(const QJsonValue& jsonVal, const QString& key, T **object)
 {
     unmarshal(jsonVal[key].toObject(), object);
 }
 
 // Unmarshal arrays of JSON objects
 template <typename T>
-QVector<T*> unmarshalMultiple(QJsonArray jsonArray)
+QVector<T*> unmarshalMultiple(const QJsonArray& jsonArray)
 {
     QVector<T*> objects;
 
@@ -37,7 +37,7 @@ QVector<T*> unmarshalMultiple(QJsonArray jsonArray)
 
 // Unmarshal arrays of JSON objects
 template <typename T>
-QVector<T*> unmarshalMultiple(QJsonObject jsonObj, QString key)
+QVector<T*> unmarshalMultiple(const QJsonObject& jsonObj, QString key)
 {
     QVector<T*> objects;
 

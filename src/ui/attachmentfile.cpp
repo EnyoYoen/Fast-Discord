@@ -10,7 +10,7 @@
 
 namespace Ui {
 
-AttachmentFile::AttachmentFile(Api::Requester *requester, Api::Attachment *attachment, QWidget *parent)
+AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment *attachment, QWidget *parent)
     : QLabel(parent)
 {
     QWidget *container = new QWidget(this);

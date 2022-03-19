@@ -7,7 +7,7 @@
 
 namespace Ui {
 
-GuildFolder::GuildFolder(Api::RessourceManager *rm, Api::GuildFolder *guildFolder, const QVector<Api::Guild *>& guilds, QWidget *parent)
+GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guildFolder, const QVector<Api::Guild *>& guilds, QWidget *parent)
     : QLabel(parent)
 {
     int color = guildFolder->color;

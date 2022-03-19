@@ -32,7 +32,7 @@ Gateway::Gateway(Api::Requester *requester, const QString& tokenp)
 }
 
 // Set the handlers and connect
-void Gateway::start()
+void const Gateway::start()
 {
     QObject::connect(&client, &QWebSocket::aboutToClose, this, &Gateway::closeHandler);
     QObject::connect(&client, &QWebSocket::connected, this, &Gateway::identify);
@@ -42,7 +42,7 @@ void Gateway::start()
     client.open(QUrl(url + "/?v=9&encoding=json"));
 }
 
-void Gateway::closeHandler()
+void const Gateway::closeHandler()
 {
     // Reconnect when the connection is closed
     if (connected) {
@@ -57,7 +57,7 @@ void Gateway::onDispatch(const std::function<void(QString&, json&)>& callback)
     onDispatchHandler = callback;
 }
 
-void Gateway::sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing)
+void const Gateway::sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing)
 {
     QString data = "{\"guild_id\":\"" + guildId + "\"" + (typing ? ",\"typing\":true" : "") + (activities ? ",\"activities\":true" : "") + (threads ? ",\"threads\":true" : "") + ",\"channels\":{";
 
@@ -78,13 +78,13 @@ void Gateway::sendGuildChannelOpened(const std::map<Snowflake, QVector<QVector<i
     send(GuildChannelOpened, data + "}}");
 }
 
-void Gateway::sendDMChannelOpened(const Snowflake& channelId)
+void const Gateway::sendDMChannelOpened(const Snowflake& channelId)
 {
     send(DMChannelOpened, "{\"channel_id\":\"" + channelId + "\"}");
 }
 
 // Send data through the gateway
-void Gateway::send(int op, const QString& data)
+void const Gateway::send(int op, const QString& data)
 {
     //qDebug() << "⇧" << message.mid(0, 198);
     // Build the payload string
@@ -94,7 +94,7 @@ void Gateway::send(int op, const QString& data)
 }
 
 // Process a binary message that the gateway recieves
-void Gateway::processBinaryMessage(const QByteArray& message)
+void const Gateway::processBinaryMessage(const QByteArray& message)
 {
     //qDebug() << "⇩" << qUncompress(message).mid(0, 198);
     QJsonDocument payload = QJsonDocument::fromJson(qUncompress(message));
@@ -136,7 +136,7 @@ void Gateway::processBinaryMessage(const QByteArray& message)
 }
 
 // Process a text message that the gateway recieves
-void Gateway::processTextMessage(const QString& message)
+void const Gateway::processTextMessage(const QString& message)
 {
     //qDebug() << "⇩" << message.mid(0, 198);
     QJsonDocument payload = QJsonDocument::fromJson(message.toUtf8());
@@ -178,7 +178,7 @@ void Gateway::processTextMessage(const QString& message)
 }
 
 // Identifying to the gateway
-void Gateway::identify()
+void const Gateway::identify()
 {
     send(Identify, "{\"token\":\"" + token +"\","
         "\"capabilities\":125,"
@@ -213,7 +213,7 @@ void Gateway::identify()
 }
 
 // Resume connection
-void Gateway::resume()
+void const Gateway::resume()
 {
     send(Resume, "{\"token\":\""+ token +"\","
                  "\"session_id\":,"

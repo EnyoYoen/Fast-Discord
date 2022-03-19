@@ -168,7 +168,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     }
 }
 
-void PrivateChannelWidget::setStatus(QString status)
+void PrivateChannelWidget::setStatus(const QString& status)
 {
     statusIcon->setStatus(status);
 }

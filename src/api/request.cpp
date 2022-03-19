@@ -41,7 +41,7 @@ Requester::~Requester()
     requestWaiter.notify_all();
 }
 
-void Requester::writeFile()
+void const Requester::writeFile()
 {
     QFile file(requestQueue.front().outputFile);
     file.open(QIODevice::WriteOnly | QIODevice::Append);
@@ -202,7 +202,7 @@ void Requester::RequestLoop()
     }
 }
 
-void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *postDatas, QHttpMultiPart *multiPart)
+void Requester::doRequest(int requestType, const QNetworkRequest& request, const QByteArray *postDatas, QHttpMultiPart *multiPart)
 {
     switch (requestType) {
         case Get:
@@ -251,7 +251,7 @@ void Requester::removeImageRequests()
 
 // Functions that request the API to retrieve data
 
-void Requester::getImage(std::function<void(void *)> callback, const QString& url, const QString& fileName)
+void const Requester::getImage(const std::function<void(void *)>& callback, const QString& url, const QString& fileName)
 {
     requestApi({
         callback,
@@ -264,7 +264,7 @@ void Requester::getImage(std::function<void(void *)> callback, const QString& ur
         false});
 }
 
-void Requester::getPrivateChannels(std::function<void(void *)> callback)
+void const Requester::getPrivateChannels(const std::function<void(void *)>& callback)
 {
     requestApi({
         callback,
@@ -277,7 +277,7 @@ void Requester::getPrivateChannels(std::function<void(void *)> callback)
         false});
 }
 
-void Requester::getGuilds(std::function<void(void *)> callback)
+void const Requester::getGuilds(const std::function<void(void *)>& callback)
 {
     requestApi({
         callback,
@@ -290,7 +290,7 @@ void Requester::getGuilds(std::function<void(void *)> callback)
         false});
 }
 
-void Requester::getGuildChannels(std::function<void(void *)> callback, const Snowflake& id)
+void const Requester::getGuildChannels(const std::function<void(void *)>& callback, const Snowflake& id)
 {
     requestApi({
         callback,
@@ -303,7 +303,7 @@ void Requester::getGuildChannels(std::function<void(void *)> callback, const Sno
         false});
 }
 
-void Requester::getMessages(std::function<void(void *)> callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit)
+void const Requester::getMessages(const std::function<void(void *)>& callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit)
 {
     limit = limit > 50 ? 50 : limit;
 
@@ -318,7 +318,7 @@ void Requester::getMessages(std::function<void(void *)> callback, const Snowflak
         false});
 }
 
-void Requester::getClient(std::function<void(void *)> callback)
+void const Requester::getClient(const std::function<void(void *)>& callback)
 {
     requestApi({
         callback,
@@ -331,7 +331,7 @@ void Requester::getClient(std::function<void(void *)> callback)
         false});
 }
 
-void Requester::getClientSettings(std::function<void(void *)> callback)
+void const Requester::getClientSettings(const std::function<void(void *)>& callback)
 {
     requestApi({
         callback,
@@ -344,7 +344,7 @@ void Requester::getClientSettings(std::function<void(void *)> callback)
         false});
 }
 
-void Requester::getUser(std::function<void(void *)> callback, const Snowflake& userId)
+void const Requester::getUser(const std::function<void(void *)>& callback, const Snowflake& userId)
 {
     requestApi({
         callback,
@@ -359,7 +359,7 @@ void Requester::getUser(std::function<void(void *)> callback, const Snowflake& u
 
 // Functions that request the API to send data
 
-void Requester::setStatus(const QString& status)
+void const Requester::setStatus(const QString& status)
 {
     requestApi({
         nullptr,
@@ -372,7 +372,7 @@ void Requester::setStatus(const QString& status)
         false});
 }
 
-void Requester::sendTyping(const Snowflake& channelId)
+void const Requester::sendTyping(const Snowflake& channelId)
 {
     requestApi({
             nullptr,
@@ -385,7 +385,7 @@ void Requester::sendTyping(const Snowflake& channelId)
             false});
 }
 
-void Requester::sendMessage(const QString& content, const Snowflake& channelId)
+void const Requester::sendMessage(const QString& content, const Snowflake& channelId)
 {
     requestApi({
             nullptr,
@@ -398,7 +398,7 @@ void Requester::sendMessage(const QString& content, const Snowflake& channelId)
             true});
 }
 
-void Requester::sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath)
+void const Requester::sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath)
 {
     requestApi({
             nullptr,
@@ -411,7 +411,7 @@ void Requester::sendMessageWithFile(const QString& content, const Snowflake& cha
             false});
 }
 
-void Requester::deleteMessage(const Snowflake& channelId, const Snowflake& messageId)
+void const Requester::deleteMessage(const Snowflake& channelId, const Snowflake& messageId)
 {
     requestApi({
         nullptr,
@@ -424,7 +424,7 @@ void Requester::deleteMessage(const Snowflake& channelId, const Snowflake& messa
         false});
 }
 
-void Requester::pinMessage(const Snowflake& channelId, const Snowflake& messageId)
+void const Requester::pinMessage(const Snowflake& channelId, const Snowflake& messageId)
 {
     requestApi({
         nullptr,
@@ -437,7 +437,7 @@ void Requester::pinMessage(const Snowflake& channelId, const Snowflake& messageI
         false});
 }
 
-void Requester::unpinMessage(const Snowflake& channelId, const Snowflake& messageId)
+void const Requester::unpinMessage(const Snowflake& channelId, const Snowflake& messageId)
 {
     requestApi({
         nullptr,
@@ -450,7 +450,7 @@ void Requester::unpinMessage(const Snowflake& channelId, const Snowflake& messag
         false});
 }
 
-void Requester::getFile(const QString& url, const QString& filename)
+void const Requester::getFile(const QString& url, const QString& filename)
 {
     requestApi({
         nullptr,

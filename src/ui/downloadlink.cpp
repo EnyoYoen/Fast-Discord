@@ -8,7 +8,7 @@ namespace Ui {
 DownloadLink::DownloadLink(const QString& urlp, const QString& filename, Api::Requester *request, QWidget *parent)
     : QLabel(filename, parent)
 {
-    url = urlp;
+    url = QString(urlp);
     requester = request;
 
     this->setCursor(Qt::PointingHandCursor);

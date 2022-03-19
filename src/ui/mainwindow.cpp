@@ -41,7 +41,7 @@ MainWindow::MainWindow() : QWidget()
     });
 }
 
-void MainWindow::addAccountInConfig(QSettings *settings, QMap<QString, QString> accountMap) {
+void const MainWindow::addAccountInConfig(QSettings *settings, const QMap<QString, QString> accountMap) {
     settings->beginGroup("Accounts");
     QMap<QString, QString>::const_iterator i = accountMap.constBegin();
     while (i != accountMap.constEnd()) {
@@ -51,7 +51,7 @@ void MainWindow::addAccountInConfig(QSettings *settings, QMap<QString, QString> 
     settings->endGroup();
 }
 
-QMap<QString, QString> MainWindow::getNewAccount() {
+QMap<QString, QString> const MainWindow::getNewAccount() {
     QDialog dlg(nullptr);
     dlg.setWindowTitle(tr("Add new account"));
     dlg.setWindowIcon(QIcon("res/images/png/icon.png"));
@@ -83,7 +83,7 @@ QMap<QString, QString> MainWindow::getNewAccount() {
     return {};
 }
 
-QMap<QString, QString> MainWindow::getAccountsMap(QSettings *settings) {
+QMap<QString, QString> const MainWindow::getAccountsMap(QSettings *settings) {
     QMap<QString, QString> accountsMap;
 
     settings->beginGroup("Accounts");
@@ -96,7 +96,7 @@ QMap<QString, QString> MainWindow::getAccountsMap(QSettings *settings) {
     return accountsMap;
 }
 
-QString MainWindow::getAccountToken() {
+QString const MainWindow::getAccountToken() {
     QSettings* settings = new QSettings("Fast-Discord", "config");
     QString token = "";
     QString name = "";

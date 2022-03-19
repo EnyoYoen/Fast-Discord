@@ -13,8 +13,8 @@
 #include <condition_variable>
 
 struct QueuedMessage {
-    Api::Message *message;
-    Api::Message *lastMessage;
+    const Api::Message *message;
+    const Api::Message *lastMessage;
     bool end;
     bool top;
 };
@@ -31,24 +31,24 @@ public:
 
     // Add messages
     void setMessages(const QVector<Api::Message *>& messages);
-    void addMessage(Api::Message *newMessage, Api::Message *lastMessage);
+    void addMessage(const Api::Message *newMessage, const Api::Message *lastMessage);
     void clear();
 
 signals:
     void messagesEnd();
     void scrollbarHigh();
     void separatorCreate(const QDate&, bool);
-    void messageCreate(Api::Message *, bool, bool, bool);
+    void messageCreate(const Api::Message *, bool, bool, bool);
 
 public slots:
     void addMessages(const QVector<Api::Message *>& messages);
 
 private slots:
-    void scrollBottom();
-    void scrollBarMoved(int value);
-    void changeSliderValue(int min, int max);
-    void displaySeparator(const QDate& date, bool top);
-    void displayMessage(Api::Message *message, bool top, bool first, bool separator);
+    void const scrollBottom();
+    void const scrollBarMoved(int value);
+    void const changeSliderValue(int min, int max);
+    void const displaySeparator(const QDate& date, bool top);
+    void const displayMessage(const Api::Message *message, bool top, bool first, bool separator);
 
 private:
     void showEvent(QShowEvent *event) override; // To scroll to the very end

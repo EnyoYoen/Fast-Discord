@@ -16,7 +16,7 @@
 
 namespace Ui {
 
-MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, bool isFirstp, bool separatorBefore, QWidget *parent)
+MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message *message, bool isFirstp, bool separatorBefore, QWidget *parent)
     : QWidget(parent)
 {
     // Attributes initialization
@@ -75,12 +75,12 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, Api::Message *message, 
                         "margin: 0px;");
 }
 
-void MessageWidget::setAvatar(const QString& avatarFileName)
+void const MessageWidget::setAvatar(const QString& avatarFileName)
 {
     avatar->setImage(avatarFileName);
 }
 
-void MessageWidget::setReplyAvatar(const QString& avatarFileName)
+void const MessageWidget::setReplyAvatar(const QString& avatarFileName)
 {
     replyAvatar->setImage(avatarFileName);
 }
@@ -125,7 +125,7 @@ void MessageWidget::leaveEvent(QEvent *)
     if (!isFirst && timestampLabel != nullptr) timestampLabel->setText("");
 }
 
-QString MessageWidget::processTime(QTime time)
+QString const MessageWidget::processTime(const QTime& time)
 {
     // Process the time to a nicer format
 
@@ -141,7 +141,7 @@ QString MessageWidget::processTime(QTime time)
     return messageTime;
 }
 
-QString MessageWidget::processTimestamp(QDateTime dateTime)
+QString const MessageWidget::processTimestamp(const QDateTime& dateTime)
 {
     // Get the date of the message and the current date to compare them
     QDate messageDate = dateTime.date();
@@ -168,7 +168,7 @@ QString MessageWidget::processTimestamp(QDateTime dateTime)
     return date;
 }
 
-void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
+void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBefore)
 {
     // Create the main widgets
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -228,7 +228,7 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
         // The message is not grouped to another message
 
         // Variable creation
-        Api::User& author = message->author;
+        const Api::User& author = message->author;
         QString avatarId = author.avatar;
 
         // Get the icon of the message
@@ -328,7 +328,7 @@ void MessageWidget::defaultMessage(Api::Message *message, bool separatorBefore)
     layout->setContentsMargins(0, 0, 0, 0);
 }
 
-void MessageWidget::iconMessage(Api::Message *message, const QString &text, const QString& iconName)
+void MessageWidget::iconMessage(const Api::Message *message, const QString &text, const QString& iconName)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     QWidget *spacer = new QWidget(this);
@@ -358,7 +358,7 @@ void MessageWidget::iconMessage(Api::Message *message, const QString &text, cons
     this->setMinimumHeight(26);
 }
 
-void MessageWidget::recipientMessage(Api::Message *message)
+void MessageWidget::recipientMessage(const Api::Message *message)
 {
     QString arrowName;
     QString text;
@@ -375,7 +375,7 @@ void MessageWidget::recipientMessage(Api::Message *message)
     iconMessage(message, text, arrowName);
 }
 
-void MessageWidget::callMessage(Api::Message *message)
+void MessageWidget::callMessage(const Api::Message *message)
 {
     rm->getClient([message, this](void *clientPtr){
 
@@ -429,22 +429,22 @@ void MessageWidget::callMessage(Api::Message *message)
     });
 }
 
-void MessageWidget::channelNameChangeMessage(Api::Message *message)
+void MessageWidget::channelNameChangeMessage(const Api::Message *message)
 {
     iconMessage(message, message->author.username + " changed the channel name: " + message->content, "pen.svg");
 }
 
-void MessageWidget::channelIconChangeMessage(Api::Message *message)
+void MessageWidget::channelIconChangeMessage(const Api::Message *message)
 {
     iconMessage(message, message->author.username + " changed the channel icon.", "pen.svg");
 }
 
-void MessageWidget::channelPinnedMessage(Api::Message *message)
+void MessageWidget::channelPinnedMessage(const Api::Message *message)
 {
     iconMessage(message, message->author.username + " pinned a message to this channel. See all pinned messages.", "pin.svg");
 }
 
-void MessageWidget::userPremiumGuildSubscriptionMessage(Api::Message *message)
+void MessageWidget::userPremiumGuildSubscriptionMessage(const Api::Message *message)
 {
     QString text = message->author.username + " just boosted the server.";
     if (message->type == Api::UserPremiumGuildSubscriptionTier1)
@@ -457,7 +457,7 @@ void MessageWidget::userPremiumGuildSubscriptionMessage(Api::Message *message)
     iconMessage(message, text, "boost.svg");
 }
 
-void MessageWidget::guildMemberJoinMessage(Api::Message *message)
+void MessageWidget::guildMemberJoinMessage(const Api::Message *message)
 {
     int randInt = rand() % 39;
     QFile messageFile("res/text/welcome-messages.txt");
@@ -475,7 +475,7 @@ void MessageWidget::guildMemberJoinMessage(Api::Message *message)
     iconMessage(message, text, "green-right-arrow.svg");
 }
 
-void MessageWidget::channelFollowAdd(Api::Message *message)
+void MessageWidget::channelFollowAdd(const Api::Message *message)
 {
     iconMessage(message, message->author.username + " has added " + message->content
      + " to this channel. Its most important updates will show up here.", "green-right-arrow.svg");

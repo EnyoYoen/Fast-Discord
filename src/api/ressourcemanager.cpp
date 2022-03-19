@@ -170,7 +170,7 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
     }
 }
 
-void RessourceManager::getGuilds(std::function<void(void *)> callback)
+void RessourceManager::getGuilds(const std::function<void(void *)>& callback)
 {
     if (guilds.empty())
         requester->getGuilds([&, callback](void *guildsPtr) {
@@ -181,7 +181,7 @@ void RessourceManager::getGuilds(std::function<void(void *)> callback)
         callback(reinterpret_cast<void *>(&guilds));
 }
 
-void RessourceManager::getGuildChannels(std::function<void(void *)> callback, const Snowflake& id)
+void RessourceManager::getGuildChannels(const std::function<void(void *)>& callback, const Snowflake& id)
 {
     requester->getGuildChannels([&, callback](void *guildChannelsPtr) {
         (*guildsChannels)[id] = *reinterpret_cast<QVector<Channel *> *>(guildChannelsPtr);
@@ -189,7 +189,7 @@ void RessourceManager::getGuildChannels(std::function<void(void *)> callback, co
     }, id);
 }
 
-void RessourceManager::getGuildChannel(std::function<void(void *)> callback, const Snowflake& guildId, const Snowflake& id)
+void RessourceManager::getGuildChannel(const std::function<void(void *)>& callback, const Snowflake& guildId, const Snowflake& id)
 {
     openedGuildsChannels[guildId][id];
 
@@ -205,7 +205,7 @@ void RessourceManager::getGuildChannel(std::function<void(void *)> callback, con
     }
 }
 
-void RessourceManager::getPrivateChannel(std::function<void(void *)> callback, const Snowflake& id)
+void RessourceManager::getPrivateChannel(const std::function<void(void *)>& callback, const Snowflake& id)
 {
     if (privateChannels.empty()) {
         requester->getPrivateChannels([&, callback](void *privateChannelsPtr) {
@@ -221,7 +221,7 @@ void RessourceManager::getPrivateChannel(std::function<void(void *)> callback, c
     }
 }
 
-void RessourceManager::getPrivateChannels(std::function<void(void *)> callback)
+void RessourceManager::getPrivateChannels(const std::function<void(void *)>& callback)
 {
     if (privateChannels.empty())
         requester->getPrivateChannels([&, callback](void *privateChannelsPtr) {
@@ -232,7 +232,7 @@ void RessourceManager::getPrivateChannels(std::function<void(void *)> callback)
         callback(reinterpret_cast<void *>(&privateChannels));
 }
 
-void RessourceManager::getMessages(std::function<void(void *)> callback, const Snowflake& channelId, unsigned int limit, bool newMessages)
+void RessourceManager::getMessages(const std::function<void(void *)>& callback, const Snowflake& channelId, unsigned int limit, bool newMessages)
 {
     bool found = false;
     for (auto it = openedGuildsChannels.begin() ; it != openedGuildsChannels.end() ; it++) {
@@ -282,7 +282,7 @@ void RessourceManager::getMessages(std::function<void(void *)> callback, const S
     }
 }
 
-void RessourceManager::getClient(std::function<void(void *)> callback)
+void RessourceManager::getClient(const std::function<void(void *)>& callback)
 {
     if (client == nullptr)
         requester->getClient([&, callback](void *clientPtr) {
@@ -293,7 +293,7 @@ void RessourceManager::getClient(std::function<void(void *)> callback)
         callback(reinterpret_cast<void *>(client));
 }
 
-void RessourceManager::getClientSettings(std::function<void(void *)> callback)
+void RessourceManager::getClientSettings(const std::function<void(void *)>& callback)
 {
     if (clientSettings == nullptr)
         requester->getClientSettings([&, callback](void *clientSettingsPtr) {
@@ -304,7 +304,7 @@ void RessourceManager::getClientSettings(std::function<void(void *)> callback)
         callback(reinterpret_cast<void *>(clientSettings));
 }
 
-void RessourceManager::getImage(std::function<void(void *)> callback, const QString& url, const QString& fileName)
+void RessourceManager::getImage(const std::function<void(void *)>& callback, const QString& url, const QString& fileName)
 {
     if (!std::ifstream(("cache/" + fileName).toUtf8().constData()).good()) {
         requester->getImage(callback, url, fileName);}
@@ -314,7 +314,7 @@ void RessourceManager::getImage(std::function<void(void *)> callback, const QStr
     }
 }
 
-void RessourceManager::getUser(std::function<void(void *)> callback, const Snowflake& userId)
+void RessourceManager::getUser(const std::function<void(void *)>& callback, const Snowflake& userId)
 {
     for (unsigned int i = 0 ; i < users.size() ; i++) {
         if (users[i]->id == userId) {
@@ -328,18 +328,18 @@ void RessourceManager::getUser(std::function<void(void *)> callback, const Snowf
    }, userId);
 }
 
-void RessourceManager::getPresences(std::function<void(void *)> callback)
+void RessourceManager::getPresences(const std::function<void(void *)>& callback)
 {
     callback(reinterpret_cast<void *>(&presences));
 }
 
 
-QVector<Api::Message *> RessourceManager::getAllMessages(Snowflake& channelId)
+QVector<Api::Message *> const RessourceManager::getAllMessages(const Snowflake& channelId)
 {
     return (*messages)[channelId];
 }
 
-bool RessourceManager::hasMessages(const Snowflake& channelId)
+bool const RessourceManager::hasMessages(const Snowflake& channelId)
 {
     return messages->find(channelId) == messages->end();
 }

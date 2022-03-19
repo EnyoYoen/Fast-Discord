@@ -68,7 +68,7 @@ void MessageArea::setMessages(const QVector<Api::Message *>& messages)
     }
 }
 
-void MessageArea::addMessage(Api::Message *newMessage, Api::Message *lastMessage)
+void MessageArea::addMessage(const Api::Message *newMessage, const Api::Message *lastMessage)
 {
     lock.lock();
     messageQueue.push(QueuedMessage{newMessage, lastMessage, false, false});
@@ -77,7 +77,7 @@ void MessageArea::addMessage(Api::Message *newMessage, Api::Message *lastMessage
     if (verticalScrollBar()->value() < 0.95 * verticalScrollBar()->minimum()) scrollBottom();
 }
 
-void MessageArea::scrollBottom()
+void const MessageArea::scrollBottom()
 {
     // Scroll to the bottom
     QScrollBar *vsb = verticalScrollBar();
@@ -118,7 +118,7 @@ void MessageArea::addMessages(const QVector<Api::Message *>& messages)
     }
 }
 
-void MessageArea::changeSliderValue(int min, int max)
+void const MessageArea::changeSliderValue(int min, int max)
 {
     this->verticalScrollBar()->setValue(max - min - tempScrollBarRange + tempScrollBarValue);
     timestamp = QDateTime::currentSecsSinceEpoch();
@@ -132,7 +132,7 @@ void MessageArea::showEvent(QShowEvent *)
     vsb->setValue(vsb->maximum());
 }
 
-void MessageArea::scrollBarMoved(int value)
+void const MessageArea::scrollBarMoved(int value)
 {
     tempScrollBarValue = value;
     tempScrollBarRange = this->verticalScrollBar()->maximum() - this->verticalScrollBar()->minimum();
@@ -151,12 +151,12 @@ void MessageArea::loop()
                 QueuedMessage queuedMessage = messageQueue.front();
                 messageQueue.pop();
                 lock.unlock();
-                Api::Message *message = queuedMessage.message;
+                const Api::Message *message = queuedMessage.message;
 
                 if (queuedMessage.lastMessage == nullptr) {
                     emit messageCreate(message, queuedMessage.top, true, false);
                 } else {
-                    Api::Message *lastMessage = queuedMessage.lastMessage;
+                    const Api::Message *lastMessage = queuedMessage.lastMessage;
 
                     // Get date and time of the messages
                     QDateTime firstDateTime = QDateTime::fromString(lastMessage->timestamp, Qt::ISODate);
@@ -203,7 +203,7 @@ void MessageArea::loop()
     }
 }
 
-void MessageArea::displayMessage(Api::Message *message, bool top, bool first, bool separator)
+void const MessageArea::displayMessage(const Api::Message *message, bool top, bool first, bool separator)
 {
     if (top)
         messageLayout->insertWidget(separator ? 1 : 0, new MessageWidget(rm, message, first, separator, this));
@@ -211,7 +211,7 @@ void MessageArea::displayMessage(Api::Message *message, bool top, bool first, bo
         messageLayout->insertWidget(messageLayout->count() - 1, new MessageWidget(rm, message, first, separator, this));
 }
 
-void MessageArea::displaySeparator(const QDate& date, bool top)
+void const MessageArea::displaySeparator(const QDate& date, bool top)
 {
     if (top)
         messageLayout->insertWidget(0, new MessageSeparator(date, this));

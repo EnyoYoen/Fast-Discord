@@ -20,7 +20,7 @@ class PrivateChannelWidget : public QWidget
 public:
     PrivateChannelWidget(Api::RessourceManager *rm, const Api::PrivateChannel& privateChannel, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
-    void setStatus(QString status);
+    void setStatus(const QString& status);
 
     Api::Snowflake id;
 
