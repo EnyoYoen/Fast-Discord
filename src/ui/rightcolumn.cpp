@@ -49,7 +49,7 @@ void const RightColumn::setMessages(const QVector<Api::Message *>& messages)
 void const RightColumn::setUserTyping(const Api::User *user)
 {
     // Get the actual timestamp
-    time_t currentTimestamp = std::time(nullptr);
+    qint64 currentTimestamp = QDateTime::currentSecsSinceEpoch();;
 
     // Get the user name and the text of the typing label
     QString username = user->username;

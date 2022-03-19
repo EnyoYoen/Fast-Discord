@@ -9,11 +9,6 @@
 #include <QDateTime>
 #include <QTextStream>
 
-#include <fstream>
-#include <cstring>
-#include <iostream>
-#include <cstdlib>
-
 namespace Ui {
 
 MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message *message, bool isFirstp, bool separatorBefore, QWidget *parent)

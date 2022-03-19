@@ -2,8 +2,6 @@
 
 #include <QHBoxLayout>
 
-#include <fstream>
-
 namespace Ui {
 
 GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, QString guildName, const QString& guildIcon, bool smallp, QWidget *parent)
@@ -17,16 +15,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
         // The guild doesn't have icon : we need to create one with the name
 
         // Split the name for every space in it
-
-        QVector<QString> nameSplit;
-        int pos = 0;
-        // Loop through the name to find spaces
-        while ((pos = guildName.indexOf(' ')) != -1) {
-            nameSplit.push_back(guildName.left(pos));
-            guildName.remove(0, pos + 1);
-        }
-        nameSplit.push_back(guildName);
-
+        QStringList nameSplit(guildName.split(' '));
 
         // The loop that will create the text of the icon
 
@@ -95,7 +84,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
         // Request the icon and cache it
         QString guildIconFileName(guildIcon);
         guildIconFileName += ".png";
-        if (!std::ifstream(("cache/" + guildIconFileName).toUtf8().constData()).good()) {
+        if (!QFile::exists("cache/" + guildIconFileName)) {
             icon = new RoundedImage(small ? 16 : 48, small ? 16 : 48, small ? 8 : 24, this);
             rm->getImage([this](void *iconFileName) {emit iconRecieved(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + guildId + "/" + guildIconFileName, guildIconFileName);
         } else {

@@ -6,8 +6,6 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
-#include <cmath>
-
 namespace Ui {
 
 AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment *attachment, QWidget *parent)
@@ -28,9 +26,9 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment 
     if (size < 1024) {
         sizeStr.setNum(size) += " O";
     } else if (size < 1024 * 1024) {
-        sizeStr.setNum(roundf(size / 1024. * 100) / 100) += " KB";
+        sizeStr.setNum(qRound(size / 1024. * 100) / 100) += " KB";
     } else {
-        sizeStr.setNum(roundf(size / (1024. * 1024.) * 100) / 100) += " MB";
+        sizeStr.setNum(qRound(size / (1024. * 1024.) * 100) / 100) += " MB";
     }
     QLabel *filesize = new QLabel(sizeStr, infos);
     filesize->setStyleSheet("color: #72767D;");

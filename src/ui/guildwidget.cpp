@@ -8,8 +8,6 @@
 #include <QPainterPath>
 #include <QString>
 
-#include <fstream>
-
 namespace Ui {
 
 GuildWidget::GuildWidget(Api::RessourceManager *rmp, const Api::Guild& guild, QWidget *parent)

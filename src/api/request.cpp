@@ -10,10 +10,6 @@
 #include <QtNetwork/QHttpPart>
 #include <QtNetwork/QNetworkRequest>
 
-#include <cstdlib>
-#include <ctime>
-#include <cstring>
-
 namespace Api {
 
 Requester::Requester(const QString& tokenp)
@@ -37,8 +33,9 @@ Requester::~Requester()
 {
     // Stop the request loop
     stopped = true;
+    lock.unlock();
     loop->wait();
-    requestWaiter.notify_all();
+    requestWaiter.wakeAll();
 }
 
 void const Requester::writeFile()
@@ -51,8 +48,7 @@ void const Requester::writeFile()
 
 void Requester::readReply()
 {
-    RequestParameters parameters = requestQueue.front();
-    requestQueue.pop();
+    RequestParameters parameters = requestQueue.dequeue();
     if (parameters.outputFile != "" && parameters.type == GetImage) {
         QDir dir("cache/");
         if (!dir.exists()) dir.mkpath(".");
@@ -67,7 +63,7 @@ void Requester::readReply()
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     if (statusCode.toInt() == 429) { // We are rate limited
         // Set the end of the rate limit
-        rateLimitEnd = std::time(0) + QJsonDocument::fromJson(ba)["retry_after"].toDouble();
+        rateLimitEnd = QJsonDocument::fromJson(ba)["retry_after"].toDouble();
     } else {
         switch (parameters.type) {
             case GetUser:
@@ -121,7 +117,7 @@ void Requester::readReply()
                         QJsonValue jsonUrl = QJsonDocument::fromJson(ba)["url"];
                         QString url = jsonUrl.toString();
                         parameters.callback(static_cast<void *>(&url));
-                    } catch(std::exception&) {
+                    } catch(...) {
                         break;
                     }
                 break;
@@ -141,7 +137,7 @@ void Requester::readReply()
         if (requestsToCheck > 0) requestsToCheck--;
         lock.unlock();
     }
-    finishWaiter.notify_one();
+    finishWaiter.wakeOne();
 }
 
 void Requester::RequestLoop()
@@ -152,12 +148,9 @@ void Requester::RequestLoop()
                 RequestParameters parameters = requestQueue.front();
                 currentRequestsNumber++;
 
-                // Very basic rate limit checker
-                if (rateLimitEnd != 0) { // We were rate limited
-                    double sleepDuration = rateLimitEnd - std::time(0); // Time to sleep
-
+                if (rateLimitEnd > 0) {
                     // We are currently rate limited
-                    if (sleepDuration > 0) QThread::msleep(sleepDuration);
+                    QThread::msleep(rateLimitEnd);
                     rateLimitEnd = 0; // Reset rate limit
                 }
 
@@ -192,12 +185,10 @@ void Requester::RequestLoop()
                     emit requestEmit(Get, request, nullptr, nullptr);
                 }
 
-                std::unique_lock<std::mutex> uniqueLock(lock);
-                finishWaiter.wait(uniqueLock);
+                finishWaiter.wait(&lock);
             } while (!requestQueue.empty() && requestQueue.size() > currentRequestsNumber);
         } else {
-            std::unique_lock<std::mutex> uniqueLock(lock);
-            requestWaiter.wait(uniqueLock);
+            requestWaiter.wait(&lock);
         }
     }
 }
@@ -232,8 +223,8 @@ void Requester::doRequest(int requestType, const QNetworkRequest& request, const
 void Requester::requestApi(const RequestParameters &parameters)
 {
     lock.lock();
-    requestQueue.push(parameters);
-    requestWaiter.notify_one();
+    requestQueue.enqueue(parameters);
+    requestWaiter.wakeOne();
     lock.unlock();
 }
 
@@ -242,16 +233,15 @@ void Requester::removeImageRequests()
     lock.lock();
     requestsToCheck = currentRequestsNumber;
     for (unsigned int i = requestQueue.size() ; i > 0 ; i--) {
-        RequestParameters temp = requestQueue.front();
-        requestQueue.pop();
-        if (temp.type != GetImage) requestQueue.push(temp);
+        RequestParameters temp = requestQueue.dequeue();
+        if (temp.type != GetImage) requestQueue.enqueue(temp);
     }
     lock.unlock();
 }
 
 // Functions that request the API to retrieve data
 
-void const Requester::getImage(const std::function<void(void *)>& callback, const QString& url, const QString& fileName)
+void const Requester::getImage(Callback callback, const QString& url, const QString& fileName)
 {
     requestApi({
         callback,
@@ -264,7 +254,7 @@ void const Requester::getImage(const std::function<void(void *)>& callback, cons
         false});
 }
 
-void const Requester::getPrivateChannels(const std::function<void(void *)>& callback)
+void const Requester::getPrivateChannels(Callback callback)
 {
     requestApi({
         callback,
@@ -277,7 +267,7 @@ void const Requester::getPrivateChannels(const std::function<void(void *)>& call
         false});
 }
 
-void const Requester::getGuilds(const std::function<void(void *)>& callback)
+void const Requester::getGuilds(Callback callback)
 {
     requestApi({
         callback,
@@ -290,7 +280,7 @@ void const Requester::getGuilds(const std::function<void(void *)>& callback)
         false});
 }
 
-void const Requester::getGuildChannels(const std::function<void(void *)>& callback, const Snowflake& id)
+void const Requester::getGuildChannels(Callback callback, const Snowflake& id)
 {
     requestApi({
         callback,
@@ -303,7 +293,7 @@ void const Requester::getGuildChannels(const std::function<void(void *)>& callba
         false});
 }
 
-void const Requester::getMessages(const std::function<void(void *)>& callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit)
+void const Requester::getMessages(Callback callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit)
 {
     limit = limit > 50 ? 50 : limit;
 
@@ -318,7 +308,7 @@ void const Requester::getMessages(const std::function<void(void *)>& callback, c
         false});
 }
 
-void const Requester::getClient(const std::function<void(void *)>& callback)
+void const Requester::getClient(Callback callback)
 {
     requestApi({
         callback,
@@ -331,7 +321,7 @@ void const Requester::getClient(const std::function<void(void *)>& callback)
         false});
 }
 
-void const Requester::getClientSettings(const std::function<void(void *)>& callback)
+void const Requester::getClientSettings(Callback callback)
 {
     requestApi({
         callback,
@@ -344,7 +334,7 @@ void const Requester::getClientSettings(const std::function<void(void *)>& callb
         false});
 }
 
-void const Requester::getUser(const std::function<void(void *)>& callback, const Snowflake& userId)
+void const Requester::getUser(Callback callback, const Snowflake& userId)
 {
     requestApi({
         callback,
@@ -375,40 +365,40 @@ void const Requester::setStatus(const QString& status)
 void const Requester::sendTyping(const Snowflake& channelId)
 {
     requestApi({
-            nullptr,
-            "https://discord.com/api/v9/channels/" + channelId + "/typing",
-            "",
-            "POST",
-            "",
-            "",
-            SendTyping,
-            false});
+        nullptr,
+        "https://discord.com/api/v9/channels/" + channelId + "/typing",
+        "",
+        "POST",
+        "",
+        "",
+        SendTyping,
+        false});
 }
 
 void const Requester::sendMessage(const QString& content, const Snowflake& channelId)
 {
     requestApi({
-            nullptr,
-            "https://discord.com/api/v9/channels/" + channelId + "/messages",
-            "{\"content\":\"" + content + "\"}",
-            "POST",
-            "",
-            "",
-            SendMessage,
-            true});
+        nullptr,
+        "https://discord.com/api/v9/channels/" + channelId + "/messages",
+        "{\"content\":\"" + content + "\"}",
+        "POST",
+        "",
+        "",
+        SendMessage,
+        true});
 }
 
 void const Requester::sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath)
 {
     requestApi({
-            nullptr,
-            "https://discord.com/api/v9/channels/" + channelId + "/messages",
-            "{\"content\":\"" + content + "\"}",
-            "POST",
-            filePath,
-            "",
-            SendMessageWithFile,
-            false});
+        nullptr,
+        "https://discord.com/api/v9/channels/" + channelId + "/messages",
+        "{\"content\":\"" + content + "\"}",
+        "POST",
+        filePath,
+        "",
+        SendMessageWithFile,
+        false});
 }
 
 void const Requester::deleteMessage(const Snowflake& channelId, const Snowflake& messageId)

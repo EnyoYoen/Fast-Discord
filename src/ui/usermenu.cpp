@@ -4,8 +4,6 @@
 
 #include <QHBoxLayout>
 
-#include <fstream>
-
 namespace Ui {
 
 UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidget *parent)

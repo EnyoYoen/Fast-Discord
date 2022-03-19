@@ -3,14 +3,12 @@
 #include "ui/messagewidget.h"
 #include "api/objects/message.h"
 
+#include <QQueue>
 #include <QShowEvent>
 #include <QScrollArea>
 #include <QVBoxLayout>
 #include <QThread>
-
-#include <queue>
-#include <mutex>
-#include <condition_variable>
+#include <QMutex>
 
 struct QueuedMessage {
     const Api::Message *message;
@@ -60,9 +58,9 @@ private:
     Api::RessourceManager *rm;  // To request the API
 
     QThread *messageCreateThread;
-    std::queue<QueuedMessage> messageQueue;
-    std::mutex lock;
-    std::condition_variable messageWaiter;
+    QQueue<QueuedMessage> messageQueue;
+    QMutex lock;
+    QWaitCondition messageWaiter;
     bool stopped;
 
     unsigned long timestamp;

@@ -8,20 +8,18 @@
 
 #include <QString>
 #include <QVector>
+#include <QQueue>
 #include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
 #include <QBoxLayout>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 
-#include <queue>
-#include <condition_variable>
-#include <mutex>
-#include <functional>
-#include <cstddef>
-#include <ostream>
-
 namespace Api {
+
+typedef std::function<void(void *)> Callback;
 
 enum RequestTypes {
     // We need the response data
@@ -48,7 +46,21 @@ enum RequestTypes {
 
 struct RequestParameters
 {
-    const std::function<void(void *)>& callback;
+    RequestParameters operator=(RequestParameters other)
+    {
+        return RequestParameters {
+            other.callback,
+            other.url,
+            other.postDatas,
+            other.customRequest,
+            other.fileName,
+            other.outputFile,
+            other.type,
+            other.json
+        };
+    }
+
+    Callback callback;
     const QString url;
     const QString postDatas;
     const QString customRequest;
@@ -78,14 +90,14 @@ public:
     void removeImageRequests();
 
     // Functions that request the API to retrieve data
-    void const getGuilds(const std::function<void(void *)>& callback);
-    void const getGuildChannels(const std::function<void(void *)>& callback, const Snowflake& id);
-    void const getPrivateChannels(const std::function<void(void *)>& callback);
-    void const getMessages(const std::function<void(void *)>& callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit);
-    void const getClient(const std::function<void(void *)>& callback);
-    void const getClientSettings(const std::function<void(void *)>& callback);
-    void const getImage(const std::function<void(void *)>& callback, const QString& url, const QString& fileName);
-    void const getUser(const std::function<void(void *)>& callback, const Snowflake& userId);
+    void const getGuilds(Callback callback);
+    void const getGuildChannels(Callback callback, const Snowflake& id);
+    void const getPrivateChannels(Callback callback);
+    void const getMessages(Callback callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit);
+    void const getClient(Callback callback);
+    void const getClientSettings(Callback callback);
+    void const getImage(Callback callback, const QString& url, const QString& fileName);
+    void const getUser(Callback callback, const Snowflake& userId);
     void const getFile(const QString& url, const QString& filename);
 
     // Functions that request the API to send data
@@ -108,12 +120,12 @@ private slots:
 private:
     QNetworkAccessManager netManager;
     QNetworkReply *reply;
-    std::queue<RequestParameters> requestQueue; // Queue of request parameters
-    std::mutex lock;
-    std::condition_variable requestWaiter;      // The loop waits when there is no request
-    std::condition_variable finishWaiter;       // The loop waits when there is no request
+    QQueue<RequestParameters> requestQueue; // Queue of request parameters
+    QMutex lock;
+    QWaitCondition requestWaiter;               // The loop waits when there is no request
+    QWaitCondition finishWaiter;                // The loop waits when there is no request
     QThread *loop;                              // Request loop
-    QString token;                          // Authorization token
+    QString token;                              // Authorization token
     double rateLimitEnd;                        // Unix time that represents the moment of the end of the rate limit
     unsigned int requestsToCheck;               // The number of requests that we have to check when we need to remove
                                                 // callbacks for image requests

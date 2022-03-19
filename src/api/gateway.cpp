@@ -52,7 +52,7 @@ void const Gateway::closeHandler()
 }
 
 // Set the callback function called when the gateway recieve events
-void Gateway::onDispatch(const std::function<void(QString&, json&)>& callback)
+void Gateway::onDispatch(const DispatchCallback& callback)
 {
     onDispatchHandler = callback;
 }

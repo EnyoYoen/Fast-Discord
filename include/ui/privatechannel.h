@@ -9,8 +9,6 @@
 #include <QWidget>
 #include <QLabel>
 
-#include <queue>
-
 namespace Ui {
 
 // A widget for private channels (DMs and group DMs)

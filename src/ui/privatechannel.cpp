@@ -9,9 +9,6 @@
 #include <QString>
 #include <QGridLayout>
 
-#include <fstream>
-#include <iostream>
-
 namespace Ui {
 
 PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api::PrivateChannel& privateChannel, QWidget *parent)

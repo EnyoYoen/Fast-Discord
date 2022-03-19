@@ -2,9 +2,6 @@
 
 #include "ui/usermenu.h"
 
-#include <algorithm>
-#include <fstream>
-
 namespace Ui {
 
 MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, const Api::Client *client, QWidget *parent)

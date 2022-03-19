@@ -2,8 +2,7 @@
 
 #include "api/objects/message.h"
 
-#include <algorithm>
-#include <ctime>
+#include <QDateTime>
 
 namespace Ui {
 
@@ -27,22 +26,16 @@ void MessageTextInput::keyPressEvent(QKeyEvent *event)
     // If the return is pressed without shift
     if (!event->modifiers().testFlag(Qt::ShiftModifier) && event->key() == Qt::Key_Return) {
         // Get the text and strip the spaces and the new lines
-        std::string content = toPlainText().toUtf8().constData();
-
-        unsigned long start = content.find_first_not_of(" \n\r\t\f\v");
-        content = start == std::string::npos ? "" : content.substr(start);
-        unsigned long end = content.find_last_not_of(" \n\r\t\f\v");
-        content = end == std::string::npos ? "" : content.substr(0, end + 1);
-        QString qcontent(content.c_str());
+        QString content = toPlainText().trimmed();
 
         // Emit signals if the message is not empty
-        if (!qcontent.isEmpty()) {
+        if (!content.isEmpty()) {
             emit clear();
-            emit returnPressed(qcontent);
+            emit returnPressed(content);
         }
     } else {
         // Compare the last timestamp and the actual time
-        time_t actualTimestamp = std::time(nullptr);
+        qint64 actualTimestamp = QDateTime::currentSecsSinceEpoch();
         if (actualTimestamp - lastTypingTimestamp > 8) {
             // Send typing because we typed more than 8 seconds ago
             lastTypingTimestamp = actualTimestamp;

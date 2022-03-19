@@ -8,6 +8,7 @@
 #include <QMap>
 
 using json = QJsonValue;
+typedef std::function<void(QString&, json&)> DispatchCallback;
 
 namespace Api {
 
@@ -34,7 +35,7 @@ class Gateway : public QObject
     Q_OBJECT
 public:
     Gateway(Api::Requester *requester, const QString& token);
-    void onDispatch(const std::function<void(QString&, json&)>& callback);
+    void onDispatch(const DispatchCallback& callback);
         //Sets the callback function called when the gateway recieve events
 
     void const sendGuildChannelOpened(const QMap<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing);
@@ -58,7 +59,7 @@ private:
                           //Internal function used to process some messages
 
     QWebSocket client;    // websocket client
-    std::function<void(QString&, json&)> onDispatchHandler;
+    DispatchCallback onDispatchHandler;
          //Function called when when the gateway recieve events
     QString url;      //websocket URL
     QString sessionId;

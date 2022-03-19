@@ -50,16 +50,16 @@ void MessageArea::setMessages(const QVector<Api::Message *>& messages)
     this->show();
 
     if (messages.size() > 0) {
-        lock.lock();
+        lock.tryLock();
         // Loop through the messages starting by the end (the most recents)
-        messageQueue.push(QueuedMessage{messages.back(), nullptr, false, false});
+        messageQueue.enqueue(QueuedMessage{messages.back(), nullptr, false, false});
         for (int i = messages.size() - 2; i >= 1 ; i--) {
-            messageQueue.push(QueuedMessage{messages[i], messages[i + 1], false, false});
+            messageQueue.enqueue(QueuedMessage{messages[i], messages[i + 1], false, false});
         }
         if (messages.size() > 1)
-            messageQueue.push(QueuedMessage{messages[0], messages[1], true, false});
+            messageQueue.enqueue(QueuedMessage{messages[0], messages[1], true, false});
         lock.unlock();
-        messageWaiter.notify_one();
+        messageWaiter.wakeOne();
 
         QWidget *spacer = new QWidget(messageBox);
         spacer->setFixedHeight(22);
@@ -70,10 +70,10 @@ void MessageArea::setMessages(const QVector<Api::Message *>& messages)
 
 void MessageArea::addMessage(const Api::Message *newMessage, const Api::Message *lastMessage)
 {
-    lock.lock();
-    messageQueue.push(QueuedMessage{newMessage, lastMessage, false, false});
+    lock.tryLock();
+    messageQueue.enqueue(QueuedMessage{newMessage, lastMessage, false, false});
     lock.unlock();
-    messageWaiter.notify_one();
+    messageWaiter.wakeOne();
     if (verticalScrollBar()->value() < 0.95 * verticalScrollBar()->minimum()) scrollBottom();
 }
 
@@ -95,10 +95,8 @@ void MessageArea::clear()
         }
     }
 
-    lock.lock();
-    for (unsigned int i = 0; i < messageQueue.size() ; i++) {
-        messageQueue.pop();
-    }
+    lock.tryLock();
+    messageQueue.clear();
     lock.unlock();
 
     this->hide();
@@ -108,13 +106,13 @@ void MessageArea::addMessages(const QVector<Api::Message *>& messages)
 {
     int size = messages.size();
     if (size != 0) {
-        lock.lock();
+        lock.tryLock();
         for (int i = 0; i < size - 1; i++) {
-            messageQueue.push(QueuedMessage{messages[i], messages[i + 1], false, true});
+            messageQueue.enqueue(QueuedMessage{messages[i], messages[i + 1], false, true});
         }
-        messageQueue.push(QueuedMessage{messages.back(), nullptr, false, true});
+        messageQueue.enqueue(QueuedMessage{messages.back(), nullptr, false, true});
         lock.unlock();
-        messageWaiter.notify_one();
+        messageWaiter.wakeOne();
     }
 }
 
@@ -147,9 +145,8 @@ void MessageArea::loop()
     while (!stopped) {
         if (messageQueue.size() > 0) {
             do {
-                lock.lock();
-                QueuedMessage queuedMessage = messageQueue.front();
-                messageQueue.pop();
+                lock.tryLock();
+                QueuedMessage queuedMessage = messageQueue.dequeue();
                 lock.unlock();
                 const Api::Message *message = queuedMessage.message;
 
@@ -197,8 +194,8 @@ void MessageArea::loop()
                     emit messagesEnd();
             } while (!messageQueue.empty());
         } else {
-            std::unique_lock<std::mutex> uniqueLock(lock);
-            messageWaiter.wait(uniqueLock);
+            lock.lock();
+            messageWaiter.wait(&lock);
         }
     }
 }
@@ -221,8 +218,9 @@ void const MessageArea::displaySeparator(const QDate& date, bool top)
 
 MessageArea::~MessageArea()
 {
+    lock.unlock();
     stopped = true;
-    messageWaiter.notify_one();
+    messageWaiter.wakeOne();
 }
 
 } // namespace Ui

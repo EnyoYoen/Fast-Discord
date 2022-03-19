@@ -5,8 +5,6 @@
 #include <QMovie>
 #include <QFileInfo>
 
-#include <iostream>
-
 namespace Ui {
 
 RoundedImage::RoundedImage(const QString& imagePath, int width, int height, int radius, QWidget *parent)

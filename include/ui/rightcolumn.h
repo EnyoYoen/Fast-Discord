@@ -11,8 +11,6 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
-#include <map>
-
 namespace Ui {
 
 // The right column of the UI (with messages)
