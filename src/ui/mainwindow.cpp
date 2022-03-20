@@ -106,6 +106,10 @@ QString const MainWindow::getAccountToken() {
     if (accountsMap.isEmpty()) {
         // Add token if it's empty
         QMap<QString, QString> tknmp = getNewAccount();
+        if (tknmp.isEmpty()) {
+            exit(0);
+        }
+
         name = tknmp.firstKey();
         token = tknmp.first();
 
