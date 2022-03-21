@@ -2,6 +2,7 @@
 
 #include "api/gateway.h"
 #include "api/request.h"
+#include "api/voicesocket.h"
 #include "api/jsonutils.h"
 #include "api/objects/presence.h"
 #include "api/objects/client.h"
@@ -36,6 +37,9 @@ public:
     
     Requester *requester;
 
+public slots:
+    void call(const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf);
+
 signals:
     void typingReceived();
     void guildsReceived(const QVector<Api::Guild *>&);
@@ -53,6 +57,7 @@ private:
         // Event handler for the gateway
 
     Gateway *gw;
+    VoiceSocket vs;
 
     QMap<Snowflake, QVector<Message *>> messages;
     QMap<Snowflake, QVector<Channel *>> guildsChannels;

@@ -161,6 +161,7 @@ void MainWindow::setup()
     QObject::connect(leftColumn, &LeftColumn::cleanRightColumn, rightColumn, &RightColumn::clean);
     QObject::connect(middleColumn, &MiddleColumn::guildChannelClicked, rightColumn, &RightColumn::openGuildChannel);
     QObject::connect(middleColumn, &MiddleColumn::privateChannelClicked, rightColumn, &RightColumn::openPrivateChannel);
+    QObject::connect(middleColumn, &MiddleColumn::voiceChannelClicked, rm, &Api::RessourceManager::call);
     QObject::connect(rightColumn, &RightColumn::messageAdded, middleColumn, &MiddleColumn::putChannelFirst);
     QObject::connect(rm, &Api::RessourceManager::unreadUpdateReceived, leftColumn, &LeftColumn::setUnreadGuild);
     QObject::connect(rm, &Api::RessourceManager::messageReceived, rightColumn, &RightColumn::addMessage);

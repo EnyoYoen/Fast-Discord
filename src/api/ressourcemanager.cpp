@@ -14,6 +14,13 @@ RessourceManager::RessourceManager(const QString& token)
     gw->onDispatch([this](QString& eventName, json& data){gatewayDispatchHandler(eventName, data);});
 }
 
+void RessourceManager::call(const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf)
+{
+    gw->sendVoiceStateUpdate([&](QString voiceSessionId, QString voiceEndpoint, QString voiceToken) {
+        vs.start(voiceEndpoint, guildId, client->id, voiceSessionId, voiceToken);
+    }, guildId, channelId, selfMute, selfDeaf);
+}
+
 void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
 {
     // Process gateway events

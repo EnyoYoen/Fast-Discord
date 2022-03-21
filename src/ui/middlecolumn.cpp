@@ -1,7 +1,5 @@
 #include "ui/middlecolumn.h"
 
-#include "ui/usermenu.h"
-
 namespace Ui {
 
 MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, const Api::Client *client, QWidget *parent)
@@ -19,7 +17,8 @@ MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, const Api::Client *client
 
     // Add the widget and style the main layout
     layout->addWidget(channelList);
-    layout->addWidget(new UserMenu(rm, client, this));
+    userMenu = new UserMenu(rm, client, this);
+    layout->addWidget(userMenu);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
@@ -161,6 +160,9 @@ void MiddleColumn::clicGuildChannel(const Api::Snowflake& id)
     for (size_t i = 0 ; i < guildChannelWidgets.size() ; i++) {
         if (guildChannelWidgets[i]->id != id) {
             guildChannelWidgets[i]->unclicked();
+        } else {
+            if (guildChannelWidgets[i]->type == Api::GuildVoice)
+                emit voiceChannelClicked(openedGuildId, id, userMenu->deaf ? true : userMenu->deaf, userMenu->muted);
         }
     }
 

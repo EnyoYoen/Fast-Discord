@@ -17,6 +17,9 @@ class UserMenu : public QWidget
 public:
     UserMenu(Api::RessourceManager *rm, const Api::Client *client, QWidget *parent);
 
+    bool deaf;
+    bool muted;
+
 private slots:
     void clicButton(int type, bool active);
 

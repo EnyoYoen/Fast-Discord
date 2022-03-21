@@ -193,7 +193,7 @@ void Requester::RequestLoop()
     }
 }
 
-void Requester::doRequest(int requestType, const QNetworkRequest& request, const QByteArray *postDatas, QHttpMultiPart *multiPart)
+void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *postDatas, QHttpMultiPart *multiPart)
 {
     switch (requestType) {
         case Get:

@@ -12,6 +12,9 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
     // Set the ressource manager
     rm = rmp;
 
+    deaf = false;
+    muted = false;
+
     // Create the layout
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
 
@@ -116,6 +119,9 @@ void UserMenu::clicButton(int type, bool active)
     if (type == Deafen) {
         // Mute when deafen pressed
         muteButton->setClicked(active);
+        deaf = active;
+    } else if (type == Mute) {
+        muted = active;
     } else if (type == Settings) {
         // TODO : settings menu not implemented
     }

@@ -110,17 +110,17 @@ public:
     void const unpinMessage(const Snowflake& channelId, const Snowflake& messageId);
 
 signals:
-    void requestEmit(int requestType, const QNetworkRequest& request, QByteArray *query, QHttpMultiPart *multiPart);
+    void requestEmit(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);
 
 private slots:
-    void doRequest(int requestType, const QNetworkRequest& request, const QByteArray *query, QHttpMultiPart *multiPart);
+    void doRequest(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);
     void readReply();
     void const writeFile();
 
 private:
     QNetworkAccessManager netManager;
     QNetworkReply *reply;
-    QQueue<RequestParameters> requestQueue; // Queue of request parameters
+    QQueue<RequestParameters> requestQueue;     // Queue of request parameters
     QMutex lock;
     QWaitCondition requestWaiter;               // The loop waits when there is no request
     QWaitCondition finishWaiter;                // The loop waits when there is no request

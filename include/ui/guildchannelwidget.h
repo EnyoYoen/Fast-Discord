@@ -20,6 +20,7 @@ public:
     void unclicked(); // Reset the stylesheet of the widget
 
     Api::Snowflake id;     // The id that we assign to the widget
+    int            type;
 
 signals:
     void leftClicked(const Api::Snowflake& id);
@@ -40,7 +41,6 @@ private:
     char        *hoverStyleSheet;
     char        *clickedStyleSheet;
 
-    int         type;
     bool        clicked; // If the widget is clicked
 };
 

@@ -2,6 +2,7 @@
 
 #include "ui/privatechannel.h"
 #include "ui/guildchannelwidget.h"
+#include "ui/usermenu.h"
 #include "api/ressourcemanager.h"
 #include "api/objects/client.h"
 #include "api/objects/channel.h"
@@ -25,6 +26,7 @@ signals:
     void guildChannelsReceived(const QVector<Api::Channel *> channels);
     void guildChannelClicked(const Api::Snowflake& guildId, const Api::Snowflake& id);
     void privateChannelClicked(const Api::Snowflake& id);
+    void voiceChannelClicked(const Api::Snowflake& guildId, const Api::Snowflake& channelId, bool selfMute, bool selfDeaf);
 
 public slots:
     void setPresences(const QVector<Api::Presence *>& presences);
@@ -46,6 +48,7 @@ private:
     // Main widgets
     QVBoxLayout *layout;
     QScrollArea *channelList;
+    UserMenu    *userMenu;
 
     Api::RessourceManager *rm; // To request the API
 

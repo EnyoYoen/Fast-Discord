@@ -11,6 +11,7 @@ Gateway::Gateway(Api::Requester *requester, const QString& tokenp)
 {
     // Member initialization
     seq = 0;
+    waitVoiceInfos = 0;
     connected = false;
     resuming = false;
     token = tokenp;
@@ -83,6 +84,21 @@ void const Gateway::sendDMChannelOpened(const Snowflake& channelId)
     send(DMChannelOpened, "{\"channel_id\":\"" + channelId + "\"}");
 }
 
+void const Gateway::sendVoiceStateUpdate(VoiceCallback callback, const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf)
+{
+    if (!waitVoiceInfos) {
+        voiceSessionId.clear();
+        voiceEndpoint.clear();
+        voiceToken.clear();
+        voiceCallback = callback;
+        waitVoiceInfos = true;
+        send(VoiceStateUpdate, "{\"guild_id\":\"" + guildId + "\","
+                                "\"channel_id\":\"" + channelId + "\","
+                                "\"self_mute\":" + (selfMute ? "true" : "false") + ","
+                                "\"self_deaf\":" + (selfDeaf ? "true" : "false") + "}");
+    }
+}
+
 // Send data through the gateway
 void const Gateway::send(int op, const QString& data)
 {
@@ -118,7 +134,7 @@ void const Gateway::processBinaryMessage(const QByteArray& message)
             heartbeatInterval = data["heartbeat_interval"].toInt(45000);
             QThread *heartbeatThread = QThread::create([this](){
                 while (connected) {
-                    send(1, QString::number(seq));
+                    send(Heartbeat, QString::number(seq));
 
                     QThread::msleep(heartbeatInterval);
                 }
@@ -128,7 +144,7 @@ void const Gateway::processBinaryMessage(const QByteArray& message)
             if (resuming) {
                 resume();
             } else {
-                identify();
+                //identify();
                 resuming = true;
             }
             break;
@@ -223,7 +239,20 @@ void const Gateway::resume()
 // Internal function used to process some messages
 void Gateway::dispatch(QString eventName, json& data)
 {
-    if (eventName == "READY") {
+    if (waitVoiceInfos) {
+        if (eventName == "VOICE_STATE_UPDATE") {
+            voiceSessionId = data["session_id"].toString();
+            if (!voiceEndpoint.isNull() && !voiceToken.isNull()) {
+                voiceCallback(voiceSessionId, voiceEndpoint, voiceToken);
+            }
+        } else if (eventName == "VOICE_SERVER_UPDATE") {
+            voiceEndpoint = data["endpoint"].toString();
+            voiceToken = data["token"].toString();
+            if (!voiceEndpoint.isNull()) {
+                voiceCallback(voiceSessionId, voiceEndpoint, voiceToken);
+            }
+        }
+    } else if (eventName == "READY") {
         sessionId = data["session_id"].toString();
     }
     onDispatchHandler(eventName, data);
