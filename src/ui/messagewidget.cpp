@@ -174,6 +174,10 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
     QWidget *iconContainer = new QWidget(mainMessage);
     QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
 
+    QFont font;
+    font.setPixelSize(14);
+    font.setFamily("whitney");
+
     // Get the date and time of the message
     QDateTime dateTime = QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime();
 
@@ -202,11 +206,13 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         }
 
         QLabel *username = new QLabel(ref->author.username, reply);
+        username->setFont(font);
         username->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
         username->setTextInteractionFlags(Qt::TextSelectableByMouse);
         username->setCursor(QCursor(Qt::PointingHandCursor));
 
         QLabel *content = new QLabel(ref->content);
+        content->setFont(font);
         content->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         content->setTextInteractionFlags(Qt::TextSelectableByMouse);
         content->setCursor(QCursor(Qt::PointingHandCursor));
@@ -245,7 +251,11 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         QWidget *messageInfos = new QWidget(data);
         QHBoxLayout *infosLayout = new QHBoxLayout(messageInfos);
         QLabel *name = new QLabel(author.username, messageInfos);
+        font.setPixelSize(16);
+        name->setFont(font);
         QLabel *date = new QLabel(processTimestamp(dateTime), messageInfos);
+        font.setPixelSize(12);
+        date->setFont(font);
 
         // Style the name label
         name->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -272,6 +282,8 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         // Add the label that shows the timestamp when the message is hovered
         hoveredTimestamp = processTime(dateTime.time());
         timestampLabel = new QLabel(this);
+        font.setPixelSize(12);
+        timestampLabel->setFont(font);
         timestampLabel->setFixedHeight(22);
         iconLayout->addWidget(timestampLabel);
         iconLayout->setContentsMargins(0, 0, 0, 0);
@@ -325,11 +337,17 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
 
 void MessageWidget::iconMessage(const Api::Message *message, const QString &text, const QString& iconName)
 {
+    QFont font;
+    font.setPixelSize(16);
+    font.setFamily("whitney");
+
     QHBoxLayout *layout = new QHBoxLayout(this);
     QWidget *spacer = new QWidget(this);
     QLabel *icon = new QLabel(this);
     QLabel *textLabel = new QLabel(text, this);
+    textLabel->setFont(font);
     QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime()), this);
+    timestampLabel->setFont(font);
 
     spacer->setFixedWidth(28);
     icon->setFixedWidth(44);

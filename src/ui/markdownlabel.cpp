@@ -7,6 +7,10 @@ namespace Ui {
 MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, QWidget *parent)
     : QLabel(parent)
 {
+    QFont font;
+    font.setPixelSize(16);
+    font.setFamily("whitney");
+    setFont(font);
     if (!content.isNull() && !content.isEmpty()) {
         QString html = "<html>";
         bool block = false, firstCharFound = false;

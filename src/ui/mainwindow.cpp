@@ -10,6 +10,7 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QDialog>
+#include <QFontDatabase>
 
 namespace Ui {
 
@@ -17,6 +18,7 @@ MainWindow::MainWindow() : QWidget()
 {
     // Style the window
     // this->setWindowFlags(Qt::CustomizeWindowHint); Soon
+    QFontDatabase::addApplicationFont("res/fonts/whitney.otf");
     this->setGeometry(0, 0, 940, 728);
     this->setStyleSheet("background-color: #202225;"
                         "padding: 0px;"

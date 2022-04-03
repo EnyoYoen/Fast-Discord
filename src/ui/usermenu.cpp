@@ -62,10 +62,16 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
                                        "background-color: rgb(90, 90, 90);");
     });
 
+    QFont font;
+    font.setPixelSize(14);
+    font.setFamily("whitney");
+
     // Create the widgets of the user menu
     QWidget *userInfos = new QWidget(container);
     QVBoxLayout *userInfosLayout = new QVBoxLayout(userInfos);
     QLabel *name = new QLabel(client->username, userInfos);
+    name->setFont(font);
+    font.setPixelSize(12);
 
     // Style the name label
     name->setFixedSize(84, 18);
@@ -73,6 +79,7 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
 
     // Create and style the discriminator label
     QLabel *discriminator = new QLabel("#" + client->discriminator, userInfos);
+    discriminator->setFont(font);
     discriminator->setFixedSize(84, 13);
     discriminator->setStyleSheet("color: #B9BBBE;");
 

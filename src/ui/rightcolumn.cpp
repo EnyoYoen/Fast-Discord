@@ -156,6 +156,10 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, int type)
 
         // Create and style the typing label
         typingLabel = new QLabel(messagesContainer);
+        QFont font;
+        font.setPixelSize(14);
+        font.setFamily("whitney");
+        typingLabel->setFont(font);
         typingLabel->setText("");
         typingLabel->setFixedHeight(24);
         typingLabel->setStyleSheet("color: #DCDDDE");

@@ -55,6 +55,10 @@ MessageSeparator::MessageSeparator(const QDate& date, QWidget *parent)
     }
     // Create the label with the timestamp
     QLabel *dateLabel = new QLabel(month + " " + QString::number(date.day()) + ", " + QString::number(date.year()), this);
+    QFont font;
+    font.setPixelSize(12);
+    font.setFamily("whitney");
+    dateLabel->setFont(font);
 
     // Add the widgets to the layout
     layout->addWidget(line1);

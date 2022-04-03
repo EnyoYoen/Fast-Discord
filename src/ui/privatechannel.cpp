@@ -37,6 +37,10 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     if (channelType == Api::DM) {
         rm->getUser([&](void *user){
             subtext = new QLabel("", container);
+            QFont font;
+            font.setPixelSize(12);
+            font.setFamily("whitney");
+            subtext->setFont(font);
 
             Api::User *dmUser = static_cast<Api::User *>(user);
             QString avatar = dmUser->avatar;
@@ -68,6 +72,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 
             // Set the DM name to the other user name
             name = new QLabel(dmUser->username, container);
+            font.setPixelSize(16);
+            name->setFont(font);
 
             // Style the widgets
             if (name) name->setFixedSize(145, 14);
@@ -101,6 +107,11 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             str_member += "s";
         }
         subtext = new QLabel(QString::number(nMember+1) + str_member, container);
+        QFont font;
+        font.setPixelSize(12);
+        font.setFamily("whitney");
+        subtext->setFont(font);
+        font.setPixelSize(16);
 
         // Get the name of the group
         QString channelName = privateChannel.name;
@@ -110,17 +121,20 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
                 // Get the name of the other user if there is only two person
                 rm->getUser([&](void *user){
                     name = new QLabel(static_cast<Api::User *>(user)->username);
+                    name->setFont(font);
                     name->setFixedSize(145, 14);
                     layout->addWidget(name, 0, 1);
                 }, privateChannel.recipientIds[0]);
             } else {
                 // Set it with 'Unnamed'
                 name = new QLabel("Unnamed");
+                name->setFont(font);
                 name->setFixedSize(145, 14);
                 layout->addWidget(name, 0, 1);
             }
         } else {
             name = new QLabel(channelName);
+            name->setFont(font);
             name->setFixedSize(145, 14);
             layout->addWidget(name, 0, 1);
         }

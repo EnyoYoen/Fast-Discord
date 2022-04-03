@@ -59,6 +59,10 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
 
     // Create the name label
     name = new QLabel(guildChannel.name, this);
+    QFont font;
+    font.setPixelSize(16);
+    font.setFamily("whitney");
+    name->setFont(font);
     name->setStyleSheet("color: #8E9297");
 
     // Add widgets to layout and style it

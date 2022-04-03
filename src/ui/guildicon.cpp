@@ -67,6 +67,10 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
         textIcon = new QLabel(this);
         QHBoxLayout *iconTextLayout = new QHBoxLayout(textIcon);
         QLabel *text = new QLabel(iconText, textIcon);
+        QFont font;
+        font.setPixelSize(16);
+        font.setFamily("whitney");
+        text->setFont(font);
 
         iconTextLayout->setContentsMargins(0, 0, 0, 0);
         iconTextLayout->addWidget(text, 0, Qt::AlignHCenter);

@@ -31,6 +31,10 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment 
         sizeStr.setNum(qRound(size / (1024. * 1024.) * 100) / 100) += " MB";
     }
     QLabel *filesize = new QLabel(sizeStr, infos);
+    QFont font;
+    font.setPixelSize(12);
+    font.setFamily("whitney");
+    filesize->setFont(font);
     filesize->setStyleSheet("color: #72767D;");
     filesize->setTextInteractionFlags(Qt::TextSelectableByMouse);
     filesize->setCursor(Qt::IBeamCursor);
