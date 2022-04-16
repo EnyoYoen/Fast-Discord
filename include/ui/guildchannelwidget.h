@@ -41,6 +41,7 @@ private:
     char        *hoverStyleSheet;
     char        *clickedStyleSheet;
 
+    QString     iconName;
     bool        clicked; // If the widget is clicked
 };
 

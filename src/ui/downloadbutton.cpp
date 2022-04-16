@@ -2,6 +2,7 @@
 
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QPainter>
 
 namespace Ui {
 
@@ -13,7 +14,13 @@ DownloadButton::DownloadButton(const QString& urlp, Api::Requester *request, QWi
 
     this->setFixedSize(24, 24);
     this->setCursor(Qt::PointingHandCursor);
-    this->setPixmap(QPixmap("res/images/svg/download-icon.svg"));
+
+    QPixmap img("res/images/svg/download-icon.svg");
+    QPainter qp(&img);
+    qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    qp.fillRect(img.rect(),QColor(185, 187, 190));
+    qp.end();
+    this->setPixmap(img);
 }
 
 void DownloadButton::mouseReleaseEvent(QMouseEvent *)
@@ -29,6 +36,26 @@ void DownloadButton::mouseReleaseEvent(QMouseEvent *)
 
     if (downloadsFolder != "/")
         requester->getFile(url, downloadsFolder + url.left(url.lastIndexOf('/') + 1));
+}
+
+void DownloadButton::enterEvent(QEvent *)
+{
+    QPixmap img("res/images/svg/download-icon.svg");
+    QPainter qp(&img);
+    qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    qp.fillRect(img.rect(),QColor(220, 221, 222));
+    qp.end();
+    this->setPixmap(img);
+}
+
+void DownloadButton::leaveEvent(QEvent *)
+{
+    QPixmap img("res/images/svg/download-icon.svg");
+    QPainter qp(&img);
+    qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    qp.fillRect(img.rect(),QColor(185, 187, 190));
+    qp.end();
+    this->setPixmap(img);
 }
 
 }

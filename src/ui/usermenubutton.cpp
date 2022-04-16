@@ -1,5 +1,8 @@
 #include "ui/usermenubutton.h"
 
+#include <QPainter>
+#include <QPixmap>
+
 namespace Ui {
 
 UserMenuButton::UserMenuButton(int typep, QWidget *parent)
@@ -12,20 +15,27 @@ UserMenuButton::UserMenuButton(int typep, QWidget *parent)
     blocked = false;
 
     // Determine the icon to use
-    iconStyle = "background-image: url(res/images/svg/";
+    QString iconName = "res/images/svg/";
     switch (type) {
         case Mute:
-            iconStyle += "mute";
+            iconName += "mute";
             break;
         case Deafen:
-            iconStyle += "deafen";
+            iconName += "deafen";
             break;
         case Settings:
-            iconStyle += "settings";
+            iconName += "settings";
             break;
     }
-    iconStyle += "-icon.svg);"
-                 "background-repeat: no-repeat;"
+    iconName += "-icon.svg";
+    QPixmap img(iconName);
+    QPainter qp(&img);
+    qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    qp.fillRect(img.rect(),QColor(185, 187, 190));
+    qp.end();
+    this->setPixmap(img);
+
+    iconStyle += "background-repeat: no-repeat;"
                  "background-position: center;"
                  "border-radius: 4px;";
 
@@ -37,28 +47,24 @@ UserMenuButton::UserMenuButton(int typep, QWidget *parent)
 void UserMenuButton::setClicked(bool active)
 {
     if (type == Mute) {
-        if (clicked && active) {
+        if (clicked) {
             // Block the widget
-            blocked = true;
-        } else if (clicked && !active) {
-            // Unblock the widget
-            blocked = false;
-        } else if (!clicked && active) {
+            blocked = active;
+        } else {
+            QString prefix = (active ? "un" : "");
+            QPixmap img("res/images/svg/" + prefix + "mute-icon.svg");
+            QPainter qp(&img);
+            qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            qp.fillRect(img.rect(),QColor(185, 187, 190));
+            qp.end();
+            this->setPixmap(img);
+
             // Put the unmute icon because deafen has been pressed
-            iconStyle = "background-image: url(res/images/svg/unmute-icon.svg);"
-                        "background-repeat: no-repeat;"
+            iconStyle = "background-repeat: no-repeat;"
                         "background-position: center;"
                         "border-radius: 4px;";
             this->setStyleSheet(styleSheet + iconStyle);
-            blocked = true;
-        } else if (!clicked && !active) {
-            // Put the mute icon because it was not muted before being blocked
-            iconStyle = "background-image: url(res/images/svg/mute-icon.svg);"
-                        "background-repeat: no-repeat;"
-                        "background-position: center;"
-                        "border-radius: 4px;";
-            this->setStyleSheet(styleSheet + iconStyle);
-            blocked = false;
+            blocked = active;
         }
     }
 }
@@ -69,20 +75,27 @@ void UserMenuButton::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
        if (!blocked) {
             // Change the icon if not blocked
-            iconStyle = "background-image: url(res/images/svg/";
+            QString iconName = "res/images/svg/";
             switch (type) {
                 case Mute:
-                    iconStyle += clicked ? "mute" : "unmute";
+                    iconName += clicked ? "mute" : "unmute";
                     break;
                 case Deafen:
-                    iconStyle += clicked ? "deafen" : "undeafen";
+                    iconName += clicked ? "deafen" : "undeafen";
                     break;
                 case Settings:
-                    iconStyle += "settings";
+                    iconName += "settings";
                     break;
             }
-            iconStyle += "-icon.svg);"
-                         "background-repeat: no-repeat;"
+            iconName += "-icon.svg";
+            QPixmap img(iconName);
+            QPainter qp(&img);
+            qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            qp.fillRect(img.rect(),QColor(185, 187, 190));
+            qp.end();
+            this->setPixmap(img);
+
+            iconStyle += "background-repeat: no-repeat;"
                          "background-position: center;"
                          "border-radius: 4px;";
             this->setStyleSheet(styleSheet + iconStyle);

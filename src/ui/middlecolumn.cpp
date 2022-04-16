@@ -76,7 +76,7 @@ void MiddleColumn::setPrivateChannels(const QVector<Api::PrivateChannel *>& priv
         QObject::connect(privateChannelWidget, &PrivateChannelWidget::closeButtonClicked, this, &MiddleColumn::deleteChannel);
     }
     privateChannelListLayout->insertStretch(-1, 1);
-    privateChannelListLayout->setSpacing(2);
+    privateChannelListLayout->setSpacing(0);
     privateChannelListLayout->setContentsMargins(8, 8, 8, 0);
 
     // Set the channels to the column
@@ -144,7 +144,7 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
     }
     guildChannelListLayout->insertStretch(-1, 1);
     guildChannelListLayout->setSpacing(2);
-    guildChannelListLayout->setContentsMargins(8, 8, 8, 8);
+    guildChannelListLayout->setContentsMargins(0, 8, 8, 8);
 
     // Style the channel list
     channelList->setWidget(guildChannelList);

@@ -21,12 +21,12 @@ GuildWidget::GuildWidget(Api::RessourceManager *rmp, const Api::Guild& guild, QW
 
     // Style the widget
     this->setMouseTracking(true);
-    this->setFixedSize(60, 48);
+    this->setFixedSize(72, 48);
     this->setStyleSheet("background-color: none;");
 
     // Create and style the layout
     layout = new QHBoxLayout(this);
-    layout->setSpacing(6);
+    layout->setSpacing(8);
     layout->setContentsMargins(0, 0, 0, 0);
 
     // Create the white pill

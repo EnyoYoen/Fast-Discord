@@ -15,6 +15,8 @@ public:
 
 private:
     void mouseReleaseEvent(QMouseEvent *event) override;
+    void enterEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
 
     QString url;
     Api::Requester *requester;

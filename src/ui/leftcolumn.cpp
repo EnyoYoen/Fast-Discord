@@ -33,7 +33,7 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     layout->setAlignment(guildSeparator, Qt::AlignHCenter);
 
     // Style the layout
-    layout->setSpacing(6);
+    layout->setSpacing(8);
     layout->setContentsMargins(0, 0, 0, 0);
 
 

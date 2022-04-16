@@ -1,7 +1,5 @@
 #include "ui/privatechannel.h"
 
-#include "ui/closechannelbutton.h"
-
 #include <QPixmap>
 #include <QBitmap>
 #include <QPainter>
@@ -79,7 +77,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             if (name) name->setFixedSize(145, 14);
             subtext->setFixedSize(145, 14);
 
-            CloseChannelButton *closeButton = new CloseChannelButton(container);
+            closeButton = new CloseChannelButton(container);
+            closeButton->hide();
             QObject::connect(closeButton, &CloseChannelButton::clicked, this, &PrivateChannelWidget::closeChannel);
 
             // Add widgets to the layout
@@ -89,9 +88,9 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             layout->addWidget(closeButton, 0, 2, 2, 1);
 
             // Create the main layout and add the container
-            QHBoxLayout *mainLayout = new QHBoxLayout(this);
+            mainLayout = new QHBoxLayout(this);
             mainLayout->addWidget(container);
-            mainLayout->setContentsMargins(0, 0, 0, 0);
+            mainLayout->setContentsMargins(0, 0, 25, 0);
 
             // Style this widget
             this->setFixedSize(224, 44);
@@ -159,7 +158,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
         // Style the subtext
         subtext->setFixedSize(145, 14);
 
-        CloseChannelButton *closeButton = new CloseChannelButton(container);
+        closeButton = new CloseChannelButton(container);
+        closeButton->hide();
         QObject::connect(closeButton, &CloseChannelButton::clicked, this, &PrivateChannelWidget::closeChannel);
 
         // Add widgets to the layout
@@ -168,9 +168,9 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
         layout->addWidget(closeButton, 0, 2, 2, 2);
 
         // Create the main layout and add the container
-        QHBoxLayout *mainLayout = new QHBoxLayout(this);
+        mainLayout = new QHBoxLayout(this);
         mainLayout->addWidget(container);
-        mainLayout->setContentsMargins(0, 0, 0, 0);
+        mainLayout->setContentsMargins(0, 0, 25, 0);
 
         // Style this widget
         this->setFixedSize(224, 44);
@@ -237,6 +237,8 @@ void PrivateChannelWidget::mousePressEvent(QMouseEvent *)
 void PrivateChannelWidget::enterEvent(QEvent *)
 {
     // Mouse hover : change the stylesheet
+    closeButton->show();
+    mainLayout->setContentsMargins(0, 0, 0, 0);
     if (!clicked) {
         if (statusBackground != nullptr) {
             statusBackground->setStyleSheet("border-radius: 8px;"
@@ -251,6 +253,8 @@ void PrivateChannelWidget::enterEvent(QEvent *)
 void PrivateChannelWidget::leaveEvent(QEvent *)
 {
     // Reset the stylesheet if not clicked
+    closeButton->hide();
+    mainLayout->setContentsMargins(0, 0, 25, 0);
     if (!clicked) {
         if (statusBackground != nullptr) {
             statusBackground->setStyleSheet("border-radius: 8px;"

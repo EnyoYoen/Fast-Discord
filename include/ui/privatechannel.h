@@ -1,7 +1,8 @@
 #pragma once
 
-#include "roundedimage.h"
-#include "statusicon.h"
+#include "ui/roundedimage.h"
+#include "ui/statusicon.h"
+#include "ui/closechannelbutton.h"
 #include "api/ressourcemanager.h"
 #include "api/objects/channel.h"
 #include "api/objects/user.h"
@@ -40,8 +41,10 @@ private:
     Api::RessourceManager *rm; // To request the API
 
     // All the main widgets
+    QHBoxLayout         *mainLayout;
     RoundedImage        *icon;
     StatusIcon          *statusIcon;
+    CloseChannelButton  *closeButton;
     QLabel              *name;
     QLabel              *subtext;
     QLabel              *statusBackground;

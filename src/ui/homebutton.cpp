@@ -2,6 +2,7 @@
 
 #include <QHBoxLayout>
 #include <QPixmap>
+#include <QPainter>
 #include <QMouseEvent>
 
 namespace Ui {
@@ -46,12 +47,15 @@ void HomeButton::unclicked()
     // Reset the stylesheet of this widget if currently clicked
     if (clic) {
         clic = false;
+        QPixmap img("res/images/svg/home-icon.svg");
+        QPainter qp(&img);
+        qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        qp.fillRect(img.rect(),QColor(220, 221, 222));
+        qp.end();
+        image->setPixmap(img);
         image->setStyleSheet("background-color: #36393f;"
                              "border: none;"
-                             "border-radius: 24px;"
-                             "background-image: url(res/images/svg/home-icon.svg);"
-                             "background-repeat: no-repeat;"
-                             "background-position: center;");
+                             "border-radius: 24px;");
     }
     pill->setHeight(0);
 }
@@ -60,12 +64,15 @@ void HomeButton::mousePressEvent(QMouseEvent *)
 {
     // Widget clicked : change the stylesheet
     if (!clic) {
+        QPixmap img("res/images/svg/home-icon.svg");
+        QPainter qp(&img);
+        qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        qp.fillRect(img.rect(),Qt::white);
+        qp.end();
+        image->setPixmap(img);
         image->setStyleSheet("background-color: #5865F2;"
                              "border: none;"
-                             "border-radius: 16px;"
-                             "background-image: url(res/images/svg/home-icon.svg);"
-                             "background-repeat: no-repeat;"
-                             "background-position: center;");
+                             "border-radius: 16px;");
         clic = true;
     }
     pill->setHeight(40);
@@ -75,12 +82,15 @@ void HomeButton::enterEvent(QEvent *)
 {
     // Mouse hover : change the stylesheet
     if (!clic) {
+        QPixmap img("res/images/svg/home-icon.svg");
+        QPainter qp(&img);
+        qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        qp.fillRect(img.rect(),Qt::white);
+        qp.end();
+        image->setPixmap(img);
         image->setStyleSheet("background-color: #5865F2;"
                              "border: none;"
-                             "border-radius: 16px;"
-                             "background-image: url(res/images/svg/home-icon.svg);"
-                             "background-repeat: no-repeat;"
-                             "background-position: center;");
+                             "border-radius: 16px;");
     }
     if (pill->height() != 40) pill->setHeight(20);
 }
@@ -89,12 +99,15 @@ void HomeButton::leaveEvent(QEvent *)
 {
     // Reset the stylesheet if not clicked
     if (!clic) {
+        QPixmap img("res/images/svg/home-icon.svg");
+        QPainter qp(&img);
+        qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        qp.fillRect(img.rect(),QColor(220, 221, 222));
+        qp.end();
+        image->setPixmap(img);
         image->setStyleSheet("background-color: #36393f;"
                              "border: none;"
-                             "border-radius: 24px;"
-                             "background-image: url(res/images/svg/home-icon.svg);"
-                             "background-repeat: no-repeat;"
-                             "background-position: center;");
+                             "border-radius: 24px;");
     }
     if (pill->height() != 40) pill->setHeight(0);
 }

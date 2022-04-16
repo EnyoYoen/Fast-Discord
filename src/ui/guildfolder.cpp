@@ -4,6 +4,7 @@
 
 #include <QHBoxLayout>
 #include <QGridLayout>
+#include <QPainter>
 
 namespace Ui {
 
@@ -14,7 +15,7 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
     guildIds = guildFolder->guildIds;
 
     QHBoxLayout *closedLayout = new QHBoxLayout(this);
-    closedLayout->setSpacing(6);
+    closedLayout->setSpacing(8);
     closedLayout->setContentsMargins(0, 0, 0, 0);
 
     closedContent = new QLabel(this);
@@ -40,12 +41,14 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
                                  + ", " + QString::number(color & 0x000000FF) + ", 0.4);"
                                  "border-radius: 16px;");
 
+    QPixmap img("res/images/svg/folder-icon.svg");
+    QPainter qp(&img);
+    qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    qp.fillRect(img.rect(),QColor(color));
+    qp.end();
     closeButton = new QLabel(openedContent);
+    closeButton->setPixmap(img);
     closeButton->setFixedSize(72, 48);
-    closeButton->setStyleSheet("background-image: url(res/images/svg/folder-icon.svg);"
-                               "background-repeat: no-repeat;"
-                               "background-position: center;"
-                               "background-color: none;");
 
     QVBoxLayout *openedLayout = new QVBoxLayout(openedContent);
     openedLayout->setSpacing(10);
