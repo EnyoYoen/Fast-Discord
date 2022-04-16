@@ -143,7 +143,7 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
         }
     }
     guildChannelListLayout->insertStretch(-1, 1);
-    guildChannelListLayout->setSpacing(2);
+    guildChannelListLayout->setSpacing(3);
     guildChannelListLayout->setContentsMargins(0, 8, 8, 8);
 
     // Style the channel list

@@ -37,6 +37,7 @@ private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
     void setIcon(const QString& iconFileName);
+    void userReceiver(void *user);
 
     Api::RessourceManager *rm; // To request the API
 
@@ -49,7 +50,10 @@ private:
     QLabel              *subtext;
     QLabel              *statusBackground;
 
-    bool         clicked; // If the widget is clicked
+    QVector<Api::User *> users;
+    unsigned int         nMembers;
+    unsigned int         userCounter;
+    bool                 clicked; // If the widget is clicked
 };
 
 } // namespace Ui

@@ -12,6 +12,9 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     type = guildChannel.type;
     clicked = false;
 
+    QFont font;
+    font.setFamily("whitney");
+
     //  Determine the icon of this channel with its type
     QString iconNumber;
     switch (type) {
@@ -40,6 +43,10 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     if (type == Api::GuildCategory) {
         // It is a category, there is no stylesheet
         hoverStyleSheet = clickedStyleSheet = (char *)"color: #FFF;";
+        font.setPixelSize(11);
+        font.setBold(true);
+        this->setFixedSize(224, 36);
+        this->setContentsMargins(0, 18, 0, 0);
     } else {
         hoverStyleSheet = (char *)"color: #DCDDDE;"
                           "border-radius: 4px;"
@@ -47,6 +54,8 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
         clickedStyleSheet = (char *)"color: #FFF;"
                             "border-radius: 4px;"
                             "background-color: #393D43;";
+        font.setPixelSize(16);
+        this->setFixedSize(224, 32);
     }
 
     // I have to create an other widget otherwise
@@ -57,14 +66,14 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     // Create the icon
     icon = new QLabel(this);
     icon->setPixmap(iconName);
-    icon->setFixedSize(32, 32);
+    if (type == Api::GuildCategory)
+        icon->setFixedSize(16, 16);
+    else
+        icon->setFixedSize(26, 26);
     icon->setStyleSheet("color: #8E9297");
 
     // Create the name label
-    name = new QLabel(guildChannel.name, this);
-    QFont font;
-    font.setPixelSize(16);
-    font.setFamily("whitney");
+    name = new QLabel((type == Api::GuildCategory ? guildChannel.name.toUpper() : guildChannel.name), this);
     name->setFont(font);
     name->setStyleSheet("color: #8E9297");
 
@@ -78,9 +87,6 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     mainLayout->addWidget(container);
     mainLayout->setContentsMargins((type == Api::GuildCategory ? 0 : 16), 0, 0, 0);
-
-    // Set the size of this widget
-    this->setFixedSize(224, 34);
 }
 
 void GuildChannelWidget::mouseReleaseEvent(QMouseEvent *event)

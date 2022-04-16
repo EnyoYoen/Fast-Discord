@@ -5,7 +5,6 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QString>
-#include <QGridLayout>
 
 namespace Ui {
 
@@ -17,16 +16,11 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     id = privateChannel.id;
     statusIcon = nullptr;
     statusBackground = nullptr;
+    userCounter = 0;
 
     // I have to create an other widget otherwise
     // the background color is not applied everywhere, I don't know why
     QWidget *container = new QWidget(this);
-
-    // Create and style the layout
-    QGridLayout *layout = new QGridLayout(container);
-    layout->setContentsMargins(8, 0, 8, 0);
-    layout->setHorizontalSpacing(4);
-    layout->setVerticalSpacing(4);
 
     // Variables initialization
     QString channelIconFileName;
@@ -35,8 +29,9 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     if (channelType == Api::DM) {
         rm->getUser([&](void *user){
             subtext = new QLabel("", container);
+            subtext->move(52, 24);
             QFont font;
-            font.setPixelSize(12);
+            font.setPixelSize(13);
             font.setFamily("whitney");
             subtext->setFont(font);
 
@@ -48,6 +43,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 
                 // Create the icon
                 icon = new RoundedImage(channelIconFileName, 32, 32, 16, container);
+                icon->move(8, 6);
             } else {
                 // Create the icon
                 icon = new RoundedImage(32, 32, 16, container);
@@ -72,6 +68,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             name = new QLabel(dmUser->username, container);
             font.setPixelSize(16);
             name->setFont(font);
+            name->move(52, (subtext->text().isEmpty() ? 16 : 8));
 
             // Style the widgets
             if (name) name->setFixedSize(145, 14);
@@ -79,18 +76,13 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 
             closeButton = new CloseChannelButton(container);
             closeButton->hide();
+            closeButton->move(200, 3);
             QObject::connect(closeButton, &CloseChannelButton::clicked, this, &PrivateChannelWidget::closeChannel);
-
-            // Add widgets to the layout
-            layout->addWidget(icon, 0, 0, 2, 1);
-            layout->addWidget(name, 0, 1);
-            layout->addWidget(subtext, 1, 1);
-            layout->addWidget(closeButton, 0, 2, 2, 1);
 
             // Create the main layout and add the container
             mainLayout = new QHBoxLayout(this);
             mainLayout->addWidget(container);
-            mainLayout->setContentsMargins(0, 0, 25, 0);
+            mainLayout->setContentsMargins(0, 0, 0, 0);
 
             // Style this widget
             this->setFixedSize(224, 44);
@@ -99,15 +91,16 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
         }, privateChannel.recipientIds[0]);
     } else if (channelType == Api::GroupDM) {
         // Get the subtext of the group DM with the number of people in it
-        size_t nMember = privateChannel.recipientIds.size();
-        QString str_member = " member";
+        nMembers = privateChannel.recipientIds.size();
+        QString str_member = " Member";
         // Plural
-        if (nMember + 1 > 1) {
+        if (nMembers + 1 > 1) {
             str_member += "s";
         }
-        subtext = new QLabel(QString::number(nMember+1) + str_member, container);
+        subtext = new QLabel(QString::number(nMembers+1) + str_member, container);
+        subtext->move(52, 24);
         QFont font;
-        font.setPixelSize(12);
+        font.setPixelSize(13);
         font.setFamily("whitney");
         subtext->setFont(font);
         font.setPixelSize(16);
@@ -116,26 +109,22 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
         QString channelName = privateChannel.name;
         if (channelName.isNull()) {
             // There is no name
-            if (nMember == 1) {
-                // Get the name of the other user if there is only two person
-                rm->getUser([&](void *user){
-                    name = new QLabel(static_cast<Api::User *>(user)->username);
-                    name->setFont(font);
-                    name->setFixedSize(145, 14);
-                    layout->addWidget(name, 0, 1);
-                }, privateChannel.recipientIds[0]);
-            } else {
+            if (nMembers == 0) {
                 // Set it with 'Unnamed'
-                name = new QLabel("Unnamed");
+                name = new QLabel("Unnamed", container);
                 name->setFont(font);
                 name->setFixedSize(145, 14);
-                layout->addWidget(name, 0, 1);
+                name->move(52, 8);
+            } else {
+                // Get the name of the other users if there is more than one person
+                for (unsigned int i = 0 ; i < nMembers ; i++)
+                    rm->getUser([this](void *u){this->userReceiver(u);}, privateChannel.recipientIds[i]);
             }
         } else {
-            name = new QLabel(channelName);
+            name = new QLabel(channelName, container);
             name->setFont(font);
             name->setFixedSize(145, 14);
-            layout->addWidget(name, 0, 1);
+            name->move(52, 8);
         }
 
         // Set the icon of the channel
@@ -146,6 +135,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 
             // Create the icon
             icon = new RoundedImage(channelIconFileName, 32, 32, 16, container);
+            icon->move(8, 6);
         } else {
             // Create the icon
             icon = new RoundedImage(32, 32, 16, container);
@@ -160,17 +150,13 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 
         closeButton = new CloseChannelButton(container);
         closeButton->hide();
+        closeButton->move(200, 3);
         QObject::connect(closeButton, &CloseChannelButton::clicked, this, &PrivateChannelWidget::closeChannel);
-
-        // Add widgets to the layout
-        layout->addWidget(icon, 0, 0, 2, 1);
-        layout->addWidget(subtext, 1, 1);
-        layout->addWidget(closeButton, 0, 2, 2, 2);
 
         // Create the main layout and add the container
         mainLayout = new QHBoxLayout(this);
         mainLayout->addWidget(container);
-        mainLayout->setContentsMargins(0, 0, 25, 0);
+        mainLayout->setContentsMargins(0, 0, 0, 0);
 
         // Style this widget
         this->setFixedSize(224, 44);
@@ -187,6 +173,28 @@ void PrivateChannelWidget::setStatus(const QString& status)
 void PrivateChannelWidget::setIcon(const QString& iconFileName)
 {
     icon->setImage(iconFileName);
+    icon->move(8, 6);
+}
+
+void PrivateChannelWidget::userReceiver(void *user)
+{
+    users.append(reinterpret_cast<Api::User *>(user));
+    if (++userCounter == nMembers) {
+        QString nameStr;
+        for (unsigned int i = 0 ; i < users.size() ; ) {
+            nameStr += users[i]->username;
+            if (++i != users.size()) {
+                nameStr += ", ";
+            }
+        }
+        QFont font;
+        font.setPixelSize(16);
+        font.setFamily("whitney");
+        name = new QLabel(nameStr, this);
+        name->setFont(font);
+        name->setFixedSize(145, 14);
+        name->move(52, 8);
+    }
 }
 
 void PrivateChannelWidget::closeChannel()
@@ -238,7 +246,6 @@ void PrivateChannelWidget::enterEvent(QEvent *)
 {
     // Mouse hover : change the stylesheet
     closeButton->show();
-    mainLayout->setContentsMargins(0, 0, 0, 0);
     if (!clicked) {
         if (statusBackground != nullptr) {
             statusBackground->setStyleSheet("border-radius: 8px;"
@@ -254,7 +261,6 @@ void PrivateChannelWidget::leaveEvent(QEvent *)
 {
     // Reset the stylesheet if not clicked
     closeButton->hide();
-    mainLayout->setContentsMargins(0, 0, 25, 0);
     if (!clicked) {
         if (statusBackground != nullptr) {
             statusBackground->setStyleSheet("border-radius: 8px;"
