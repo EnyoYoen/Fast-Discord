@@ -214,7 +214,6 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *
             break;
     }
 
-    QObject::connect(reply, &QNetworkReply::finished, this, &Requester::readReply);
     connect(reply, SIGNAL(finished()), this, SLOT(readReply()));
     if (requestQueue.front().type == GetFile)
         connect(reply, SIGNAL(readyRead()), this, SLOT(writeFile()));
