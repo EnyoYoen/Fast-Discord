@@ -26,7 +26,7 @@ Requester::Requester(const QString& tokenp)
     loop = QThread::create([this](){RequestLoop();});
     loop->start();
 
-    QObject::connect(this, &Requester::requestEmit, this, &Requester::doRequest);
+    connect(this, SIGNAL(requestEmit(int,QNetworkRequest,QByteArray*,QHttpMultiPart*)), this, SLOT(doRequest(int,QNetworkRequest,QByteArray*,QHttpMultiPart*)));
 }
 
 Requester::~Requester()
@@ -214,10 +214,10 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *
             break;
     }
 
-    // Connect the finished and read signals to process the reply
     QObject::connect(reply, &QNetworkReply::finished, this, &Requester::readReply);
+    connect(reply, SIGNAL(finished()), this, SLOT(readReply()));
     if (requestQueue.front().type == GetFile)
-        QObject::connect(reply, &QNetworkReply::readyRead, this, &Requester::writeFile);
+        connect(reply, SIGNAL(readyRead()), this, SLOT(writeFile()));
 }
 
 void Requester::requestApi(const RequestParameters &parameters)
