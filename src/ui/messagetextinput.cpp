@@ -33,10 +33,9 @@ void MessageTextInput::keyPressEvent(QKeyEvent *event)
         // Get the text and strip the spaces and the new lines
         QString content = toPlainText().trimmed();
 
-        // Emit signals if the message is not empty
+        emit returnPressed(content);
         if (!content.isEmpty()) {
             emit clear();
-            emit returnPressed(content);
         }
     } else {
         // Compare the last timestamp and the actual time

@@ -50,6 +50,7 @@ private:
     QVBoxLayout *messagesLayout;
     MessageArea *messageArea;
     QLabel      *typingLabel;
+    QLabel      *fileLabel;
     bool         placeholder;
 
     Api::RessourceManager *rm; // To request the API

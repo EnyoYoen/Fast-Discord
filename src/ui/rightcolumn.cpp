@@ -140,10 +140,17 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, int type)
         QHBoxLayout *inputLayout = new QHBoxLayout(inputBox);
         MessageTextInput *textInput = new MessageTextInput(inputBox);
         FileUploadButton *uploadButton = new FileUploadButton(inputBox);
+        
+        fileLabel = new QLabel(inputBox);
+        QPixmap pix("res/images/svg/archive-icon.svg");
+        fileLabel->setPixmap(pix.scaled(18, 24, Qt::KeepAspectRatio));
+        fileLabel->setFixedSize(18, 24);
+        fileLabel->hide();
 
         // Add widget to the layout and style it
         inputLayout->addWidget(uploadButton);
         inputLayout->addWidget(textInput);
+        inputLayout->addWidget(fileLabel);
         inputLayout->setContentsMargins(16, 0, 16, 0);
         inputLayout->setSpacing(0);
 
@@ -238,18 +245,21 @@ void const RightColumn::sendTyping()
 
 void const RightColumn::sendMessage(const QString& content)
 {
-    // Send a new message to the API and add it to the opened channel
-    if (filePath.isNull()) {
-        rm->requester->sendMessage(content, currentOpenedChannel);
-    } else {
-        rm->requester->sendMessageWithFile(content, currentOpenedChannel, filePath);
-        filePath.clear();
-    }
+    if (!content.isEmpty() || !filePath.isNull()) {
+        // Send a new message to the API and add it to the opened channel
+        if (filePath.isNull()) {
+            rm->requester->sendMessage(content, currentOpenedChannel);
+        } else {
+            rm->requester->sendMessageWithFile(content, currentOpenedChannel, filePath);
+            filePath.clear();
+            fileLabel->hide();
+        }
 
-    QString messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs);
-    QString fakeStr;
-    Api::Message *newMessage = new Api::Message {Api::User{QString(client->username), fakeStr, QString(client->avatar), fakeStr, fakeStr, fakeStr, Api::Snowflake(client->id), 0, 0, 0, 0, 2, 2, 2, 2}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, QVector<Api::Reaction *>(), QVector<Api::Embed *>(), QVector<Api::User *>(), QVector<Api::Attachment *>(), QVector<Api::ChannelMention *>(), QVector<QString>(), QVector<Api::MessageComponent *>(), QVector<Api::StickerItem *>(), QVector<Api::Sticker *>(), QString(content), QString(messageTimestamp), fakeStr, fakeStr, 0, Api::Snowflake(currentOpenedChannel), 0, 0, 0, 0, 0, 0, 0, false, false, false};
-    this->addMessage(*newMessage);
+        QString messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs);
+        QString fakeStr;
+        Api::Message *newMessage = new Api::Message {Api::User{QString(client->username), fakeStr, QString(client->avatar), fakeStr, fakeStr, fakeStr, Api::Snowflake(client->id), 0, 0, 0, 0, 2, 2, 2, 2}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, QVector<Api::Reaction *>(), QVector<Api::Embed *>(), QVector<Api::User *>(), QVector<Api::Attachment *>(), QVector<Api::ChannelMention *>(), QVector<QString>(), QVector<Api::MessageComponent *>(), QVector<Api::StickerItem *>(), QVector<Api::Sticker *>(), QString(content), QString(messageTimestamp), fakeStr, fakeStr, 0, Api::Snowflake(currentOpenedChannel), 0, 0, 0, 0, 0, 0, 0, false, false, false};
+        this->addMessage(*newMessage);
+    }
 }
 
 void const RightColumn::loadMoreMessages()
@@ -262,6 +272,7 @@ void const RightColumn::loadMoreMessages()
 void const RightColumn::setUploadFilePath(const QString& file)
 {
     filePath = file;
+    fileLabel->show();
 }
 
 } // namespace Ui

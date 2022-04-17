@@ -162,7 +162,7 @@ void Requester::RequestLoop()
                 if (parameters.json)
                     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-                if (parameters.fileName != "") {
+                if (!parameters.fileName.isEmpty()) {
                     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
                     QHttpPart part;
 
@@ -180,7 +180,7 @@ void Requester::RequestLoop()
                     multiPart->append(part);
 
                     emit requestEmit(Post, request, nullptr, multiPart);
-                } else if (parameters.customRequest != "") {
+                } else if (!parameters.customRequest.isEmpty()) {
                     if (parameters.customRequest == "POST") {
                         emit requestEmit(Post, request, new QByteArray(parameters.postDatas.toUtf8()), nullptr);
                     } else if (parameters.customRequest == "PUT") {
