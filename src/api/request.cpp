@@ -59,8 +59,6 @@ void Requester::readReply()
         file.close();
     }
     QByteArray ba = reply->readAll();
-    if (parameters.type == SendMessageWithFile) 
-        qDebug() << ba;
 
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     if (statusCode.toInt() == 429) { // We are rate limited
