@@ -11,11 +11,16 @@ MessageTextInput::MessageTextInput(QWidget *parent) : QTextEdit(parent)
     // Initialize attribute
     lastTypingTimestamp = 0;
 
+    QFont font;
+    font.setPixelSize(16);
+    font.setFamily("whitney");
+    this->setFont(font);
+
     // Style
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setPlaceholderText("Message");
-    this->setFixedHeight(22);
+    this->setFixedHeight(30);
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     this->setStyleSheet("color: #DCDDDE;"
                         "border: 0px;");

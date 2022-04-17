@@ -40,6 +40,7 @@ private slots:
     void const sendTyping();
     void const sendMessage(const QString& content);
     void const loadMoreMessages();
+    void const setUploadFilePath(const QString& filepath);
 
 private:
     void openChannel(const Api::Snowflake& channelId, int type);
@@ -52,6 +53,7 @@ private:
     bool         placeholder;
 
     Api::RessourceManager *rm; // To request the API
+    QString filePath;
 
     const Api::Client *client;           // Store the actual user
     Api::Snowflake currentOpenedChannel; // Current channel ID

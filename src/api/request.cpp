@@ -59,6 +59,8 @@ void Requester::readReply()
         file.close();
     }
     QByteArray ba = reply->readAll();
+    if (parameters.type == SendMessageWithFile) 
+        qDebug() << ba;
 
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     if (statusCode.toInt() == 429) { // We are rate limited
@@ -159,11 +161,28 @@ void Requester::RequestLoop()
                 /* Set the headers */
                 if (parameters.type != GetFile)
                     request.setRawHeader(QByteArray("Authorization"), token.toUtf8());
-                if (parameters.json) {
+                if (parameters.json)
                     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-                }
 
-                if (parameters.customRequest != "") {
+                if (parameters.fileName != "") {
+                    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+                    QHttpPart part;
+
+                    part.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"payload_json\""));
+                    part.setBody(parameters.postDatas.toUtf8());
+                    multiPart->append(part);
+
+                    QString fileName = parameters.fileName;
+                    part.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"files[0]\"; filename=\"" + fileName.right(fileName.size() - fileName.lastIndexOf("/")) + "\""));
+                    part.setHeader(QNetworkRequest::ContentTypeHeader, QVariant(QMimeDatabase().mimeTypeForFile(parameters.fileName).name()));
+                    QFile file(parameters.fileName);
+                    file.open(QIODevice::ReadOnly);
+                    part.setBody(file.readAll());
+                    file.close();
+                    multiPart->append(part);
+
+                    emit requestEmit(Post, request, nullptr, multiPart);
+                } else if (parameters.customRequest != "") {
                     if (parameters.customRequest == "POST") {
                         emit requestEmit(Post, request, new QByteArray(parameters.postDatas.toUtf8()), nullptr);
                     } else if (parameters.customRequest == "PUT") {
@@ -171,16 +190,6 @@ void Requester::RequestLoop()
                     } else if (parameters.customRequest == "DELETE") {
                         emit requestEmit(Delete, request, nullptr, nullptr);
                     }
-                } else if (parameters.fileName != "") {
-                    QHttpMultiPart multiPart(QHttpMultiPart::FormDataType);
-                    QHttpPart part;
-
-                    part.setHeader(QNetworkRequest::ContentTypeHeader, QVariant(QMimeDatabase().mimeTypeForFile(parameters.fileName).name()));
-                    QFile file(parameters.fileName);
-                    part.setBody(file.readAll());
-
-                    multiPart.append(part);
-                    emit requestEmit(Post, request, nullptr, &multiPart);
                 } else {
                     emit requestEmit(Get, request, nullptr, nullptr);
                 }
