@@ -2,7 +2,6 @@
 *Thanks to [Sour Dani](https://github.com/dangreene0) for the logo*
 # Fast-Discord
 ![Fast-Discord image](doc/images/Fast-Discord.gif)
-*For now it is very basic*
 
  - [Origins of this project](#origins)
  - [Coding conventions](#coding-conventions)
