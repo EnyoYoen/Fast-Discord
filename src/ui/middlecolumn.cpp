@@ -157,30 +157,35 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
 void MiddleColumn::clicGuildChannel(const Api::Snowflake& id)
 {
     // Reset the stylesheet of the channels except the one that we just clicked
+    QString name;
     for (size_t i = 0 ; i < guildChannelWidgets.size() ; i++) {
         if (guildChannelWidgets[i]->id != id) {
             guildChannelWidgets[i]->unclicked();
         } else {
+            name = guildChannelWidgets[i]->name->text();
             if (guildChannelWidgets[i]->type == Api::GuildVoice)
                 emit voiceChannelClicked(openedGuildId, id, userMenu->deaf ? true : userMenu->deaf, userMenu->muted);
         }
     }
 
     // Emit the signal to open the channel
-    emit guildChannelClicked(openedGuildId, id);
+    emit guildChannelClicked(name, openedGuildId, id);
 }
 
 void MiddleColumn::clicPrivateChannel(const Api::Snowflake& id)
 {
     // Reset the stylesheet of the channels except the one that we just clicked
+    QString name;
     for (size_t i = 0 ; i < privateChannelWidgets.size() ; i++) {
         if (privateChannelWidgets[i]->id != id) {
             privateChannelWidgets[i]->unclicked();
+        } else {
+            name = privateChannelWidgets[i]->name->text();
         }
     }
 
     // Emit the signal to open the channel
-    emit privateChannelClicked(id);
+    emit privateChannelClicked(name, id);
 }
 
 void MiddleColumn::displayPrivateChannels()

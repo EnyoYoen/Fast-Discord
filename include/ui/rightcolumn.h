@@ -30,8 +30,8 @@ signals:
 
 public slots:
     void clean();
-    void openGuildChannel(const Api::Snowflake& guildId, const Api::Snowflake& id);
-    void openPrivateChannel(const Api::Snowflake& id);
+    void openGuildChannel(const QString& channelName, const Api::Snowflake& guildId, const Api::Snowflake& id);
+    void openPrivateChannel(const QString& channelName, const Api::Snowflake& id);
     void const addMessage(const Api::Message& message);
 
 private slots:
@@ -43,7 +43,7 @@ private slots:
     void const setUploadFilePath(const QString& filepath);
 
 private:
-    void openChannel(const Api::Snowflake& channelId, int type);
+    void openChannel(const Api::Snowflake& channelId, const QString& channelName, int type);
 
     // Main widgets
     QHBoxLayout *layout;

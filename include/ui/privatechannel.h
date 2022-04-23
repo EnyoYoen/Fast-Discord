@@ -21,7 +21,8 @@ public:
     void unclicked(); // Reset the stylesheet of the widget
     void setStatus(const QString& status);
 
-    Api::Snowflake id;
+    QLabel         *name;
+    Api::Snowflake  id;
 
 signals:
     void leftClicked(const Api::Snowflake&);
@@ -46,7 +47,6 @@ private:
     RoundedImage        *icon;
     StatusIcon          *statusIcon;
     CloseChannelButton  *closeButton;
-    QLabel              *name;
     QLabel              *subtext;
     QLabel              *statusBackground;
 

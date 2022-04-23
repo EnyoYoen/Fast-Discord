@@ -6,7 +6,7 @@
 
 namespace Ui {
 
-MessageTextInput::MessageTextInput(QWidget *parent) : QTextEdit(parent)
+MessageTextInput::MessageTextInput(const QString& channelName, QWidget *parent) : QTextEdit(parent)
 {
     // Initialize attribute
     lastTypingTimestamp = 0;
@@ -19,7 +19,7 @@ MessageTextInput::MessageTextInput(QWidget *parent) : QTextEdit(parent)
     // Style
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    this->setPlaceholderText("Message");
+    this->setPlaceholderText("Message " + channelName);
     this->setFixedHeight(30);
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     this->setStyleSheet("color: #DCDDDE;"

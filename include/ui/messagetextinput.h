@@ -11,7 +11,7 @@ class MessageTextInput : public QTextEdit
 {
     Q_OBJECT
 public:
-    MessageTextInput(QWidget *parent = 0);
+    MessageTextInput(const QString& channelName, QWidget *parent = 0);
 
 signals:
     void returnPressed(QString);

@@ -19,8 +19,9 @@ public:
     GuildChannelWidget(const Api::Channel& guildChannel, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
 
-    Api::Snowflake id;     // The id that we assign to the widget
-    int            type;
+    QLabel         *name;
+    Api::Snowflake  id;     // The id that we assign to the widget
+    int             type;
 
 signals:
     void leftClicked(const Api::Snowflake& id);
@@ -35,7 +36,6 @@ private:
     // All the main widgets
     QHBoxLayout *layout;
     QLabel      *icon;
-    QLabel      *name;
 
     // Different stylesheets when the widget is clicked or the mouse is hover
     char        *hoverStyleSheet;

@@ -91,21 +91,22 @@ void RightColumn::clean()
     layout->addWidget(placeholderWidget);
 }
 
-void RightColumn::openGuildChannel(const Api::Snowflake& guildId, const Api::Snowflake& id)
+void RightColumn::openGuildChannel(const QString& channelName, const Api::Snowflake& guildId, const Api::Snowflake& id)
 {
     rm->getGuildChannel([&](void *channel){
-        openChannel(id, reinterpret_cast<Api::Channel *>(channel)->type);
+        openChannel(id, "#" + channelName, reinterpret_cast<Api::Channel *>(channel)->type);
     }, guildId, id);
 }
 
-void RightColumn::openPrivateChannel(const Api::Snowflake& id)
+void RightColumn::openPrivateChannel(const QString& channelName, const Api::Snowflake& id)
 {
     rm->getPrivateChannel([&](void *channel){
-        openChannel(id, reinterpret_cast<Api::PrivateChannel *>(channel)->type);
+        int type = reinterpret_cast<Api::PrivateChannel *>(channel)->type;
+        openChannel(id, (type == Api::DM ? "@" : "") + channelName, type);
     }, id);
 }
 
-void RightColumn::openChannel(const Api::Snowflake& channelId, int type)
+void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& channelName, int type)
 {
     if (type != Api::GuildVoice) {
         rm->requester->removeImageRequests();
@@ -138,7 +139,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, int type)
         QHBoxLayout *containerLayout = new QHBoxLayout(inputContainer);
         QWidget *inputBox = new QWidget(inputContainer);
         QHBoxLayout *inputLayout = new QHBoxLayout(inputBox);
-        MessageTextInput *textInput = new MessageTextInput(inputBox);
+        MessageTextInput *textInput = new MessageTextInput(channelName, inputBox);
         FileUploadButton *uploadButton = new FileUploadButton(inputBox);
         
         fileLabel = new QLabel(inputBox);

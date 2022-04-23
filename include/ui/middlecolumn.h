@@ -24,8 +24,8 @@ public:
 
 signals:
     void guildChannelsReceived(const QVector<Api::Channel *> channels);
-    void guildChannelClicked(const Api::Snowflake& guildId, const Api::Snowflake& id);
-    void privateChannelClicked(const Api::Snowflake& id);
+    void guildChannelClicked(const QString& channelName, const Api::Snowflake& guildId, const Api::Snowflake& id);
+    void privateChannelClicked(const QString& channelName, const Api::Snowflake& id);
     void voiceChannelClicked(const Api::Snowflake& guildId, const Api::Snowflake& channelId, bool selfMute, bool selfDeaf);
 
 public slots:
