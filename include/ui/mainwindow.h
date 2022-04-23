@@ -19,7 +19,7 @@ public:
     MainWindow();
 
 signals:
-    void clientSettingsReceived();
+    void clientAndSettingsReceived();
 
 private slots:
     void setup();
@@ -40,6 +40,9 @@ private:
 
     Api::Client *client;                 // The actual client
     Api::ClientSettings *clientSettings; // and the settings
+
+    bool clientReceived;
+    bool clientSettingsReceived;
 };
 
 } // namespace Ui

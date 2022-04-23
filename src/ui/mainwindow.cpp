@@ -31,15 +31,24 @@ MainWindow::MainWindow() : QWidget()
     rm = new Api::RessourceManager(token);
 
     // Connect the signal for the setup
-    QObject::connect(this, &MainWindow::clientSettingsReceived, this, &MainWindow::setup);
+    QObject::connect(this, &MainWindow::clientAndSettingsReceived, this, &MainWindow::setup);
 
     // Get user settings
+    clientReceived = false;
+    clientSettingsReceived = false;
     rm->getClient([this](void *clientp){
         client = static_cast<Api::Client *>(clientp);
+        if (clientSettingsReceived)
+            emit clientAndSettingsReceived();
+        else
+            clientReceived = true;
     });
     rm->getClientSettings([this](void *clientSettingsp){
         clientSettings = static_cast<Api::ClientSettings *>(clientSettingsp);
-        emit clientSettingsReceived();
+        if (clientReceived)
+            emit clientAndSettingsReceived();
+        else
+            clientSettingsReceived = true;
     });
 }
 
