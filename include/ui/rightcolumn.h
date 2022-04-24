@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ui/messagearea.h"
+#include "channelheader.h"
 #include "api/jsonutils.h"
 #include "api/ressourcemanager.h"
 #include "api/objects/channel.h"
@@ -46,12 +47,13 @@ private:
     void openChannel(const Api::Snowflake& channelId, const QString& channelName, int type);
 
     // Main widgets
-    QHBoxLayout *layout;
-    QVBoxLayout *messagesLayout;
-    MessageArea *messageArea;
-    QLabel      *typingLabel;
-    QLabel      *fileLabel;
-    bool         placeholder;
+    ChannelHeader *header;
+    QHBoxLayout   *layout;
+    QVBoxLayout   *messagesLayout;
+    MessageArea   *messageArea;
+    QLabel        *typingLabel;
+    QLabel        *fileLabel;
+    bool           placeholder;
 
     Api::RessourceManager *rm; // To request the API
     QString filePath;

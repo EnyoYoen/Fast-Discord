@@ -18,7 +18,8 @@ RightColumn::RightColumn(Api::RessourceManager *rmp, const Api::Client *clientp,
     placeholder = true;
     messagesLayout = nullptr;
 
-    // Create the message area
+    // Create some widgets
+    header = new ChannelHeader(rm, this);
     messageArea = new MessageArea(rm, this);
 
     // Create and style the layout
@@ -44,7 +45,7 @@ void const RightColumn::setMessages(const QVector<Api::Message *>& messages)
 {
     messageArea->clear();
     messageArea->setMessages(messages);
-    messagesLayout->insertWidget(0, messageArea);
+    messagesLayout->insertWidget(1, messageArea);
 }
 
 void const RightColumn::setUserTyping(const Api::User *user)
@@ -77,8 +78,10 @@ void RightColumn::clean()
 {
     rm->requester->removeImageRequests();
 
-    if (messagesLayout != nullptr)
+    if (messagesLayout != nullptr) {
+        messagesLayout->removeItem(messagesLayout->itemAt(1));
         messagesLayout->removeItem(messagesLayout->itemAt(0));
+    }
     messageArea->clear();
 
     for (unsigned int i = 0 ; i < 10 ; i++) {
@@ -89,6 +92,7 @@ void RightColumn::clean()
     QWidget *placeholderWidget = new QWidget(this);
     placeholderWidget->setStyleSheet("background-color: #36393F;");
     layout->addWidget(placeholderWidget);
+    header->close();
 }
 
 void RightColumn::openGuildChannel(const QString& channelName, const Api::Snowflake& guildId, const Api::Snowflake& id)
@@ -118,6 +122,8 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         // Create some widgets
         QWidget *messagesContainer = new QWidget(this);
         messagesLayout = new QVBoxLayout(messagesContainer);
+        header->close();
+        header->openChannel(channelName, type);
 
         // Change the current opened channel ID
         currentOpenedChannel = channelId;
@@ -177,6 +183,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         typingLabel->setStyleSheet("color: #DCDDDE");
 
         // Add widgets to the message layout and style it
+        messagesLayout->addWidget(header);
         messagesLayout->addWidget(messageArea);
         messagesLayout->addWidget(inputContainer);
         messagesLayout->addWidget(typingLabel);
@@ -186,22 +193,6 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         // Add a widget to the layout and style it
         layout->addWidget(messagesContainer);
         layout->setContentsMargins(0, 0, 0, 0);
-
-        /*if (type != Api::DM && type != Api::GroupDM) {
-            // Guild channel
-
-            // Create the widgets of the user list
-            QScrollArea *userListWidget = new QScrollArea(this);
-            QVBoxLayout *userListLayout = new QVBoxLayout(userList);
-
-            // Style the user list
-            userListWidget->setFixedWidth(240);
-            userListWidget->setStyleSheet("border: none;"
-                                          "background-color: #2F3136");
-
-            // Add it to the layout
-            layout->addWidget(userListWidget);
-        }*/
 
         // Connect signals to slots
         QObject::connect(uploadButton, &FileUploadButton::fileSelected, this, &RightColumn::setUploadFilePath);
