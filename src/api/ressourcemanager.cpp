@@ -9,6 +9,7 @@ RessourceManager::RessourceManager(const QString& token)
 {
     requester = new Requester(token);
     gw = new Gateway(requester, token);
+    vs = new VoiceSocket();
 
     // Set the gateway event callback
     gw->onDispatch([this](QString& eventName, json& data){gatewayDispatchHandler(eventName, data);});
@@ -16,15 +17,23 @@ RessourceManager::RessourceManager(const QString& token)
 
 void RessourceManager::call(const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf)
 {
-    gw->sendVoiceStateUpdate([&](QString voiceSessionId, QString voiceEndpoint, QString voiceToken) {
-        vs.start(voiceEndpoint, guildId, client->id, voiceSessionId, voiceToken);
+    gw->sendCall([&](QString voiceSessionId, QString voiceEndpoint, QString voiceToken) {
+        vs->start(voiceEndpoint, guildId, client->id, voiceSessionId, voiceToken);
     }, guildId, channelId, selfMute, selfDeaf);
+}
+
+void RessourceManager::stopCall()
+{
+    gw->sendVoiceStateUpdate(Snowflake(), Snowflake(), vs->mute, vs->deaf);
 }
 
 void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
 {
     // Process gateway events
     if (eventName == "READY") {
+        QFile file("output.txt");
+        file.open(QIODevice::OpenModeFlag::WriteOnly);
+        file.write(QJsonDocument(data.toObject()).toJson());
         guilds = Api::unmarshalMultiple<Api::Guild>(data["guilds"].toArray());
         emit guildsReceived(guilds);
 
@@ -289,6 +298,7 @@ void RessourceManager::getClient(Callback callback)
     if (client == nullptr)
         requester->getClient([&, callback](void *clientPtr) {
             client = reinterpret_cast<Client *>(clientPtr);
+
             callback(clientPtr);
         });
     else
@@ -299,8 +309,8 @@ void RessourceManager::getClientSettings(Callback callback)
 {
     if (clientSettings == nullptr)
         requester->getClientSettings([&, callback](void *clientSettingsPtr) {
-           clientSettings = reinterpret_cast<ClientSettings *>(clientSettingsPtr);
-           callback(clientSettingsPtr);
+            clientSettings = reinterpret_cast<ClientSettings *>(clientSettingsPtr);
+            callback(clientSettingsPtr);
        });
     else
         callback(reinterpret_cast<void *>(clientSettings));

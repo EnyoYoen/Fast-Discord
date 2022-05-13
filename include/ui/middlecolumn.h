@@ -3,6 +3,7 @@
 #include "ui/privatechannel.h"
 #include "ui/guildchannelwidget.h"
 #include "ui/usermenu.h"
+#include "ui/callwidget.h"
 #include "api/ressourcemanager.h"
 #include "api/objects/client.h"
 #include "api/objects/channel.h"
@@ -48,6 +49,7 @@ private:
     // Main widgets
     QVBoxLayout *layout;
     QScrollArea *channelList;
+    CallWidget  *callWidget;
     UserMenu    *userMenu;
 
     Api::RessourceManager *rm; // To request the API
@@ -57,6 +59,7 @@ private:
     QVector<GuildChannelWidget *>   guildChannelWidgets;
 
     Api::Snowflake openedGuildId;
+    Api::Snowflake callChannel;
 };
 
 } // namespace Ui

@@ -17,11 +17,19 @@ MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, const Api::Client *client
 
     // Add the widget and style the main layout
     layout->addWidget(channelList);
+    callWidget = new CallWidget(rm, this);
+    layout->addWidget(callWidget);
     userMenu = new UserMenu(rm, client, this);
     layout->addWidget(userMenu);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
+    QObject::connect(userMenu, &UserMenu::voiceStateChanged, [this](bool mute, bool deaf){
+        rm->vs->deaf = deaf;
+        rm->vs->mute = mute;
+        if (callChannel != 0)
+            rm->gw->sendVoiceStateUpdate(openedGuildId, callChannel, mute, deaf);
+    });
     QObject::connect(this, &MiddleColumn::guildChannelsReceived, this, &MiddleColumn::setGuildChannels);
 
     // Style this column
@@ -163,8 +171,23 @@ void MiddleColumn::clicGuildChannel(const Api::Snowflake& id)
             guildChannelWidgets[i]->unclicked();
         } else {
             name = guildChannelWidgets[i]->name->text();
-            if (guildChannelWidgets[i]->type == Api::GuildVoice)
+            if (guildChannelWidgets[i]->type == Api::GuildVoice) {
+                if (callChannel != 0) {
+                    rm->stopCall();
+                    callWidget->hide();
+                }
                 emit voiceChannelClicked(openedGuildId, id, userMenu->deaf ? true : userMenu->deaf, userMenu->muted);
+                callChannel = id;
+                rm->getGuilds([this, name](void *guildsPtr){
+                    QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                    for (unsigned int i = 0 ; i < guilds.size() ; i++) {
+                        if (guilds[i]->id == openedGuildId)
+                            callWidget->call(name, guilds[i]->name);
+                    }
+                });
+            } else {
+                callChannel.clear();
+            }
         }
     }
 
@@ -181,6 +204,7 @@ void MiddleColumn::clicPrivateChannel(const Api::Snowflake& id)
             privateChannelWidgets[i]->unclicked();
         } else {
             name = privateChannelWidgets[i]->name->text();
+            callChannel.clear();
         }
     }
 

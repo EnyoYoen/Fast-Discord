@@ -20,6 +20,9 @@ public:
     bool deaf;
     bool muted;
 
+signals:
+    void voiceStateChanged(bool mute, bool deaf);
+
 private slots:
     void clicButton(int type, bool active);
 

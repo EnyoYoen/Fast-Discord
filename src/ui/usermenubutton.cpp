@@ -73,7 +73,7 @@ void UserMenuButton::mouseReleaseEvent(QMouseEvent *event)
 {
     // Emit signals when clicked
     if (event->button() == Qt::LeftButton) {
-       if (!blocked) {
+        if (!blocked) {
             // Change the icon if not blocked
             QString iconName = "res/images/svg/";
             switch (type) {

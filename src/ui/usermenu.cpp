@@ -113,6 +113,7 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
 
     // Connect buttons clicked signals
     QObject::connect(deafenButton, &UserMenuButton::leftClicked, this, &UserMenu::clicButton);
+    QObject::connect(muteButton, &UserMenuButton::leftClicked, this, &UserMenu::clicButton);
     QObject::connect(settingsButton, &UserMenuButton::leftClicked, this, &UserMenu::clicButton);
 }
 
@@ -127,8 +128,11 @@ void UserMenu::clicButton(int type, bool active)
         // Mute when deafen pressed
         muteButton->setClicked(active);
         deaf = active;
+        emit voiceStateChanged((deaf ? true : muted), deaf);
     } else if (type == Mute) {
-        muted = active;
+        if (!deaf)
+            muted = active;
+            emit voiceStateChanged((deaf ? true : muted), deaf);
     } else if (type == Settings) {
         // TODO : settings menu not implemented
     }

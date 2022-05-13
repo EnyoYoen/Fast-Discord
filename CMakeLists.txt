@@ -10,9 +10,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(include/)
-
-find_package(Qt5 COMPONENTS Widgets Network WebSockets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets Network Multimedia WebSockets REQUIRED)
 if (NOT WIN32)
     find_package(Threads REQUIRED)
 endif (NOT WIN32)
@@ -25,7 +23,9 @@ set(SOURCES
     "src/api/voicesocket.cpp"
     "src/main.cpp"
     "src/ui/attachmentfile.cpp"
+    "src/ui/callwidget.cpp"
     "src/ui/channelheader.cpp"
+    "src/ui/closecallbutton.cpp"
     "src/ui/closechannelbutton.cpp"
     "src/ui/downloadbutton.cpp"
     "src/ui/downloadlink.cpp"
@@ -75,7 +75,9 @@ set(HEADERS
     "include/api/ressourcemanager.h"
     "include/api/voicesocket.h"
     "include/ui/attachmentfile.h"
+    "include/ui/callwidget.h"
     "include/ui/channelheader.h"
+    "include/ui/closecallbutton.h"
     "include/ui/closechannelbutton.h"
     "include/ui/downloadbutton.h"
     "include/ui/downloadlink.h"
@@ -106,7 +108,22 @@ add_executable(Fast-Discord ${SOURCES} ${HEADERS})
 
 target_link_libraries(Fast-Discord Qt5::Widgets)
 target_link_libraries(Fast-Discord Qt5::Network)
+target_link_libraries(Fast-Discord Qt5::Multimedia)
 target_link_libraries(Fast-Discord Qt5::WebSockets)
 if (NOT WIN32)
     target_link_libraries(Fast-Discord pthread)
 endif (NOT WIN32)
+
+include("FindOpus.cmake")
+include("FindSodium.cmake")
+
+if(NOT DEFINED OPUS_FOUND)
+    message(FATAL_ERROR, "Opus not found, can't compile.")
+endif()
+if(NOT DEFINED sodium_VERSION_STRING)
+    message(FATAL_ERROR, "Sodium not found, can't compile.")
+endif()
+
+target_link_libraries(Fast-Discord ${OPUS_LIBRARIES} ${sodium_LIBRARY_RELEASE})
+include_directories(${OPUS_INCLUDE_DIRS} ${sodium_INCLUDE_DIR})
+include_directories(include/)

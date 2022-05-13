@@ -34,8 +34,12 @@ public:
 
     QVector<Api::Message *> const getAllMessages(const Snowflake& channelId);
     bool const hasMessages(const Snowflake& channelId);
+
+    void stopCall();
     
     Requester *requester;
+    Gateway *gw;
+    VoiceSocket *vs;
 
 public slots:
     void call(const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf);
@@ -55,9 +59,6 @@ signals:
 private:
     void gatewayDispatchHandler(QString& eventName, json& data);
         // Event handler for the gateway
-
-    Gateway *gw;
-    VoiceSocket vs;
 
     QMap<Snowflake, QVector<Message *>> messages;
     QMap<Snowflake, QVector<Channel *>> guildsChannels;

@@ -41,7 +41,8 @@ public:
 
     void const sendGuildChannelOpened(const QMap<Snowflake, QVector<QVector<int>>>& channels, const Snowflake& guildId, bool activities, bool threads, bool typing);
     void const sendDMChannelOpened(const Snowflake& channelId);
-    void const sendVoiceStateUpdate(VoiceCallback callback, const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf);
+    void const sendVoiceStateUpdate(const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf);
+    void const sendCall(VoiceCallback callback, const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf);
 
 private slots:
     void const closeHandler();

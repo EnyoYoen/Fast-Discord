@@ -84,7 +84,15 @@ void const Gateway::sendDMChannelOpened(const Snowflake& channelId)
     send(DMChannelOpened, "{\"channel_id\":\"" + channelId + "\"}");
 }
 
-void const Gateway::sendVoiceStateUpdate(VoiceCallback callback, const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf)
+void const Gateway::sendVoiceStateUpdate(const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf)
+{
+    send(VoiceStateUpdate, "{\"guild_id\":" + (guildId == 0 ? "null" : "\"" + guildId + "\"") + ","
+                            "\"channel_id\":" + (channelId == 0 ? "null" : "\"" + channelId + "\"") + ","
+                            "\"self_mute\":" + (selfMute ? "true" : "false") + ","
+                            "\"self_deaf\":" + (selfDeaf ? "true" : "false") + "}");
+}
+
+void const Gateway::sendCall(VoiceCallback callback, const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf)
 {
     if (!waitVoiceInfos) {
         voiceSessionId.clear();
@@ -102,9 +110,9 @@ void const Gateway::sendVoiceStateUpdate(VoiceCallback callback, const Snowflake
 // Send data through the gateway
 void const Gateway::send(int op, const QString& data)
 {
-    //qDebug() << "⇧" << message.mid(0, 198);
     // Build the payload string
     QString payload = "{\"op\":" + QString::number(op) + ",\"d\":" + data + "}";
+    //qDebug() << "⇧" << payload.mid(0, 198);
     // Send the message
     client.sendTextMessage(payload);
 }
@@ -243,12 +251,14 @@ void Gateway::dispatch(QString eventName, json& data)
         if (eventName == "VOICE_STATE_UPDATE") {
             voiceSessionId = data["session_id"].toString();
             if (!voiceEndpoint.isNull() && !voiceToken.isNull()) {
+                waitVoiceInfos = false;
                 voiceCallback(voiceSessionId, voiceEndpoint, voiceToken);
             }
         } else if (eventName == "VOICE_SERVER_UPDATE") {
             voiceEndpoint = data["endpoint"].toString();
             voiceToken = data["token"].toString();
             if (!voiceEndpoint.isNull()) {
+                waitVoiceInfos = false;
                 voiceCallback(voiceSessionId, voiceEndpoint, voiceToken);
             }
         }
