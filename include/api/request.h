@@ -4,7 +4,7 @@
 #include "api/objects/guild.h"
 #include "api/objects/message.h"
 #include "api/objects/client.h"
-#include "ui/roundedimage.h"
+#include "ui/common/roundedimage.h"
 
 #include <QString>
 #include <QVector>
