@@ -28,3 +28,10 @@ jobs:
           cd bin
           cmake ..
           cmake --build . --parallel $(nproc)
+          ls
+
+      - name: Upload Executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Fast-Discord - Windows x64"
+          path: '${{github.workspace}}/bin/Fast-Discord.exe'

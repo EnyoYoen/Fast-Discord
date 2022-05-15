@@ -114,24 +114,33 @@ set(HEADERS
 
 add_executable(Fast-Discord ${SOURCES} ${HEADERS})
 
+if (WIN32)
+    set(OPUS_INCLUDE_DIRS "libs/include")
+    set(OPUS_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/libs/lib/opus.lib)
+    set(sodium_INCLUDE_DIR "libs/include")
+    set(sodium_LIBRARY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/libs/lib/libsodium.lib)
+
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libs/bin/libsodium.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COPYONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libs/bin/opus.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COPYONLY)
+else()
+    include("FindOpus.cmake")
+    include("FindSodium.cmake")
+
+    if(NOT DEFINED OPUS_FOUND)
+        message(FATAL_ERROR, "Opus not found, can't compile.")
+    endif()
+    if(NOT DEFINED sodium_VERSION_STRING)
+        message(FATAL_ERROR, "Sodium not found, can't compile.")
+    endif()
+
+    target_link_libraries(Fast-Discord pthread)
+endif()
+
 target_link_libraries(Fast-Discord Qt5::Widgets)
 target_link_libraries(Fast-Discord Qt5::Network)
 target_link_libraries(Fast-Discord Qt5::Multimedia)
 target_link_libraries(Fast-Discord Qt5::WebSockets)
-if (NOT WIN32)
-    target_link_libraries(Fast-Discord pthread)
-endif (NOT WIN32)
-
-include("FindOpus.cmake")
-include("FindSodium.cmake")
-
-if(NOT DEFINED OPUS_FOUND)
-    message(FATAL_ERROR, "Opus not found, can't compile.")
-endif()
-if(NOT DEFINED sodium_VERSION_STRING)
-    message(FATAL_ERROR, "Sodium not found, can't compile.")
-endif()
-
 target_link_libraries(Fast-Discord ${OPUS_LIBRARIES} ${sodium_LIBRARY_RELEASE})
+
 include_directories(${OPUS_INCLUDE_DIRS} ${sodium_INCLUDE_DIR})
 include_directories(include/)

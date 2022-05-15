@@ -41,13 +41,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ## Build and Run
 ### Dependencies
-- Qt5 (Widgets, Network, WebSockets)
+- Qt5 (Widgets, Network, WebSockets, Multimedia)
 - Pthread
+- Opus
+- Sodium
 
 ### Install the dependencies
 **On Debian / Ubuntu :**
 ```shell
-$ sudo apt-get install qt5-default libqt5websockets5-dev libpthread-stubs0-dev
+$ sudo apt-get install qt5-default libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
 ```
 
 **On Windows (with [vcpkg](https://github.com/microsoft/vcpkg/#quick-start-windows)) :**
@@ -57,7 +59,7 @@ $ sudo apt-get install qt5-default libqt5websockets5-dev libpthread-stubs0-dev
 
 **On MacOS (with [Homebrew](https://brew.sh/index)) :**
 ```shell
-$ brew install qt5 libpthread-stubs
+$ brew install qt5 libpthread-stubs libsodium opus
 ```
 
 You will also need [CMake](https://cmake.org/download/) (Minimum version : 3.0)
