@@ -98,7 +98,7 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, const Api::Client *client, QWidge
     // Add the buttons of the user menu
     muteButton = new UserMenuButton(Mute, container);
     UserMenuButton *deafenButton = new UserMenuButton(Deafen, container);
-    UserMenuButton *settingsButton = new UserMenuButton(Settings, container);
+    UserMenuButton *settingsButton = new UserMenuButton(SettingsButton, container);
     layout->addWidget(muteButton);
     layout->addWidget(deafenButton);
     layout->addWidget(settingsButton);
@@ -133,8 +133,8 @@ void UserMenu::clicButton(int type, bool active)
         if (!deaf)
             muted = active;
             emit voiceStateChanged((deaf ? true : muted), deaf);
-    } else if (type == Settings) {
-        // TODO : settings menu not implemented
+    } else if (type == SettingsButton) {
+        emit parametersClicked();
     }
 }
 

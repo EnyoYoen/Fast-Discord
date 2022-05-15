@@ -23,7 +23,7 @@ UserMenuButton::UserMenuButton(int typep, QWidget *parent)
         case Deafen:
             iconName += "deafen";
             break;
-        case Settings:
+        case SettingsButton:
             iconName += "settings";
             break;
     }
@@ -83,7 +83,7 @@ void UserMenuButton::mouseReleaseEvent(QMouseEvent *event)
                 case Deafen:
                     iconName += clicked ? "deafen" : "undeafen";
                     break;
-                case Settings:
+                case SettingsButton:
                     iconName += "settings";
                     break;
             }

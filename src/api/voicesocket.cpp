@@ -138,7 +138,7 @@ void VoiceSocket::processTextMessage(const QString& message)
     QJsonDocument payload = QJsonDocument::fromJson(message.toUtf8());
     QJsonValue data = payload["d"];
 
-    qDebug() << "⇩" << message;
+    //qDebug() << "⇩" << message;
 
     switch (payload["op"].toInt(-1)) {
         case Opcodes::Ready:
@@ -280,7 +280,7 @@ void const VoiceSocket::send(Opcodes op, const QString& data)
 {
     // Build the payload string
     QString payload = "{\"op\":" + QString::number(op) + ",\"d\":" + data + "}";
-    qDebug() << "⇧" << payload;
+    //qDebug() << "⇧" << payload;
     // Send the message
     client.sendTextMessage(payload);
 }

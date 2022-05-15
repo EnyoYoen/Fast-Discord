@@ -9,7 +9,7 @@ namespace Ui {
 enum UserMenuButtonTypes {
     Mute,
     Deafen,
-    Settings
+    SettingsButton
 };
 
 // A button in the user menu (un/deafen, un/mute, settings)

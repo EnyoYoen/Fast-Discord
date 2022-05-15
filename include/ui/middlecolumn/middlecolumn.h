@@ -28,6 +28,7 @@ signals:
     void guildChannelClicked(const QString& channelName, const Api::Snowflake& guildId, const Api::Snowflake& id);
     void privateChannelClicked(const QString& channelName, const Api::Snowflake& id);
     void voiceChannelClicked(const Api::Snowflake& guildId, const Api::Snowflake& channelId, bool selfMute, bool selfDeaf);
+    void parametersClicked();
 
 public slots:
     void setPresences(const QVector<Api::Presence *>& presences);

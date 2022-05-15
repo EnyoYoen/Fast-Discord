@@ -158,6 +158,8 @@ void MainWindow::setup()
     leftColumn = new LeftColumn(rm, this);
     middleColumn = new MiddleColumn(rm, client, this);
     rightColumn = new RightColumn(rm, client, this);
+    settings = new Settings(rm, this);
+    settings->hide();
 
     // Add the column to the layout
     mainLayout->addWidget(leftColumn);
@@ -177,7 +179,9 @@ void MainWindow::setup()
     QObject::connect(middleColumn, &MiddleColumn::guildChannelClicked, rightColumn, &RightColumn::openGuildChannel);
     QObject::connect(middleColumn, &MiddleColumn::privateChannelClicked, rightColumn, &RightColumn::openPrivateChannel);
     QObject::connect(middleColumn, &MiddleColumn::voiceChannelClicked, rm, &Api::RessourceManager::call);
+    QObject::connect(middleColumn, &MiddleColumn::parametersClicked, this, &MainWindow::openSettingsMenu);
     QObject::connect(rightColumn, &RightColumn::messageAdded, middleColumn, &MiddleColumn::putChannelFirst);
+    QObject::connect(settings, &Settings::closeClicked, this, &MainWindow::closeSettingsMenu);
     QObject::connect(rm, &Api::RessourceManager::unreadUpdateReceived, leftColumn, &LeftColumn::setUnreadGuild);
     QObject::connect(rm, &Api::RessourceManager::messageReceived, rightColumn, &RightColumn::addMessage);
     QObject::connect(rm, &Api::RessourceManager::presenceReceived, middleColumn, &MiddleColumn::updatePresence);
@@ -187,6 +191,30 @@ void MainWindow::setup()
     QObject::connect(rm, &Api::RessourceManager::channelCreated, middleColumn, &MiddleColumn::createChannel);
     QObject::connect(rm, &Api::RessourceManager::channelUpdated, middleColumn, &MiddleColumn::updateChannel);
     QObject::connect(rm, &Api::RessourceManager::channelDeleted, middleColumn, &MiddleColumn::deleteChannel);
+}
+
+void MainWindow::openSettingsMenu()
+{
+    mainLayout->removeWidget(leftColumn);
+    mainLayout->removeWidget(middleColumn);
+    mainLayout->removeWidget(rightColumn);
+    mainLayout->addWidget(settings);
+    leftColumn->hide();
+    middleColumn->hide();
+    rightColumn->hide();
+    settings->show();
+}
+
+void MainWindow::closeSettingsMenu()
+{
+    mainLayout->removeWidget(settings);
+    mainLayout->addWidget(leftColumn);
+    mainLayout->addWidget(middleColumn);
+    mainLayout->addWidget(rightColumn);
+    settings->hide();
+    leftColumn->show();
+    middleColumn->show();
+    rightColumn->show();
 }
 
 } // namespace Ui

@@ -22,6 +22,7 @@ public:
 
 signals:
     void voiceStateChanged(bool mute, bool deaf);
+    void parametersClicked();
 
 private slots:
     void clicButton(int type, bool active);

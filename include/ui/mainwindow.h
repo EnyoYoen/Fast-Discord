@@ -3,6 +3,7 @@
 #include "ui/leftcolumn/leftcolumn.h"
 #include "ui/middlecolumn/middlecolumn.h"
 #include "ui/rightcolumn/rightcolumn.h"
+#include "ui/settings/settings.h"
 #include "api/ressourcemanager.h"
 
 #include <QWidget>
@@ -23,6 +24,8 @@ signals:
 
 private slots:
     void setup();
+    void openSettingsMenu();
+    void closeSettingsMenu();
 
 private:
     void const addAccountInConfig(QSettings *settings, QMap<QString, QString> accountMap);
@@ -35,6 +38,7 @@ private:
     LeftColumn   *leftColumn;
     MiddleColumn *middleColumn;
     RightColumn  *rightColumn;
+    Settings *settings;
 
     Api::RessourceManager *rm;           // Manage all the data we receive
 

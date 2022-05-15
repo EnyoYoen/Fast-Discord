@@ -24,6 +24,7 @@ MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, const Api::Client *client
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
+    QObject::connect(userMenu, &UserMenu::parametersClicked, [this](){emit parametersClicked();});
     QObject::connect(userMenu, &UserMenu::voiceStateChanged, [this](bool mute, bool deaf){
         rm->vs->deaf = deaf;
         rm->vs->mute = mute;
