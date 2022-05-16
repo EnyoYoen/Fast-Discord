@@ -52,6 +52,11 @@ SOFTWARE.
 $ sudo apt-get install qt5-default libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
 ```
 
+**On Debian/Ubuntu arm64**
+```shell
+$ sudo apt-get install qtbase5-dev qtmultimedia5-dev libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
+```
+
 **On Windows (with [vcpkg](https://github.com/microsoft/vcpkg/#quick-start-windows)) :**
 ```shell
 > vcpkg install qt5 qt5-websockets pthreads
