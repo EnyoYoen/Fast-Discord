@@ -49,12 +49,12 @@ SOFTWARE.
 ### Install the dependencies
 **On Debian / Ubuntu :**
 ```shell
-$ sudo apt-get install qt5-default qtmultimedia5-dev libqt5svg5-dev libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
+$ sudo apt-get install qt5-default qtmultimedia5-dev libqt5networkauth5-dev libqt5svg5-dev libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
 ```
 
 **On Debian/Ubuntu arm64**
 ```shell
-$ sudo apt-get install qtbase5-dev qtmultimedia5-dev libqt5svg5-dev libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
+$ sudo apt-get install qtbase5-dev qtmultimedia5-dev libqt5networkauth5-dev libqt5svg5-dev libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
 ```
 
 **On Windows (with [vcpkg](https://github.com/microsoft/vcpkg/#quick-start-windows)) :**
