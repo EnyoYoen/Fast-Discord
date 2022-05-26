@@ -15,12 +15,6 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     layout->setSpacing(2);
     layout->setContentsMargins(20, 60, 6, 60);
 
-    QWidget *separator = new QWidget(scrollWidget);
-    separator->setFixedSize(172, 17);
-    separator->setContentsMargins(10, 8, 10, 8);
-    QWidget *lineSeparator = new QWidget(separator);
-    lineSeparator->setStyleSheet("color: rgba(79, 84, 92, 0.48);");
-
     buttons.append(new MenuButton(MenuButton::ButtonType::MyAccount, scrollWidget));
     buttons.append(new MenuButton(MenuButton::ButtonType::UserProfile, scrollWidget));
     buttons.append(new MenuButton(MenuButton::ButtonType::PrivacySafety, scrollWidget));
@@ -40,25 +34,29 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     buttons.append(new MenuButton(MenuButton::ButtonType::HypeSquad, scrollWidget));
     buttons.append(new MenuButton(MenuButton::ButtonType::LogOut, scrollWidget));
 
+    buttons[0]->setStyleSheet("border-radius: 4px;"
+                              "color: #FFF;"
+                              "background-color: rgba(79, 84, 92, 0.6);");
+
     for (unsigned int i = 0 ; i < buttons.size() ; i++) {
         if (i == 0) {
             layout->addWidget(createMenuTitle((char *)"USER SETTINGS"));
-        } else if (i == 4) {
-            layout->addWidget(separator);
+        } else if (i == 5) {
+            layout->addWidget(createSeparator());
             layout->addWidget(createMenuTitle((char *)"APP SETTINGS"));
-        } else if (i == 13) {
-            layout->addWidget(separator);
-            layout->addWidget(createMenuTitle((char *)"ACTIVITY SETTINGS"));
         } else if (i == 14) {
-            layout->addWidget(separator);
-        } else if (i == 16) {
-            layout->addWidget(separator);
+            layout->addWidget(createSeparator());
+            layout->addWidget(createMenuTitle((char *)"ACTIVITY SETTINGS"));
+        } else if (i == 15) {
+            layout->addWidget(createSeparator());
+        } else if (i == 17) {
+            layout->addWidget(createSeparator());
         }
 
         layout->addWidget(buttons[i]);
         QObject::connect(buttons[i], &MenuButton::clicked, this, &ScrollMenu::resetButtons);
     }
-    layout->addWidget(separator);
+    layout->addWidget(createSeparator());
 
     this->setWidget(scrollWidget);
     this->setFixedWidth(218);
@@ -88,6 +86,18 @@ QLabel *ScrollMenu::createMenuTitle(char *title)
     menuTitle->setFixedSize(192, 28);
     menuTitle->setStyleSheet("color: #96989D;");
     return menuTitle;
+}
+
+QWidget *ScrollMenu::createSeparator()
+{
+    QWidget *separator = new QWidget(scrollWidget);
+    separator->setFixedSize(172, 17);
+    separator->setContentsMargins(10, 8, 10, 8);
+    QWidget *lineSeparator = new QWidget(separator);
+    lineSeparator->move(0, 9);
+    lineSeparator->setFixedSize(172, 1);
+    lineSeparator->setStyleSheet("background-color: rgba(79, 84, 92, 0.48);");
+    return separator;
 }
 
 } // namespace Ui

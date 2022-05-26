@@ -88,7 +88,7 @@ struct Client
     Snowflake id;
     qint32    publicFlags;
     qint32    flags;
-    qint32    purchased_flags;
+    qint32    purchasedFlags;
     qint32    bannerColor;
     qint32    accentColor;
     bool      nfswAllowed;

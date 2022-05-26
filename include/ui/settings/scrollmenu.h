@@ -20,6 +20,7 @@ private slots:
 
 private:
     QLabel *createMenuTitle(char *title);
+    QWidget *createSeparator();
 
     QVector<MenuButton *> buttons;
     QWidget *scrollWidget;

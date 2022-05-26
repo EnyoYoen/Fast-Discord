@@ -20,12 +20,15 @@ CloseButton::CloseButton(QWidget *parent)
     iconContainer->setStyleSheet("border-radius: 18px;"
                                  "border: 2px solid #B9BBBE;");
     icon = new QLabel(iconContainer);
-    icon->move(9, 9);
+    icon->move(7, 7);
     icon->setFixedSize(18, 18);
-    icon->setStyleSheet("background-image: url(res/images/svg/close-settings-icon.svg);"
-                        "background-repeat: no-repeat;"
-                        "background-position: center;"
-                        "border: none");
+    icon->setStyleSheet("border: none");
+    QPixmap img("res/images/svg/close-settings-icon.svg");
+    QPainter qp(&img);
+    qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    qp.fillRect(img.rect(),QColor(185, 187, 190));
+    qp.end();
+    icon->setPixmap(img.scaled(18, 18));
 
     QFont font;
     font.setBold(true);
@@ -68,7 +71,7 @@ void CloseButton::mouseReleaseEvent(QMouseEvent *event)
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(),QColor(185, 187, 190));
     qp.end();
-    icon->setPixmap(img);
+    icon->setPixmap(img.scaled(18, 18));
     if (event->button() == Qt::LeftButton) {
         emit clicked();
     }
@@ -85,7 +88,7 @@ void CloseButton::mousePressEvent(QMouseEvent *event)
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(),QColor(255, 255, 255));
     qp.end();
-    icon->setPixmap(img);
+    icon->setPixmap(img.scaled(18, 18));
 }
 
 void CloseButton::enterEvent(QEvent *)
@@ -99,7 +102,7 @@ void CloseButton::enterEvent(QEvent *)
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(),QColor(220, 221, 222));
         qp.end();
-        icon->setPixmap(img);
+        icon->setPixmap(img.scaled(18, 18));
     }
 }
 
@@ -114,7 +117,7 @@ void CloseButton::leaveEvent(QEvent *)
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(),QColor(185, 187, 190));
         qp.end();
-        icon->setPixmap(img);
+        icon->setPixmap(img.scaled(18, 18));
     }
 }
 
