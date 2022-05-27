@@ -4,6 +4,7 @@
 #include "ui/settings/settingsinput.h"
 #include "ui/settings/popup.h"
 #include "api/objects/client.h"
+#include "api/objects/error.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -250,13 +251,14 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             inputsLayout->addWidget(nameInput);
             inputsLayout->addWidget(separator);
 
+            SettingsInput *discriminator;
             if (client.purchasedFlags) {
-                SettingsInput *discriminator = new SettingsInput(QString(), client.discriminator, false, false, inputs);
+                discriminator = new SettingsInput(QString(), client.discriminator, false, false, inputs);
                 discriminator->setFixedWidth(70);
                 discriminator->setContentsMargins(0, 10, 10, 10);
                 inputsLayout->addWidget(discriminator);
             } else {
-                SettingsInput *discriminator = new SettingsInput(QString(), client.discriminator, true, false, inputs);
+                discriminator = new SettingsInput(QString(), client.discriminator, true, false, inputs);
                 discriminator->setFixedWidth(70);
                 SettingsButton *infoButton = new SettingsButton(SettingsButton::Type::Normal, "?", inputs);
                 QObject::connect(infoButton, &SettingsButton::clicked, [this](){
@@ -297,7 +299,28 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
             PopUp *popUp = new PopUp(content, 440, 336, QString(), "Change your username", true, true, "<div style=\"text-align: center\">Enter a new username and your existing password.<div style=\"text-align: center\">", "Cancel", "Done", true, true, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
-            QObject::connect(popUp, &PopUp::done, [popUp](){popUp->deleteLater();});
+            QObject::connect(popUp, &PopUp::done, [this, popUp, nameInput, discriminator, passwordInput, username, password](){
+                username->setText("USERNAME");
+                username->setStyleSheet("color: #B9BBBE");
+                password->setText("CURRENT PASSWORD");
+                password->setStyleSheet("color: #B9BBBE");
+                rm->requester->changeUsername([this, popUp, username, password](void *errorsPtr){
+                    if (errorsPtr == nullptr) {
+                        popUp->deleteLater();
+                    } else {
+                        QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
+                        for (unsigned int i = 0 ; i < errors.size() ; i++) {
+                            if (errors[i]->intCode == 0 || errors[i]->intCode == 1) {
+                                username->setText("USERNAME - " + errors[i]->message);
+                                username->setStyleSheet("color: #F38688");
+                            } else {
+                                password->setText("CURRENT PASSWORD - " + errors[i]->message);
+                                password->setStyleSheet("color: #F38688");
+                            }
+                        }
+                    }
+                }, nameInput->input->text(), discriminator->input->text(), passwordInput->input->text());
+            });
         });
 
 
@@ -330,7 +353,8 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
             PopUp *popUp = new PopUp(new QWidget(), 440, 306, QString(), "Verify email address", true, true, "<div style=\"text-align: center\">We'll need to verify your old email address, <b>" + client.email + "</b> in order to change it. <a style=\"color: #00AFF4; text-decoration: none;\" href=\"https://support.discord.com/hc/en-us/requests/new\">Lost access to your email? Go to https://support.discord.com/hc/en-us/requests/new.</a></div>", "Cancel", "Send Verification Code", true, false, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
-            QObject::connect(popUp, &PopUp::done, [popUp, parentWidget](){
+            QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget](){
+                rm->requester->sendVerificationEmail();
                 popUp->deleteLater();
 
                 QFont font;
@@ -341,7 +365,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 QVBoxLayout *layout = new QVBoxLayout(content);
                 layout->setSpacing(8);
                 layout->setContentsMargins(0, 0, 0, 0);
-                QLabel *code = new QLabel("CURRENT PASSWORD", content);
+                QLabel *code = new QLabel("VERIFICATION CODE", content);
                 code->setFont(font);
                 code->setStyleSheet("color: #B9BBBE");
                 SettingsInput *codeInput = new SettingsInput(QString(), QString(), false, false, content);
@@ -352,48 +376,78 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
                 PopUp *codePopUp = new PopUp(content, 440, 320, QString(), "Enter code", true, true, "Check your email: we sent you a verification code. Enter it here to verify you're really you.", "", "Next", true, true, parentWidget->size(), parentWidget);
                 QObject::connect(codePopUp, &PopUp::cancelled, [codePopUp](){codePopUp->deleteLater();});
-                QObject::connect(codePopUp, &PopUp::done, [codePopUp, parentWidget](){
-                    codePopUp->deleteLater();
+                QObject::connect(codePopUp, &PopUp::done, [this, parentWidget, codePopUp, codeInput, code](){
+                    code->setText("VERIFICATION CODE");
+                    code->setStyleSheet("color: #B9BBBE");
+                    rm->requester->sendVerifyCode([this, parentWidget, codePopUp, codeInput, code](void *errorPtr){
+                        if (errorPtr == nullptr) {
+                            codePopUp->deleteLater();
 
-                    QFont font;
-                    font.setPixelSize(12);
-                    font.setFamily("whitney");
+                            QFont font;
+                            font.setPixelSize(12);
+                            font.setFamily("whitney");
 
-                    QWidget *content = new QWidget();
+                            QWidget *content = new QWidget();
 
-                    QWidget *emailSection = new QWidget(content);
-                    QVBoxLayout *emailLayout = new QVBoxLayout(emailSection);
-                    emailLayout->setSpacing(8);
-                    emailLayout->setContentsMargins(0, 0, 0, 0);
-                    QLabel *email = new QLabel("EMAIL", emailSection);
-                    email->setFont(font);
-                    email->setStyleSheet("color: #B9BBBE");
-                    SettingsInput *emailInput = new SettingsInput(QString(), QString(), false, false, emailSection);
-                    emailLayout->addWidget(email);
-                    emailLayout->addWidget(emailInput);
+                            QWidget *emailSection = new QWidget(content);
+                            QVBoxLayout *emailLayout = new QVBoxLayout(emailSection);
+                            emailLayout->setSpacing(8);
+                            emailLayout->setContentsMargins(0, 0, 0, 0);
+                            QLabel *email = new QLabel("EMAIL", emailSection);
+                            email->setFont(font);
+                            email->setStyleSheet("color: #B9BBBE");
+                            SettingsInput *emailInput = new SettingsInput(QString(), QString(), false, false, emailSection);
+                            emailLayout->addWidget(email);
+                            emailLayout->addWidget(emailInput);
 
-                    QWidget *passwordSection = new QWidget(content);
-                    QVBoxLayout *passwordLayout = new QVBoxLayout(passwordSection);
-                    passwordLayout->setSpacing(8);
-                    passwordLayout->setContentsMargins(0, 0, 0, 0);
-                    font.setPixelSize(12);
-                    QLabel *password = new QLabel("CURRENT PASSWORD", passwordSection);
-                    password->setFont(font);
-                    password->setStyleSheet("color: #B9BBBE");
-                    SettingsInput *passwordInput = new SettingsInput(QString(), QString(), false, true, passwordSection);
-                    passwordLayout->addWidget(password);
-                    passwordLayout->addWidget(passwordInput);
+                            QWidget *passwordSection = new QWidget(content);
+                            QVBoxLayout *passwordLayout = new QVBoxLayout(passwordSection);
+                            passwordLayout->setSpacing(8);
+                            passwordLayout->setContentsMargins(0, 0, 0, 0);
+                            font.setPixelSize(12);
+                            QLabel *password = new QLabel("CURRENT PASSWORD", passwordSection);
+                            password->setFont(font);
+                            password->setStyleSheet("color: #B9BBBE");
+                            SettingsInput *passwordInput = new SettingsInput(QString(), QString(), false, true, passwordSection);
+                            passwordLayout->addWidget(password);
+                            passwordLayout->addWidget(passwordInput);
 
-                    QVBoxLayout *layout = new QVBoxLayout(content);
-                    layout->setSpacing(16);
-                    layout->setContentsMargins(0, 0, 0, 0);
-                    layout->addWidget(emailSection);
-                    layout->addWidget(passwordSection);
-                    content->setContentsMargins(16, 0, 16, 0);
+                            QVBoxLayout *layout = new QVBoxLayout(content);
+                            layout->setSpacing(16);
+                            layout->setContentsMargins(0, 0, 0, 0);
+                            layout->addWidget(emailSection);
+                            layout->addWidget(passwordSection);
+                            content->setContentsMargins(16, 0, 16, 0);
 
-                    PopUp *emailPopUp = new PopUp(content, 440, 348, QString(), "Enter an email address", true, true, "Enter a new email address and your existing password.", "Back", "Done", true, true, parentWidget->size(), parentWidget);
-                    QObject::connect(emailPopUp, &PopUp::cancelled, [emailPopUp](){emailPopUp->deleteLater();});
-                    QObject::connect(emailPopUp, &PopUp::done, [emailPopUp](){emailPopUp->deleteLater();});
+                            PopUp *emailPopUp = new PopUp(content, 440, 348, QString(), "Enter an email address", true, true, "Enter a new email address and your existing password.", "Back", "Done", true, true, parentWidget->size(), parentWidget);
+                            QObject::connect(emailPopUp, &PopUp::cancelled, [emailPopUp](){emailPopUp->deleteLater();});
+                            QObject::connect(emailPopUp, &PopUp::done, [this, emailPopUp, email, password, emailInput, passwordInput](){
+                                email->setText("EMAIL");
+                                email->setStyleSheet("color: #B9BBBE");
+                                password->setText("CURRENT PASSWORD");
+                                password->setStyleSheet("color: #B9BBBE");
+                                rm->requester->changeEmail([this, emailPopUp, email, password](void *errorsPtr){
+                                    if (errorsPtr == nullptr) {
+                                        emailPopUp->deleteLater();
+                                    } else {
+                                        QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
+                                        for (unsigned int i = 0 ; i < errors.size() ; i++) {
+                                            if (errors[i]->intCode == 0) {
+                                                email->setText("EMAIL - " + errors[i]->message);
+                                                email->setStyleSheet("color: #F38688");
+                                            } else {
+                                                password->setText("CURRENT PASSWORD - " + errors[i]->message);
+                                                password->setStyleSheet("color: #F38688");
+                                            }
+                                        }
+                                    }
+                                }, emailInput->input->text(), passwordInput->input->text());
+                            });
+                        } else {
+                            code->setText("USERNAME - " + reinterpret_cast<Api::Error *>(errorPtr)->message);
+                            code->setStyleSheet("color: #F38688");
+                        }
+                    }, codeInput->input->text());
                 });
             });
         });
@@ -484,7 +538,19 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
                 PopUp *popUp = new PopUp(content, 440, 272, QString(), "Remove phone number", false, false, (client.mfaEnabled ? "<div style=\"background-color: #FAA81A\">Removing your phone number will disable SMS backup for two-factor authentication.</div>" : QString()), "Cancel", "Remove", true, true, parentWidget->size(), parentWidget);
                 QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
-                QObject::connect(popUp, &PopUp::done, [popUp](){popUp->deleteLater();});
+                QObject::connect(popUp, &PopUp::done, [this, popUp, password, input](){
+                    password->setText("PASSWORD");
+                    password->setStyleSheet("color: #B9BBBE");
+                    rm->requester->removePhone([popUp, password](void *errorPtr){
+                        if (errorPtr == nullptr) {
+                            popUp->deleteLater();
+                        } else {
+                            password->setText("CURRENT PASSWORD - " + reinterpret_cast<Api::Error *>(errorPtr)->message);
+                            password->setStyleSheet("color: #F38688");
+                        }
+                    }, input->input->text());
+                    
+                });
             });
 
             SettingsButton *phoneEditButton = new SettingsButton(SettingsButton::Type::Edit, "Add", phoneEdit);
@@ -588,7 +654,35 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
             PopUp *popUp = new PopUp(content, 440, 416, QString(), "Update your password", true, true, "Enter your current password and a new password.", "Cancel", "Done", true, true, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
-            QObject::connect(popUp, &PopUp::done, [popUp](){popUp->deleteLater();});
+            QObject::connect(popUp, &PopUp::done, [this, popUp, current, currentInput, newPassword, newInput, confirm, confirmInput](){
+                current->setText("CURRENT PASSWORD");
+                current->setStyleSheet("color: #B9BBBE");
+                newPassword->setText("NEW PASSWORD");
+                newPassword->setStyleSheet("color: #B9BBBE");
+                confirm->setText("CONFIRM NEW  PASSWORD");
+                confirm->setStyleSheet("color: #B9BBBE");
+                if (newInput->input->text() != confirmInput->input->text()) {
+                    confirm->setText("CONFIRM NEW PASSWORD - Passwords do not match!");
+                    confirm->setStyleSheet("color: #F38688");
+                } else {
+                    rm->requester->changePassword([popUp, current, newPassword](void *errorsPtr){
+                        if (errorsPtr == nullptr) {
+                            popUp->deleteLater();
+                        } else {
+                            QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
+                            for (unsigned int i = 0 ; i < errors.size() ; i++) {
+                                if (errors[i]->intCode == 0) {
+                                    current->setText("CURRENT PASSWORD - " + errors[i]->message);
+                                    current->setStyleSheet("color: #F38688");
+                                } else {
+                                    newPassword->setText("NEW PASSWORD - " + errors[i]->message);
+                                    newPassword->setStyleSheet("color: #F38688");
+                                }
+                            }
+                        }
+                    }, currentInput->input->text(), newInput->input->text());
+                }
+            });
         });
 
     
@@ -662,11 +756,12 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 QWidget *parentWidget = this;
                 while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
                 if (owner) {
-                    PopUp *popUp = new PopUp(new QWidget(), 440, 200, QString(), "You Own Servers", false, false, "In order to delete or disable your account you must first transfer ownership of all servers that you own.", "", "Okay", true, true, parentWidget->size(), parentWidget);
+                    PopUp *popUp = new PopUp(new QWidget(), 440, 220, QString(), "You Own Servers", false, false, "In order to delete or disable your account you must first transfer ownership of all servers that you own.", "", "Okay", true, true, parentWidget->size(), parentWidget);
                     QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                     QObject::connect(popUp, &PopUp::done, [popUp](){popUp->deleteLater();});
                 } else {
                     QWidget *content = new QWidget();
+                    content->setContentsMargins(16, 0, 16, 0);
                     QVBoxLayout *layout = new QVBoxLayout(content);
                     layout->setSpacing(8);
                     layout->setContentsMargins(0, 0, 0, 0);
@@ -681,8 +776,22 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                     layout->addWidget(input);
 
                     PopUp *popUp = new PopUp(content, 440, 312, QString(), "Delete Account", false, false, "<div style=\"background-color: #FAA81A\">Are you sure that you want to disable your account? This will immediatly log you out of your account and make your account inaccessible to anyone.", "Cancel", "Disable Account", true, true, parentWidget->size(), parentWidget);
-                    QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
-                    QObject::connect(popUp, &PopUp::done, [popUp](){popUp->deleteLater();});
+                    QObject::connect(popUp, &PopUp::cancelled, [this, popUp](){popUp->deleteLater();});
+                    QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget, password, input](){
+                        password->setText("PASSWORD");
+                        password->setStyleSheet("color: #B9BBBE");
+                        rm->requester->disableAccount([popUp, parentWidget, password](void *errorPtr){
+                            if (errorPtr == nullptr) {
+                                popUp->deleteLater();
+
+                                PopUp *closePopUp = new PopUp(new QWidget(), 440, 200, QString(), QString(), true, false, "Your account has been disabled successfully, Fast-Discord will now exit.", QString(), QString(), false, false, parentWidget->size(), parentWidget);
+                                QObject::connect(closePopUp, &PopUp::cancelled, [](){exit(0);});
+                            } else {
+                                password->setText("PASSWORD - " + reinterpret_cast<Api::Error *>(errorPtr)->message);
+                                password->setStyleSheet("color: #F38688");
+                            }
+                        }, input->input->text());
+                    });
                 }
             });
         });
@@ -703,11 +812,12 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 QWidget *parentWidget = this;
                 while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
                 if (owner) {
-                    PopUp *popUp = new PopUp(new QWidget(), 440, 200, QString(), "You Own Servers", false, false, "In order to delete or disable your account you must first transfer ownership of all servers that you own.", "", "Okay", true, true, parentWidget->size(), parentWidget);
+                    PopUp *popUp = new PopUp(new QWidget(), 440, 220, QString(), "You Own Servers", false, false, "In order to delete or disable your account you must first transfer ownership of all servers that you own.", "", "Okay", true, true, parentWidget->size(), parentWidget);
                     QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                     QObject::connect(popUp, &PopUp::done, [popUp](){popUp->deleteLater();});
                 } else {
                     QWidget *content = new QWidget();
+                    content->setContentsMargins(16, 0, 16, 0);
                     QVBoxLayout *layout = new QVBoxLayout(content);
                     layout->setSpacing(8);
                     layout->setContentsMargins(0, 0, 0, 0);
@@ -723,7 +833,21 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
                     PopUp *popUp = new PopUp(content, 440, 312, QString(), "Disable Account", false, false, "<div style=\"background-color: #FAA81A\">Are you sure that you want to delete your account? This will immediatly log you out of your account and you will not be able to log in again.", "Cancel", "Delete Account", true, true, parentWidget->size(), parentWidget);
                     QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
-                    QObject::connect(popUp, &PopUp::done, [popUp](){popUp->deleteLater();});
+                    QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget, password, input](){
+                        password->setText("CURRENT PASSWORD");
+                        password->setStyleSheet("color: #B9BBBE");
+                        rm->requester->deleteAccount([popUp, parentWidget, password](void *errorPtr){
+                            if (errorPtr == nullptr) {
+                                popUp->deleteLater();
+
+                                PopUp *closePopUp = new PopUp(new QWidget(), 440, 200, QString(), QString(), true, false, "Your account has been deleted successfully, Fast-Discord will now exit.", QString(), QString(), false, false, parentWidget->size(), parentWidget);
+                                QObject::connect(closePopUp, &PopUp::cancelled, [](){exit(0);});
+                            } else {
+                                password->setText("PASSWORD - " + reinterpret_cast<Api::Error *>(errorPtr)->message);
+                                password->setStyleSheet("color: #F38688");
+                            }
+                        }, input->input->text());
+                    });
                 }
             });
         });

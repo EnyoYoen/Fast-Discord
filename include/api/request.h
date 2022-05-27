@@ -4,6 +4,7 @@
 #include "api/objects/guild.h"
 #include "api/objects/message.h"
 #include "api/objects/client.h"
+#include "api/objects/error.h"
 #include "ui/common/roundedimage.h"
 
 #include <QString>
@@ -33,9 +34,17 @@ enum RequestTypes {
     GetWsUrl,
     GetUser,
     GetFile,
+    ChangeUsername,
+    ChangeEmail,
+    ChangePassword,
+    RemovePhone,
+    DisableAccount,
+    DeleteAccount,
 
     // We don't care about the response
     SetStatus,
+    SendVerificationEmail,
+    SendVerifyCode,
     SendTyping,
     SendMessage,
     SendMessageWithFile,
@@ -74,7 +83,8 @@ enum RequestMethods {
     Get,
     Post,
     Put,
-    Delete
+    Delete,
+    Patch
 };
 
 // Class to request the API
@@ -82,7 +92,7 @@ class Requester : public QObject
 {
     Q_OBJECT
 public:
-    Requester(const QString& token);
+    Requester(const QString& token, QObject *parent);
     ~Requester();
 
     // Function that request the API
@@ -100,9 +110,19 @@ public:
     void const getUser(Callback callback, const Snowflake& userId);
     void const getFile(const QString& url, const QString& filename);
 
+    // Functions that request the API to change data
+    void const changeUsername(Callback callback, const QString& username, const QString& discriminator, const QString& password);
+    void const changeEmail(Callback callback, QString email, QString password);
+    void const changePassword(Callback callback, QString oldPassword, QString newPassword);
+    void const removePhone(Callback callback, QString password);
+    void const disableAccount(Callback callback, QString password);
+    void const deleteAccount(Callback callback, QString password);
+
     // Functions that request the API to send data
     void const setStatus(const QString& status);
     void const sendTyping(const Snowflake& channelId);
+    void const sendVerifyCode(Callback callback, QString verifyCode);
+    void const sendVerificationEmail();
     void const sendMessage(const QString& content, const Snowflake& channelId);
     void const sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath);
     void const deleteMessage(const Snowflake& channelId, const Snowflake& messageId);
@@ -126,6 +146,7 @@ private:
     QWaitCondition finishWaiter;                // The loop waits when there is no request
     QThread *loop;                              // Request loop
     QString token;                              // Authorization token
+    QString emailToken;
     double rateLimitEnd;                        // Unix time that represents the moment of the end of the rate limit
     unsigned int requestsToCheck;               // The number of requests that we have to check when we need to remove
                                                 // callbacks for image requests

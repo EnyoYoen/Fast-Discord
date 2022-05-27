@@ -36,6 +36,9 @@ public:
     bool const hasMessages(const Snowflake& channelId);
 
     void stopCall();
+
+    void const setToken(QString token);
+    void setClient(Client *client);
     
     Requester *requester;
     Gateway *gw;

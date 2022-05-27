@@ -44,6 +44,8 @@ public:
     void const sendVoiceStateUpdate(const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf);
     void const sendCall(VoiceCallback callback, const Snowflake& guildId, const Snowflake& channelId, bool selfMute, bool selfDeaf);
 
+    void setToken(QString token);
+
 private slots:
     void const closeHandler();
     void const identify();

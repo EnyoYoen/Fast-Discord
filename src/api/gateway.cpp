@@ -43,6 +43,11 @@ void const Gateway::start()
     client.open(QUrl(url + "/?v=9&encoding=json"));
 }
 
+void Gateway::setToken(QString tokenp)
+{
+    token = tokenp;
+}
+
 void const Gateway::closeHandler()
 {
     // Reconnect when the connection is closed

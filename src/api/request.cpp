@@ -1,6 +1,7 @@
 #include "api/request.h"
 
 #include "api/jsonutils.h"
+#include "api/ressourcemanager.h"
 
 #include <QJsonDocument>
 #include <QDir>
@@ -12,8 +13,8 @@
 
 namespace Api {
 
-Requester::Requester(const QString& tokenp)
-    : QObject()
+Requester::Requester(const QString& tokenp, QObject *parent)
+    : QObject(parent)
 {
     // Attributes initialization
     token = tokenp;
@@ -130,6 +131,121 @@ void Requester::readReply()
                     lock.unlock();
                     break;
                 }
+            case ChangeUsername:
+                {
+                    QJsonDocument doc = QJsonDocument::fromJson(ba);
+                    if (doc["errors"].isUndefined()) {
+                        Client *client;
+                        unmarshal<Client>(doc.object(), &client);
+                        reinterpret_cast<RessourceManager *>(parent())->setClient(client);
+                        reinterpret_cast<RessourceManager *>(parent())->setToken(doc.object()["token"].toString());
+                        parameters.callback(nullptr);
+                    } else {
+                        QVector<Error *> errors;
+                        Error *error;
+                        QJsonObject errorsJson = doc["errors"].toObject();
+                        if (!errorsJson["discriminator"].isNull()) {
+                            unmarshal<Error>(errorsJson["discriminator"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 0;
+                            errors.append(new Error(*error));
+                        }
+                        if (!errorsJson["username"].isNull()) {
+                            unmarshal<Error>(errorsJson["username"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 1;
+                            errors.append(new Error(*error));
+                        }
+                        if (!errorsJson["password"].isNull()) {
+                            unmarshal<Error>(errorsJson["password"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 2;
+                            errors.append(new Error(*error));
+                        }                            
+                        parameters.callback(static_cast<void *>(&errors));
+                    }
+                    break;
+                }
+            case ChangeEmail:
+                {
+                    QJsonDocument doc = QJsonDocument::fromJson(ba);
+                    if (doc["errors"].isUndefined()) {
+                        Client *client;
+                        unmarshal<Client>(doc.object(), &client);
+                        reinterpret_cast<RessourceManager *>(parent())->setClient(client);
+                        reinterpret_cast<RessourceManager *>(parent())->setToken(doc.object()["token"].toString());
+                        parameters.callback(nullptr);
+                    } else {
+                        QVector<Error *> errors;
+                        Error *error;
+                        QJsonObject errorsJson = doc["errors"].toObject();
+                        if (!errorsJson["email"].isNull()) {
+                            unmarshal<Error>(errorsJson["email"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 0;
+                            errors.append(new Error(*error));
+                        }
+                        if (!errorsJson["password"].isNull()) {
+                            unmarshal<Error>(errorsJson["password"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 1;
+                            errors.append(new Error(*error));
+                        }                            
+                        parameters.callback(static_cast<void *>(&errors));
+                    }
+                    break;
+                }
+            case ChangePassword:
+                {
+                    QJsonDocument doc = QJsonDocument::fromJson(ba);
+                    if (doc["errors"].isUndefined()) {
+                        Client *client;
+                        unmarshal<Client>(doc.object(), &client);
+                        reinterpret_cast<RessourceManager *>(parent())->setClient(client);
+                        reinterpret_cast<RessourceManager *>(parent())->setToken(doc.object()["token"].toString());
+                        parameters.callback(nullptr);
+                    } else {
+                        QVector<Error *> errors;
+                        Error *error;
+                        QJsonObject errorsJson = doc["errors"].toObject();
+                        if (!errorsJson["password"].isNull()) {
+                            unmarshal<Error>(errorsJson["password"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 0;
+                            errors.append(new Error(*error));
+                        }   
+                        if (!errorsJson["new_password"].isNull()) {
+                            unmarshal<Error>(errorsJson["new_password"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 1;
+                            errors.append(new Error(*error));
+                        }                         
+                        parameters.callback(static_cast<void *>(&errors));
+                    }
+                    break;
+                }
+            case SendVerifyCode:
+                {
+                    QJsonDocument doc = QJsonDocument::fromJson(ba);
+                    if (doc["errors"].isUndefined()) {
+                        emailToken = doc["token"].toString();
+                        parameters.callback(nullptr);
+                    } else {
+                        Error *error;
+                        unmarshal<Error>(doc["errors"].toObject()["code"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                        parameters.callback(error);
+                    }
+                    break;
+                }
+            case DisableAccount:
+            case DeleteAccount:
+                {
+                    QJsonDocument doc = QJsonDocument::fromJson(ba);
+                    if (doc["message"].isUndefined()) {
+                        parameters.callback(nullptr);
+                    } else {
+                        Error *error = new Error {
+                            doc["message"].toString(),
+                            doc["code"].toString(),
+                            doc["code"].toInt(),
+                        };
+                        parameters.callback(error);
+                    }
+                    break;
+                }
         }
         currentRequestsNumber--;
 
@@ -187,6 +303,8 @@ void Requester::RequestLoop()
                         emit requestEmit(Put, request, new QByteArray(parameters.postDatas.toUtf8()), nullptr);
                     } else if (parameters.customRequest == "DELETE") {
                         emit requestEmit(Delete, request, nullptr, nullptr);
+                    } else if (parameters.customRequest == "PATCH") {
+                        emit requestEmit(Patch, request, new QByteArray(parameters.postDatas.toUtf8()), nullptr);
                     }
                 } else {
                     emit requestEmit(Get, request, nullptr, nullptr);
@@ -218,6 +336,9 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *
             break;
         case Delete:
             reply = netManager.deleteResource(request);
+            break;
+        case Patch:
+            reply = netManager.sendCustomRequest(request, "PATCH", (postDatas == nullptr ? QByteArray() : *postDatas));
             break;
     }
 
@@ -457,6 +578,111 @@ void const Requester::getFile(const QString& url, const QString& filename)
         filename,
         GetFile,
         false});
+}
+
+void const Requester::changeUsername(Callback callback, const QString& username, const QString& discriminator, const QString& password)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me",
+        "{\"username\":\"" + username + "\",\"password\":\"" + password + "\",\"discriminator\":\"" + discriminator + "\"}",
+        "PATCH",
+        "",
+        "",
+        ChangeUsername,
+        true});
+}
+
+void const Requester::changeEmail(Callback callback, QString email, QString password)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me",
+        "{\"email\":\"" + email + "\",\"password\":\"" + password + "\",\"email_token\":\"" + emailToken + "\"}",
+        "PATCH",
+        "",
+        "",
+        ChangeEmail,
+        true});
+    emailToken.clear();
+}
+
+void const Requester::changePassword(Callback callback, QString oldPassword, QString newPassword)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me",
+        "{\"new_password\":\"" + newPassword + "\",\"password\":\"" + oldPassword + "\"}",
+        "PATCH",
+        "",
+        "",
+        ChangePassword,
+        true});
+}
+
+void const Requester::removePhone(Callback callback, QString password)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/phone",
+        "{\"change_phone_reason\":\"user_settings_update\",\"password\":\"" + password + "\",\"email_token\":\"" + emailToken + "\"}",
+        "DELETE",
+        "",
+        "",
+        RemovePhone,
+        true});
+}
+
+void const Requester::sendVerificationEmail()
+{
+    requestApi({
+        nullptr,
+        "https://discord.com/api/v9/users/@me/email",
+        "",
+        "PUT",
+        "",
+        "",
+        SendVerificationEmail,
+        false});
+}
+
+void const Requester::sendVerifyCode(Callback callback, QString verifyCode)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/email/verify-code",
+        "{\"code\":\"" + verifyCode + "\"}",
+        "POST",
+        "",
+        "",
+        SendVerifyCode,
+        true});
+}
+
+void const Requester::disableAccount(Callback callback, QString password)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/disable",
+        "{\"password\":\"" + password + "\"}",
+        "POST",
+        "",
+        "",
+        DisableAccount,
+        true});
+}
+
+void const Requester::deleteAccount(Callback callback, QString password)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/delete",
+        "{\"password\":\"" + password + "\"}",
+        "POST",
+        "",
+        "",
+        DeleteAccount,
+        true});
 }
 
 } // namespace Api

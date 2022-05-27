@@ -7,7 +7,7 @@ namespace Api {
 
 RessourceManager::RessourceManager(const QString& token)
 {
-    requester = new Requester(token);
+    requester = new Requester(token, this);
     gw = new Gateway(requester, token);
     vs = new VoiceSocket();
 
@@ -25,6 +25,16 @@ void RessourceManager::call(const Snowflake& guildId, const Snowflake& channelId
 void RessourceManager::stopCall()
 {
     gw->sendVoiceStateUpdate(Snowflake(), Snowflake(), vs->mute, vs->deaf);
+}
+
+void const RessourceManager::setToken(QString token)
+{
+    gw->setToken(token);
+}
+
+void RessourceManager::setClient(Client *clientp)
+{
+    client = clientp;
 }
 
 void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)

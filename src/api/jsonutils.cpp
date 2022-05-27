@@ -14,10 +14,12 @@
 #include "api/objects/client.h"
 #include "api/objects/presence.h"
 #include "api/objects/optional.h"
+#include "api/objects/error.h"
 
 #include <QVariant>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QDebug>
 
 namespace Api {
 
@@ -1046,6 +1048,16 @@ void unmarshal<Call>(const QJsonObject& jsonObj, Call **object)
         getSnowflakesFromJson(jsonObj["participants"].toArray()),
 
         getString(jsonObj, "ended_timestamp"),
+    };
+}
+
+template <>
+void unmarshal<Error>(const QJsonObject& jsonObj, Error **object)
+{
+    *object = new Error {
+        getString(jsonObj, "message"),
+        getString(jsonObj, "code"),
+        jsonObj["code"].toInt(),
     };
 }
 
