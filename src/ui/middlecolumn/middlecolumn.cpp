@@ -2,7 +2,7 @@
 
 namespace Ui {
 
-MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, const Api::Client *client, QWidget *parent)
+MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, QWidget *parent)
     : QWidget(parent)
 {
     // Set the requester
@@ -19,7 +19,7 @@ MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, const Api::Client *client
     layout->addWidget(channelList);
     callWidget = new CallWidget(rm, this);
     layout->addWidget(callWidget);
-    userMenu = new UserMenu(rm, client, this);
+    userMenu = new UserMenu(rm, this);
     layout->addWidget(userMenu);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);

@@ -41,9 +41,6 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
 {
     // Process gateway events
     if (eventName == "READY") {
-        QFile file("output.txt");
-        file.open(QIODevice::OpenModeFlag::WriteOnly);
-        file.write(QJsonDocument(data.toObject()).toJson());
         guilds = Api::unmarshalMultiple<Api::Guild>(data["guilds"].toArray());
         emit guildsReceived(guilds);
 

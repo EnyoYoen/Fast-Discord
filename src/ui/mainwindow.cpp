@@ -30,26 +30,44 @@ MainWindow::MainWindow() : QWidget()
     // Create the ressource manager
     rm = new Api::RessourceManager(token);
 
-    // Connect the signal for the setup
-    QObject::connect(this, &MainWindow::clientAndSettingsReceived, this, &MainWindow::setup);
+    // Create all the widgets
+    mainLayout = new QHBoxLayout(this);
+    leftColumn = new LeftColumn(rm, this);
+    middleColumn = new MiddleColumn(rm, this);
+    rightColumn = new RightColumn(rm, this);
+    settings = new Settings(rm, this);
+    settings->hide();
 
-    // Get user settings
-    clientReceived = false;
-    clientSettingsReceived = false;
-    rm->getClient([this](void *clientp){
-        client = static_cast<Api::Client *>(clientp);
-        if (clientSettingsReceived)
-            emit clientAndSettingsReceived();
-        else
-            clientReceived = true;
-    });
-    rm->getClientSettings([this](void *clientSettingsp){
-        clientSettings = static_cast<Api::ClientSettings *>(clientSettingsp);
-        if (clientReceived)
-            emit clientAndSettingsReceived();
-        else
-            clientSettingsReceived = true;
-    });
+    // Add the column to the layout
+    mainLayout->addWidget(leftColumn);
+    mainLayout->addWidget(middleColumn);
+    mainLayout->addWidget(rightColumn);
+
+    // Style the layout
+    mainLayout->setSpacing(0);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    this->setWindowIcon(QIcon("res/images/png/icon.png"));
+
+    // Connect signals to slots of the columns
+    QObject::connect(leftColumn, &LeftColumn::guildClicked, middleColumn, &MiddleColumn::openGuild);
+    QObject::connect(leftColumn, &LeftColumn::homeButtonClicked, middleColumn, &MiddleColumn::displayPrivateChannels);
+    QObject::connect(leftColumn, &LeftColumn::cleanRightColumn, rightColumn, &RightColumn::clean);
+    QObject::connect(middleColumn, &MiddleColumn::guildChannelClicked, rightColumn, &RightColumn::openGuildChannel);
+    QObject::connect(middleColumn, &MiddleColumn::privateChannelClicked, rightColumn, &RightColumn::openPrivateChannel);
+    QObject::connect(middleColumn, &MiddleColumn::voiceChannelClicked, rm, &Api::RessourceManager::call);
+    QObject::connect(middleColumn, &MiddleColumn::parametersClicked, this, &MainWindow::openSettingsMenu);
+    QObject::connect(rightColumn, &RightColumn::messageAdded, middleColumn, &MiddleColumn::putChannelFirst);
+    QObject::connect(settings, &Settings::closeClicked, this, &MainWindow::closeSettingsMenu);
+    QObject::connect(rm, &Api::RessourceManager::unreadUpdateReceived, leftColumn, &LeftColumn::setUnreadGuild);
+    QObject::connect(rm, &Api::RessourceManager::messageReceived, rightColumn, &RightColumn::addMessage);
+    QObject::connect(rm, &Api::RessourceManager::presenceReceived, middleColumn, &MiddleColumn::updatePresence);
+    QObject::connect(rm, &Api::RessourceManager::guildsReceived, leftColumn, &LeftColumn::displayGuilds);
+    QObject::connect(rm, &Api::RessourceManager::presencesReceived, middleColumn, &MiddleColumn::setPresences);
+    QObject::connect(rm, &Api::RessourceManager::privateChannelsReceived, middleColumn, &MiddleColumn::setPrivateChannels);
+    QObject::connect(rm, &Api::RessourceManager::channelCreated, middleColumn, &MiddleColumn::createChannel);
+    QObject::connect(rm, &Api::RessourceManager::channelUpdated, middleColumn, &MiddleColumn::updateChannel);
+    QObject::connect(rm, &Api::RessourceManager::channelDeleted, middleColumn, &MiddleColumn::deleteChannel);
 }
 
 void const MainWindow::addAccountInConfig(QSettings *settings, const QMap<QString, QString> accountMap) {
@@ -149,48 +167,6 @@ QString const MainWindow::getAccountToken() {
     }
 
     return token;
-}
-
-void MainWindow::setup()
-{
-    // Create all the widgets
-    mainLayout = new QHBoxLayout(this);
-    leftColumn = new LeftColumn(rm, this);
-    middleColumn = new MiddleColumn(rm, client, this);
-    rightColumn = new RightColumn(rm, client, this);
-    settings = new Settings(rm, this);
-    settings->hide();
-
-    // Add the column to the layout
-    mainLayout->addWidget(leftColumn);
-    mainLayout->addWidget(middleColumn);
-    mainLayout->addWidget(rightColumn);
-
-    // Style the layout
-    mainLayout->setSpacing(0);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-
-    this->setWindowIcon(QIcon("res/images/png/icon.png"));
-
-    // Connect signals to slots of the columns
-    QObject::connect(leftColumn, &LeftColumn::guildClicked, middleColumn, &MiddleColumn::openGuild);
-    QObject::connect(leftColumn, &LeftColumn::homeButtonClicked, middleColumn, &MiddleColumn::displayPrivateChannels);
-    QObject::connect(leftColumn, &LeftColumn::cleanRightColumn, rightColumn, &RightColumn::clean);
-    QObject::connect(middleColumn, &MiddleColumn::guildChannelClicked, rightColumn, &RightColumn::openGuildChannel);
-    QObject::connect(middleColumn, &MiddleColumn::privateChannelClicked, rightColumn, &RightColumn::openPrivateChannel);
-    QObject::connect(middleColumn, &MiddleColumn::voiceChannelClicked, rm, &Api::RessourceManager::call);
-    QObject::connect(middleColumn, &MiddleColumn::parametersClicked, this, &MainWindow::openSettingsMenu);
-    QObject::connect(rightColumn, &RightColumn::messageAdded, middleColumn, &MiddleColumn::putChannelFirst);
-    QObject::connect(settings, &Settings::closeClicked, this, &MainWindow::closeSettingsMenu);
-    QObject::connect(rm, &Api::RessourceManager::unreadUpdateReceived, leftColumn, &LeftColumn::setUnreadGuild);
-    QObject::connect(rm, &Api::RessourceManager::messageReceived, rightColumn, &RightColumn::addMessage);
-    QObject::connect(rm, &Api::RessourceManager::presenceReceived, middleColumn, &MiddleColumn::updatePresence);
-    QObject::connect(rm, &Api::RessourceManager::guildsReceived, leftColumn, &LeftColumn::displayGuilds);
-    QObject::connect(rm, &Api::RessourceManager::presencesReceived, middleColumn, &MiddleColumn::setPresences);
-    QObject::connect(rm, &Api::RessourceManager::privateChannelsReceived, middleColumn, &MiddleColumn::setPrivateChannels);
-    QObject::connect(rm, &Api::RessourceManager::channelCreated, middleColumn, &MiddleColumn::createChannel);
-    QObject::connect(rm, &Api::RessourceManager::channelUpdated, middleColumn, &MiddleColumn::updateChannel);
-    QObject::connect(rm, &Api::RessourceManager::channelDeleted, middleColumn, &MiddleColumn::deleteChannel);
 }
 
 void MainWindow::openSettingsMenu()

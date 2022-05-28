@@ -23,7 +23,6 @@ signals:
     void clientAndSettingsReceived();
 
 private slots:
-    void setup();
     void openSettingsMenu();
     void closeSettingsMenu();
 
@@ -41,12 +40,6 @@ private:
     Settings *settings;
 
     Api::RessourceManager *rm;           // Manage all the data we receive
-
-    Api::Client *client;                 // The actual client
-    Api::ClientSettings *clientSettings; // and the settings
-
-    bool clientReceived;
-    bool clientSettingsReceived;
 };
 
 } // namespace Ui

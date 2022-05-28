@@ -4,7 +4,6 @@
 #include "ui/common/statusicon.h"
 #include "ui/middlecolumn/usermenubutton.h"
 #include "api/ressourcemanager.h"
-#include "api/objects/client.h"
 
 #include <QWidget>
 
@@ -15,7 +14,7 @@ class UserMenu : public QWidget
 {
     Q_OBJECT
 public:
-    UserMenu(Api::RessourceManager *rm, const Api::Client *client, QWidget *parent);
+    UserMenu(Api::RessourceManager *rm, QWidget *parent);
 
     bool deaf;
     bool muted;

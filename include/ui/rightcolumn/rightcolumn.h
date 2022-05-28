@@ -19,7 +19,7 @@ class RightColumn : public QWidget
 {
     Q_OBJECT
 public:
-    RightColumn(Api::RessourceManager *rm, const Api::Client *clientp, QWidget *parent);
+    RightColumn(Api::RessourceManager *rm, QWidget *parent);
     void userTyping(const json& data); // Used when we recieve TYPING_START event
                                        // from the gateway to show the typing label
 
@@ -58,7 +58,6 @@ private:
     Api::RessourceManager *rm; // To request the API
     QString filePath;
 
-    const Api::Client *client;           // Store the actual user
     Api::Snowflake currentOpenedChannel; // Current channel ID
     long typingTimestamp;                // The timestamp of the start of the typing
 };

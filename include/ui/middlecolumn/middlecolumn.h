@@ -21,7 +21,7 @@ class MiddleColumn : public QWidget
 {
     Q_OBJECT
 public:
-    MiddleColumn(Api::RessourceManager *rm, const Api::Client *client, QWidget *parent);
+    MiddleColumn(Api::RessourceManager *rm, QWidget *parent);
 
 signals:
     void guildChannelsReceived(const QVector<Api::Channel *> channels);
