@@ -109,7 +109,6 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
     // Create the channels widgets
 
     size_t channelsLen = channels.size();
-    unsigned int count = 0; // For the IDs of the channels
     // Loop to find channel that are not in a category
     for (size_t i = 0 ; i < channelsLen ; i++) {
         if (channels[i]->type != Api::GuildCategory && channels[i]->parentId == 0) {
@@ -119,38 +118,81 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
             guildChannelWidgets.push_back(channelWidget);
             // Connect the clicked signal to open the channel
             QObject::connect(channelWidget, &GuildChannelWidget::leftClicked, this, &MiddleColumn::clicGuildChannel);
-            count++;
         }
     }
+
     // Loop through all channels to create widgets
+    QMap<Api::Snowflake, Api::Channel *> categoriesId;
+    QMap<Api::Channel *, QVector<Api::Channel *>> categories;
     for (size_t i = 0 ; i < channelsLen ; i++) {
+        if (channels[i]->type == Api::GuildCategory) {
+            categoriesId[channels[i]->id] = channels[i];
+            categories[channels[i]];
+        }
+    }
+    for (size_t i = 0 ; i < channelsLen ; i++) {
+        if (channels[i]->parentId != 0) {
+            QVector<qint32> idxs;
+            QVector<Api::Channel *> categoryChannels = categories[categoriesId[channels[i]->parentId]];
+            for (size_t j = 0 ; j < categoryChannels.size() ; j++) {
+                idxs.append(categoryChannels[j]->position);
+            }
+            idxs.append(channels[i]->position);
+            qSort(idxs);
+            int idx = idxs.indexOf(channels[i]->position);
+            categories[categoriesId[channels[i]->parentId]].insert(idx, channels[i]);
+        }
+    }
+
+    int index = 0;
+    QList<Api::Channel *> keys = categories.keys();
+    QList<QVector<Api::Channel *>> values = categories.values();
+    for (size_t i = 0 ; i < categories.count() ; i++) {
+        for (size_t j = 0 ; j != categories.count() ; j++) {
+            if (keys.at(j)->position == index) {
+                GuildChannelWidget *channelWidget = new GuildChannelWidget(*keys.at(j), guildChannelList);
+                guildChannelListLayout->addWidget(channelWidget);
+                guildChannelWidgets.push_back(channelWidget);
+                for (size_t k = 0 ; k < values.at(j).size() ; k++) {
+                    GuildChannelWidget *channelWidget = new GuildChannelWidget(*values.at(j)[k], guildChannelList);
+                    guildChannelListLayout->addWidget(channelWidget);
+                    guildChannelWidgets.push_back(channelWidget);
+                    QObject::connect(channelWidget, &GuildChannelWidget::leftClicked, this, &MiddleColumn::clicGuildChannel);
+                }
+                index++;
+                break;
+            }
+        }
+    }
+
+    /*for (size_t i = 0 ; i < channelsLen ; i++) {
         if (channels[i]->type == Api::GuildCategory) {
             // Create the category channel channel widget
             GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[i], guildChannelList);
             guildChannelListLayout->addWidget(channelWidget);
             guildChannelWidgets.push_back(channelWidget);
-            count++;
             // Loop another time to find channels belonging to this category
+            QVector<qint32> channelsPosition;
+            size_t channelsCount = 0;
             for (size_t j = 0 ; j < channelsLen ; j++) {
-                if (channels[j]->parentId == 0) { // Category or 'orphan' channel
-                    if (channels[j]->type != Api::GuildCategory) {
-                        // Connect the clicked signal to open the channel
-                        QObject::connect(channelWidget, &GuildChannelWidget::leftClicked, this, &MiddleColumn::clicGuildChannel);
-                    }
-                }
                 if (channels[j]->parentId == channels[i]->id) {
+                    channelsCount++;
                     // This channel belongs to the category
                     // Create and add the channel widget
                     GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[j], guildChannelList);
                     guildChannelWidgets.push_back(channelWidget);
-                    guildChannelListLayout->addWidget(channelWidget);
+                    channelsPosition.append(channels[j]->position);
+                    qSort<QVector<qint32>>(channelsPosition);
+                    int index = channelsPosition.indexOf(channels[j]->position);
+                    guildChannelListLayout->insertWidget(guildChannelListLayout->count() - sum - (channelsPosition.size() - index - 1), channelWidget);
+                    qDebug() << guildChannelListLayout->count() - sum - (channelsPosition.size() - index - 1);
                     // Connect the clicked signal to open the channel
                     QObject::connect(channelWidget, &GuildChannelWidget::leftClicked, this, &MiddleColumn::clicGuildChannel);
-                    count++;
                 }
             }
+            categoryChannelsCount[channels[i]->position] = channelsCount;
         }
-    }
+    }*/
     guildChannelListLayout->insertStretch(-1, 1);
     guildChannelListLayout->setSpacing(3);
     guildChannelListLayout->setContentsMargins(0, 8, 8, 8);
