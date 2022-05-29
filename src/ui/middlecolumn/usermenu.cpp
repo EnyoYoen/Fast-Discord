@@ -48,12 +48,14 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, QWidget *parent)
         statusBackground->move(28, 29);
         statusBackground->setStyleSheet("border-radius: 8px;"
                                         "background-color: #292B2F;");
+        statusBackground->show();
 
         // Set the status icon
         statusIcon = new QLabel(this);
         statusIcon->setFixedSize(10, 10);
         statusIcon->setStyleSheet("border-radius: 5px;");
         statusIcon->move(31, 32);
+        statusIcon->show();
         rm->getClientSettings([&](void *settingsPtr){
             QString status = reinterpret_cast<Api::ClientSettings *>(settingsPtr)->status;
             if (status == "online") statusIcon->setStyleSheet("border-radius: 5px;"

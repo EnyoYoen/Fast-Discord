@@ -180,7 +180,7 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
         Api::unmarshal<Api::Message>(data.toObject(), &message);
         if (messages.find(message->channelId) != messages.end())
             messages[message->channelId].insert(messages[message->channelId].begin(), message);
-        if (message->author.id != client->id) emit messageReceived(*message);
+        emit messageReceived(*message);
     } else if (eventName == "PRESENCE_UPDATE") {
         Api::Presence *presence;
         Api::unmarshal<Api::Presence>(data.toObject(), &presence);

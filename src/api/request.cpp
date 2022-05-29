@@ -504,6 +504,8 @@ void const Requester::sendTyping(const Snowflake& channelId)
 
 void const Requester::sendMessage(const QString& content, const Snowflake& channelId)
 {
+    const_cast<QString&>(content).replace('\n', "\\n").replace('\t', "\\t").replace('\r', "\\r").replace('\v', "\\v")
+        .replace('\f', "\\f").replace('\e', "\\e").replace('\b', "\\b").replace('\a', "\\a");
     requestApi({
         nullptr,
         "https://discord.com/api/v9/channels/" + channelId + "/messages",
@@ -517,6 +519,8 @@ void const Requester::sendMessage(const QString& content, const Snowflake& chann
 
 void const Requester::sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath)
 {
+    const_cast<QString&>(content).replace('\n', "\\n").replace('\t', "\\t").replace('\r', "\\r").replace('\v', "\\v")
+        .replace('\f', "\\f").replace('\e', "\\e").replace('\b', "\\b").replace('\a', "\\a");
     requestApi({
         nullptr,
         "https://discord.com/api/v9/channels/" + channelId + "/messages",

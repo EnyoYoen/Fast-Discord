@@ -245,14 +245,6 @@ void const RightColumn::sendMessage(const QString& content)
             filePath.clear();
             fileLabel->hide();
         }
-
-        rm->getClient([this, content](void *clientPtr){
-            Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
-            QString messageTimestamp = QDateTime::currentDateTime().toString(Qt::ISODateWithMs);
-            QString fakeStr;
-            Api::Message *newMessage = new Api::Message {Api::User{QString(client->username), fakeStr, QString(client->avatar), fakeStr, fakeStr, fakeStr, Api::Snowflake(client->id), 0, 0, 0, 0, 2, 2, 2, 2}, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, QVector<Api::Reaction *>(), QVector<Api::Embed *>(), QVector<Api::User *>(), QVector<Api::Attachment *>(), QVector<Api::ChannelMention *>(), QVector<QString>(), QVector<Api::MessageComponent *>(), QVector<Api::StickerItem *>(), QVector<Api::Sticker *>(), QString(content), QString(messageTimestamp), fakeStr, fakeStr, 0, Api::Snowflake(currentOpenedChannel), 0, 0, 0, 0, 0, 0, 0, false, false, false};
-            this->addMessage(*newMessage);
-        });
     }
 }
 
