@@ -159,40 +159,11 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
                     guildChannelWidgets.push_back(channelWidget);
                     QObject::connect(channelWidget, &GuildChannelWidget::leftClicked, this, &MiddleColumn::clicGuildChannel);
                 }
-                index++;
-                break;
             }
         }
+        index++;
     }
 
-    /*for (size_t i = 0 ; i < channelsLen ; i++) {
-        if (channels[i]->type == Api::GuildCategory) {
-            // Create the category channel channel widget
-            GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[i], guildChannelList);
-            guildChannelListLayout->addWidget(channelWidget);
-            guildChannelWidgets.push_back(channelWidget);
-            // Loop another time to find channels belonging to this category
-            QVector<qint32> channelsPosition;
-            size_t channelsCount = 0;
-            for (size_t j = 0 ; j < channelsLen ; j++) {
-                if (channels[j]->parentId == channels[i]->id) {
-                    channelsCount++;
-                    // This channel belongs to the category
-                    // Create and add the channel widget
-                    GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[j], guildChannelList);
-                    guildChannelWidgets.push_back(channelWidget);
-                    channelsPosition.append(channels[j]->position);
-                    qSort<QVector<qint32>>(channelsPosition);
-                    int index = channelsPosition.indexOf(channels[j]->position);
-                    guildChannelListLayout->insertWidget(guildChannelListLayout->count() - sum - (channelsPosition.size() - index - 1), channelWidget);
-                    qDebug() << guildChannelListLayout->count() - sum - (channelsPosition.size() - index - 1);
-                    // Connect the clicked signal to open the channel
-                    QObject::connect(channelWidget, &GuildChannelWidget::leftClicked, this, &MiddleColumn::clicGuildChannel);
-                }
-            }
-            categoryChannelsCount[channels[i]->position] = channelsCount;
-        }
-    }*/
     guildChannelListLayout->insertStretch(-1, 1);
     guildChannelListLayout->setSpacing(3);
     guildChannelListLayout->setContentsMargins(0, 8, 8, 8);

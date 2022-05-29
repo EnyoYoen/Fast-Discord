@@ -8,7 +8,6 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QGraphicsOpacityEffect>
-#include <QDebug>
 
 namespace Ui {
 

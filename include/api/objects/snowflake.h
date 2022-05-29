@@ -17,8 +17,8 @@ struct Snowflake
     friend bool operator==(const Snowflake& lhs, const Snowflake& rhs) { return lhs.value == rhs.value; }
     friend bool operator==(const Snowflake& lhs, int i) { return lhs.value == i; }
     friend bool operator!=(const Snowflake& lhs, const Snowflake& rhs) { return lhs.value != rhs.value; }
-    friend bool operator<(const Snowflake& lhs, const Snowflake& rhs) { return lhs.discordTimestamp() < rhs.discordTimestamp(); }
-    friend bool operator>(const Snowflake& lhs, const Snowflake& rhs) { return lhs.discordTimestamp() > rhs.discordTimestamp(); }
+    friend bool operator<(const Snowflake& lhs, const Snowflake& rhs) { return lhs.value < rhs.value; }
+    friend bool operator>(const Snowflake& lhs, const Snowflake& rhs) { return lhs.value > rhs.value; }
     friend QString operator+(const Snowflake& snow, const QString& str) { return QString::number(snow.value) + str; }
     friend QString operator+(const QString& str, const Snowflake& snow) { return str + QString::number(snow.value); }
 
