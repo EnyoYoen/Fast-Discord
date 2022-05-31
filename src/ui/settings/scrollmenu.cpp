@@ -15,25 +15,26 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     layout->setSpacing(2);
     layout->setContentsMargins(20, 60, 6, 60);
 
-    buttons.append(new MenuButton(MenuButton::ButtonType::MyAccount, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::UserProfile, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::PrivacySafety, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::AuthorizedApps, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::Connections, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::Appearance, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::Accessibility, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::VoiceVideo, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::TextImages, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::Notifications, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::Keybinds, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::Language, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::StreamerMode, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::Advanced, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::ActivityStatus, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::WhatsNew, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::HypeSquad, scrollWidget));
-    buttons.append(new MenuButton(MenuButton::ButtonType::LogOut, scrollWidget));
+    buttons.append(new MenuButton(MenuButton::ButtonType::MyAccount, scrollWidget, true));
+    buttons.append(new MenuButton(MenuButton::ButtonType::UserProfile, scrollWidget, true));
+    buttons.append(new MenuButton(MenuButton::ButtonType::PrivacySafety, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::AuthorizedApps, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::Connections, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::Appearance, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::Accessibility, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::VoiceVideo, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::TextImages, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::Notifications, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::Keybinds, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::Language, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::StreamerMode, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::Advanced, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::ActivityStatus, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::WhatsNew, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::HypeSquad, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::LogOut, scrollWidget, false));
 
+    actualType = MenuButton::ButtonType::MyAccount;
     buttons[0]->setStyleSheet("border-radius: 4px;"
                               "color: #FFF;"
                               "background-color: rgba(79, 84, 92, 0.6);");
@@ -68,11 +69,14 @@ ScrollMenu::ScrollMenu(QWidget *parent)
 
 void ScrollMenu::resetButtons(MenuButton::ButtonType type)
 {
-    for (unsigned int i = 0 ; i < buttons.size() ; i++) {
-        if (buttons[i]->type != type) 
-            buttons[i]->unclicked();
+    if (actualType != type) {
+        for (unsigned int i = 0 ; i < buttons.size() ; i++) {
+            if (buttons[i]->type != type) 
+                buttons[i]->unclicked();
+        }
+        actualType = type;
+        emit buttonClicked(type);
     }
-    emit buttonClicked(type);
 }
 
 QLabel *ScrollMenu::createMenuTitle(char *title)

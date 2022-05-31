@@ -2,15 +2,16 @@
 
 namespace Ui {
 
-MenuButton::MenuButton(MenuButton::ButtonType typep, QWidget *parent) 
+MenuButton::MenuButton(MenuButton::ButtonType typep, QWidget *parent, bool activep) 
     : QLabel(parent)
 {
+    active = activep;
     type = typep;
     pressed = false;
 
     char *text;
     switch (type) {
-        case ButtonType::MyAccount:      text = (char *)"My Account";       break;
+        case ButtonType::MyAccount:      text = (char *)"My Account";       pressed = true; break;
         case ButtonType::UserProfile:    text = (char *)"User Profile";     break;
         case ButtonType::PrivacySafety:  text = (char *)"Privacy & Safety"; break;
         case ButtonType::AuthorizedApps: text = (char *)"Authorized Apps";  break;
@@ -50,9 +51,11 @@ MenuButton::MenuButton(MenuButton::ButtonType typep, QWidget *parent)
 void MenuButton::unclicked()
 {
     pressed = false;
-    /*this->setStyleSheet("border-radius: 4px;"
-                        "color: #B9BBBE;"
-                        "background-color: #2F3136;");*/
+    if (active) {
+        this->setStyleSheet("border-radius: 4px;"
+                            "color: #B9BBBE;"
+                            "background-color: #2F3136;");
+    }
 }
 
 void MenuButton::mouseReleaseEvent(QMouseEvent *event)
@@ -65,26 +68,32 @@ void MenuButton::mouseReleaseEvent(QMouseEvent *event)
 void MenuButton::mousePressEvent(QMouseEvent *)
 {
     pressed = true;
-    /*this->setStyleSheet("border-radius: 4px;"
-                        "color: #FFF;"
-                        "background-color: rgba(79, 84, 92, 0.6);");*/
+    if (active) {
+        this->setStyleSheet("border-radius: 4px;"
+                            "color: #FFF;"
+                            "background-color: rgba(79, 84, 92, 0.6);");
+    }
 }
 
 void MenuButton::enterEvent(QEvent *)
 {
     if (!pressed) {
-        /*this->setStyleSheet("border-radius: 4px;"
-                            "color: #B9BBBE;"
-                            "background-color: rgba(79, 84, 92, 0.4);");*/
+        if (active) {
+            this->setStyleSheet("border-radius: 4px;"
+                                "color: #B9BBBE;"
+                                "background-color: rgba(79, 84, 92, 0.4);");
+        }
     }
 }
 
 void MenuButton::leaveEvent(QEvent *)
 {
     if (!pressed) {
-        /*this->setStyleSheet("border-radius: 4px;"
-                            "color: #B9BBBE;"
-                            "background-color: #2F3136;");*/
+        if (active) {
+            this->setStyleSheet("border-radius: 4px;"
+                                "color: #B9BBBE;"
+                                "background-color: #2F3136;");
+        }
     }
 }
 

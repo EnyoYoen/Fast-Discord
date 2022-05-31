@@ -131,7 +131,7 @@ void GuildFolder::setUnread(const Api::Snowflake& id)
     if (!clicked) 
         pill->setHeight(8);
     
-    for (unsigned int i = 0 ; i < guildIds.size() ; i++) {
+    for (unsigned int i = 0 ; i < guildWidgets.size() ; i++) {
         if (guildWidgets[i]->id == id)
             guildWidgets[i]->setUnread(true);
     }

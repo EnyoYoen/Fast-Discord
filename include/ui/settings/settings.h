@@ -3,6 +3,7 @@
 #include "api/ressourcemanager.h"
 
 #include <QWidget>
+#include <QHBoxLayout>
 
 namespace Ui {
 
@@ -16,6 +17,7 @@ signals:
     void closeClicked();
 
 private:
+    QHBoxLayout *layout;
     Api::RessourceManager *rm;
 };
 

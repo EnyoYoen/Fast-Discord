@@ -76,7 +76,7 @@ void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
                     }
                 }
             }
-            if (folder->intId != 0 && folder->strId.isNull()) {
+            if (folder->intId != 0 || !folder->strId.isNull()) {
                 GuildFolder *folderWidget = new GuildFolder(rm, folder, folderGuilds, this);
                 guildFolders.push_back(folderWidget);
                 layout->insertWidget(widgetCounter + 3, folderWidget);

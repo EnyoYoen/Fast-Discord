@@ -6,11 +6,11 @@
 
 namespace Ui {
 
-class MyAccount : public QScrollArea
+class UserProfile : public QScrollArea
 {
     Q_OBJECT
 public:
-    MyAccount(Api::RessourceManager *rm, QWidget *parent);
+    UserProfile(Api::RessourceManager *rm, QWidget *parent);
 
 private:
     Api::RessourceManager *rm;

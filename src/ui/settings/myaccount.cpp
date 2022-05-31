@@ -3,6 +3,7 @@
 #include "ui/settings/settingsbutton.h"
 #include "ui/settings/settingsinput.h"
 #include "ui/settings/popup.h"
+#include "ui/settings/divider.h"
 #include "api/objects/client.h"
 #include "api/objects/error.h"
 
@@ -861,13 +862,13 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
     layout->addWidget(title);
     layout->addSpacing(20);
     layout->addWidget(profile);
-    layout->addWidget(createDivider());
+    layout->addWidget(new Divider());
     layout->addWidget(sectionTitle);
     layout->addSpacing(20);
     layout->addWidget(changePassword);
     /*layout->addSpacing(28);
     layout->addWidget(tfaSection);*/
-    layout->addWidget(createDivider());
+    layout->addWidget(new Divider());
     layout->addWidget(accountRemoval);
     layout->addSpacing(8);
     layout->addWidget(accountRemovalDesc);
@@ -878,18 +879,6 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
     this->setStyleSheet("QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
                         "QScrollBar {border: none; background-color: #36393F; border-radius: 8px; width: 3px;}"
                         "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}");
-}
-
-QWidget *MyAccount::createDivider()
-{
-    QWidget *divider = new QWidget();
-    divider->setFixedSize(660, 81);
-    divider->setContentsMargins(0, 40, 0, 40);
-    QWidget *lineDivider = new QWidget(divider);
-    lineDivider->move(0, 41);
-    lineDivider->setFixedSize(660, 1);
-    lineDivider->setStyleSheet("background-color: rgba(79, 84, 92, 0.48);");
-    return divider;
 }
 
 } // namespace Ui

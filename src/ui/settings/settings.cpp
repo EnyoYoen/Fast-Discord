@@ -3,8 +3,7 @@
 #include "ui/settings/scrollmenu.h"
 #include "ui/settings/closebutton.h"
 #include "ui/settings/myaccount.h"
-
-#include <QHBoxLayout>
+#include "ui/settings/userprofile.h"
 
 namespace Ui {
 
@@ -13,7 +12,7 @@ Settings::Settings(Api::RessourceManager *rmp, QWidget *parent)
 {
     rm = rmp;
 
-    QHBoxLayout *layout = new QHBoxLayout(this);
+    layout = new QHBoxLayout(this);
     CloseButton *close = new CloseButton(this);
     QWidget *closeContainer = new QWidget(this);
     QVBoxLayout *closeLayout = new QVBoxLayout(closeContainer);
@@ -22,13 +21,29 @@ Settings::Settings(Api::RessourceManager *rmp, QWidget *parent)
     closeLayout->addWidget(close);
     closeLayout->addWidget(new QWidget(closeContainer));
 
-    layout->addWidget(new ScrollMenu(this));
+    ScrollMenu *scrollMenu = new ScrollMenu(this);
+    layout->addWidget(scrollMenu);
     layout->addWidget(new MyAccount(rm, this));
     layout->addWidget(closeContainer);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
     
     QObject::connect(close, &CloseButton::clicked, [this](){emit closeClicked();});
+    QObject::connect(scrollMenu, &ScrollMenu::buttonClicked, [this](MenuButton::ButtonType type){
+        QWidget *menu = nullptr;
+        switch (type) {
+            case MenuButton::ButtonType::MyAccount:
+                menu = new MyAccount(rm, this);
+                break;
+            case MenuButton::ButtonType::UserProfile:
+                menu = new UserProfile(rm, this);
+                break;
+        }
+
+        if (menu != nullptr) {
+            layout->replaceWidget(layout->itemAt(1)->widget(), menu);
+        }
+    });
     
     this->setStyleSheet("background-color: #36393F;");
 }

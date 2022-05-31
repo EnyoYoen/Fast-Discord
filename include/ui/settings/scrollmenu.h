@@ -24,6 +24,7 @@ private:
 
     QVector<MenuButton *> buttons;
     QWidget *scrollWidget;
+    MenuButton::ButtonType actualType;
 };
 
 } // namespace Ui

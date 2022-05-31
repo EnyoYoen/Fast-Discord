@@ -35,7 +35,7 @@ public:
         LogOut
     };
 
-    MenuButton(MenuButton::ButtonType type, QWidget *parent);
+    MenuButton(MenuButton::ButtonType type, QWidget *parent, bool active);
     void unclicked();
 
     ButtonType type;
@@ -50,6 +50,7 @@ private:
     void leaveEvent(QEvent *) override;
 
     bool pressed;
+    bool active;
 };
 
 } // namespace Ui
