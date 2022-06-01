@@ -68,14 +68,26 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
         QHBoxLayout *iconTextLayout = new QHBoxLayout(textIcon);
         QLabel *text = new QLabel(iconText, textIcon);
         QFont font;
-        font.setPixelSize(small ? 6 : 16);
         font.setFamily("whitney");
+        if (small) {
+            font.setPixelSize(6);
+        } else {
+            font.setPixelSize(16);
+            QFontMetrics metrics(font);
+            int fontWidth = metrics.width(iconText);
+            if (fontWidth > 48) {
+                font.setPixelSize(10);
+                text->setAlignment(Qt::AlignCenter);
+            } else {
+                font.setPixelSize(16);
+            }
+        }
         text->setFont(font);
 
         iconTextLayout->setContentsMargins(0, 0, 0, 0);
         iconTextLayout->addWidget(text, 0, Qt::AlignHCenter);
 
-        text->setFixedHeight(small ? 10 : 40);
+        text->setFixedHeight(small ? 10 : 16);
         textIcon->setFixedSize(small ? 16 : 48, small ? 16 : 48);
         textIcon->setStyleSheet("border-radius: " + QString::number(small ? 8 : 24) + "px;"
                                 "color: #DCDDDE;"
