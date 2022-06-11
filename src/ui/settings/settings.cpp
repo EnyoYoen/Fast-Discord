@@ -22,11 +22,11 @@ Settings::Settings(Api::RessourceManager *rmp, QWidget *parent)
     closeLayout->addWidget(new QWidget(closeContainer));
 
     ScrollMenu *scrollMenu = new ScrollMenu(this);
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(scrollMenu);
     layout->addWidget(new MyAccount(rm, this));
     layout->addWidget(closeContainer);
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
     
     QObject::connect(close, &CloseButton::clicked, [this](){emit closeClicked();});
     QObject::connect(scrollMenu, &ScrollMenu::buttonClicked, [this](MenuButton::ButtonType type){

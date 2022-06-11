@@ -246,6 +246,43 @@ void Requester::readReply()
                     }
                     break;
                 }
+            case ChangeClient:
+                {
+                    QJsonDocument doc = QJsonDocument::fromJson(ba);
+                    if (doc["errors"].isUndefined()) {
+                        Client *client;
+                        unmarshal<Client>(doc.object(), &client);
+                        reinterpret_cast<RessourceManager *>(parent())->setClient(client);
+                        reinterpret_cast<RessourceManager *>(parent())->setToken(doc.object()["token"].toString());
+                        parameters.callback(nullptr);
+                    } else {
+                        QVector<Error *> errors;
+                        Error *error;
+                        QJsonObject errorsJson = doc["errors"].toObject();
+                        if (!errorsJson["avatar"].isNull()) {
+                            unmarshal<Error>(errorsJson["avatar"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 0;
+                            errors.append(new Error(*error));
+                        }
+                        if (!errorsJson["accent_color"].isNull()) {
+                            unmarshal<Error>(errorsJson["accent_color"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 1;
+                            errors.append(new Error(*error));
+                        }
+                        if (!errorsJson["banner"].isNull()) {
+                            unmarshal<Error>(errorsJson["banner"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 2;
+                            errors.append(new Error(*error));
+                        }
+                        if (!errorsJson["bio"].isNull()) {
+                            unmarshal<Error>(errorsJson["bio"].toObject()["_errors"].toArray()[0].toObject(), &error);
+                            error->intCode = 3;
+                            errors.append(new Error(*error));
+                        }
+                        parameters.callback(static_cast<void *>(&errors));
+                    }
+                    break;
+                }
         }
         currentRequestsNumber--;
 
@@ -686,6 +723,19 @@ void const Requester::deleteAccount(Callback callback, QString password)
         "",
         "",
         DeleteAccount,
+        true});
+}
+
+void const Requester::changeClient(Callback callback, QString json)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me",
+        json,
+        "PATCH",
+        "",
+        "",
+        ChangeClient,
         true});
 }
 

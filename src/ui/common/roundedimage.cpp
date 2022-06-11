@@ -70,6 +70,14 @@ void RoundedImage::setImage(const QString& imagePath)
     }
 }
 
+void RoundedImage::clear()
+{
+    hasImage = false;
+    image = QPixmap();
+    animatedImage = nullptr;
+    this->setPixmap(image);
+}
+
 void RoundedImage::paintEvent(QPaintEvent *)
 {
     if (hasImage) {

@@ -40,6 +40,7 @@ enum RequestTypes {
     RemovePhone,
     DisableAccount,
     DeleteAccount,
+    ChangeClient,
 
     // We don't care about the response
     SetStatus,
@@ -117,6 +118,7 @@ public:
     void const removePhone(Callback callback, QString password);
     void const disableAccount(Callback callback, QString password);
     void const deleteAccount(Callback callback, QString password);
+    void const changeClient(Callback callback, QString json);
 
     // Functions that request the API to send data
     void const setStatus(const QString& status);

@@ -100,8 +100,30 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         } else if (client.bannerColor != 0) {
             banner->setStyleSheet("background-color: #" + QString::number(client.bannerColor, 16));
         } else {
-            // TODO : get average color of the avatar image for the banner
-            banner->setStyleSheet("background-color: #000");
+            if (client.avatar.isNull()) {
+                banner->setStyleSheet("background-color: #000");
+            } else {
+                QString channelIconFileName = client.id + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
+                rm->getImage([banner](void *imageFileName){
+                    QImage img(*reinterpret_cast<QString *>(imageFileName));
+                    int count = 0;
+                    int r = 0, g = 0, b = 0;
+                    for (int i = 0 ; i < img.width() ; i++) {
+                        for (int j = 0 ; j < img.height() ; j++) {
+                            count++;
+                            QColor c = img.pixel(i, j);
+                            r += c.red();
+                            g += c.green();
+                            b += c.blue();
+                        }
+                    }
+
+                    r /= count;
+                    g /= count;
+                    b /= count;
+                    banner->setStyleSheet("background-color: #" + (r < 16 ? "0" + QString::number(r, 16) : QString::number(r, 16)) + (g < 16 ? "0" + QString::number(g, 16) : QString::number(g, 16)) + (b < 16 ? "0" + QString::number(b, 16) : QString::number(b, 16)) + ";");
+                }, "https://cdn.discordapp.com/avatars/" + client.id + "/" + client.avatar, channelIconFileName);
+            }
         }
 
         QWidget *nameAndEdit = new QWidget(profile);
