@@ -5,6 +5,7 @@
 #include "ui/settings/myaccount.h"
 #include "ui/settings/userprofile.h"
 #include "ui/settings/privacysafety.h"
+#include "ui/settings/authorizedapps.h"
 
 namespace Ui {
 
@@ -41,6 +42,9 @@ Settings::Settings(Api::RessourceManager *rmp, QWidget *parent)
                 break;
             case MenuButton::ButtonType::PrivacySafety:
                 menu = new PrivacySafety(rm, this);
+                break;
+            case MenuButton::ButtonType::AuthorizedApps:
+                menu = new AuthorizedApps(rm, this);
                 break;
         }
 

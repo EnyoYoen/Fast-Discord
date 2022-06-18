@@ -36,6 +36,7 @@ enum RequestTypes {
     GetFile,
     GetConsent,
     GetHarvest,
+    GetAuthorizedApp,
     ChangeUsername,
     ChangeEmail,
     ChangePassword,
@@ -57,7 +58,8 @@ enum RequestTypes {
     DeleteMessage,
     PinMessage,
     UnpinMessage,
-    HarvestData
+    HarvestData,
+    DeleteAuthorizedApp
 };
 
 struct RequestParameters
@@ -118,6 +120,7 @@ public:
     void const getFile(const QString& url, const QString& filename);
     void const getConsent(Callback callback);
     void const getHarvest(Callback callback);
+    void const getAuthorizedApp(Callback callback);
     
     // Functions that request the API to change data
     void const changeUsername(Callback callback, const QString& username, const QString& discriminator, const QString& password);
@@ -142,6 +145,7 @@ public:
     void const deleteMessage(const Snowflake& channelId, const Snowflake& messageId);
     void const pinMessage(const Snowflake& channelId, const Snowflake& messageId);
     void const unpinMessage(const Snowflake& channelId, const Snowflake& messageId);
+    void const deleteAuthorizedApp(const Snowflake& appId);
 
 signals:
     void requestEmit(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);

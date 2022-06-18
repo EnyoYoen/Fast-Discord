@@ -18,7 +18,7 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     buttons.append(new MenuButton(MenuButton::ButtonType::MyAccount, scrollWidget, true));
     buttons.append(new MenuButton(MenuButton::ButtonType::UserProfile, scrollWidget, true));
     buttons.append(new MenuButton(MenuButton::ButtonType::PrivacySafety, scrollWidget, true));
-    buttons.append(new MenuButton(MenuButton::ButtonType::AuthorizedApps, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::AuthorizedApps, scrollWidget, true));
     buttons.append(new MenuButton(MenuButton::ButtonType::Connections, scrollWidget, false));
     buttons.append(new MenuButton(MenuButton::ButtonType::Appearance, scrollWidget, false));
     buttons.append(new MenuButton(MenuButton::ButtonType::Accessibility, scrollWidget, false));

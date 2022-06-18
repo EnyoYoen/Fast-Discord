@@ -245,6 +245,20 @@ void unmarshal<Application>(const QJsonObject& jsonObj, Application **object)
     };
 }
 
+template<>
+void unmarshal<AuthorizedApp>(const QJsonObject& jsonObj, AuthorizedApp **object)
+{
+    Application *application = new Application;
+
+    unmarshal<Application>(jsonObj, "application", &application);
+
+    *object = new AuthorizedApp {
+        application,
+        getStringsFromJson(jsonObj["scopes"].toArray()),
+        jsonObj["id"].toVariant().toULongLong()
+    };
+}
+
 template <>
 void unmarshal<MessageActivity>(const QJsonObject& jsonObj, MessageActivity **object)
 {

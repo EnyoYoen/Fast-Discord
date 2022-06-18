@@ -289,6 +289,12 @@ void Requester::readReply()
                     parameters.callback(reinterpret_cast<void *>(new QJsonDocument(QJsonDocument::fromJson(ba))));
                     break;
                 }
+            case GetAuthorizedApp:
+                {
+                    QVector<AuthorizedApp *> apps = unmarshalMultiple<AuthorizedApp>(QJsonDocument::fromJson(ba).array());
+                    parameters.callback(static_cast<void *>(&apps));
+                    break;
+                }
         }
         currentRequestsNumber--;
 
@@ -732,6 +738,19 @@ void const Requester::deleteAccount(Callback callback, QString password)
         true});
 }
 
+void const Requester::deleteAuthorizedApp(const Snowflake& appId)
+{
+    requestApi({
+        nullptr,
+        "https://discord.com/api/v9/oauth2/tokens/" + appId,
+        "",
+        "DELETE",
+        "",
+        "",
+        DeleteAuthorizedApp,
+        false});
+}
+
 void const Requester::changeClient(Callback callback, QString json)
 {
     requestApi({
@@ -743,6 +762,19 @@ void const Requester::changeClient(Callback callback, QString json)
         "",
         ChangeClient,
         true});
+}
+
+void const Requester::getAuthorizedApp(Callback callback)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/oauth2/tokens",
+        "",
+        "",
+        "",
+        "",
+        GetAuthorizedApp,
+        false});
 }
 
 void const Requester::getConsent(Callback callback)

@@ -38,4 +38,16 @@ struct Application
     bool              botRequireCodeGrant;
 };
 
+struct AuthorizedApp
+{
+    ~AuthorizedApp()
+    {
+        delete application;
+    }
+
+    Application      *application;
+    QVector<QString>  scopes;
+    Snowflake         id;
+};
+
 } // namespace Api
