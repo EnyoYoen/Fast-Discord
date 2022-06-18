@@ -283,6 +283,12 @@ void Requester::readReply()
                     }
                     break;
                 }
+            case GetConsent:
+            case GetHarvest:
+                {
+                    parameters.callback(reinterpret_cast<void *>(new QJsonDocument(QJsonDocument::fromJson(ba))));
+                    break;
+                }
         }
         currentRequestsNumber--;
 
@@ -736,6 +742,84 @@ void const Requester::changeClient(Callback callback, QString json)
         "",
         "",
         ChangeClient,
+        true});
+}
+
+void const Requester::getConsent(Callback callback)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/consent",
+        "",
+        "",
+        "",
+        "",
+        GetConsent,
+        false});
+}
+
+void const Requester::getHarvest(Callback callback)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/harvest",
+        "",
+        "",
+        "",
+        "",
+        GetHarvest,
+        false});
+}
+
+void const Requester::harvestData()
+{
+    requestApi({
+        nullptr,
+        "https://discord.com/api/v9/users/@me/harvest",
+        "POST",
+        "",
+        "",
+        "",
+        HarvestData,
+        false});
+}
+
+void const Requester::setSettings(Callback callback, QString settings)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/settings",
+        settings,
+        "PATCH",
+        "",
+        "",
+        SetSettings,
+        true});
+}
+
+void const Requester::setSettingsProto(Callback callback, QString settings)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/settings-proto/1",
+        "{\"settings\":\"" + settings + "\"}",
+        "PATCH",
+        "",
+        "",
+        SetSettingsProto,
+        true});
+}
+
+void const Requester::setConsent(Callback callback, QString grant, QString revoke)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/consent",
+        "{\"grant\":[" + grant + "],\"revoke\":[" + revoke + "]}",
+        "POST",
+        "",
+        "",
+        SetConsent,
         true});
 }
 

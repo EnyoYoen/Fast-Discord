@@ -4,6 +4,7 @@
 #include "ui/settings/closebutton.h"
 #include "ui/settings/myaccount.h"
 #include "ui/settings/userprofile.h"
+#include "ui/settings/privacysafety.h"
 
 namespace Ui {
 
@@ -37,6 +38,9 @@ Settings::Settings(Api::RessourceManager *rmp, QWidget *parent)
                 break;
             case MenuButton::ButtonType::UserProfile:
                 menu = new UserProfile(rm, this);
+                break;
+            case MenuButton::ButtonType::PrivacySafety:
+                menu = new PrivacySafety(rm, this);
                 break;
         }
 

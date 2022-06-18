@@ -34,6 +34,8 @@ enum RequestTypes {
     GetWsUrl,
     GetUser,
     GetFile,
+    GetConsent,
+    GetHarvest,
     ChangeUsername,
     ChangeEmail,
     ChangePassword,
@@ -41,6 +43,9 @@ enum RequestTypes {
     DisableAccount,
     DeleteAccount,
     ChangeClient,
+    SetConsent,
+    SetSettings,
+    SetSettingsProto,
 
     // We don't care about the response
     SetStatus,
@@ -51,7 +56,8 @@ enum RequestTypes {
     SendMessageWithFile,
     DeleteMessage,
     PinMessage,
-    UnpinMessage
+    UnpinMessage,
+    HarvestData
 };
 
 struct RequestParameters
@@ -110,7 +116,9 @@ public:
     void const getImage(Callback callback, const QString& url, const QString& fileName);
     void const getUser(Callback callback, const Snowflake& userId);
     void const getFile(const QString& url, const QString& filename);
-
+    void const getConsent(Callback callback);
+    void const getHarvest(Callback callback);
+    
     // Functions that request the API to change data
     void const changeUsername(Callback callback, const QString& username, const QString& discriminator, const QString& password);
     void const changeEmail(Callback callback, QString email, QString password);
@@ -119,12 +127,16 @@ public:
     void const disableAccount(Callback callback, QString password);
     void const deleteAccount(Callback callback, QString password);
     void const changeClient(Callback callback, QString json);
+    void const setSettings(Callback callback, QString settings);
+    void const setSettingsProto(Callback callback, QString settings);
+    void const setConsent(Callback callback, QString grant, QString revoke);
 
     // Functions that request the API to send data
     void const setStatus(const QString& status);
     void const sendTyping(const Snowflake& channelId);
     void const sendVerifyCode(Callback callback, QString verifyCode);
     void const sendVerificationEmail();
+    void const harvestData();
     void const sendMessage(const QString& content, const Snowflake& channelId);
     void const sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath);
     void const deleteMessage(const Snowflake& channelId, const Snowflake& messageId);

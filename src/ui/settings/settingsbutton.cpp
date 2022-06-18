@@ -31,6 +31,11 @@ SettingsButton::SettingsButton(SettingsButton::Type typep, QString text, QWidget
                                 "color: #FFF;"
                                 "border-radius: 3px;");
             break;
+        case SettingsButton::Type::NormalOutlined:
+            this->setStyleSheet("border: 1px solid #5865F2;"
+                                "color: #FFF;"
+                                "border-radius: 3px;");
+            break;
         case SettingsButton::Type::Normal:    
         default:
             this->setStyleSheet("background-color: #5865F2;"
@@ -78,6 +83,11 @@ void SettingsButton::mouseReleaseEvent(QMouseEvent *event)
                                     "color: #FFF;"
                                     "border-radius: 3px;");
                 break;
+            case SettingsButton::Type::NormalOutlined:
+                this->setStyleSheet("border: 1px solid #5865F2;"
+                                    "color: #FFF;"
+                                    "border-radius: 3px;");
+                break;
             case SettingsButton::Type::Normal:    
             default:
                 this->setStyleSheet("background-color: #5865F2;"
@@ -116,7 +126,13 @@ void SettingsButton::mousePressEvent(QMouseEvent *)
         case SettingsButton::Type::Critical:
             this->setStyleSheet("background-color: #ED4245;"
                                 "border: 1px solid #ED4245;"
-                                    "color: #FFF;"
+                                "color: #FFF;"
+                                "border-radius: 3px;");
+            break;
+        case SettingsButton::Type::NormalOutlined:
+            this->setStyleSheet("background-color: #4752C4;"
+                                "border: 1px solid #4752C4;"
+                                "color: #FFF;"
                                 "border-radius: 3px;");
             break;
         case SettingsButton::Type::Normal:    
@@ -158,6 +174,12 @@ void SettingsButton::enterEvent(QEvent *)
                                     "color: #FFF;"
                                     "border-radius: 3px;");
                 break;
+            case SettingsButton::Type::NormalOutlined:
+                this->setStyleSheet("background-color: #5865F2;"
+                                    "border: 1px solid #5865F2;"
+                                    "color: #FFF;"
+                                    "border-radius: 3px;");
+                break;
             case SettingsButton::Type::Normal:    
             default:
                 this->setStyleSheet("background-color: #4752C4;"
@@ -194,6 +216,11 @@ void SettingsButton::leaveEvent(QEvent *)
                 break;
             case SettingsButton::Type::Critical:
                 this->setStyleSheet("border: 1px solid #ED4245;"
+                                    "color: #FFF;"
+                                    "border-radius: 3px;");
+                break;
+            case SettingsButton::Type::NormalOutlined:
+                this->setStyleSheet("border: 1px solid #5865F2;"
                                     "color: #FFF;"
                                     "border-radius: 3px;");
                 break;

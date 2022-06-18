@@ -13,6 +13,7 @@ public:
         NoBackground,
         Edit,
         Normal,
+        NormalOutlined,
         Important,
         Critical
     };
