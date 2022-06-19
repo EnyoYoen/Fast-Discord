@@ -6,6 +6,7 @@
 #include "ui/settings/userprofile.h"
 #include "ui/settings/privacysafety.h"
 #include "ui/settings/authorizedapps.h"
+#include "ui/settings/connections.h"
 
 namespace Ui {
 
@@ -45,6 +46,9 @@ Settings::Settings(Api::RessourceManager *rmp, QWidget *parent)
                 break;
             case MenuButton::ButtonType::AuthorizedApps:
                 menu = new AuthorizedApps(rm, this);
+                break;
+            case MenuButton::ButtonType::Connections:
+                menu = new Connections(rm, this);
                 break;
         }
 

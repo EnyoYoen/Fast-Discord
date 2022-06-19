@@ -40,6 +40,7 @@ SwitchButton::SwitchButton(bool statep)
     }
 
     this->setFixedSize(40, 24);
+    this->setCursor(Qt::CursorShape::PointingHandCursor);
 }
 
 void SwitchButton::setState(bool statep)

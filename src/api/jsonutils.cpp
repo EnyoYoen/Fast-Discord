@@ -15,6 +15,7 @@
 #include "api/objects/presence.h"
 #include "api/objects/optional.h"
 #include "api/objects/error.h"
+#include "api/objects/connection.h"
 
 #include <QVariant>
 #include <QJsonObject>
@@ -1060,7 +1061,7 @@ void unmarshal<Call>(const QJsonObject& jsonObj, Call **object)
     *object = new Call {
         getSnowflakesFromJson(jsonObj["participants"].toArray()),
 
-        getString(jsonObj, "ended_timestamp"),
+        getString(jsonObj, "ended_timestamp")
     };
 }
 
@@ -1070,7 +1071,23 @@ void unmarshal<Error>(const QJsonObject& jsonObj, Error **object)
     *object = new Error {
         getString(jsonObj, "message"),
         getString(jsonObj, "code"),
-        jsonObj["code"].toInt(),
+        jsonObj["code"].toInt()
+    };
+}
+
+template <>
+void unmarshal<Connection>(const QJsonObject& jsonObj, Connection **object)
+{
+    *object = new Connection {
+        getString(jsonObj, "type"),
+        getString(jsonObj, "id"),
+        getString(jsonObj, "name"),
+        getString(jsonObj, "access_token"),
+        jsonObj["visibility"].toInt(),
+        jsonObj["revoked"].toBool(),
+        jsonObj["friend_sync"].toBool(),
+        jsonObj["show_activity"].toBool(),
+        jsonObj["verified"].toBool()
     };
 }
 

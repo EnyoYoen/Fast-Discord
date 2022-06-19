@@ -2,6 +2,7 @@
 
 #include "api/jsonutils.h"
 #include "api/ressourcemanager.h"
+#include "api/objects/connection.h"
 
 #include <QJsonDocument>
 #include <QDir>
@@ -295,6 +296,12 @@ void Requester::readReply()
                     parameters.callback(static_cast<void *>(&apps));
                     break;
                 }
+            case GetConnections:
+                {
+                    QVector<Connection *> connections = unmarshalMultiple<Connection>(QJsonDocument::fromJson(ba).array());
+                    parameters.callback(static_cast<void *>(&connections));
+                    break;
+                }
         }
         currentRequestsNumber--;
 
@@ -520,6 +527,58 @@ void const Requester::getUser(Callback callback, const Snowflake& userId)
         "",
         "",
         GetUser,
+        false});
+}
+
+void const Requester::getAuthorizedApp(Callback callback)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/oauth2/tokens",
+        "",
+        "",
+        "",
+        "",
+        GetAuthorizedApp,
+        false});
+}
+
+void const Requester::getConsent(Callback callback)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/consent",
+        "",
+        "",
+        "",
+        "",
+        GetConsent,
+        false});
+}
+
+void const Requester::getHarvest(Callback callback)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/harvest",
+        "",
+        "",
+        "",
+        "",
+        GetHarvest,
+        false});
+}
+
+void const Requester::getConnections(Callback callback)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/users/@me/connections",
+        "",
+        "",
+        "",
+        "",
+        GetConnections,
         false});
 }
 
@@ -764,45 +823,6 @@ void const Requester::changeClient(Callback callback, QString json)
         true});
 }
 
-void const Requester::getAuthorizedApp(Callback callback)
-{
-    requestApi({
-        callback,
-        "https://discord.com/api/v9/oauth2/tokens",
-        "",
-        "",
-        "",
-        "",
-        GetAuthorizedApp,
-        false});
-}
-
-void const Requester::getConsent(Callback callback)
-{
-    requestApi({
-        callback,
-        "https://discord.com/api/v9/users/@me/consent",
-        "",
-        "",
-        "",
-        "",
-        GetConsent,
-        false});
-}
-
-void const Requester::getHarvest(Callback callback)
-{
-    requestApi({
-        callback,
-        "https://discord.com/api/v9/users/@me/harvest",
-        "",
-        "",
-        "",
-        "",
-        GetHarvest,
-        false});
-}
-
 void const Requester::harvestData()
 {
     requestApi({
@@ -853,6 +873,32 @@ void const Requester::setConsent(Callback callback, QString grant, QString revok
         "",
         SetConsent,
         true});
+}
+
+void const Requester::setConnection(QString type, QString id, int visibility)
+{
+    requestApi({
+        nullptr,
+        "https://discord.com/api/v9/users/@me/connections/" + type + "/" + id,
+        "{\"visibility\":" + QString(visibility ? "true" : "false") + "}",
+        "PATCH",
+        "",
+        "",
+        SetConnection,
+        true});
+}
+
+void const Requester::removeConnection(QString type, QString id)
+{
+    requestApi({
+        nullptr,
+        "https://discord.com/api/v9/users/@me/connections/" + type + "/" + id,
+        "",
+        "DELETE",
+        "",
+        "",
+        RemoveConnection,
+        false});
 }
 
 } // namespace Api
