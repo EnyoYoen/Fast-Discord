@@ -1,22 +1,24 @@
 #pragma once
 
+#include "ui/common/roundedimage.h"
 #include "api/ressourcemanager.h"
 #include "api/objects/client.h"
 
 #include <QWidget>
+#include <QLabel>
 #include <QTimer>
 
 namespace Ui {
 
-class Profile : public QWidget
+class Profile : public Widget
 {
     Q_OBJECT
 public:
     Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent);
     ~Profile();
 
-    void setAvatar(QString file, QString color);
-    void setBanner(QString file, QString color);
+    void setAvatar(QString file, QColor color);
+    void setBanner(QString file, QColor color);
     void setBio(QString bio);
 
 signals:
@@ -24,12 +26,12 @@ signals:
     void avatarChanged(QString avatarFile);
 
 private:
-    QLabel *bio;
-    QLabel *banner;
-    QLabel *avatarBorders;
-    QLabel *imageUpload;
+    Label  *bio;
+    Widget *banner;
+    Widget *avatarBorders;
+    Widget *imageUpload;
     RoundedImage *avatar;
-    QWidget *bioSection;
+    Widget *bioSection;
     QVBoxLayout *layout;
     QTimer *timer;
     qint64 counter;

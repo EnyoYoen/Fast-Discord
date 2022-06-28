@@ -13,18 +13,14 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     QWidget *content = new QWidget(this);
     layout = new QVBoxLayout(content);
     homeButton = new HomeButton(content);
-    QWidget *guildSeparator = new QWidget(content);
-    QWidget *spacer = new QWidget(content);
-
-    // Style the spacer
-    spacer->setFixedHeight(6);
+    Widget *guildSeparator = new Widget(content);
 
     // Style the guild separator
     guildSeparator->setFixedSize(32, 2);
-    guildSeparator->setStyleSheet("background-color: #444649;");
+    guildSeparator->setBackgroundColor(Settings::BackgroundModifierAccent);
 
     // Add widgets to the layout
-    layout->addWidget(spacer);
+    layout->addSpacing(6);
     layout->addWidget(homeButton);
     layout->addWidget(guildSeparator);
 
@@ -43,8 +39,8 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     this->setFixedWidth(72);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    this->setStyleSheet("background-color: #202225;"
-                        "border: none;");
+    this->setStyleSheet("border: none;"
+                        "background-color:" + Settings::colors[Settings::BackgroundTertiary].name());
 
     // Connect the home button clic signal
     QObject::connect(homeButton, &HomeButton::clicked, this, &LeftColumn::clicHomeButton);

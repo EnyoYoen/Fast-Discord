@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "api/ressourcemanager.h"
 
 #include <QWidget>
@@ -7,11 +8,11 @@
 
 namespace Ui {
 
-class Settings : public QWidget
+class SettingsMenu : public Widget
 {
     Q_OBJECT
 public:
-    Settings(Api::RessourceManager *rm, QWidget *parent);
+    SettingsMenu(Api::RessourceManager *rm, QWidget *parent);
 
 signals:
     void closeClicked();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "api/ressourcemanager.h"
 
 #include <QScrollArea>
@@ -16,7 +17,7 @@ private slots:
     void empty();
 
 private:
-    QWidget *container;
+    Widget *container;
     QVBoxLayout *layout;
 
     Api::RessourceManager *rm;

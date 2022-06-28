@@ -1,13 +1,13 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "api/ressourcemanager.h"
 
-#include <QLabel>
 #include <QMouseEvent>
 
 namespace Ui {
 
-class CloseCallButton : public QLabel
+class CloseCallButton : public Widget
 {
     Q_OBJECT
 public:

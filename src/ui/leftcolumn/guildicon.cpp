@@ -5,7 +5,7 @@
 namespace Ui {
 
 GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, QString guildName, const QString& guildIcon, bool smallp, QWidget *parent)
-    : QWidget(parent)
+    : Widget(parent)
 {
     small = smallp;
     QObject::connect(this, &GuildIcon::iconRecieved, this, &GuildIcon::setIcon);
@@ -64,9 +64,10 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
 
         // Create and add the text icon
 
-        textIcon = new QLabel(this);
+        textIcon = new Label(this);
         QHBoxLayout *iconTextLayout = new QHBoxLayout(textIcon);
-        QLabel *text = new QLabel(iconText, textIcon);
+        text = new QLabel(iconText, textIcon);
+        text->setStyleSheet("background: none;color:" + Settings::colors[Settings::TextNormal].name());
         QFont font;
         font.setFamily("whitney");
         if (small) {
@@ -77,7 +78,6 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
             int fontWidth = metrics.width(iconText);
             if (fontWidth > 48) {
                 font.setPixelSize(10);
-                text->setAlignment(Qt::AlignCenter);
             } else {
                 font.setPixelSize(16);
             }
@@ -89,9 +89,9 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
 
         text->setFixedHeight(small ? 10 : 16);
         textIcon->setFixedSize(small ? 16 : 48, small ? 16 : 48);
-        textIcon->setStyleSheet("border-radius: " + QString::number(small ? 8 : 24) + "px;"
-                                "color: #DCDDDE;"
-                                "background-color: #36393F;");
+        textIcon->setBorderRadius(small ? 8 : 24);
+        textIcon->setTextColor(Settings::TextNormal);
+        textIcon->setBackgroundColor(Settings::BackgroundPrimary);
         icon = nullptr;
 
     } else {
@@ -109,7 +109,6 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
             // Create the icon and add it to the layout
             icon = new RoundedImage(guildIconFileName, small ? 16 : 48, small ? 16 : 48, small ? 8 : 24, this);
         }
-        icon->setStyleSheet("background-color: none;");
     }
 }
 
@@ -120,18 +119,20 @@ void const GuildIcon::setIcon(const QString& guildIconFileName)
 
 void GuildIcon::setActive()
 {
-    if (!icon)
-        textIcon->setStyleSheet("border-radius: " + QString::number(small ? 6 : 16) + "px;"
-                                "color: #FFF;"
-                                "background-color: #5865F2;");
+    if (!icon) {
+        text->setStyleSheet("background: none;color:" + Settings::colors[Settings::White].name());
+        textIcon->setBackgroundColor(Settings::BrandExperiment);
+        textIcon->setBorderRadius(16);
+    }
 }
 
 void GuildIcon::setInactive()
 {
-    if (!icon)
-        textIcon->setStyleSheet("border-radius: " + QString::number(small ? 8 : 24) + "px;"
-                                "color: #DCDDDE;"
-                                "background-color: #36393F;");
+    if (!icon) {
+        text->setStyleSheet("background: none;color:" + Settings::colors[Settings::TextNormal].name());
+        textIcon->setBackgroundColor(Settings::BackgroundPrimary);
+        textIcon->setBorderRadius(24);
+    }
 }
 
 }

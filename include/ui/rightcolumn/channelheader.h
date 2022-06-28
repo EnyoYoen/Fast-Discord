@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "api/ressourcemanager.h"
 
 #include <QWidget>
@@ -7,7 +8,7 @@
 
 namespace Ui {
 
-class ChannelHeader : public QWidget
+class ChannelHeader : public Widget
 {
     Q_OBJECT
 public:

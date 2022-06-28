@@ -1,5 +1,6 @@
 #include "ui/mainwindow.h"
 
+#include "settings/settings.h"
 #include "api/ressourcemanager.h"
 
 #include <QThread>
@@ -14,15 +15,12 @@
 
 namespace Ui {
 
-MainWindow::MainWindow() : QWidget()
+MainWindow::MainWindow() : Widget(nullptr)
 {
     // Style the window
     // this->setWindowFlags(Qt::CustomizeWindowHint); Soon
     QFontDatabase::addApplicationFont("res/fonts/whitney.otf");
     this->setGeometry(0, 0, 940, 728);
-    this->setStyleSheet("background-color: #202225;"
-                        "padding: 0px;"
-                        "border: none;");
 
     // Get account token from accounts list
     QString token = getAccountToken();
@@ -30,12 +28,14 @@ MainWindow::MainWindow() : QWidget()
     // Create the ressource manager
     rm = new Api::RessourceManager(token);
 
+    Settings::initSettings(rm);
+
     // Create all the widgets
     mainLayout = new QHBoxLayout(this);
     leftColumn = new LeftColumn(rm, this);
     middleColumn = new MiddleColumn(rm, this);
     rightColumn = new RightColumn(rm, this);
-    settings = new Settings(rm, this);
+    settings = new SettingsMenu(rm, this);
     settings->hide();
 
     // Add the column to the layout
@@ -48,6 +48,7 @@ MainWindow::MainWindow() : QWidget()
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     this->setWindowIcon(QIcon("res/images/png/icon.png"));
+    this->setBackgroundColor(Settings::BackgroundPrimary);
 
     // Connect signals to slots of the columns
     QObject::connect(leftColumn, &LeftColumn::guildClicked, middleColumn, &MiddleColumn::openGuild);
@@ -58,7 +59,7 @@ MainWindow::MainWindow() : QWidget()
     QObject::connect(middleColumn, &MiddleColumn::voiceChannelClicked, rm, &Api::RessourceManager::call);
     QObject::connect(middleColumn, &MiddleColumn::parametersClicked, this, &MainWindow::openSettingsMenu);
     QObject::connect(rightColumn, &RightColumn::messageAdded, middleColumn, &MiddleColumn::putChannelFirst);
-    QObject::connect(settings, &Settings::closeClicked, this, &MainWindow::closeSettingsMenu);
+    QObject::connect(settings, &SettingsMenu::closeClicked, this, &MainWindow::closeSettingsMenu);
     QObject::connect(rm, &Api::RessourceManager::unreadUpdateReceived, leftColumn, &LeftColumn::setUnreadGuild);
     QObject::connect(rm, &Api::RessourceManager::messageReceived, rightColumn, &RightColumn::addMessage);
     QObject::connect(rm, &Api::RessourceManager::presenceReceived, middleColumn, &MiddleColumn::updatePresence);

@@ -10,7 +10,7 @@
 namespace Ui {
 
 RightColumn::RightColumn(Api::RessourceManager *rmp, QWidget *parent)
-    : QWidget(parent)
+    : Widget(parent)
 {
     // Attribute initialization
     rm = rmp;
@@ -27,12 +27,12 @@ RightColumn::RightColumn(Api::RessourceManager *rmp, QWidget *parent)
     layout->setSpacing(0);
 
     // Create a placeholder
-    QWidget *placeholder = new QWidget(this);
-    placeholder->setStyleSheet("background-color: #36393F;");
+    Widget *placeholder = new Widget(this);
+    placeholder->setBackgroundColor(Settings::BackgroundPrimary);
     layout->addWidget(placeholder);
 
     // Style the column
-    this->setStyleSheet("background-color: #36393F;");
+    this->setBackgroundColor(Settings::BackgroundPrimary);
 
     QObject::connect(this, &RightColumn::messagesReceived, this, &RightColumn::setMessages);
     QObject::connect(this, &RightColumn::userTypingReceived, this, &RightColumn::setUserTyping);
@@ -54,7 +54,7 @@ void const RightColumn::setUserTyping(const Api::User *user)
 
     // Get the user name and the text of the typing label
     QString username = user->username;
-    QString text = typingLabel->text();
+    QString text = typingLabel->text;
 
     // Change the text of the typing label
     if (text != "") {
@@ -88,8 +88,8 @@ void RightColumn::clean()
     }
 
     // Add a placeholder
-    QWidget *placeholderWidget = new QWidget(this);
-    placeholderWidget->setStyleSheet("background-color: #36393F;");
+    Widget *placeholderWidget = new Widget(this);
+    placeholderWidget->setBackgroundColor(Settings::BackgroundPrimary);
     layout->addWidget(placeholderWidget);
     header->close();
 }
@@ -114,6 +114,8 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
     if (type != Api::GuildVoice) {
         rm->requester->removeImageRequests();
         messageArea->clear();
+        if (inputBox != nullptr)
+            inputBox->deleteLater();
         for (unsigned int i = 0 ; i < 10 ; i++) {
             layout->removeItem(layout->itemAt(i));
         }
@@ -142,7 +144,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         // Create all the widgets
         QWidget *inputContainer = new QWidget(messagesContainer);
         QHBoxLayout *containerLayout = new QHBoxLayout(inputContainer);
-        QWidget *inputBox = new QWidget(inputContainer);
+        inputBox = new Widget(inputContainer);
         QHBoxLayout *inputLayout = new QHBoxLayout(inputBox);
         MessageTextInput *textInput = new MessageTextInput(channelName, inputBox);
         FileUploadButton *uploadButton = new FileUploadButton(inputBox);
@@ -162,9 +164,9 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
 
         // Style the input box
         inputBox->setFixedHeight(44);
-        inputBox->setStyleSheet("background-color: #40444B;"
-                                "height: 44px;"
-                                "border-radius: 8px;");
+        inputBox->setBackgroundColor(Settings::ChanneltextareaBackground);
+        inputBox->setFixedHeight(44);
+        inputBox->setBorderRadius(8);
 
         // Add the input in an other container
         containerLayout->addWidget(inputBox);
@@ -172,14 +174,14 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         inputLayout->setSpacing(0);
 
         // Create and style the typing label
-        typingLabel = new QLabel(messagesContainer);
+        typingLabel = new Label(messagesContainer);
         QFont font;
         font.setPixelSize(14);
         font.setFamily("whitney");
         typingLabel->setFont(font);
         typingLabel->setText("");
         typingLabel->setFixedHeight(24);
-        typingLabel->setStyleSheet("color: #DCDDDE");
+        typingLabel->setTextColor(Settings::TextNormal);
 
         // Add widgets to the message layout and style it
         messagesLayout->addWidget(header);

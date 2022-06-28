@@ -3,7 +3,7 @@
 namespace Ui {
 
 MenuButton::MenuButton(MenuButton::ButtonType typep, QWidget *parent, bool activep) 
-    : QLabel(parent)
+    : Label(parent)
 {
     active = activep;
     type = typep;
@@ -43,18 +43,17 @@ MenuButton::MenuButton(MenuButton::ButtonType typep, QWidget *parent, bool activ
     this->setText(text);
 
     this->setFixedSize(192, 32);
-    this->setStyleSheet("border-radius: 4px;"
-                        "color: #B9BBBE;"
-                        "background-color: #2F3136;");
+    this->setBorderRadius(4);
+    this->setBackgroundColor(Settings::BackgroundSecondary);
+    this->setTextColor(Settings::InteractiveNormal);
 }
 
 void MenuButton::unclicked()
 {
     pressed = false;
     if (active) {
-        this->setStyleSheet("border-radius: 4px;"
-                            "color: #B9BBBE;"
-                            "background-color: #2F3136;");
+        this->setBackgroundColor(Settings::BackgroundSecondary);
+        this->setTextColor(Settings::InteractiveNormal);
     }
 }
 
@@ -69,9 +68,8 @@ void MenuButton::mousePressEvent(QMouseEvent *)
 {
     pressed = true;
     if (active) {
-        this->setStyleSheet("border-radius: 4px;"
-                            "color: #FFF;"
-                            "background-color: rgba(79, 84, 92, 0.6);");
+        this->setBackgroundColor(Settings::BackgroundModifierSelected);
+        this->setTextColor(Settings::InteractiveActive);
     }
 }
 
@@ -79,9 +77,8 @@ void MenuButton::enterEvent(QEvent *)
 {
     if (!pressed) {
         if (active) {
-            this->setStyleSheet("border-radius: 4px;"
-                                "color: #B9BBBE;"
-                                "background-color: rgba(79, 84, 92, 0.4);");
+            this->setBackgroundColor(Settings::BackgroundModifierHover);
+            this->setTextColor(Settings::InteractiveNormal);
         }
     }
 }
@@ -90,9 +87,8 @@ void MenuButton::leaveEvent(QEvent *)
 {
     if (!pressed) {
         if (active) {
-            this->setStyleSheet("border-radius: 4px;"
-                                "color: #B9BBBE;"
-                                "background-color: #2F3136;");
+            this->setBackgroundColor(Settings::BackgroundSecondary);
+            this->setTextColor(Settings::InteractiveNormal);
         }
     }
 }

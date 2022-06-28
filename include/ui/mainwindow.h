@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "ui/leftcolumn/leftcolumn.h"
 #include "ui/middlecolumn/middlecolumn.h"
 #include "ui/rightcolumn/rightcolumn.h"
@@ -12,7 +13,7 @@
 namespace Ui {
 
 // The main window of the app
-class MainWindow : public QWidget
+class MainWindow : public Widget
 {
     Q_OBJECT
 
@@ -37,7 +38,7 @@ private:
     LeftColumn   *leftColumn;
     MiddleColumn *middleColumn;
     RightColumn  *rightColumn;
-    Settings *settings;
+    SettingsMenu *settings;
 
     Api::RessourceManager *rm;           // Manage all the data we receive
 };

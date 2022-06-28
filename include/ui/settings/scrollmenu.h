@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "ui/settings/menubutton.h"
 
 #include "QScrollArea"
@@ -19,11 +20,11 @@ private slots:
     void resetButtons(MenuButton::ButtonType type);
 
 private:
-    QLabel *createMenuTitle(char *title);
-    QWidget *createSeparator();
+    Label *createMenuTitle(char *title);
+    Widget *createSeparator();
 
     QVector<MenuButton *> buttons;
-    QWidget *scrollWidget;
+    Widget *scrollWidget;
     MenuButton::ButtonType actualType;
 };
 

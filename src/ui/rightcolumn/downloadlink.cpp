@@ -6,17 +6,18 @@
 namespace Ui {
 
 DownloadLink::DownloadLink(const QString& urlp, const QString& filename, Api::Requester *request, QWidget *parent)
-    : QLabel(filename, parent)
+    : Label(filename, parent)
 {
     QFont font;
     font.setPixelSize(16);
     font.setFamily("whitney");
-    setFont(font);
     url = QString(urlp);
     requester = request;
 
+    this->setFixedSize(QFontMetrics(font).width(filename), 20);
+    this->setFont(font);
     this->setCursor(Qt::PointingHandCursor);
-    this->setStyleSheet("color: #00AFF4;");
+    this->setTextColor(Settings::Link);
 }
 
 void DownloadLink::mouseReleaseEvent(QMouseEvent *)

@@ -1,9 +1,10 @@
-#include <QLabel>
+#include "ui/common/basicwidgets.h"
+
 #include <QMouseEvent>
 
 namespace Ui {
 
-class SelectImageButton : public QLabel
+class SelectImageButton : public Label
 {
     Q_OBJECT
 public:

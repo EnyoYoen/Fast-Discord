@@ -1,11 +1,13 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
+
 #include <QLabel>
 #include <QMouseEvent>
 
 namespace Ui {
 
-class SettingsButton : public QLabel
+class SettingsButton : public Widget
 {
     Q_OBJECT
 public:
@@ -29,7 +31,7 @@ private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
 
-    QLabel *content;
+    Label *content;
     Type type;
     bool pressed;
 };

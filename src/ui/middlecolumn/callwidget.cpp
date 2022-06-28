@@ -5,17 +5,18 @@
 namespace Ui {
 
 CallWidget::CallWidget(Api::RessourceManager *rmp, QWidget *parent)
-    : QLabel(parent)
+    : Widget(parent)
 {
     rm = rmp;
 
     this->hide();
     this->setFixedSize(240, 44);
-    this->setStyleSheet("background-color: #292B2F;"
-                        "border-bottom: 1px solid #3A3F45;");
+    this->setBackgroundColor(Settings::BackgroundSecondaryAlt);
+    this->setBorderColor(Settings::BackgroundModifierAccent);
+    this->setBorderSize(0, 0, 1, 0);
 
-    QLabel *state = new QLabel("Voice connected", this);
-    name = new QLabel(this);
+    Label *state = new Label("Voice connected", this);
+    name = new Label(this);
     CloseCallButton *button = new CloseCallButton(rm, this);
 
     QFont font;
@@ -23,18 +24,17 @@ CallWidget::CallWidget(Api::RessourceManager *rmp, QWidget *parent)
     font.setFamily("whitney");
 
     name->setFont(font);
+    name->setFixedWidth(181);
     name->move(8, 26);
-    name->setStyleSheet("background-color: #292B2F;"
-                        "color: #B9BBBE;"
-                        "border: none");
+    name->setBackgroundColor(Settings::BackgroundSecondaryAlt);
+    name->setTextColor(Settings::HeaderSecondary);
 
     font.setPixelSize(14);
     font.setBold(true);
     state->setFont(font);
     state->move(8, 8);
-    state->setStyleSheet("background-color: #292B2F;"
-                         "color: #46C46E;"
-                         "border: none");
+    state->setBackgroundColor(Settings::BackgroundSecondaryAlt);
+    state->setTextColor(Settings::TextPositive);
 
     button->move(200, 8);
 

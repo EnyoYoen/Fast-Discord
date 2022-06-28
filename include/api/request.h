@@ -5,7 +5,6 @@
 #include "api/objects/message.h"
 #include "api/objects/client.h"
 #include "api/objects/error.h"
-#include "ui/common/roundedimage.h"
 
 #include <QString>
 #include <QVector>

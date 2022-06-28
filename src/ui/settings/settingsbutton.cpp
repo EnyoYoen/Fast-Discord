@@ -6,54 +6,55 @@
 namespace Ui {
 
 SettingsButton::SettingsButton(SettingsButton::Type typep, QString text, QWidget *parent)
-    : QLabel(parent)
+    : Widget(parent)
 {
     type = typep;
     pressed = false;
 
-    switch (type)
-    {
-        case SettingsButton::Type::NoBackground:
-            this->setStyleSheet("color: #FFF;");
-            break;
-        case SettingsButton::Type::Edit:
-            this->setStyleSheet("background-color: #4F545C;"
-                                "color: #FFF;"
-                                "border-radius: 3px;");
-            break;
-        case SettingsButton::Type::Important:
-            this->setStyleSheet("background-color: #ED4245;"
-                                "color: #FFF;"
-                                "border-radius: 3px;");
-            break;
-        case SettingsButton::Type::Critical:
-            this->setStyleSheet("border: 1px solid #ED4245;"
-                                "color: #FFF;"
-                                "border-radius: 3px;");
-            break;
-        case SettingsButton::Type::NormalOutlined:
-            this->setStyleSheet("border: 1px solid #5865F2;"
-                                "color: #FFF;"
-                                "border-radius: 3px;");
-            break;
-        case SettingsButton::Type::Normal:    
-        default:
-            this->setStyleSheet("background-color: #5865F2;"
-                                "color: #FFF;"
-                                "border-radius: 3px;");
-    }
-
     QFont font;
     font.setPixelSize(13);
     font.setFamily("whitney");
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    content = new QLabel(text, this);
+    content = new Label(text, this);
+    content->setFixedSize(QFontMetrics(font).width(text), 16);
     content->setFont(font);
-    content->setStyleSheet("border: none");
+
+    switch (type)
+    {
+        case SettingsButton::Type::NoBackground:
+            content->setTextColor(Settings::SettingsButtonTextColor);
+            break;
+        case SettingsButton::Type::Edit:
+            content->setTextColor(Settings::White);
+            this->setBackgroundColor(Settings::ButtonSecondaryBackground);
+            break;
+        case SettingsButton::Type::Important:
+            content->setTextColor(Settings::White);
+            this->setBackgroundColor(Settings::ButtonDangerBackground);
+            break;
+        case SettingsButton::Type::Critical:
+            content->setTextColor(Settings::ButtonOutlineDangerText);
+            this->setBackgroundColor(Settings::None);
+            this->setBorderColor(Settings::ButtonOutlineDangerBorder);
+            this->setBorderSize(1);
+            break;
+        case SettingsButton::Type::NormalOutlined:
+            content->setTextColor(Settings::White);
+            this->setBackgroundColor(Settings::None);
+            this->setBorderColor(Settings::BrandExperiment);
+            this->setBorderSize(1);
+            break;
+        case SettingsButton::Type::Normal:    
+        default:
+            content->setTextColor(Settings::White);
+            this->setBackgroundColor(Settings::BrandExperiment);
+    }
+
+    QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(content, 0, Qt::AlignHCenter);
 
     this->setCursor(Qt::CursorShape::PointingHandCursor);
+    this->setBorderRadius(3);
     this->setContentsMargins(16, 2, 16, 2);
     this->setFixedSize(QFontMetrics(font).width(text) + (type == Type::Critical ? 36 : 32), 32);
 }
@@ -66,33 +67,39 @@ void SettingsButton::mouseReleaseEvent(QMouseEvent *event)
         switch (type)
         {
             case SettingsButton::Type::NoBackground:
-                this->setStyleSheet("color: #FFF;");
+            {
+                QFont font;
+                font.setPixelSize(13);
+                font.setFamily("whitney");
+                font.setUnderline(false);
+                content->setFont(font);
+                content->setTextColor(Settings::SettingsButtonTextColor);
                 break;
+            }
             case SettingsButton::Type::Edit:
-                this->setStyleSheet("background-color: #4F545C;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::ButtonSecondaryBackground);
                 break;
             case SettingsButton::Type::Important:
-                this->setStyleSheet("background-color: #ED4245;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::ButtonDangerBackground);
                 break;
             case SettingsButton::Type::Critical:
-                this->setStyleSheet("border: 1px solid #ED4245;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::ButtonOutlineDangerText);
+                this->setBackgroundColor(Settings::None);
+                this->setBorderColor(Settings::ButtonOutlineDangerBorder);
+                this->setBorderSize(1);
                 break;
             case SettingsButton::Type::NormalOutlined:
-                this->setStyleSheet("border: 1px solid #5865F2;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::None);
+                this->setBorderColor(Settings::BrandExperiment);
+                this->setBorderSize(1);
                 break;
             case SettingsButton::Type::Normal:    
             default:
-                this->setStyleSheet("background-color: #5865F2;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::BrandExperiment);
         }
         emit clicked();
     }
@@ -110,36 +117,33 @@ void SettingsButton::mousePressEvent(QMouseEvent *)
             font.setFamily("whitney");
             font.setUnderline(true);
             content->setFont(font);
-            this->setStyleSheet("color: #FFF;");
+            content->setTextColor(Settings::SettingsButtonTextColor);
             break;
         }
         case SettingsButton::Type::Edit:
-            this->setStyleSheet("background-color: #72767D;"
-                                "color: #FFF;"
-                                "border-radius: 3px;");
+            content->setTextColor(Settings::White);
+            this->setBackgroundColor(Settings::ButtonSecondaryBackgroundActive);
             break;
         case SettingsButton::Type::Important:
-            this->setStyleSheet("background-color: #ED4245;"
-                                "color: #FFF;"
-                                "border-radius: 3px;");
+            content->setTextColor(Settings::White);
+            this->setBackgroundColor(Settings::ButtonDangerBackgroundActive);
             break;
         case SettingsButton::Type::Critical:
-            this->setStyleSheet("background-color: #ED4245;"
-                                "border: 1px solid #ED4245;"
-                                "color: #FFF;"
-                                "border-radius: 3px;");
+            content->setTextColor(Settings::ButtonOutlineDangerTextActive);
+            this->setBackgroundColor(Settings::ButtonOutlineDangerBackgroundActive);
+            this->setBorderColor(Settings::ButtonOutlineDangerBorderActive);
+            this->setBorderSize(1);
             break;
         case SettingsButton::Type::NormalOutlined:
-            this->setStyleSheet("background-color: #4752C4;"
-                                "border: 1px solid #4752C4;"
-                                "color: #FFF;"
-                                "border-radius: 3px;");
+            content->setTextColor(Settings::White);
+            this->setBackgroundColor(Settings::BrandExperiment560);
+            this->setBorderColor(Settings::BrandExperiment560);
+            this->setBorderSize(1);
             break;
         case SettingsButton::Type::Normal:    
         default:
-            this->setStyleSheet("background-color: #3C45A5;"
-                                "color: #FFF;"
-                                "border-radius: 3px;");
+            content->setTextColor(Settings::White);
+            this->setBackgroundColor(Settings::BrandExperiment560);
     }
 }
 
@@ -155,36 +159,33 @@ void SettingsButton::enterEvent(QEvent *)
                 font.setFamily("whitney");
                 font.setUnderline(true);
                 content->setFont(font);
-                this->setStyleSheet("color: #FFF;");
+                content->setTextColor(Settings::SettingsButtonTextColor);
                 break;
             }
             case SettingsButton::Type::Edit:
-                this->setStyleSheet("background-color: #686D73;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::ButtonSecondaryBackgroundHover);
                 break;
             case SettingsButton::Type::Important:
-                this->setStyleSheet("background-color: #C03537;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::ButtonDangerBackgroundActive);
                 break;
             case SettingsButton::Type::Critical:
-                this->setStyleSheet("background-color: #ED4245;"
-                                    "border: 1px solid #ED4245;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::ButtonOutlineDangerTextHover);
+                this->setBackgroundColor(Settings::ButtonOutlineDangerBackgroundHover);
+                this->setBorderColor(Settings::ButtonOutlineDangerBorderHover);
+                this->setBorderSize(1);
                 break;
             case SettingsButton::Type::NormalOutlined:
-                this->setStyleSheet("background-color: #5865F2;"
-                                    "border: 1px solid #5865F2;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::BrandExperiment);
+                this->setBorderColor(Settings::BrandExperiment);
+                this->setBorderSize(1);
                 break;
             case SettingsButton::Type::Normal:    
             default:
-                this->setStyleSheet("background-color: #4752C4;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::BrandExperiment560);
         }
     }
 }
@@ -201,34 +202,33 @@ void SettingsButton::leaveEvent(QEvent *)
                 font.setFamily("whitney");
                 font.setUnderline(false);
                 content->setFont(font);
-                this->setStyleSheet("color: #FFF;");
+                content->setTextColor(Settings::SettingsButtonTextColor);
                 break;
             }
             case SettingsButton::Type::Edit:
-                this->setStyleSheet("background-color: #4F545C;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::ButtonSecondaryBackground);
                 break;
             case SettingsButton::Type::Important:
-                this->setStyleSheet("background-color: #ED4245;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::ButtonDangerBackground);
                 break;
             case SettingsButton::Type::Critical:
-                this->setStyleSheet("border: 1px solid #ED4245;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::ButtonOutlineDangerText);
+                this->setBackgroundColor(Settings::None);
+                this->setBorderColor(Settings::ButtonOutlineDangerBorder);
+                this->setBorderSize(1);
                 break;
             case SettingsButton::Type::NormalOutlined:
-                this->setStyleSheet("border: 1px solid #5865F2;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::None);
+                this->setBorderColor(Settings::BrandExperiment);
+                this->setBorderSize(1);
                 break;
             case SettingsButton::Type::Normal:    
             default:
-                this->setStyleSheet("background-color: #5865F2;"
-                                    "color: #FFF;"
-                                    "border-radius: 3px;");
+                content->setTextColor(Settings::White);
+                this->setBackgroundColor(Settings::BrandExperiment);
         }
     }
 }

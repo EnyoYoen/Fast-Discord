@@ -6,12 +6,12 @@
 
 namespace Ui {
 
-class RadioButton : public QLabel
+class RadioButton : public Widget
 {
     Q_OBJECT
 public:
     RadioButton(RadioParameters parameters, int indexp, bool activep, QWidget *parent)
-        : QLabel(parent)
+        : Widget(parent)
     {
         index = indexp;
         active = activep;
@@ -20,23 +20,25 @@ public:
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(10);
 
-        QLabel *color = new QLabel(this);
+        Widget *color = new Widget(this);
         color->move(0, 0);
         color->setFixedSize(3, 62);
-        color->setStyleSheet("background-color:" + parameters.color);
+        color->setBorderRadius(4, 0, 4, 0);
+        color->setBackgroundColor(parameters.color);
 
-        circle = new QLabel(this);
+        circle = new Widget(this);
         circle->setFixedSize(20, 20);
+        circle->setBorderRadius(10);
+        circle->setBorderSize(2);
 
-        activeCircle = new QLabel(circle);
+        activeCircle = new Widget(circle);
         activeCircle->setFixedSize(10, 10);
         activeCircle->move(5, 5);
-        activeCircle->setStyleSheet("background-color: #FFF;"
-                                    "border-radius: 5px");
+        activeCircle->setBorderRadius(5);
+        activeCircle->setBackgroundColor(Settings::InteractiveActive);
 
         
-        QWidget *text = new QWidget(this);
-        text->setStyleSheet("background-color: none");
+        Widget *text = new Widget(this);
         text->setFixedHeight(42);
         QVBoxLayout *textLayout = new QVBoxLayout(text);
         textLayout->setContentsMargins(0, 0, 0, 0);
@@ -46,10 +48,12 @@ public:
         font.setPixelSize(16);
         font.setFamily("whitney");
 
-        title = new QLabel(parameters.title, text);
+        title = new Label(parameters.title, text);
         title->setFont(font);
+        title->setFixedSize(QFontMetrics(font).width(parameters.title), 20);
         font.setPixelSize(14);
-        description = new QLabel(parameters.description, text);
+        description = new Label(parameters.description, text);
+        description->setFixedSize(QFontMetrics(font).width(parameters.description), 18);
         description->setFont(font);
 
         textLayout->addWidget(title);
@@ -61,23 +65,20 @@ public:
         layout->addWidget(text, 0, Qt::AlignVCenter);
         layout->addStretch(1);
 
-        this->setFixedHeight(62);                  
+        this->setFixedHeight(62); 
+        this->setBorderRadius(4);
 
         if (active) {
-            circle->setStyleSheet("border: 2px solid #FFF;"
-                                  "border-radius: 10px");
-            title->setStyleSheet("color: #FFF");
-            description->setStyleSheet("color: #FFF");
-            this->setStyleSheet("background-color: rgba(79, 84, 92, 0.6);"
-                                "border-radius: 3px");
+            circle->setBorderColor(Settings::InteractiveActive);
+            title->setTextColor(Settings::InteractiveActive);
+            description->setTextColor(Settings::InteractiveActive);
+            this->setBackgroundColor(Settings::BackgroundModifierSelected);
         } else {
             activeCircle->hide();
-            circle->setStyleSheet("border: 2px solid #B9BBBE;"
-                                "border-radius: 10px");
-            title->setStyleSheet("color: #B9BBBE");
-            description->setStyleSheet("color: #B9BBBE");
-            this->setStyleSheet("background-color: #2F3136;"
-                                "border-radius: 3px");
+            circle->setBorderColor(Settings::InteractiveNormal);
+            title->setTextColor(Settings::InteractiveNormal);
+            description->setTextColor(Settings::InteractiveNormal);
+            this->setBackgroundColor(Settings::BackgroundSecondary);
         }
     }
 
@@ -85,12 +86,10 @@ public:
     {
         active = false;
         activeCircle->hide();
-        title->setStyleSheet("color: #B9BBBE");
-        description->setStyleSheet("color: #B9BBBE");
-        circle->setStyleSheet("border: 2px solid #B9BBBE;"
-                              "border-radius: 10px");
-        this->setStyleSheet("background-color: #2F3136;"
-                            "border-radius: 3px");
+        circle->setBorderColor(Settings::InteractiveNormal);
+        title->setTextColor(Settings::InteractiveNormal);
+        description->setTextColor(Settings::InteractiveNormal);
+        this->setBackgroundColor(Settings::BackgroundSecondary);
     }
 
     int index;
@@ -108,47 +107,41 @@ private:
     {
         active = true;
         activeCircle->show();
-        this->setStyleSheet("background-color: rgba(79, 84, 92, 0.6);"
-                            "border-radius: 3px");
-        title->setStyleSheet("color: #FFF");
-        description->setStyleSheet("color: #FFF");
-        circle->setStyleSheet("border: 2px solid #FFF;"
-                              "border-radius: 10px");
+        circle->setBorderColor(Settings::InteractiveActive);
+        title->setTextColor(Settings::InteractiveActive);
+        description->setTextColor(Settings::InteractiveActive);
+        this->setBackgroundColor(Settings::BackgroundModifierSelected);
     }
     void enterEvent(QEvent *) override
     {
         if (!active) {
-            this->setStyleSheet("background-color: rgba(79, 84, 92, 0.4);"
-                                "border-radius: 3px");
-            title->setStyleSheet("color: #DCDDDE");
-            description->setStyleSheet("color: #DCDDDE");
-            circle->setStyleSheet("border: 2px solid #DCDDDE;"
-                                "border-radius: 10px");
+            circle->setBorderColor(Settings::InteractiveHover);
+            title->setTextColor(Settings::InteractiveHover);
+            description->setTextColor(Settings::InteractiveHover);
+            this->setBackgroundColor(Settings::BackgroundModifierHover);
         }
     }
     void leaveEvent(QEvent *) override
     {
         if (!active) {
-            this->setStyleSheet("background-color: #2F3136;"
-                                "border-radius: 3px");
-            title->setStyleSheet("color: #B9BBBE");
-            description->setStyleSheet("color: #B9BBBE");
-            circle->setStyleSheet("border: 2px solid #B9BBBE;"
-                                "border-radius: 10px");
+            circle->setBorderColor(Settings::InteractiveNormal);
+            title->setTextColor(Settings::InteractiveNormal);
+            description->setTextColor(Settings::InteractiveNormal);
+            this->setBackgroundColor(Settings::BackgroundSecondary);
         }
     }
 
-    QLabel *activeCircle;
-    QLabel *circle;
-    QLabel *title;
-    QLabel *description;
+    Widget *activeCircle;
+    Widget *circle;
+    Label *title;
+    Label *description;
 
     bool active;
 };
 
 
 RadioGroup::RadioGroup(QVector<RadioParameters> radios, int selectedIndex, QWidget *parent)
-    : QLabel(parent)
+    : Widget(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
     this->setFixedHeight(radios.size() * 70 - 8);

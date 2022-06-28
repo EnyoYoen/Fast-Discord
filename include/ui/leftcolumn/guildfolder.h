@@ -31,13 +31,13 @@ private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
 
-    QLabel *closedContent;
     GuildPill *pill;
-    QWidget *openedContent;
-    QLabel *closeButton;
+    Widget *closedContent;
+    Widget *openedContent;
+    Widget *closeButton;
 
     QVector<GuildWidget *> guildWidgets;
-    QVector<QLabel *> guildsIcon;
+    QVector<Widget *> guildsIcon;
     bool opened = false;
     bool clicked = false;
     bool unread = false;

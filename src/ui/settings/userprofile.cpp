@@ -22,46 +22,48 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    QWidget *container = new QWidget(this);
+    Widget *container = new Widget(this);
     layout = new QVBoxLayout(container);
     layout->setContentsMargins(0, 0, 0, 0);
     container->setMaximumWidth(752);
     container->setContentsMargins(40, 60, 40, 80);
-    container->setStyleSheet("background-color: #36393F");
+    container->setBackgroundColor(Settings::BackgroundPrimary);
 
     QFont font;
     font.setPixelSize(20);
     font.setFamily("whitney");
 
-    QLabel *title = new QLabel("User Profile", container);
+    Label *title = new Label("User Profile", container);
+    title->setFixedHeight(24);
     title->setFont(font);
-    title->setStyleSheet("color: #FFF;");
+    title->setTextColor(Settings::HeaderPrimary);
 
     layout->addWidget(title);
     layout->addWidget(new Divider());
 
-    QWidget *profileEdit = new QWidget(container);
+    Widget *profileEdit = new Widget(container);
     QHBoxLayout *profileLayout = new QHBoxLayout(profileEdit);
     profileLayout->setSpacing(20);
     profileLayout->setContentsMargins(0, 0, 0, 0);
 
     font.setPixelSize(12);
-    QWidget *customization = new QWidget(profileEdit);
+    Widget *customization = new Widget(profileEdit);
     QVBoxLayout *customizationLayout = new QVBoxLayout(customization);
     customizationLayout->setSpacing(0);
     customizationLayout->setContentsMargins(0, 0, 0, 0);
 
 
-    QWidget *avatarSection = new QWidget(customization);
+    Widget *avatarSection = new Widget(customization);
     QVBoxLayout *avatarLayout = new QVBoxLayout(avatarSection);
     avatarLayout->setSpacing(8);
     avatarLayout->setContentsMargins(0, 0, 0, 0);
 
-    QLabel *avatarTitle = new QLabel("AVATAR", avatarSection);
+    Label *avatarTitle = new Label("AVATAR", avatarSection);
+    avatarTitle->setFixedHeight(16);
     avatarTitle->setFont(font);
-    avatarTitle->setStyleSheet("color: #B9BBBE");
+    avatarTitle->setTextColor(Settings::HeaderSecondary);
     
-    QWidget *avatarButtons = new QWidget(avatarSection);
+    Widget *avatarButtons = new Widget(avatarSection);
     QHBoxLayout *avatarButtonsLayout = new QHBoxLayout(avatarButtons);
     avatarButtonsLayout->setSpacing(4);
     avatarButtonsLayout->setContentsMargins(0, 0, 0, 0);
@@ -75,43 +77,48 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     avatarLayout->addWidget(avatarButtons);
 
 
-    QWidget *colorSection = new QWidget(customization);
+    Widget *colorSection = new Widget(customization);
     QVBoxLayout *colorLayout = new QVBoxLayout(colorSection);
     colorLayout->setSpacing(16);
     colorLayout->setContentsMargins(0, 0, 0, 0);
 
-    QLabel *colorTitle = new QLabel("PROFILE COLOR", colorSection);
+    Label *colorTitle = new Label("PROFILE COLOR", colorSection);
+    colorTitle->setFixedHeight(16);
     colorTitle->setFont(font);
-    colorTitle->setStyleSheet("color: #B9BBBE");
+    colorTitle->setTextColor(Settings::HeaderSecondary);
 
-    QWidget *colorButtons = new QWidget(colorSection);
+    Widget *colorButtons = new Widget(colorSection);
     QHBoxLayout *colorButtonsLayout = new QHBoxLayout(colorButtons);
     colorButtonsLayout->setSpacing(16);
     colorButtonsLayout->setContentsMargins(0, 0, 0, 0);
 
     font.setPixelSize(11);
-    QWidget *defaultColorContainer = new QWidget(colorButtons);
+    Widget *defaultColorContainer = new Widget(colorButtons);
     defaultColorContainer->setFixedSize(69, 70);
     QVBoxLayout *defaultColorLayout = new QVBoxLayout(defaultColorContainer);
     defaultColorLayout->setSpacing(4);
     defaultColorLayout->setContentsMargins(0, 0, 0, 0);
-    QLabel *defaultColorTitle = new QLabel("Default", defaultColorContainer);
+    Label *defaultColorTitle = new Label("Default", defaultColorContainer);
+    defaultColorTitle->setFixedSize(69, 16);
+    defaultColorTitle->setFlags(Qt::AlignCenter);
     defaultColorTitle->setFont(font);
-    defaultColorTitle->setStyleSheet("color: #B9BBBE");
+    defaultColorTitle->setTextColor(Settings::HeaderSecondary);
     defaultColor = new ColorLabel(defaultColorContainer);
     defaultColorLayout->addWidget(defaultColor);
     defaultColorLayout->addWidget(defaultColorTitle, 1, Qt::AlignHCenter);
 
-    QWidget *customColorContainer = new QWidget(colorButtons);
+    Widget *customColorContainer = new Widget(colorButtons);
     customColorContainer->setFixedSize(69, 70);
     QVBoxLayout *customColorLayout = new QVBoxLayout(customColorContainer);
     customColorLayout->setSpacing(4);
     customColorLayout->setContentsMargins(0, 0, 0, 0);
-    QLabel *customColorTitle = new QLabel("Custom", customColorContainer);
+    Label *customColorTitle = new Label("Custom", customColorContainer);
+    customColorTitle->setFixedSize(69, 16);
+    customColorTitle->setFlags(Qt::AlignCenter);
     customColorTitle->setFont(font);
-    customColorTitle->setStyleSheet("color: #B9BBBE");
+    customColorTitle->setTextColor(Settings::HeaderSecondary);
     customColor = new ColorLabel(customColorContainer);
-    QLabel *colorIcon = new QLabel(customColor);
+    Widget *colorIcon = new Widget(customColor);
     colorIcon->setPixmap(QPixmap("res/images/svg/grab-color-icon.svg").scaled(14, 14));
     colorIcon->move(50, 0);
     customColorLayout->addWidget(customColor);
@@ -169,30 +176,32 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     colorLayout->addStretch(1);
 
 
-    QWidget *bannerSection = new QWidget(customization);
+    Widget *bannerSection = new Widget(customization);
     QVBoxLayout *bannerLayout = new QVBoxLayout(bannerSection);
     bannerLayout->setSpacing(8);
     bannerLayout->setContentsMargins(0, 0, 0, 0);
 
     font.setPixelSize(12);
-    QWidget *bannerTitle = new QWidget(bannerSection);
+    Widget *bannerTitle = new Widget(bannerSection);
     QHBoxLayout *bannerTitleLayout = new QHBoxLayout(bannerTitle);
     bannerTitleLayout->setSpacing(0);
     bannerTitleLayout->setContentsMargins(0, 0, 0, 0);
-    QLabel *bannerTitleText = new QLabel("PROFILE BANNER", bannerTitle);
+    Label *bannerTitleText = new Label("PROFILE BANNER", bannerTitle);
+    bannerTitleText->setMinimumSize(104, 16);
     bannerTitleText->setFont(font);
-    bannerTitleText->setStyleSheet("color: #B9BBBE");
+    bannerTitleText->setTextColor(Settings::HeaderSecondary);
     QLabel *bannerTitleIcon = new QLabel(bannerTitle);
     bannerTitleIcon->setPixmap(QPixmap("res/images/svg/nitro-icon.svg").scaled(16, 16));
     bannerTitleLayout->addWidget(bannerTitleText);
     bannerTitleLayout->addWidget(bannerTitleIcon);
     bannerTitleLayout->addStretch(1);
 
-    QLabel *bannerDescription = new QLabel("We recommend an image of at least 600x240. You can\nupload a PNG, JPG, or an animated GIF under 10 MB.", bannerSection);
+    Label *bannerDescription = new Label("We recommend an image of at least 600x240. You can\nupload a PNG, JPG, or an animated GIF under 10 MB.", bannerSection);
+    bannerDescription->setMinimumHeight(40);
     bannerDescription->setFont(font);
-    bannerDescription->setStyleSheet("color: #B9BBBE");
+    bannerDescription->setTextColor(Settings::HeaderSecondary);
 
-    QWidget *bannerButtons = new QWidget(bannerSection);
+    Widget *bannerButtons = new Widget(bannerSection);
     QHBoxLayout *bannerButtonsLayout = new QHBoxLayout(bannerButtons);
     bannerButtonsLayout->setSpacing(4);
     bannerButtonsLayout->setContentsMargins(0, 0, 0, 0);
@@ -213,23 +222,24 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
             }
             QObject::connect(changeBanner, &SettingsButton::clicked, [this](){
                 QWidget *parentWidget = this;
-                while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
+                while (parentWidget->parent()) parentWidget = (Widget *)parentWidget->parent();
 
                 QFont font;
                 font.setPixelSize(12);
                 font.setFamily("whitney");
-                QWidget *container = new QWidget();
+                Widget *container = new Widget(nullptr);
                 container->setFixedSize(200, 212);
                 QHBoxLayout *mainLayout = new QHBoxLayout(container);
                 mainLayout->setContentsMargins(16, 0, 16, 16);
-                QLabel *content = new QLabel(container);
+                Label *content = new Label(container);
                 content->setFixedSize(160, 196);
-                content->setStyleSheet("background-color: #292B2F");
+                content->setTextColor(Settings::BackgroundSecondaryAlt);
                 QVBoxLayout *layout = new QVBoxLayout(content);
                 layout->setSpacing(32);
                 layout->setContentsMargins(16, 16, 16, 16);
                 SelectImageButton *button = new SelectImageButton(content);
                 QLabel *desc = new QLabel("Upload Image", content);
+                desc->setFixedHeight(16);
                 desc->setFont(font);
                 layout->addWidget(button);
                 layout->addWidget(desc, 0, Qt::AlignHCenter);
@@ -257,8 +267,8 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
             SettingsButton *getNitroButton = new SettingsButton(SettingsButton::Type::Normal, "Get Nitro", bannerButtons);
             QObject::connect(getNitroButton, &SettingsButton::clicked, [this](){
                 QWidget *parentWidget = this;
-                while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-                PopUp *popUp = new PopUp(new QWidget(), 440, 120, QString(), "Get Nitro", true, false, "<div style=\"text-align: center\">You can get nitro at <a style=\"color: #00AFF4; text-decoration: none;\" href=\"https://discord.com/nitro\">https://discord.com/nitro</a></div>", QString(), QString(), false, false, parentWidget->size(), parentWidget);
+                while (parentWidget->parent()) parentWidget = (Widget *)parentWidget->parent();
+                PopUp *popUp = new PopUp(new Widget(nullptr), 440, 120, QString(), "Get Nitro", true, false, "<div style=\"text-align: center\">You can get nitro at <a style=\"color: #00AFF4; text-decoration: none;\" href=\"https://discord.com/nitro\">https://discord.com/nitro</a></div>", QString(), QString(), false, false, parentWidget->size(), parentWidget);
                 QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             });
             bannerButtonsLayout->addWidget(getNitroButton);
@@ -272,37 +282,43 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     bannerLayout->addWidget(bannerButtons);
 
 
-    QWidget *aboutSection = new QWidget(customization);
+    Widget *aboutSection = new Widget(customization);
     QVBoxLayout *aboutLayout = new QVBoxLayout(aboutSection);
     aboutLayout->setSpacing(8);
     aboutLayout->setContentsMargins(0, 0, 0, 0);
 
-    QLabel *aboutTitle = new QLabel("ABOUT ME", aboutSection);
+    Label *aboutTitle = new Label("ABOUT ME", aboutSection);
+    aboutTitle->setFixedHeight(16);
     aboutTitle->setFont(font);
-    aboutTitle->setStyleSheet("color: #B9BBBE");
+    aboutTitle->setTextColor(Settings::HeaderSecondary);
 
-    QLabel *aboutDescription = new QLabel("You can use markdown and links if you'd like.", aboutSection);
+    Label *aboutDescription = new Label("You can use markdown and links if you'd like.", aboutSection);
+    aboutDescription->setFixedHeight(16);
     aboutDescription->setFont(font);
-    aboutDescription->setStyleSheet("color: #B9BBBE");
+    aboutDescription->setTextColor(Settings::HeaderSecondary);
 
     font.setPixelSize(14);
-    QLabel *aboutEdit = new QLabel(aboutSection);
+    Widget *aboutEdit = new Widget(aboutSection);
     aboutEdit->setFixedSize(340, 136);
-    aboutEdit->setStyleSheet("background-color: #202225;"
-                             "border-radius: 3px");
+    aboutEdit->setBackgroundColor(Settings::BackgroundTertiary);
+    aboutEdit->setBorderRadius(3);
     QHBoxLayout *aboutEditLayout = new QHBoxLayout(aboutEdit);
     aboutEditLayout->setSpacing(10);
     aboutEditLayout->setContentsMargins(16, 11, 16, 11);
     aboutTextEdit = new QTextEdit(aboutEdit);
     aboutTextEdit->setFont(font);
-    aboutTextEdit->setStyleSheet("color: #DCDDDE");
-    QLabel *charCount = new QLabel(aboutEdit);
+    aboutTextEdit->setTextColor(Settings::colors[Settings::TextNormal]);
+    aboutTextEdit->setStyleSheet(QString("background-color: ") + Settings::colors[Settings::BackgroundTertiary].name());
+    Label *charCount = new Label(aboutEdit);
+    charCount->setFixedSize(25, 16);
+    charCount->setTextColor(Settings::TextNormal);
+    charCount->setBackgroundColor(Settings::BackgroundTertiary);
     rm->getClient([charCount, this](void *clientPtr){
         aboutTextEdit->setText(reinterpret_cast<Api::Client *>(clientPtr)->bio);
         charCount->setText(QString::number(190 - reinterpret_cast<Api::Client *>(clientPtr)->bio.length()));
     });
     charCount->setFont(font);
-    charCount->setStyleSheet("color: #DCDDDE");
+    charCount->setTextColor(Settings::TextNormal);
     QObject::connect(aboutTextEdit, &QTextEdit::textChanged, [charCount, this](){
         QString text = aboutTextEdit->toPlainText();
         if (text.length() > 190) {
@@ -328,12 +344,12 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     aboutLayout->addWidget(aboutEdit);
 
 
-    QWidget *line1 = new QWidget(this);
+    Widget *line1 = new Widget(this);
     line1->setFixedSize(660, 1);
-    line1->setStyleSheet("background-color: rgba(79, 84, 92, 0.48);");
-    QWidget *line2 = new QWidget(this);
+    line1->setBackgroundColor(Settings::BackgroundModifierActive);
+    Widget *line2 = new Widget(this);
     line2->setFixedSize(660, 1);
-    line2->setStyleSheet("background-color: rgba(79, 84, 92, 0.48);");
+    line2->setBackgroundColor(Settings::BackgroundModifierActive);
 
     customizationLayout->addWidget(avatarSection);
     customizationLayout->addSpacing(24);
@@ -349,15 +365,16 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     customizationLayout->addStretch(1);
 
 
-    QWidget *preview = new QWidget(profileEdit);
+    Widget *preview = new Widget(profileEdit);
     QVBoxLayout *previewLayout = new QVBoxLayout(preview);
     previewLayout->setSpacing(8);
     previewLayout->setContentsMargins(0, 0, 0, 0);
 
     font.setPixelSize(12);
-    QLabel *previewTitle = new QLabel("PREVIEW", preview);
+    Label *previewTitle = new Label("PREVIEW", preview);
+    previewTitle->setFixedHeight(16);
     previewTitle->setFont(font);
-    previewTitle->setStyleSheet("color: #B9BBBE");
+    previewTitle->setTextColor(Settings::HeaderSecondary);
     previewLayout->addWidget(previewTitle);
 
     rm->getClient([rmp, preview, previewLayout, this](void *clientPtr){
@@ -382,7 +399,8 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     mainLayout->addWidget(container, 10);
 
     this->setWidget(container);
-    this->setStyleSheet("QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
+    this->setStyleSheet("* {border: none;}"
+                        "QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
                         "QScrollBar {border: none; background-color: #36393F; border-radius: 8px; width: 3px;}"
                         "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}");
 
@@ -415,18 +433,18 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     });
     QObject::connect(changeAvatar, &SettingsButton::clicked, [this](){
         QWidget *parentWidget = this;
-        while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
+        while (parentWidget->parent()) parentWidget = (Widget *)parentWidget->parent();
 
         QFont font;
         font.setPixelSize(12);
         font.setFamily("whitney");
-        QWidget *container = new QWidget();
+        Widget *container = new Widget(nullptr);
         container->setFixedSize(200, 212);
         QHBoxLayout *mainLayout = new QHBoxLayout(container);
         mainLayout->setContentsMargins(16, 0, 16, 16);
-        QLabel *content = new QLabel(container);
+        Label *content = new Label(container);
         content->setFixedSize(160, 196);
-        content->setStyleSheet("background-color: #292B2F");
+        content->setBackgroundColor(Settings::BackgroundSecondaryAlt);
         QVBoxLayout *layout = new QVBoxLayout(content);
         layout->setSpacing(32);
         layout->setContentsMargins(16, 16, 16, 16);
@@ -464,17 +482,18 @@ void UserProfile::profileChanged()
         font.setPixelSize(13);
         font.setFamily("whitney");
 
-        QLabel *unsaved = new QLabel(this);
-        unsaved->setFixedHeight(32);
+        Widget *unsaved = new Widget(this);
+        unsaved->setFixedHeight(52);
         unsaved->setMaximumWidth(700);
-        unsaved->setStyleSheet("background-color: rgba(32, 34, 37, 0.9);"
-                               "border-radius: 5px");
+        unsaved->setBackgroundColor(Settings::UnsavedBackground);
+        unsaved->setBorderRadius(5);
         QHBoxLayout *layout = new QHBoxLayout(unsaved);
         layout->setSpacing(10);
         layout->setContentsMargins(16, 10, 10, 10);
-        QLabel *careful = new QLabel("Careful - you have unsaved changes!", unsaved);
+        Label *careful = new Label("Careful - you have unsaved changes!", unsaved);
+        careful->setFixedHeight(20);
         careful->setFont(font);
-        careful->setStyleSheet("color: #fff");
+        careful->setTextColor(Settings::White);
         SettingsButton *reset = new SettingsButton(SettingsButton::Type::NoBackground, "Reset", unsaved);
         SettingsButton *save = new SettingsButton(SettingsButton::Type::Normal, "Save Changes", unsaved);
         layout->addWidget(careful);
@@ -518,8 +537,8 @@ void UserProfile::profileChanged()
                 bool modified = false;
                 QString data = "{";
 
-                if ("#" + QString::number(client.bannerColor, 16) != bannerColor) {
-                    data += "\"accent_color\":" + bannerColor.mid(1, 6).toLong(nullptr, 16);
+                if (QColor((client.bannerColor & 0x00FF0000) >> 16, (client.bannerColor & 0x0000FF00) >> 8, client.bannerColor & 0x000000FF) != bannerColor) {
+                    data += "\"accent_color\":" + QString::number(bannerColor.name().mid(1, 6).toLong(nullptr, 16));
                     modified = true;
                 }
 
@@ -554,7 +573,7 @@ void UserProfile::profileChanged()
                     } else {
                         QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
 
-                        QWidget *container = new QWidget();
+                        Widget *container = new Widget(nullptr);
                         QHBoxLayout *layout = new QHBoxLayout(container);
                         layout->setContentsMargins(32, 32, 32, 32);
                         layout->setSpacing(10);
@@ -565,15 +584,15 @@ void UserProfile::profileChanged()
                         font.setFamily("whitney");
 
                         for (unsigned int i = 0 ; i < errors.size() ; i++) {
-                            QLabel *label = new QLabel(errors[i]->message, container);
+                            Label *label = new Label(errors[i]->message, container);
                             label->setFont(font);
-                            label->setStyleSheet("color: #B9BBBE");
+                            label->setTextColor(Settings::HeaderSecondary);
                             layout->addWidget(label);
                         }
                         layout->addStretch(1);
 
                         QWidget *parentWidget = this;
-                        while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
+                        while (parentWidget->parent()) parentWidget = (Widget *)parentWidget->parent();
 
                         PopUp *popUp = new PopUp(container, 400, 300, QString(), "Errors", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
                         QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});

@@ -1,11 +1,13 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
+
 #include <QLabel>
 #include <QMouseEvent>
 
 namespace Ui {
 
-class MenuButton : public QLabel
+class MenuButton : public Label
 {
     Q_OBJECT
 public:

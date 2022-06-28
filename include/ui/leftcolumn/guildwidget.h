@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "ui/common/roundedimage.h"
 #include "ui/leftcolumn/guildpill.h"
 #include "ui/leftcolumn/guildicon.h"
@@ -14,7 +15,7 @@
 namespace Ui {
 
 // A widget to show a guild (in the left column)
-class GuildWidget : public QFrame
+class GuildWidget : public Widget
 {
     Q_OBJECT
 public:

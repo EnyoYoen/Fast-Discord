@@ -1,5 +1,7 @@
 #include "ui/rightcolumn/markdownlabel.h"
 
+#include "ui/common/basicwidgets.h"
+
 #include <QFontMetrics>
 
 namespace Ui {
@@ -185,11 +187,10 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
         html += "</html>";
 
         this->setText(html);
-        this->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        this->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
         this->setCursor(QCursor(Qt::IBeamCursor));
-        this->setWordWrap(true);
-        this->setStyleSheet("color: #DCDDDE;"
-                            "background-color: #36393F;");
+        this->setStyleSheet("background-color:" + Settings::colors[Settings::BackgroundPrimary].name()
+         + ";color:" + Settings::colors[Settings::InteractiveHover].name());
     }
 }
 

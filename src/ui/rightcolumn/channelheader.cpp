@@ -1,17 +1,19 @@
 #include "ui/rightcolumn/channelheader.h"
 
+#include <QLabel>
+
 namespace Ui {
 
 
 ChannelHeader::ChannelHeader(Api::RessourceManager *rmp, QWidget *parent) 
-    : rm(rmp), QWidget(parent)
+    : rm(rmp), Widget(parent)
 {
     layout = new QHBoxLayout(this);
     layout->setSpacing(8);
     layout->setContentsMargins(16, 0, 0, 0);
 
     this->setFixedHeight(48);
-    this->setStyleSheet("background-color: #36393F;");
+    this->setBackgroundColor(Settings::BackgroundPrimary);
     this->hide();
 }
 
@@ -60,13 +62,13 @@ void ChannelHeader::openChannel(const QString& channelName, int channelType)
     icon->setPixmap(QPixmap("res/images/svg/" + iconName));
     icon->setFixedSize(24, 24);
 
-    QLabel *name = new QLabel((channelType == Api::GroupDM ? channelName : channelName.mid(1)));
+    Label *name = new Label((channelType == Api::GroupDM ? channelName : channelName.mid(1)), nullptr);
     QFont font;
     font.setPixelSize(16);
     font.setFamily("whitney");
     font.setBold(true);
     name->setFont(font);
-    name->setStyleSheet("color: #DCDDDE;");
+    name->setTextColor(Settings::TextNormal);
 
     layout->insertWidget(0, name);
     layout->insertWidget(0, icon);

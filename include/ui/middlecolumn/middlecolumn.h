@@ -17,7 +17,7 @@
 namespace Ui {
 
 // The middle column of the UI (with channels widgets)
-class MiddleColumn : public QWidget
+class MiddleColumn : public Widget
 {
     Q_OBJECT
 public:

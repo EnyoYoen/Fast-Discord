@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "ui/common/roundedimage.h"
 #include "ui/common/statusicon.h"
 #include "ui/middlecolumn/closechannelbutton.h"
@@ -13,7 +14,7 @@
 namespace Ui {
 
 // A widget for private channels (DMs and group DMs)
-class PrivateChannelWidget : public QWidget
+class PrivateChannelWidget : public Widget
 {
     Q_OBJECT
 public:
@@ -21,7 +22,7 @@ public:
     void unclicked(); // Reset the stylesheet of the widget
     void setStatus(const QString& status);
 
-    QLabel         *name;
+    Label          *name;
     Api::Snowflake  id;
 
 signals:
@@ -47,8 +48,8 @@ private:
     RoundedImage        *icon;
     StatusIcon          *statusIcon;
     CloseChannelButton  *closeButton;
-    QLabel              *subtext;
-    QLabel              *statusBackground;
+    Label               *subtext;
+    Widget              *statusBackground;
 
     QVector<Api::User *> users;
     unsigned int         nMembers;

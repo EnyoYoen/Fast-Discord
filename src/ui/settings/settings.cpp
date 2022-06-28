@@ -10,8 +10,8 @@
 
 namespace Ui {
 
-Settings::Settings(Api::RessourceManager *rmp, QWidget *parent)
-    : QWidget(parent)
+SettingsMenu::SettingsMenu(Api::RessourceManager *rmp, QWidget *parent)
+    : Widget(parent)
 {
     rm = rmp;
 
@@ -57,7 +57,7 @@ Settings::Settings(Api::RessourceManager *rmp, QWidget *parent)
         }
     });
     
-    this->setStyleSheet("background-color: #36393F;");
+    this->setBackgroundColor(Settings::BackgroundPrimary);
 }
 
 } // namespace Ui

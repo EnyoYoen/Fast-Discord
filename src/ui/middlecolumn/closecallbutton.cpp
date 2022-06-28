@@ -3,17 +3,14 @@
 namespace Ui {
 
 CloseCallButton::CloseCallButton(Api::RessourceManager *rmp, QWidget *parent)
-    : QLabel(parent)
+    : Widget(parent)
 {
     rm = rmp;
 
     this->setFixedSize(32, 32);
     this->setCursor(Qt::PointingHandCursor);
-    this->setStyleSheet("background-image: url(\"res/images/svg/close-call-icon.svg\");"
-                        "background-repeat: no-repeat;"
-                        "background-position: center;"
-                        "border-radius: 4px;"
-                        "border: none");
+    this->setImage("res/images/svg/close-call-icon.svg");
+    this->setBorderRadius(4);
 }
 
 void CloseCallButton::mouseReleaseEvent(QMouseEvent *)
@@ -24,22 +21,12 @@ void CloseCallButton::mouseReleaseEvent(QMouseEvent *)
 
 void CloseCallButton::enterEvent(QEvent *)
 {
-    this->setStyleSheet("background-image: url(\"res/images/svg/close-call-icon.svg\");"
-                        "background-repeat: no-repeat;"
-                        "background-position: center;"
-                        "border-radius: 4px;"
-                        "background-color: #393D43;"
-                        "border: none");
+    this->setBackgroundColor(Settings::BackgroundModifierSelected);
 }
 
 void CloseCallButton::leaveEvent(QEvent *)
 {
-    this->setStyleSheet("background-image: url(\"res/images/svg/close-call-icon.svg\");"
-                        "background-repeat: no-repeat;"
-                        "background-position: center;"
-                        "border-radius: 4px;"
-                        "background-color: none;"
-                        "border: none");
+    this->setBackgroundColor(Settings::None);
 }
 
 

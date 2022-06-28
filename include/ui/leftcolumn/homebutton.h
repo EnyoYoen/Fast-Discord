@@ -24,7 +24,7 @@ private:
     void leaveEvent(QEvent *) override;
 
     GuildPill *pill;
-    QLabel    *image;
+    Widget    *image;
 
     bool clic; // If the widget is clicked
 };

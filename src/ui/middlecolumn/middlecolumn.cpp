@@ -3,8 +3,12 @@
 namespace Ui {
 
 MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, QWidget *parent)
-    : QWidget(parent)
+    : Widget(parent)
 {
+    // Style this column
+    this->setFixedWidth(240);
+    this->setBackgroundColor(Settings::BackgroundSecondary);
+    
     // Set the requester
     rm = rmp;
 
@@ -13,6 +17,7 @@ MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, QWidget *parent)
 
     // Create and style the channel list
     channelList = new QScrollArea(this);
+    channelList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + ";border:none;}");
     channelList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     // Add the widget and style the main layout
@@ -32,11 +37,6 @@ MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, QWidget *parent)
             rm->gw->sendVoiceStateUpdate(openedGuildId, callChannel, mute, deaf);
     });
     QObject::connect(this, &MiddleColumn::guildChannelsReceived, this, &MiddleColumn::setGuildChannels);
-
-    // Style this column
-    this->setFixedWidth(240);
-    this->setStyleSheet("background-color: #2F3136;"
-                        "border: none;");
 }
 
 void MiddleColumn::setPresences(const QVector<Api::Presence *>& presences)
@@ -90,7 +90,7 @@ void MiddleColumn::setPrivateChannels(const QVector<Api::PrivateChannel *>& priv
 
     // Set the channels to the column
     channelList->setWidget(privateChannelList);
-    channelList->setStyleSheet("* {background-color: #2f3136; border: none;}"
+    channelList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
                                "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
                                "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
@@ -170,7 +170,7 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
 
     // Style the channel list
     channelList->setWidget(guildChannelList);
-    channelList->setStyleSheet("* {background-color: #2f3136; border: none;}"
+    channelList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
                                "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
                                "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
@@ -184,7 +184,7 @@ void MiddleColumn::clicGuildChannel(const Api::Snowflake& id)
         if (guildChannelWidgets[i]->id != id) {
             guildChannelWidgets[i]->unclicked();
         } else {
-            name = guildChannelWidgets[i]->name->text();
+            name = guildChannelWidgets[i]->name->text;
             if (guildChannelWidgets[i]->type == Api::GuildVoice) {
                 if (callChannel != 0) {
                     rm->stopCall();
@@ -217,7 +217,7 @@ void MiddleColumn::clicPrivateChannel(const Api::Snowflake& id)
         if (privateChannelWidgets[i]->id != id) {
             privateChannelWidgets[i]->unclicked();
         } else {
-            name = privateChannelWidgets[i]->name->text();
+            name = privateChannelWidgets[i]->name->text;
             callChannel.clear();
         }
     }

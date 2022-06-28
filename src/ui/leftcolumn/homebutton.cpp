@@ -14,7 +14,7 @@ HomeButton::HomeButton(QWidget *parent)
     clic = true;
 
     QHBoxLayout *layout = new QHBoxLayout(this);
-    image = new QLabel(this);
+    image = new Widget(this);
     pill = new GuildPill(this);
 
     layout->setContentsMargins(0, 0, 0, 0);
@@ -24,14 +24,11 @@ HomeButton::HomeButton(QWidget *parent)
 
     // Style
     this->setFixedSize(60, 48);
-    pill->setHeight(40);
+    pill->setFixedHeight(40);
     image->setFixedSize(48, 48);
-    image->setStyleSheet("background-color: #5865F2;"
-                         "border: none;"
-                         "border-radius: 16px;"
-                         "background-image: url(res/images/svg/home-icon.svg);"
-                         "background-repeat: no-repeat;"
-                         "background-position: center;");
+    image->setBackgroundColor(Settings::BrandExperiment);
+    image->setBorderRadius(16);
+    image->setImage("res/images/svg/home-icon.svg");
 }
 
 void HomeButton::mouseReleaseEvent(QMouseEvent *event)
@@ -53,11 +50,10 @@ void HomeButton::unclicked()
         qp.fillRect(img.rect(),QColor(220, 221, 222));
         qp.end();
         image->setPixmap(img);
-        image->setStyleSheet("background-color: #36393f;"
-                             "border: none;"
-                             "border-radius: 24px;");
+        image->setBackgroundColor(Settings::BackgroundPrimary);
+        image->setBorderRadius(24);
     }
-    pill->setHeight(0);
+    pill->setFixedHeight(0);
 }
 
 void HomeButton::mousePressEvent(QMouseEvent *)
@@ -70,12 +66,11 @@ void HomeButton::mousePressEvent(QMouseEvent *)
         qp.fillRect(img.rect(),Qt::white);
         qp.end();
         image->setPixmap(img);
-        image->setStyleSheet("background-color: #5865F2;"
-                             "border: none;"
-                             "border-radius: 16px;");
+        image->setBackgroundColor(Settings::BrandExperiment);
+        image->setBorderRadius(16);
         clic = true;
     }
-    pill->setHeight(40);
+    pill->setFixedHeight(40);
 }
 
 void HomeButton::enterEvent(QEvent *)
@@ -88,11 +83,10 @@ void HomeButton::enterEvent(QEvent *)
         qp.fillRect(img.rect(),Qt::white);
         qp.end();
         image->setPixmap(img);
-        image->setStyleSheet("background-color: #5865F2;"
-                             "border: none;"
-                             "border-radius: 16px;");
+        image->setBackgroundColor(Settings::BrandExperiment);
+        image->setBorderRadius(16);
     }
-    if (pill->height() != 40) pill->setHeight(20);
+    if (pill->height() != 40) pill->setFixedHeight(20);
 }
 
 void HomeButton::leaveEvent(QEvent *)
@@ -105,11 +99,10 @@ void HomeButton::leaveEvent(QEvent *)
         qp.fillRect(img.rect(),QColor(220, 221, 222));
         qp.end();
         image->setPixmap(img);
-        image->setStyleSheet("background-color: #36393f;"
-                             "border: none;"
-                             "border-radius: 24px;");
+        image->setBackgroundColor(Settings::BackgroundPrimary);
+        image->setBorderRadius(24);
     }
-    if (pill->height() != 40) pill->setHeight(0);
+    if (pill->height() != 40) pill->setFixedHeight(0);
 }
 
 } // namespace Ui

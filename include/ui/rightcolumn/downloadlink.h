@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "api/request.h"
 
 #include <QLabel>
@@ -7,7 +8,7 @@
 
 namespace Ui {
 
-class DownloadLink : public QLabel
+class DownloadLink : public Label
 {
     Q_OBJECT
 public:

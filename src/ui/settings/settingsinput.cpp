@@ -5,13 +5,12 @@
 namespace Ui { 
 
 SettingsInput::SettingsInput(QString placeholder, QString text, bool readOnly, bool password, QWidget *parent)
-    : QWidget(parent)
+    : Widget(parent)
 {
     this->setFixedHeight(40);
     this->setContentsMargins(10, 10, 10, 10);
-    this->setAttribute(Qt::WA_StyledBackground);
-    this->setStyleSheet("border-radius: 3px;"
-                        "background-color: #202225;");
+    this->setBorderRadius(3);
+    this->setBackgroundColor(Settings::BackgroundTertiary);
 
     QFont font;
     font.setPixelSize(16);
@@ -23,16 +22,18 @@ SettingsInput::SettingsInput(QString placeholder, QString text, bool readOnly, b
     if (readOnly) {
         input->setReadOnly(true);
         input->setStyleSheet("border: none;"
+                             "background: none;"
                              "color: #A3A6AA");
     } else {
         this->setCursor(Qt::CursorShape::IBeamCursor);
         input->setStyleSheet("border: none;"
+                             "background: none;"
                              "color: #DCDDDE");
     }
     if (password)
         input->setEchoMode(QLineEdit::EchoMode::Password);
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(input);

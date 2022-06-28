@@ -1,18 +1,16 @@
 #include "ui/middlecolumn/closechannelbutton.h"
 
+#include "settings/settings.h"
+
 #include <QHBoxLayout>
 
 namespace Ui {
 
 CloseChannelButton::CloseChannelButton(QWidget *parent)
-    : QWidget(parent)
+    : Widget(parent)
 {
-    QWidget *container = new QWidget(this);
-
-    container->setFixedSize(16, 38);
-    container->setStyleSheet("background-image: url(res/images/svg/close-icon.svg);"
-                             "background-repeat: no-repeat;"
-                             "background-position: center;");
+    this->setFixedSize(16, 38);
+    this->setPixmap(QPixmap("res/images/svg/close-icon.svg"));
 }
 
 void CloseChannelButton::mouseReleaseEvent(QMouseEvent *event)

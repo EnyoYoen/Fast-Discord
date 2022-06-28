@@ -7,26 +7,26 @@
 namespace Ui {
 
 CloseButton::CloseButton(QWidget *parent)
-    : QWidget(parent)
+    : Widget(parent)
 {
     pressed = false;
 
-    QWidget *mainContainer = new QWidget(this);
-    QWidget *container = new QWidget(mainContainer);
+    Widget *mainContainer = new Widget(this);
+    Widget *container = new Widget(mainContainer);
 
-    iconContainer = new QWidget(container);
+    iconContainer = new Widget(container);
     iconContainer->move(0, 60);
     iconContainer->setFixedSize(36, 36);
-    iconContainer->setStyleSheet("border-radius: 18px;"
-                                 "border: 2px solid #B9BBBE;");
-    icon = new QLabel(iconContainer);
+    iconContainer->setBorderRadius(18);
+    iconContainer->setBorderSize(2);
+    iconContainer->setBorderColor(Settings::InteractiveNormal);
+    icon = new Widget(iconContainer);
     icon->move(7, 7);
     icon->setFixedSize(18, 18);
-    icon->setStyleSheet("border: none");
     QPixmap img("res/images/svg/close-settings-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    qp.fillRect(img.rect(),QColor(185, 187, 190));
+    qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
     qp.end();
     icon->setPixmap(img.scaled(18, 18));
 
@@ -34,11 +34,11 @@ CloseButton::CloseButton(QWidget *parent)
     font.setBold(true);
     font.setPixelSize(13);
     font.setFamily("whitney");
-    text = new QLabel("  ESC", container);
+    text = new Label("  ESC", container);
     text->setFont(font);
     text->setFixedSize(36, 13);
     text->move(0, 104);
-    text->setStyleSheet("color: #B9BBBE;");
+    text->setTextColor(Settings::InteractiveNormal);
 
     QWidget *spacer = new QWidget(this);
     spacer->setFixedHeight(52);
@@ -51,25 +51,24 @@ CloseButton::CloseButton(QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
 
     container->setFixedSize(36, 117);
-    container->setStyleSheet("background-color: #36393F;");
+    container->setBackgroundColor(Settings::BackgroundPrimary);
 
     mainContainer->setFixedSize(57, 117);
-    mainContainer->setStyleSheet("background-color: #36393F;");
+    mainContainer->setBackgroundColor(Settings::BackgroundPrimary);
     
     this->setFixedSize(57, 117);
-    this->setStyleSheet("background-color: #36393F;");
+    this->setBackgroundColor(Settings::BackgroundPrimary);
 }
 
 void CloseButton::mouseReleaseEvent(QMouseEvent *event)
 {
     pressed = false;
-    text->setStyleSheet("color: #B9BBBE;");
-    iconContainer->setStyleSheet("border-radius: 18px;"
-                                 "border: 2px solid #B9BBBE;");
+    text->setTextColor(Settings::InteractiveNormal);
+    iconContainer->setBorderColor(Settings::InteractiveNormal);
     QPixmap img("res/images/svg/close-settings-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    qp.fillRect(img.rect(),QColor(185, 187, 190));
+    qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
     qp.end();
     icon->setPixmap(img.scaled(18, 18));
     if (event->button() == Qt::LeftButton) {
@@ -80,13 +79,12 @@ void CloseButton::mouseReleaseEvent(QMouseEvent *event)
 void CloseButton::mousePressEvent(QMouseEvent *event)
 {
     pressed = true;
-    text->setStyleSheet("color: #FFF;");
-    iconContainer->setStyleSheet("border-radius: 18px;"
-                                 "border: 2px solid #FFF;");
+    text->setTextColor(Settings::InteractiveActive);
+    iconContainer->setBorderColor(Settings::InteractiveActive);
     QPixmap img("res/images/svg/close-settings-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    qp.fillRect(img.rect(),QColor(255, 255, 255));
+    qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveActive]);
     qp.end();
     icon->setPixmap(img.scaled(18, 18));
 }
@@ -94,13 +92,12 @@ void CloseButton::mousePressEvent(QMouseEvent *event)
 void CloseButton::enterEvent(QEvent *)
 {
     if (!pressed) {
-        text->setStyleSheet("color: #DCDDDE;");
-        iconContainer->setStyleSheet("border-radius: 18px;"
-                                     "border: 2px solid #DCDDDE;");
+        text->setTextColor(Settings::InteractiveHover);
+        iconContainer->setBorderColor(Settings::InteractiveHover);
         QPixmap img("res/images/svg/close-settings-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        qp.fillRect(img.rect(),QColor(220, 221, 222));
+        qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
         qp.end();
         icon->setPixmap(img.scaled(18, 18));
     }
@@ -109,13 +106,12 @@ void CloseButton::enterEvent(QEvent *)
 void CloseButton::leaveEvent(QEvent *)
 {
     if (!pressed) {
-        text->setStyleSheet("color: #B9BBBE;");
-        iconContainer->setStyleSheet("border-radius: 18px;"
-                                     "border: 2px solid #B9BBBE;");
+        text->setTextColor(Settings::InteractiveNormal);
+        iconContainer->setBorderColor(Settings::InteractiveNormal);
         QPixmap img("res/images/svg/close-settings-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        qp.fillRect(img.rect(),QColor(185, 187, 190));
+        qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
         qp.end();
         icon->setPixmap(img.scaled(18, 18));
     }

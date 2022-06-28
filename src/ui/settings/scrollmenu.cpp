@@ -9,8 +9,8 @@ namespace Ui {
 ScrollMenu::ScrollMenu(QWidget *parent)
     : QScrollArea(nullptr)
 {
-    scrollWidget = new QWidget(this);
-    scrollWidget->setStyleSheet("background-color: #2F3136;");
+    scrollWidget = new Widget(this);
+    scrollWidget->setBackgroundColor(Settings::BackgroundSecondary);
     QVBoxLayout *layout = new QVBoxLayout(scrollWidget);
     layout->setSpacing(2);
     layout->setContentsMargins(20, 60, 6, 60);
@@ -35,9 +35,8 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     buttons.append(new MenuButton(MenuButton::ButtonType::LogOut, scrollWidget, false));
 
     actualType = MenuButton::ButtonType::MyAccount;
-    buttons[0]->setStyleSheet("border-radius: 4px;"
-                              "color: #FFF;"
-                              "background-color: rgba(79, 84, 92, 0.6);");
+    buttons[0]->setBackgroundColor(Settings::BackgroundModifierSelected);
+    buttons[0]->setTextColor(Settings::InteractiveActive);
 
     for (unsigned int i = 0 ; i < buttons.size() ; i++) {
         if (i == 0) {
@@ -62,7 +61,8 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     this->setWidget(scrollWidget);
     this->setFixedWidth(218);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    this->setStyleSheet("QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
+    this->setStyleSheet("* {border: none;}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
                         "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
                         "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
 }
@@ -79,28 +79,28 @@ void ScrollMenu::resetButtons(MenuButton::ButtonType type)
     }
 }
 
-QLabel *ScrollMenu::createMenuTitle(char *title)
+Label *ScrollMenu::createMenuTitle(char *title)
 {
-    QLabel *menuTitle = new QLabel(title, scrollWidget);
+    Label *menuTitle = new Label(title, scrollWidget);
     QFont font;
     font.setPixelSize(12);
     font.setFamily("whitney");
     font.setBold(true);
     menuTitle->setFont(font);
     menuTitle->setFixedSize(192, 28);
-    menuTitle->setStyleSheet("color: #96989D;");
+    menuTitle->setTextColor(Settings::ChannelsDefault);
     return menuTitle;
 }
 
-QWidget *ScrollMenu::createSeparator()
+Widget *ScrollMenu::createSeparator()
 {
-    QWidget *separator = new QWidget(scrollWidget);
+    Widget *separator = new Widget(scrollWidget);
     separator->setFixedSize(172, 17);
     separator->setContentsMargins(10, 8, 10, 8);
-    QWidget *lineSeparator = new QWidget(separator);
+    Widget *lineSeparator = new Widget(separator);
     lineSeparator->move(0, 9);
     lineSeparator->setFixedSize(172, 1);
-    lineSeparator->setStyleSheet("background-color: rgba(79, 84, 92, 0.48);");
+    lineSeparator->setBackgroundColor(Settings::BackgroundModifierAccent);
     return separator;
 }
 

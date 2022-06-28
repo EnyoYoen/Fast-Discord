@@ -1,18 +1,20 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
+
 #include <QWidget>
 #include <QPaintEvent>
 
 namespace Ui {
 
-class StatusIcon : public QWidget
+class StatusIcon : public Widget
 {
 public:
     StatusIcon(QWidget *parent);
     void setStatus(const QString& status);
-
+/*
 private:
-    void paintEvent(QPaintEvent *);
+    void paintEvent(QPaintEvent *);*/
 };
 
 } // namespace Ui

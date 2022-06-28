@@ -11,7 +11,7 @@
 namespace Ui {
 
 // A widget to show messages
-class MessageWidget : public QWidget
+class MessageWidget : public Widget
 {
     Q_OBJECT
 public:
@@ -40,13 +40,16 @@ private:
     QString const processTime(const QTime& time);
     QString const processTimestamp(const QDateTime& dateTime);
 
-    QString hoveredTimestamp;         // The timestamp we show
-    RoundedImage *avatar = nullptr;   // The avatar if there is one
+    QString hoveredTimestamp;
+    RoundedImage *avatar = nullptr;
     RoundedImage *replyAvatar = nullptr;
-    QLabel *timestampLabel = nullptr; // The label of the timestamp
+    Label *timestampLabel = nullptr;
+    Label *textLabel = nullptr;
+    Widget *mainMessage = nullptr;
+    Widget *reply = nullptr;
     MarkdownLabel *content = nullptr;
     QVBoxLayout *dataLayout = nullptr;
-    bool isFirst;             // Is the message is not grouped
+    bool isFirst;
 
 };
 

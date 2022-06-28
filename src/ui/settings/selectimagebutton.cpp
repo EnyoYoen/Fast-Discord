@@ -3,13 +3,13 @@
 namespace Ui {
 
 SelectImageButton::SelectImageButton(QWidget *parent)
-    : QLabel(parent)
+    : Label(parent)
 {
     this->setFixedSize(128, 128);
-    this->setStyleSheet("background-color: #5865F2;"
-                        "border-radius: 64px");
-    QLabel *icon = new QLabel(this);
-    icon->setPixmap(QPixmap("res/images/svg/add-image-icon.svg"));
+    this->setBorderRadius(64);
+    this->setBackgroundColor(Settings::BrandExperiment);
+    Widget *icon = new Widget(this);
+    icon->setImage("res/images/svg/add-image-icon.svg");
     icon->setFixedSize(24, 24);
     icon->move(52, 52);
 }

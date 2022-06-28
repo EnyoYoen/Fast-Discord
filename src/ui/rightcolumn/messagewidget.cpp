@@ -12,7 +12,7 @@
 namespace Ui {
 
 MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message *message, bool isFirstp, bool separatorBefore, QWidget *parent)
-    : QWidget(parent)
+    : Widget(parent)
 {
     // Attributes initialization
     rm = rmp;
@@ -63,11 +63,6 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message *mes
         default:
             defaultMessage(message, separatorBefore);
     }
-
-    // Style
-    this->setMinimumHeight(26);
-    this->setStyleSheet("padding: 0px;"
-                        "margin: 0px;");
 }
 
 void const MessageWidget::setAvatar(const QString& avatarFileName)
@@ -102,22 +97,32 @@ void MessageWidget::addImage(const QString& filename, int width, int height)
 
 void MessageWidget::enterEvent(QEvent *)
 {
-    // Mouse hover : change the stylesheet and show the timestamp label
-    setStyleSheet("background-color: #32353B;");
-    if (content != nullptr)
-        content->setStyleSheet("background-color: #32353B;"
-                               "color: #DCDDDE;");
-    if (!isFirst && timestampLabel != nullptr) timestampLabel->setText(" " + hoveredTimestamp);
+    if (textLabel != nullptr) {
+        this->setBackgroundColor(Settings::BackgroundMessageHover);
+    } else {
+        if (mainMessage != nullptr)
+            mainMessage->setBackgroundColor(Settings::BackgroundMessageHover);
+        if (content != nullptr)
+            content->setStyleSheet("color:" + Settings::colors[Settings::InteractiveHover].name());
+        if (reply != nullptr)
+            reply->setBackgroundColor(Settings::BackgroundMessageHover);
+        if (!isFirst && timestampLabel != nullptr) timestampLabel->setText(" " + hoveredTimestamp);
+    }
 }
 
 void MessageWidget::leaveEvent(QEvent *)
 {
-    // Reset the stylesheet and hide the timestamp label
-    setStyleSheet("background-color: none;");
-    if (content != nullptr)
-        content->setStyleSheet("background-color: #36393F;"
-                               "color: #DCDDDE;");
-    if (!isFirst && timestampLabel != nullptr) timestampLabel->setText("");
+    if (textLabel != nullptr) {
+        this->setBackgroundColor(Settings::None);
+    } else {
+        if (mainMessage != nullptr)
+            mainMessage->setBackgroundColor(Settings::None);
+        if (content != nullptr)
+            content->setStyleSheet("color:" + Settings::colors[Settings::TextNormal].name());
+        if (reply != nullptr)
+            reply->setBackgroundColor(Settings::None);
+        if (!isFirst && timestampLabel != nullptr) timestampLabel->setText("");
+    }
 }
 
 QString const MessageWidget::processTime(const QTime& time)
@@ -167,12 +172,14 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
 {
     // Create the main widgets
     QVBoxLayout *layout = new QVBoxLayout(this);
-    QWidget *mainMessage = new QWidget(this);
+    mainMessage = new Widget(this);
     QHBoxLayout *mainLayout = new QHBoxLayout(mainMessage);
-    QWidget *data = new QWidget(mainMessage);
+    Widget *data = new Widget(mainMessage);
     dataLayout = new QVBoxLayout(data);
-    QWidget *iconContainer = new QWidget(mainMessage);
+    Widget *iconContainer = new Widget(mainMessage);
     QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
+
+    int height = 0;
 
     QFont font;
     font.setPixelSize(14);
@@ -183,13 +190,15 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
 
     if (message->referencedMessage != nullptr && message->referencedMessage->id != 0) {
         Api::Message *ref = message->referencedMessage;
+        height += 18;
         isFirst = true;
 
-        QWidget *reply = new QWidget(this);
+        reply = new Widget(this);
+        reply->setFixedHeight(22);
         QHBoxLayout *replyLayout = new QHBoxLayout(reply);
 
-        QLabel *replyIcon = new QLabel(reply);
-        replyIcon->setPixmap(QPixmap("res/images/png/reply2.png"));
+        Widget *replyIcon = new Widget(reply);
+        replyIcon->setImage("res/images/png/reply.png");
         replyIcon->setFixedSize(68, 22);
         replyLayout->addWidget(replyIcon);
 
@@ -207,20 +216,22 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
 
         QLabel *username = new QLabel(ref->author.username, reply);
         username->setFont(font);
+        username->setFixedHeight(18);
         username->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
         username->setTextInteractionFlags(Qt::TextSelectableByMouse);
         username->setCursor(QCursor(Qt::PointingHandCursor));
 
-        QLabel *content = new QLabel(ref->content);
+        Label *content = new Label(ref->content, nullptr);
         content->setFont(font);
+        content->setFixedSize(QFontMetrics(font).width(ref->content), 18);
         content->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-        content->setTextInteractionFlags(Qt::TextSelectableByMouse);
         content->setCursor(QCursor(Qt::PointingHandCursor));
-        content->setStyleSheet("color: #B9BBBE;");
+        content->setTextColor(Settings::InteractiveNormal);
 
         replyLayout->addWidget(username);
         replyLayout->addWidget(content);
         replyLayout->setSpacing(4);
+        replyLayout->addStretch(1);
 
         layout->addWidget(reply);
     }
@@ -231,6 +242,8 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         // Variable creation
         const Api::User& author = message->author;
         QString avatarId = author.avatar;
+
+        height += 48;
 
         // Get the icon of the message
         if (avatarId.isNull()) {
@@ -248,23 +261,25 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         }
 
         // Widget to show some infos of the message
-        QWidget *messageInfos = new QWidget(data);
+        Widget *messageInfos = new Widget(data);
         QHBoxLayout *infosLayout = new QHBoxLayout(messageInfos);
-        QLabel *name = new QLabel(author.username, messageInfos);
+        Label *name = new Label(author.username, messageInfos);
         font.setPixelSize(16);
+        name->setTextColor(Settings::HeaderPrimary);
+        name->setFixedSize(QFontMetrics(font).width(author.username), 22);
         name->setFont(font);
-        QLabel *date = new QLabel(processTimestamp(dateTime), messageInfos);
+        Label *date = new Label(processTimestamp(dateTime), messageInfos);
         font.setPixelSize(12);
+        date->setTextColor(Settings::TextMuted);
+        date->setFixedSize(QFontMetrics(font).width(processTimestamp(dateTime)), 22);
         date->setFont(font);
 
         // Style the name label
-        name->setTextInteractionFlags(Qt::TextSelectableByMouse);
         name->setCursor(QCursor(Qt::IBeamCursor));
-        name->setStyleSheet("color: #FFF");
+        name->setTextColor(Settings::HeaderPrimary);
 
         // Style the date
-        date->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        date->setStyleSheet("color: #72767D;");
+        date->setTextColor(Settings::TextMuted);
 
         // Add widgets and style the infos layout
         infosLayout->addWidget(name);
@@ -279,12 +294,16 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         // Style the message widget
         this->setContentsMargins(0, separatorBefore ? 0 : 20, 0, 0);
     } else {
+        height += 22;
+
         // Add the label that shows the timestamp when the message is hovered
         hoveredTimestamp = processTime(dateTime.time());
-        timestampLabel = new QLabel(this);
+        timestampLabel = new Label(this);
         font.setPixelSize(12);
         timestampLabel->setFont(font);
         timestampLabel->setFixedHeight(22);
+        timestampLabel->setTextColor(Settings::TextMuted);
+        timestampLabel->setFlags(Qt::AlignCenter);
         iconLayout->addWidget(timestampLabel);
         iconLayout->setContentsMargins(0, 0, 0, 0);
         mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -293,12 +312,11 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
     // Style the icon container
     iconContainer->setFixedWidth(72);
     iconContainer->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
-    iconContainer->setStyleSheet("color: #72767D;");
     iconContainer->setLayout(iconLayout);
 
     // Create and style the content label
     content = nullptr;
-    if (!message->content.isNull()) {
+    if (!message->content.isNull() && !message->content.isEmpty()) {
         content = new MarkdownLabel(message->content, rm, this);
         dataLayout->addWidget(content);
     }
@@ -310,19 +328,29 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         QVector<Api::Attachment *> attachments = message->attachments;
         for (unsigned int i = 0 ; i < attachments.size() ; i++) {
             Api::Attachment *attachment = attachments[i];
-            if (attachments[i]->contentType != nullptr
-              && attachments[i]->contentType.indexOf("image") != -1
-              && attachments[i]->contentType.indexOf("svg") == -1) {
-                QString filename = attachments[i]->id +
-                        attachments[i]->filename.mid(0, attachments[i]->filename.lastIndexOf('.'));
+            if (attachment->contentType != nullptr
+              && attachment->contentType.indexOf("image") != -1
+              && attachment->contentType.indexOf("svg") == -1) {
+                QString filename = attachment->id +
+                        attachment->filename.mid(0, attachment->filename.lastIndexOf('.'));
+                if (attachment->width >= attachment->height && attachment->width > 400)
+                    height += attachment->height / (attachment->width / 400);
+                else if (attachment->height > attachment->width && attachment->height > 400)
+                    height += attachment->height / (attachment->height / 400);
+                else 
+                    height += attachment->height;
                 rm->getImage([this, attachment](void *filename) {
                     this->addImage(*reinterpret_cast<QString *>(filename), attachment->width, attachment->height);
-                }, attachments[i]->proxyUrl, filename);
+                }, attachment->proxyUrl, filename);
             } else {
                 dataLayout->addWidget(new AttachmentFile(rm->requester, attachment, data));
+                height += 52;
             }
         }
     }
+    dataLayout->addStretch(1);
+
+    mainMessage->setMinimumHeight(height);
 
     // Add widgets to the main layout and style it
     mainLayout->addWidget(iconContainer);
@@ -342,33 +370,32 @@ void MessageWidget::iconMessage(const Api::Message *message, const QString &text
     font.setFamily("whitney");
 
     QHBoxLayout *layout = new QHBoxLayout(this);
-    QWidget *spacer = new QWidget(this);
     QLabel *icon = new QLabel(this);
-    QLabel *textLabel = new QLabel(text, this);
+    textLabel = new Label(text, this);
+    textLabel->setFixedSize(QFontMetrics(font).width(text), 22);
     textLabel->setFont(font);
-    QLabel *timestampLabel = new QLabel(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime()), this);
+
+    font.setPixelSize(12);
+    Label *timestampLabel = new Label(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime()), this);
+    timestampLabel->setFixedSize(QFontMetrics(font).width(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime())), 16);
     timestampLabel->setFont(font);
 
-    spacer->setFixedWidth(28);
     icon->setFixedWidth(44);
     icon->setPixmap(QPixmap("res/images/svg/" + iconName));
 
-    textLabel->setStyleSheet("color: #8E9297;");
-    timestampLabel->setStyleSheet("color: #72767D;");
-    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    textLabel->setTextColor(Settings::ChannelIcon);
     textLabel->setCursor(QCursor(Qt::IBeamCursor));
-    timestampLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    timestampLabel->setTextColor(Settings::TextMuted);
 
-    layout->addWidget(spacer);
+    layout->addSpacing(28);
     layout->addWidget(icon);
     layout->addWidget(textLabel);
+    layout->addSpacing(4);
     layout->addWidget(timestampLabel);
-    layout->addStretch();
+    layout->addStretch(1);
 
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
-
-    this->setMinimumHeight(26);
 }
 
 void MessageWidget::recipientMessage(const Api::Message *message)

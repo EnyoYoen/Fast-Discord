@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "ui/common/roundedimage.h"
 #include "api/ressourcemanager.h"
 
@@ -8,7 +9,7 @@
 
 namespace Ui {
 
-class GuildIcon : public QWidget
+class GuildIcon : public Widget
 {
     Q_OBJECT
 public:
@@ -24,7 +25,8 @@ private slots:
 
 private:
     RoundedImage *icon;
-    QLabel       *textIcon;
+    Label        *textIcon;
+    QLabel       *text;
     bool          small;
 };
 

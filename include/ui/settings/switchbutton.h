@@ -1,10 +1,12 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
+
 #include <QLabel>
 
 namespace Ui {
 
-class SwitchButton : public QLabel
+class SwitchButton : public Widget
 {
     Q_OBJECT
 public:
@@ -18,9 +20,9 @@ signals:
 private:
     void mouseReleaseEvent(QMouseEvent *) override;
 
-    QLabel *checkIcon;
-    QLabel *crossIcon;
-    QLabel *iconBackground;
+    Widget *checkIcon;
+    Widget *crossIcon;
+    Widget *iconBackground;
 
     bool state;
 };

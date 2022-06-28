@@ -10,7 +10,7 @@
 namespace Ui {
 
 // The menu containing some user infos at the bottom of the middle column
-class UserMenu : public QWidget
+class UserMenu : public Widget
 {
     Q_OBJECT
 public:
@@ -32,7 +32,7 @@ private:
     Api::RessourceManager *rm; // To request the API
 
     RoundedImage   *avatar;     // The avatar of the user
-    QLabel         *statusIcon; // The status icon
+    Label          *statusIcon; // The status icon
     UserMenuButton *muteButton; // Used when deafen button is clicked
 };
 

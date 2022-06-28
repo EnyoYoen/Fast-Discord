@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "ui/settings/switchbutton.h"
 #include "api/ressourcemanager.h"
 #include "api/objects/optional.h"
@@ -15,7 +16,7 @@ public:
     PrivacySafety(Api::RessourceManager *rm, QWidget *parent);
 
 private:
-    QLabel *createTitle(QString text);
+    Label *createTitle(QString text);
     
     enum class SectionType : quint8 {
         None,
@@ -25,7 +26,7 @@ private:
     };
     QWidget *createSection(std::function<void(bool)> callback, QString title, QString description, optbool active, SectionType type);
 
-    QWidget *container;
+    Widget *container;
     SwitchButton *allSwitch;
     SwitchButton *mutualFriendsSwitch;
     SwitchButton *mutualGuildsSwitch;

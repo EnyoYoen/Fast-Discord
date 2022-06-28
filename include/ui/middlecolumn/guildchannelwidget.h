@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
+#include "settings/settings.h"
 #include "api/objects/channel.h"
 #include "api/objects/snowflake.h"
 
@@ -12,14 +14,14 @@
 namespace Ui {
 
 // A widget to show guild channels (in the middle column)
-class GuildChannelWidget : public QWidget
+class GuildChannelWidget : public Widget
 {
     Q_OBJECT
 public:
     GuildChannelWidget(const Api::Channel& guildChannel, QWidget *parent);
     void unclicked(); // Reset the stylesheet of the widget
 
-    QLabel         *name;
+    Label          *name;
     Api::Snowflake  id;     // The id that we assign to the widget
     int             type;
 
@@ -35,11 +37,11 @@ private:
 
     // All the main widgets
     QHBoxLayout *layout;
-    QLabel      *icon;
+    Widget      *icon;
+    Widget      *container;
 
-    // Different stylesheets when the widget is clicked or the mouse is hover
-    char        *hoverStyleSheet;
-    char        *clickedStyleSheet;
+    Settings::ColorEnum hoverColor;
+    Settings::ColorEnum clickedColor;
 
     QString     iconName;
     bool        clicked; // If the widget is clicked

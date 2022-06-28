@@ -1,12 +1,13 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "api/ressourcemanager.h"
 
 #include <QLabel>
 
 namespace Ui {
 
-class CallWidget : public QLabel
+class CallWidget : public Widget
 {
     Q_OBJECT
 public:
@@ -14,7 +15,7 @@ public:
     void call(QString channel, QString guild);
 
 private:
-    QLabel *name;
+    Label *name;
 
     Api::RessourceManager *rm;
 };

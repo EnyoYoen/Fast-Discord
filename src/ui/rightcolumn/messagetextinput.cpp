@@ -1,12 +1,14 @@
 #include "ui/rightcolumn/messagetextinput.h"
 
+#include "settings/settings.h"
 #include "api/objects/message.h"
 
 #include <QDateTime>
 
 namespace Ui {
 
-MessageTextInput::MessageTextInput(const QString& channelName, QWidget *parent) : QTextEdit(parent)
+MessageTextInput::MessageTextInput(const QString& channelName, QWidget *parent)
+    : QTextEdit()
 {
     // Initialize attribute
     lastTypingTimestamp = 0;
@@ -22,8 +24,20 @@ MessageTextInput::MessageTextInput(const QString& channelName, QWidget *parent) 
     this->setPlaceholderText("Message " + channelName);
     this->setFixedHeight(30);
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    this->setStyleSheet("color: #DCDDDE;"
-                        "border: 0px;");
+    this->setStyleSheet("color:" + Settings::colors[Settings::ChanneltextareaPlaceholder].name() + ";"
+                        "border: 0px;"
+                        "background: " + Settings::colors[Settings::ChanneltextareaBackground].name());
+
+    QObject::connect(this, &QTextEdit::textChanged, [this](){
+        if (this->toPlainText().isEmpty())
+            this->setStyleSheet("color:" + Settings::colors[Settings::ChanneltextareaPlaceholder].name() + ";"
+                                "border: 0px;"
+                                "background: " + Settings::colors[Settings::ChanneltextareaBackground].name());
+        else 
+            this->setStyleSheet("color:" + Settings::colors[Settings::TextNormal].name() + ";"
+                                "border: 0px;"
+                                "background: " + Settings::colors[Settings::ChanneltextareaBackground].name());
+    });
 }
 
 void MessageTextInput::keyPressEvent(QKeyEvent *event)

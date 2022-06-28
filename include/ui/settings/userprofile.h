@@ -3,22 +3,23 @@
 #include "ui/settings/profile.h"
 #include "api/ressourcemanager.h"
 
+#include <QLabel>
 #include <QScrollArea>
 #include <QTextEdit>
 
 namespace Ui {
 
-class ColorLabel : public QLabel
+class ColorLabel : public Widget
 {
     Q_OBJECT
 public:
     ColorLabel(QWidget *parent)
-        : QLabel(parent)
+        : Widget(parent)
     {
         this->setFixedSize(69, 50);
         pressed = false;
         QVBoxLayout *layout = new QVBoxLayout(this);
-        icon = new QLabel(this);
+        icon = new Widget(this);
         icon->setPixmap(QPixmap("res/images/svg/check-icon.svg"));
         icon->hide();
         layout->addWidget(icon, 0, Qt::AlignCenter);
@@ -33,21 +34,21 @@ public:
         pressed = false;
         icon->hide();
     }
-    void setColor(QString colorp)
+    void setColor(QColor colorp)
     {
         color = colorp;
-        this->setStyleSheet("background-color: " + colorp + ";"
-                            "border-radius: 4px");
+        this->setBackgroundColor(colorp);
+        this->setBorderRadius(4);
     }
 
-    QString color;
+    QColor color;
     bool pressed;
 
 signals:
     void clicked();
 
 private:
-    QLabel *icon;
+    Widget *icon;
     void mouseReleaseEvent(QMouseEvent *event) override
     {
         if (event->button() == Qt::LeftButton) {
@@ -77,7 +78,7 @@ private:
     QString bio;
     QString avatarFile;
     QString bannerFile;
-    QString bannerColor;
+    QColor bannerColor;
     QColor defaultBannerColor;
     bool modified;
 };

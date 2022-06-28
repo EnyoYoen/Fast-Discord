@@ -8,111 +8,60 @@
 namespace Ui {
 
 RoundedImage::RoundedImage(const QString& imagePath, int width, int height, int radius, QWidget *parent)
-    : QLabel(parent)
+    : Widget(parent)
 {
-    // Attributes initialization
-    h = height;
-    w = width;
-    r = radius;
-    hasImage = true;
-
-    // Determine if the image is animated and set the image to the widget
+    w = width, h = height;
     if (imagePath.mid(imagePath.length() - 4, 4).compare(".gif") == 0) {
-        // This is an animated image
-        image = QPixmap(imagePath).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        animatedImage = new QMovie(imagePath);
-        animatedImage->start();
-        animatedImage->setPaused(true);
-        this->setMovie(animatedImage);
+        this->setMovie(new QMovie(imagePath));
+        this->mov->start();
+        this->mov->setPaused(true);
     } else {
-        // Not animated
-        image = QPixmap(imagePath).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        this->setPixmap(image);
-        animatedImage = nullptr;
+        QPixmap img(imagePath);
+        QPixmap scaled = img.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        this->setPixmap(scaled);
     }
 
-    // Set the size of the widget
+    this->setBorderRadius(radius);
     this->setFixedSize(width, height);
+    //this->setFixedSize(100, 100);
 }
 
 RoundedImage::RoundedImage(int width, int height, int radius, QWidget *parent)
-    : QLabel(parent)
+    : Widget(parent)
 {
-    hasImage = false;
-    // Attributes initialization
-    h = height;
-    w = width;
-    r = radius;
-
-    // Set the size of the widget
+    this->setBorderRadius(radius);
+    //this->setFixedSize(100, 100);
     this->setFixedSize(width, height);
 }
 
-void RoundedImage::setImage(const QString& imagePath)
+void RoundedImage::setRoundedImage(const QString& imagePath)
 {
-    hasImage = true;
-
-    // Determine if the image is animated and set the image to the widget
     if (imagePath.mid(imagePath.length() - 4, 4).compare(".gif") == 0) {
-        // This is an animated image
-        image = QPixmap(imagePath).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        animatedImage = new QMovie(imagePath);
-        animatedImage->start();
-        animatedImage->setPaused(true);
-        this->setMovie(animatedImage);
+        this->setMovie(new QMovie(imagePath));
+        this->mov->start();
+        this->mov->setPaused(true);
     } else {
-        // Not animated
-        image = QPixmap(imagePath).scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        if (image.isNull())
-            image = QPixmap(imagePath, "JPG").scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        this->setPixmap(image);
-        animatedImage = nullptr;
+        this->setImage(imagePath);
     }
 }
 
 void RoundedImage::clear()
 {
-    hasImage = false;
-    image = QPixmap();
-    animatedImage = nullptr;
-    this->setPixmap(image);
-}
-
-void RoundedImage::paintEvent(QPaintEvent *)
-{
-    if (hasImage) {
-        // Make the image rounded with some antialiasing
-        QPainter p(this);
-        p.setRenderHint(QPainter::Antialiasing);
-        p.setRenderHint(QPainter::SmoothPixmapTransform);
-
-        if (animatedImage != nullptr) {
-            QPixmap target = animatedImage->currentPixmap().scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            QBrush brush = QBrush(target);
-            p.setPen(Qt::NoPen);
-            p.setBrush(target);
-            p.drawRoundedRect(0, 0, h, w, r, r);
-        } else {
-            QPainterPath path = QPainterPath();
-            path.addRoundedRect(0, 0, h, w, r, r);
-
-            p.setClipPath(path);
-            p.drawPixmap(0, 0, image);
-        }
-    }
+    this->setPixmap(QPixmap());
+    this->mov = nullptr;
 }
 
 void RoundedImage::enterEvent(QEvent *)
 {
-    if (animatedImage != nullptr && animatedImage->state() == QMovie::Paused) animatedImage->setPaused(false);
+    if (this->mov != nullptr && this->mov->state() == QMovie::Paused) this->mov->setPaused(false);
 }
 
 void RoundedImage::leaveEvent(QEvent *)
 {
-    if (animatedImage != nullptr && animatedImage->state() != QMovie::Paused) {
-        animatedImage->stop();
-        animatedImage->start();
-        animatedImage->setPaused(true);
+    if (this->mov != nullptr && this->mov->state() != QMovie::Paused) {
+        this->mov->stop();
+        this->mov->start();
+        this->mov->setPaused(true);
     }
 }
 

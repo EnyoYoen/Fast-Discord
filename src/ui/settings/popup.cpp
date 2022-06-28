@@ -11,11 +11,11 @@
 
 namespace Ui {
 
-class PopUpCloseButton : public QLabel
+class PopUpCloseButton : public Widget
 {
     Q_OBJECT
 public:
-    PopUpCloseButton(QWidget *parent) : QLabel(parent)
+    PopUpCloseButton(QWidget *parent) : Widget(parent)
     {
         this->setFixedSize(24, 24);
         this->setPixmap(QPixmap("res/images/svg/close-settings-icon.svg"));
@@ -50,42 +50,46 @@ private:
     }
 };
 
-PopUp::PopUp(QWidget *content, int maximumWidth, int maximumHeight, QString icon, 
+PopUp::PopUp(Widget *content, int maximumWidth, int maximumHeight, QString icon, 
     QString title, bool titleCentered, bool closeable, QString description,
     QString cancelButtonStr, QString doneButtonStr, bool controlButtons, 
-    bool horizontalButtons, QSize winSize, QWidget *parent) : QWidget(parent)
+    bool horizontalButtons, QSize winSize, QWidget *parent) : Widget(parent)
 {
     this->setAttribute(Qt::WA_StyledBackground);
-    this->setStyleSheet("background-color: rgba(0, 0, 0, 0.85);");
+    this->setBackgroundColor(Settings::Black85);
     this->setMinimumSize(winSize);
 
     QHBoxLayout *layout = new QHBoxLayout(this);
 
-    actualPopup = new QLabel(this);
+    actualPopup = new Widget(this);
     actualPopup->setFixedSize(maximumWidth, maximumHeight);
-    actualPopup->setStyleSheet("border-radius: 4px;"
-                               "background-color: #36393F;");
+    actualPopup->setBorderRadius(4);
+    actualPopup->setBackgroundColor(Settings::BackgroundPrimary);
 
     QVBoxLayout *popUpLayout = new QVBoxLayout(actualPopup);
     popUpLayout->setSpacing(16);
     popUpLayout->setContentsMargins(0, 0, 0, 0);
 
-    QWidget *header = new QWidget(actualPopup);
+    Widget *header = new Widget(actualPopup);
     header->setContentsMargins(20, 12, 16, 0);
+    header->setBackgroundColor(Settings::None);
     QHBoxLayout *headerLayout = new QHBoxLayout(header);
     
     QFont font;
     font.setPixelSize(24);
     font.setFamily("whitney");
     font.setBold(true);
-    QLabel *titleWidget;
+    Label *titleWidget;
     if (titleCentered || !description.isNull()) {
-        titleWidget = new QLabel(header);
+        titleWidget = new Label(header);
         QVBoxLayout *titleLayout = new QVBoxLayout(titleWidget);
         titleLayout->setContentsMargins(0, 0, 0, 0);
         titleLayout->setSpacing(8);
-        QLabel *titleCenteredWidget = new QLabel(title, titleWidget);
+        Label *titleCenteredWidget = new Label(title, titleWidget);
+        titleCenteredWidget->setTextColor(Settings::HeaderPrimary);
         titleCenteredWidget->setFont(font);
+        titleCenteredWidget->setFixedSize(QFontMetrics(font).width(title), 30);
+        titleCenteredWidget->setFlags(Qt::AlignCenter);
         titleLayout->addWidget(titleCenteredWidget, 0, Qt::AlignHCenter);
         if (!description.isNull()) {
             font.setBold(false);
@@ -96,12 +100,17 @@ PopUp::PopUp(QWidget *content, int maximumWidth, int maximumHeight, QString icon
             descriptionWidget->setFont(font);
             descriptionWidget->setFixedWidth(maximumWidth - 60);
             descriptionWidget->viewport()->setCursor(Qt::CursorShape::ArrowCursor);
+            descriptionWidget->setStyleSheet("border:none;background-color:" + Settings::colors[Settings::BackgroundPrimary].name() + ";color:" + Settings::colors[Settings::HeaderSecondary].name());
             titleLayout->addWidget(descriptionWidget, 0, Qt::AlignHCenter);
         }
     } else {
-        titleWidget = new QLabel(title, actualPopup);
+        titleWidget = new Label(title, actualPopup);
+        titleWidget->setTextColor(Settings::HeaderPrimary);
         titleWidget->setFont(font);
+        titleWidget->setFixedSize(QFontMetrics(font).width(title), 30);
+        titleWidget->setFlags(Qt::AlignCenter);
     }
+    titleWidget->setBackgroundColor(Settings::None);
     headerLayout->addWidget(titleWidget);
 
     if (closeable) {
@@ -111,10 +120,11 @@ PopUp::PopUp(QWidget *content, int maximumWidth, int maximumHeight, QString icon
     }
 
     popUpLayout->addWidget(header);
+    content->setBackgroundColor(Settings::None);
     popUpLayout->addWidget(content);
     
     if (controlButtons) {
-        QWidget *footer = new QWidget(actualPopup);
+        Widget *footer = new Widget(actualPopup);
         footer->setFixedHeight(horizontalButtons ? 70 : 116);
         footer->setContentsMargins(16, horizontalButtons ? 16 : 24, 16, 16);
 
@@ -124,7 +134,7 @@ PopUp::PopUp(QWidget *content, int maximumWidth, int maximumHeight, QString icon
         QObject::connect(cancelButton, &SettingsButton::clicked, [this](){emit cancelled();});
         
         if (horizontalButtons) {
-            footer->setStyleSheet("background-color: #2F3136");
+            footer->setBackgroundColor(Settings::BackgroundSecondary);
             cancelButton->setFixedSize(96, 38);
             doneButton->setFixedSize(96, 38);
             QHBoxLayout *footerLayout = new QHBoxLayout(footer);

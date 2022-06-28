@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
+
 #include <QLabel>
 
 namespace Ui {
@@ -8,16 +10,12 @@ struct RadioParameters
 {
     QString title;
     QString description;
-    QString color;
-
-    static constexpr const char *Green  = "#3BA55D";
-    static constexpr const char *Orange = "#CB8515";
-    static constexpr const char *Red    = "#ED4245";
+    Settings::ColorEnum color;
 };
 
 class RadioButton;
 
-class RadioGroup : public QLabel
+class RadioGroup : public Widget
 {
     Q_OBJECT
 public:

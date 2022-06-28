@@ -6,11 +6,10 @@
 namespace Ui {
 
 UserMenuButton::UserMenuButton(int typep, QWidget *parent)
-    : QLabel(parent)
+    : Widget(parent)
 {
     // Attributes initialization
     type = typep;
-    styleSheet = "";
     clicked = false;
     blocked = false;
 
@@ -31,17 +30,13 @@ UserMenuButton::UserMenuButton(int typep, QWidget *parent)
     QPixmap img(iconName);
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    qp.fillRect(img.rect(),QColor(185, 187, 190));
+    qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
     qp.end();
     this->setPixmap(img);
 
-    iconStyle += "background-repeat: no-repeat;"
-                 "background-position: center;"
-                 "border-radius: 4px;";
-
     // Style
     this->setFixedSize(32, 32);
-    this->setStyleSheet(iconStyle);
+    this->setBorderRadius(4);
 }
 
 void UserMenuButton::setClicked(bool active)
@@ -55,15 +50,10 @@ void UserMenuButton::setClicked(bool active)
             QPixmap img("res/images/svg/" + prefix + "mute-icon.svg");
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-            qp.fillRect(img.rect(),QColor(185, 187, 190));
+            qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
             qp.end();
             this->setPixmap(img);
 
-            // Put the unmute icon because deafen has been pressed
-            iconStyle = "background-repeat: no-repeat;"
-                        "background-position: center;"
-                        "border-radius: 4px;";
-            this->setStyleSheet(styleSheet + iconStyle);
             blocked = active;
         }
     }
@@ -91,14 +81,10 @@ void UserMenuButton::mouseReleaseEvent(QMouseEvent *event)
             QPixmap img(iconName);
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-            qp.fillRect(img.rect(),QColor(185, 187, 190));
+            qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
             qp.end();
             this->setPixmap(img);
-
-            iconStyle += "background-repeat: no-repeat;"
-                         "background-position: center;"
-                         "border-radius: 4px;";
-            this->setStyleSheet(styleSheet + iconStyle);
+            
             clicked = !clicked;
 
             // Emit signals
@@ -111,16 +97,49 @@ void UserMenuButton::mouseReleaseEvent(QMouseEvent *event)
 
 void UserMenuButton::enterEvent(QEvent *)
 {
-    // Mouse hover : change the stylesheet
-    styleSheet = "background-color: #393D43;";
-    this->setStyleSheet(styleSheet + iconStyle);
+    this->setBackgroundColor(Settings::BackgroundModifierSelected);
+    QString iconName = "res/images/svg/";
+    switch (type) {
+        case Mute:
+            iconName += clicked ? "unmute" : "mute";
+            break;
+        case Deafen:
+            iconName += clicked ? "undeafen" : "deafen";
+            break;
+        case SettingsButton:
+            iconName += "settings";
+            break;
+    }
+    iconName += "-icon.svg";
+    QPixmap img(iconName);
+    QPainter qp(&img);
+    qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
+    qp.end();
+    this->setPixmap(img);
 }
 
-void UserMenuButton::leaveEvent(QEvent *)
-{
-    // Reset the stylesheet
-    styleSheet = "";
-    this->setStyleSheet("background-color: none;" + iconStyle);
+void UserMenuButton::leaveEvent(QEvent *) {
+    QString iconName = "res/images/svg/";
+    switch (type) {
+        case Mute:
+            iconName += clicked ? "unmute" : "mute";
+            break;
+        case Deafen:
+            iconName += clicked ? "undeafen" : "deafen";
+            break;
+        case SettingsButton:
+            iconName += "settings";
+            break;
+    }
+    iconName += "-icon.svg";
+    QPixmap img(iconName);
+    QPainter qp(&img);
+    qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
+    qp.end();
+    this->setPixmap(img);
+    this->setBackgroundColor(Settings::None);
 }
 
 } // namespace Ui

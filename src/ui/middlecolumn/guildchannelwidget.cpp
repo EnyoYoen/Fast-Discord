@@ -5,7 +5,7 @@
 namespace Ui {
 
 GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget *parent)
-    : QWidget(parent)
+    : Widget(parent)
 {
     // Attributes initialization
     id = guildChannel.id;
@@ -14,6 +14,9 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
 
     QFont font;
     font.setFamily("whitney");
+
+    container = new Widget(this);
+    container->setBorderRadius(4);
 
     //  Determine the icon of this channel with its type
     QString iconNumber;
@@ -39,43 +42,33 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     }
     iconName = "res/images/svg/guild-channel-icon" + iconNumber + ".svg";
 
-    // Set the different stylesheets
     if (type == Api::GuildCategory) {
-        // It is a category, there is no stylesheet
-        hoverStyleSheet = clickedStyleSheet = (char *)"color: #FFF;";
+        hoverColor = clickedColor = Settings::None;
         font.setPixelSize(11);
         font.setBold(true);
         this->setFixedSize(224, 36);
         this->setContentsMargins(0, 18, 0, 0);
     } else {
-        hoverStyleSheet = (char *)"color: #DCDDDE;"
-                          "border-radius: 4px;"
-                          "background-color: #35373D;";
-        clickedStyleSheet = (char *)"color: #FFF;"
-                            "border-radius: 4px;"
-                            "background-color: #393D43;";
+        hoverColor = Settings::BackgroundModifierHover;
+        clickedColor = Settings::BackgroundModifierActive;
         font.setPixelSize(16);
         this->setFixedSize(224, 32);
     }
 
-    // I have to create an other widget otherwise
-    // the background color is not applied everywhere, I don't know why
-    QWidget *container = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(container);
 
     // Create the icon
-    icon = new QLabel(this);
-    icon->setPixmap(iconName);
+    icon = new Widget(container);
+    icon->setImage(iconName);
     if (type == Api::GuildCategory)
         icon->setFixedSize(16, 16);
     else
         icon->setFixedSize(26, 26);
-    icon->setStyleSheet("color: #8E9297");
 
     // Create the name label
-    name = new QLabel((type == Api::GuildCategory ? guildChannel.name.toUpper() : guildChannel.name), this);
+    name = new Label((type == Api::GuildCategory ? guildChannel.name.toUpper() : guildChannel.name), container);
     name->setFont(font);
-    name->setStyleSheet("color: #8E9297");
+    name->setTextColor(Settings::ChannelIcon);
 
     // Add widgets to layout and style it
     layout->addWidget(icon, Qt::AlignLeft);
@@ -83,10 +76,9 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    // Create the main layout and add the container
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
-    mainLayout->addWidget(container);
     mainLayout->setContentsMargins((type == Api::GuildCategory ? 0 : 16), 0, 0, 0);
+    mainLayout->addWidget(container);
 }
 
 void GuildChannelWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -104,58 +96,61 @@ void GuildChannelWidget::unclicked()
     // Reset the stylesheet of this widget if currently clicked
     if (clicked) {
         clicked = false;
-        QPixmap img(iconName);
-        QPainter qp(&img);
-        qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        qp.fillRect(img.rect(),QColor(142, 146, 151));
-        qp.end();
-        this->icon->setPixmap(img);
-        this->setStyleSheet("color: #8E9297;"
-                            "background-color: none;");
-        this->name->setStyleSheet("color: #8E9297;");
+
+        if (type == Api::GuildCategory) {
+            QPixmap img(iconName);
+            QPainter qp(&img);
+            qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            qp.fillRect(img.rect(), Settings::colors[Settings::ChannelIcon]);
+            qp.end();
+            icon->setPixmap(img);
+        }
+
+        container->setBackgroundColor(Settings::None);
+        name->setTextColor(Settings::ChannelIcon);
     }
 }
 
 void GuildChannelWidget::mousePressEvent(QMouseEvent *)
 {
-    // Widget clicked : change the stylesheet
     if (!clicked && type != Api::GuildVoice && type != Api::GuildCategory) {
-        this->setStyleSheet(clickedStyleSheet);
-        this->name->setStyleSheet("color: #FFF;");
+        container->setBackgroundColor(clickedColor);
+        name->setTextColor(Settings::InteractiveActive);
         clicked = true;
     }
 }
 
 void GuildChannelWidget::enterEvent(QEvent *)
 {
-    // Mouse hover : change the stylesheet
     if (!clicked) {
-        QPixmap img(iconName);
-        QPainter qp(&img);
-        qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        qp.fillRect(img.rect(),QColor(220, 221, 222));
-        qp.end();
-        this->icon->setPixmap(img);
+        if (type == Api::GuildCategory) {
+            QPixmap img(iconName);
+            QPainter qp(&img);
+            qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
+            qp.end();
+            icon->setPixmap(img);
+        }
 
-        this->setStyleSheet(hoverStyleSheet);
-        this->name->setStyleSheet("color: #DCDDDE;");
+        container->setBackgroundColor(hoverColor);
+        name->setTextColor(Settings::InteractiveHover);
     }
 }
 
 void GuildChannelWidget::leaveEvent(QEvent *)
 {
-    // Reset the stylesheet if not clicked
     if (!clicked) {
-        QPixmap img(iconName);
-        QPainter qp(&img);
-        qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        qp.fillRect(img.rect(),QColor(142, 146, 151));
-        qp.end();
-        this->icon->setPixmap(img);
+        if (type == Api::GuildCategory) {
+            QPixmap img(iconName);
+            QPainter qp(&img);
+            qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            qp.fillRect(img.rect(), Settings::colors[Settings::ChannelIcon]);
+            qp.end();
+            icon->setPixmap(img);
+        }
 
-        this->setStyleSheet("color: #8E9297;"
-                            "background-color: none;");
-        this->name->setStyleSheet("color: #8E9297;");
+        container->setBackgroundColor(Settings::None);
+        name->setTextColor(Settings::ChannelIcon);
     }
 }
 

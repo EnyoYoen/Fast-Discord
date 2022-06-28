@@ -1,5 +1,7 @@
 #include "ui/rightcolumn/messageseparator.h"
 
+#include "ui/common/basicwidgets.h"
+
 #include <QHBoxLayout>
 #include <QLabel>
 
@@ -10,8 +12,8 @@ MessageSeparator::MessageSeparator(const QDate& date, QWidget *parent)
 {
     // Create the widgets
     QHBoxLayout *layout = new QHBoxLayout(this);
-    QWidget *line1 = new QWidget(this);
-    QWidget *line2 = new QWidget(this);
+    Widget *line1 = new Widget(this);
+    Widget *line2 = new Widget(this);
 
     // Determine the month of the separator timestamp
     QString month("");
@@ -54,7 +56,7 @@ MessageSeparator::MessageSeparator(const QDate& date, QWidget *parent)
             break;
     }
     // Create the label with the timestamp
-    QLabel *dateLabel = new QLabel(month + " " + QString::number(date.day()) + ", " + QString::number(date.year()), this);
+    Label *dateLabel = new Label(month + " " + QString::number(date.day()) + ", " + QString::number(date.year()), this);
     QFont font;
     font.setPixelSize(12);
     font.setFamily("whitney");
@@ -66,13 +68,13 @@ MessageSeparator::MessageSeparator(const QDate& date, QWidget *parent)
     layout->addWidget(line2);
 
     // Style the lines
-    line1->setStyleSheet("background-color: #42454B;");
-    line2->setStyleSheet("background-color: #42454B;");
+    line1->setBackgroundColor(Settings::BackgroundModifierAccent);
+    line2->setBackgroundColor(Settings::BackgroundModifierAccent);
     line1->setFixedHeight(1);
     line2->setFixedHeight(1);
 
     // Style the date label
-    dateLabel->setStyleSheet("color: #72767D;");
+    dateLabel->setTextColor(Settings::TextMuted);
     dateLabel->setFixedHeight(21);
     dateLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 

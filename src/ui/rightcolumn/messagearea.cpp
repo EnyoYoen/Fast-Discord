@@ -9,7 +9,7 @@
 namespace Ui {
 
 MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget * /*parent*/)
-    : QScrollArea(/*parent*/) // TODO stylesheet bug
+    : QScrollArea(/*parent*/)
 {
     // Set the ressource manager
     rm = rmp;

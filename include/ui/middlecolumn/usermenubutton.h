@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
+
 #include <QLabel>
 #include <QString>
 #include <QMouseEvent>
@@ -13,7 +15,7 @@ enum UserMenuButtonTypes {
 };
 
 // A button in the user menu (un/deafen, un/mute, settings)
-class UserMenuButton : public QLabel
+class UserMenuButton : public Widget
 {
     Q_OBJECT
 public:
@@ -31,8 +33,6 @@ private:
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
 
-    QString styleSheet; // Store the current stylesheet
-    QString iconStyle;  // Store the icon style
     int type;           // The type of the button
     bool blocked;       // For mute button, if blocked by deafen button
 };

@@ -1,11 +1,13 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
+
 #include <QWidget>
 #include <QMouseEvent>
 
 namespace Ui {
 
-class CloseChannelButton : public QWidget
+class CloseChannelButton : public Widget
 {
     Q_OBJECT
 public:

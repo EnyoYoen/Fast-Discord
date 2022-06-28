@@ -1,5 +1,6 @@
 #include "ui/settings/connections.h"
 
+#include "ui/common/basicwidgets.h"
 #include "ui/settings/switchbutton.h"
 #include "ui/settings/popup.h"
 #include "api/objects/connection.h"
@@ -9,27 +10,23 @@
 
 namespace Ui {
 
-class AccountButton : public QLabel
+class AccountButton : public Widget
 {
 public:
-    AccountButton(Api::RessourceManager *rmp, QString typep, QWidget *parent)
-        : QLabel(parent)
+    AccountButton(Api::RessourceManager *rmp, QString type, QWidget *parent)
+        : Widget(parent)
     {
         rm = rmp;
-        type = typep;
         this->setFixedSize(48, 48);
-        this->setStyleSheet("border-radius: 5px;"
-                            "background-color: #2F3136;"
-                            "background-repeat: no-repeat;"
-                            "background-position: center;"
-                            "background-image: url(\"res/images/svg/" + type + "-icon.svg\")");
+        this->setBorderRadius(5);
+        this->setBackgroundColor(Settings::BackgroundSecondary);
+        this->setImage("res/images/svg/" + type + "-icon.svg");
     }
 
     static QMap<QString, QString> names;
 
 private:
     Api::RessourceManager *rm;
-    QString type;
 
     void mouseReleaseEvent(QMouseEvent *) override
     {
@@ -37,19 +34,11 @@ private:
     }
     void enterEvent(QEvent *) override
     {
-        this->setStyleSheet("border-radius: 5px;"
-                            "background-color: #36393F;"
-                            "background-repeat: no-repeat;"
-                            "background-position: center;"
-                            "background-image: url(\"res/images/svg/" + type + "-icon.svg\")");
+        this->setBackgroundColor(Settings::BackgroundPrimary);
     }
     void leaveEvent(QEvent *) override
     {
-        this->setStyleSheet("border-radius: 5px;"
-                            "background-color: #2F3136;"
-                            "background-repeat: no-repeat;"
-                            "background-position: center;"
-                            "background-image: url(\"res/images/svg/" + type + "-icon.svg\")");
+        this->setBackgroundColor(Settings::BackgroundSecondary);
     }
 };
 QMap<QString, QString> AccountButton::names = QMap<QString, QString>({
@@ -66,20 +55,21 @@ QMap<QString, QString> AccountButton::names = QMap<QString, QString>({
     {"youtube", "YouTube"}
 });
 
-class RemoveAccountButton : public QLabel
+class RemoveAccountButton : public Widget
 {
     Q_OBJECT
 public:
     RemoveAccountButton(Api::RessourceManager *rmp, QWidget *parent)
-        : QLabel(parent)
+        : Widget(parent)
     {
         pressed = false;
         rm = rmp;
         this->setFixedSize(16, 16);
+        this->setBackgroundColor(Settings::BackgroundSecondaryAlt);
         QPixmap img("res/images/svg/close-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        qp.fillRect(img.rect(),QColor(185, 187, 190));
+        qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
         qp.end();
         this->setPixmap(img.scaled(16, 16));
     }
@@ -96,7 +86,7 @@ private:
         QPixmap img("res/images/svg/close-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        qp.fillRect(img.rect(),QColor(185, 187, 190));
+        qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
         qp.end();
         this->setPixmap(img.scaled(16, 16));
         emit clicked();
@@ -108,7 +98,7 @@ private:
         QPixmap img("res/images/svg/close-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        qp.fillRect(img.rect(),QColor(255, 255, 255));
+        qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveActive]);
         qp.end();
         this->setPixmap(img.scaled(16, 16));
     }
@@ -119,7 +109,7 @@ private:
             QPixmap img("res/images/svg/close-icon.svg");
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-            qp.fillRect(img.rect(),QColor(220, 221, 222));
+            qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
             qp.end();
             this->setPixmap(img.scaled(16, 16));
         }
@@ -131,41 +121,40 @@ private:
             QPixmap img("res/images/svg/close-icon.svg");
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-            qp.fillRect(img.rect(),QColor(185, 187, 190));
+            qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
             qp.end();
             this->setPixmap(img.scaled(16, 16));
         }
     }
 };
 
-class ConnectedAccount : public QLabel
+class ConnectedAccount : public Widget
 {
     Q_OBJECT
 public:
     ConnectedAccount(Api::RessourceManager *rm, Api::Connection *connection, QWidget *parent)
-        : QLabel(parent)
+        : Widget(parent)
     {
         this->setFixedHeight(136);
-        this->setStyleSheet("border-radius: 8px;"
-                            "background-color: #2F3136");
+        this->setBorderRadius(8);
 
         QVBoxLayout *layout = new QVBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
 
-        QLabel *header = new QLabel(this);
+        Widget *header = new Widget(this);
         header->setFixedHeight(72);
-        header->setStyleSheet("background-color: #292B2F");
+        header->setBackgroundColor(Settings::BackgroundSecondaryAlt);
+        header->setBorderRadius(8, 8, 0, 0);
         QHBoxLayout *headerLayout = new QHBoxLayout(header);
         headerLayout->setContentsMargins(20, 20, 20, 20);
         headerLayout->setSpacing(0);
 
-        QLabel *icon = new QLabel(header);
+        Widget *icon = new Widget(header);
         icon->setFixedSize(32, 32);
-        icon->setStyleSheet("background-repeat: no-repeat;"
-                            "background-image: url(\"res/images/svg/" + connection->type + "-icon.svg\")");
+        icon->setImage("res/images/svg/" + connection->type + "-icon.svg");
         
-        QWidget *nameContainer = new QWidget(header);
+        Widget *nameContainer = new Widget(header);
         nameContainer->setFixedHeight(32);
         QVBoxLayout *nameLayout = new QVBoxLayout(nameContainer);
         nameLayout->setContentsMargins(0, 0, 0, 0);
@@ -174,15 +163,16 @@ public:
         QFont font;
         font.setPixelSize(14);
         font.setFamily("whitney");
-        QLabel *username = new QLabel(connection->name, nameContainer);
-        username->setFixedHeight(18);
+        Label *username = new Label(connection->name, nameContainer);
+        username->setFixedSize(QFontMetrics(font).width(connection->name), 18);
         username->setFont(font);
-        username->setStyleSheet("color: #FFF");
-        QLabel *name = new QLabel((AccountButton::names.contains(connection->type) ? AccountButton::names[connection->type] : connection->type), nameContainer);
+        username->setTextColor(Settings::HeaderPrimary);
+        Label *name = new Label((AccountButton::names.contains(connection->type) ? AccountButton::names[connection->type] : connection->type), nameContainer);
         font.setPixelSize(12);
         name->setFixedHeight(14);
+        name->setFixedSize(QFontMetrics(font).width(connection->name), 14);
         name->setFont(font);
-        name->setStyleSheet("color: #B9BBBE");
+        name->setTextColor(Settings::HeaderSecondary);
 
         nameLayout->addWidget(username);
         nameLayout->addWidget(name);
@@ -191,7 +181,7 @@ public:
         QObject::connect(button, &RemoveAccountButton::clicked, [rm, connection, this](){
             QWidget *parentWidget = this;
             while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-            PopUp *popUp = new PopUp(new QWidget(), 440, 210, QString(), "DISCONNECT " + connection->type.toUpper(), true, false, "Disconnecting your account might remove you from servers\nyou joined via this account.", "Cancel", "Disconnect", true, true, parentWidget->size(), parentWidget);
+            PopUp *popUp = new PopUp(new Widget(nullptr), 440, 210, QString(), "DISCONNECT " + connection->type.toUpper(), true, false, "Disconnecting your account might remove you from servers\nyou joined via this account.", "Cancel", "Disconnect", true, true, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             QObject::connect(popUp, &PopUp::done, [popUp, connection, rm, this](){
                 rm->requester->removeConnection(connection->type, connection->id);
@@ -208,17 +198,19 @@ public:
         headerLayout->addWidget(button, 0, Qt::AlignVCenter);
 
 
-        QLabel *switchContainer = new QLabel(this);
+        Widget *switchContainer = new Widget(this);
+        switchContainer->setBackgroundColor(Settings::BackgroundSecondary);
+        switchContainer->setBorderRadius(0, 0, 8, 8);
         switchContainer->setFixedHeight(64);
         QHBoxLayout *switchLayout = new QHBoxLayout(switchContainer);
         switchLayout->setContentsMargins(20, 20, 20, 20);
         switchLayout->setSpacing(0);
 
         font.setPixelSize(16);
-        QLabel *description = new QLabel("Display on profile", switchContainer);
-        description->setFixedHeight(24);
+        Label *description = new Label("Display on profile", switchContainer);
+        description->setFixedSize(QFontMetrics(font).width("Display on profile"), 24);
         description->setFont(font);
-        description->setStyleSheet("color: #FFF");
+        description->setTextColor(Settings::HeaderPrimary);
 
         SwitchButton *switchButton = new SwitchButton(connection->visibility);
         QObject::connect(switchButton, &SwitchButton::clicked, [rm, connection](bool state){
@@ -242,10 +234,10 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
 {
     rm = rmp;
 
-    QWidget *container = new QWidget(this);
+    Widget *container = new Widget(this);
     container->setMaximumWidth(740);
     container->setContentsMargins(40, 60, 40, 80);
-    container->setStyleSheet("background-color: #36393F");
+    container->setBackgroundColor(Settings::BackgroundPrimary);
     layout = new QVBoxLayout(container);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
@@ -254,35 +246,35 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
     font.setPixelSize(20);
     font.setFamily("whitney");
 
-    QLabel *title = new QLabel("Connections", container);
+    Label *title = new Label("Connections", container);
     title->setFont(font);
-    title->setStyleSheet("color: #FFF");
+    title->setTextColor(Settings::HeaderPrimary);
 
     layout->addWidget(title);
     layout->addSpacing(20);
 
 
-    QLabel *accountList = new QLabel(container);
+    Widget *accountList = new Widget(container);
     accountList->setMinimumHeight(134);
-    accountList->setStyleSheet("border-radius: 8px;"
-                               "background-color: #292B2F");
+    accountList->setBackgroundColor(Settings::BackgroundSecondaryAlt);
+    accountList->setBorderRadius(8);
     QVBoxLayout *accountLayout = new QVBoxLayout(accountList);
     accountLayout->setContentsMargins(20, 20, 20, 20);
     accountLayout->setSpacing(0);
 
     font.setPixelSize(12);
     font.setBold(true);
-    QLabel *accountTitle = new QLabel("CONNECT YOUR ACCOUNTS", accountList);
+    Label *accountTitle = new Label("CONNECT YOUR ACCOUNTS", accountList);
     accountTitle->setFont(font);
-    accountTitle->setStyleSheet("color: #B9BBBE");
+    accountTitle->setTextColor(Settings::HeaderSecondary);
 
     font.setPixelSize(14);
     font.setBold(false);
-    QLabel *description = new QLabel("Connect these accounts and unlock special Discord integrations.", accountList);
+    Label *description = new Label("Connect these accounts and unlock special Discord integrations.", accountList);
     description->setFont(font);
-    description->setStyleSheet("color: #DCDDDE");
+    description->setTextColor(Settings::TextNormal);
 
-    QWidget *accountGrid = new QWidget(accountList);
+    Widget *accountGrid = new Widget(accountList);
     QHBoxLayout *accountGridLayout = new QHBoxLayout(accountGrid);
     accountGridLayout->setContentsMargins(0, 0, 0, 8);
     accountGridLayout->setSpacing(0);
@@ -319,26 +311,25 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
         }
     });
 
-    layout->addStretch(1);
-
 
     this->setWidgetResizable(true);
     this->setWidget(container);
-    this->setStyleSheet("QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
+    this->setStyleSheet("* {border: none;}"
+                        "QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
                         "QScrollBar {border: none; background-color: #36393F; border-radius: 8px; width: 3px;}"
                         "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}");
 }
 
 void Connections::empty()
 {
-    QWidget *noConnections = new QWidget();
+    Widget *noConnections = new Widget();
     QVBoxLayout *noConnectionsLayout = new QVBoxLayout(noConnections);
     noConnectionsLayout->setContentsMargins(0, 0, 0, 0);
     noConnectionsLayout->setSpacing(0);
     
-    QLabel *image = new QLabel(noConnections);
+    Widget *image = new Widget(noConnections);
     image->setFixedSize(262, 226);
-    image->setStyleSheet("background-image: url(\"res/images/svg/no-connections-icon.svg\")");
+    image->setImage("res/images/svg/no-connections-icon.svg");
 
     noConnectionsLayout->addWidget(image, 0, Qt::AlignHCenter);
     noConnectionsLayout->addSpacing(40);
@@ -348,16 +339,18 @@ void Connections::empty()
     font.setBold(true);
     font.setFamily("whitney");
 
-    QLabel *title = new QLabel("NO CONNECTIONS", noConnections);
-    title->setStyleSheet("color: #A3A6AA");
+    Label *title = new Label("NO CONNECTIONS", noConnections);
+    title->setFixedSize(QFontMetrics(font).width("NO CONNECTIONS"), 22);
+    title->setTextColor(Settings::TextMuted);
     title->setFont(font);
 
     noConnectionsLayout->addWidget(title, 0, Qt::AlignHCenter);
     noConnectionsLayout->addSpacing(8);
     
     font.setBold(false);
-    QLabel *desc = new QLabel("Connect your account to unlock special Discord integrations", noConnections);
-    desc->setStyleSheet("color: #A3A6AA");
+    Label *desc = new Label("Connect your account to unlock special Discord integrations", noConnections);
+    desc->setFixedSize(QFontMetrics(font).width("Connect your account to unlock special Discord integrations"), 20);
+    desc->setTextColor(Settings::TextMuted);
     desc->setFont(font);
 
     noConnectionsLayout->addWidget(desc, 0, Qt::AlignHCenter);

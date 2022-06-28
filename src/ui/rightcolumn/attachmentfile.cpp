@@ -9,9 +9,9 @@
 namespace Ui {
 
 AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment *attachment, QWidget *parent)
-    : QLabel(parent)
+    : Widget(parent)
 {
-    QWidget *container = new QWidget(this);
+    Widget *container = new Widget(this);
     QHBoxLayout *layout = new QHBoxLayout(container);
     QWidget *infos = new QWidget(container);
     QVBoxLayout *infosLayout = new QVBoxLayout(infos);
@@ -30,13 +30,13 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment 
     } else {
         sizeStr.setNum(qRound(size / (1024. * 1024.) * 100) / 100) += " MB";
     }
-    QLabel *filesize = new QLabel(sizeStr, infos);
+    Label *filesize = new Label(sizeStr, infos);
     QFont font;
     font.setPixelSize(12);
     font.setFamily("whitney");
     filesize->setFont(font);
-    filesize->setStyleSheet("color: #72767D;");
-    filesize->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    filesize->setFixedSize(QFontMetrics(font).width(sizeStr), 16);
+    filesize->setTextColor(Settings::FileSizeColor);
     filesize->setCursor(Qt::IBeamCursor);
 
     infosLayout->addWidget(new DownloadLink(attachment->url, attachment->filename, requester, container));
@@ -51,10 +51,11 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment 
     layout->setSpacing(8);
 
     container->setFixedHeight(62);
-    container->setStyleSheet("background-color: #2F3136;"
-                             "border-color: #292B2F;");
+    container->setBackgroundColor(Settings::BackgroundSecondary);
+    container->setBorderSize(1);
+    container->setBorderColor(Settings::BackgroundSecondaryAlt);
     this->setFixedHeight(62);
-    this->setStyleSheet("border-radius: 3px;");
+    this->setBorderRadius(3);
 }
 
 } // namespace Ui

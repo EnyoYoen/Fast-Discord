@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "ui/rightcolumn/messagearea.h"
 #include "ui/rightcolumn/channelheader.h"
 #include "api/jsonutils.h"
@@ -15,7 +16,7 @@
 namespace Ui {
 
 // The right column of the UI (with messages)
-class RightColumn : public QWidget
+class RightColumn : public Widget
 {
     Q_OBJECT
 public:
@@ -51,8 +52,9 @@ private:
     QHBoxLayout   *layout;
     QVBoxLayout   *messagesLayout;
     MessageArea   *messageArea;
-    QLabel        *typingLabel;
+    Label         *typingLabel;
     QLabel        *fileLabel;
+    Widget        *inputBox = nullptr;
     bool           placeholder;
 
     Api::RessourceManager *rm; // To request the API

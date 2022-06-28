@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
+
 #include <QObject>
 #include <QWidget>
 #include <QLineEdit>
@@ -7,7 +9,7 @@
 
 namespace Ui {
 
-class SettingsInput : public QWidget
+class SettingsInput : public Widget
 {
     Q_OBJECT
 public:

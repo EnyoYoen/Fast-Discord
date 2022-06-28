@@ -11,11 +11,11 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
 {
     rm = rmp;
 
-    container = new QWidget(this);
+    container = new Widget(this);
     container->setMaximumWidth(740);
     container->setMinimumHeight(2050);
     container->setContentsMargins(40, 60, 40, 80);
-    container->setStyleSheet("background-color: #36393F");
+    container->setBackgroundColor(Settings::BackgroundPrimary);
     QVBoxLayout *layout = new QVBoxLayout(container);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -24,14 +24,16 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
     font.setPixelSize(20);
     font.setFamily("whitney");
 
-    QLabel *title = new QLabel("Privacy & Safety", container);
+    Label *title = new Label("Privacy & Safety", container);
+    title->setFixedSize(QFontMetrics(font).width("Privacy & Safety"), 16);
     title->setFont(font);
-    title->setStyleSheet("color: #FFF;");
+    title->setTextColor(Settings::HeaderPrimary);
 
     font.setPixelSize(12);
-    QLabel *safeDMDescription = new QLabel("Automatically scan and delete direct messages you receive that contain explicit media content.", container);
+    Label *safeDMDescription = new Label("Automatically scan and delete direct messages you receive that contain explicit media content.", container);
+    safeDMDescription->setFixedSize(QFontMetrics(font).width("Automatically scan and delete direct messages you receive that contain explicit media content."), 20);
     safeDMDescription->setFont(font);
-    safeDMDescription->setStyleSheet("color: #B9BBBE");
+    safeDMDescription->setTextColor(Settings::HeaderSecondary);
 
     layout->addWidget(title);
     layout->addSpacing(20);
@@ -44,9 +46,9 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
         Api::ClientSettings *settings = reinterpret_cast<Api::ClientSettings *>(settingsPtr);
 
         QVector<RadioParameters> radioParameters;
-        radioParameters.append(RadioParameters{"Keep me safe", "Scan direct messages from everyone.", RadioParameters::Green});
-        radioParameters.append(RadioParameters{"My friends are nice", "Scan direct messages from everyone unless they are a friend.", RadioParameters::Orange});
-        radioParameters.append(RadioParameters{"Do not scan", "Direct messages will not be scanned for explicit content.", RadioParameters::Red});
+        radioParameters.append(RadioParameters{"Keep me safe", "Scan direct messages from everyone.", Settings::RadioBarGreen});
+        radioParameters.append(RadioParameters{"My friends are nice", "Scan direct messages from everyone unless they are a friend.", Settings::RadioBarOrange});
+        radioParameters.append(RadioParameters{"Do not scan", "Direct messages will not be scanned for explicit content.", Settings::RadioBarRed});
         RadioGroup *safeDMRadio = new RadioGroup(radioParameters, 2 - settings->explicitContentFilter, container);
         QObject::connect(safeDMRadio, &RadioGroup::clicked, [this](int index){
             QString settings;
@@ -208,28 +210,28 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                     QObject::connect(requestButton, &SettingsButton::clicked, [font, requestButton, layout, this](){
                         QWidget *parentWidget = this;
                         while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-                        PopUp *popUp = new PopUp(new QWidget(), 440, 206, QString(), "Submit Data Request", false, false, "It may take us up to 30 days to collect your data. We will send you an email to the address you registered with when to package is ready.", "I've changed my mind", "Request My Data", true, true, parentWidget->size(), parentWidget);
+                        PopUp *popUp = new PopUp(new Widget(nullptr), 440, 206, QString(), "Submit Data Request", false, false, "It may take us up to 30 days to collect your data. We will send you an email to the address you registered with when to package is ready.", "I've changed my mind", "Request My Data", true, true, parentWidget->size(), parentWidget);
                         QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                         QObject::connect(popUp, &PopUp::done, [font, parentWidget, requestButton, popUp, layout, this](){
                             rm->requester->harvestData();
 
-                            QWidget *requestData = new QWidget(container);
+                            Widget *requestData = new Widget(nullptr);
                             requestData->setFixedHeight(62);
-                            requestData->setStyleSheet("background-color: rgba(32, 34, 37, 0.6);"
-                                                       "border-radius: 5px;"
-                                                       "border: 1px solid #202225");
+                            requestData->setBackgroundColor(Settings::DeprecatedCardBg);
+                            requestData->setBorderRadius(5);
+                            requestData->setBorderSize(1);
+                            requestData->setBorderColor(Settings::BackgroundTertiary);
                             QHBoxLayout *requestLayout = new QHBoxLayout(requestData);
                             requestLayout->setContentsMargins(0, 0, 0, 0);
-                            QLabel *requestText = new QLabel();
+                            Label *requestText = new Label(nullptr);
 
                             QDateTime time = QDateTime::currentDateTime().addMonths(1);
                             int dayMod = (time.date().day() - 1) % 10;
                             requestText->setText("You've recently requested a copy of your data. You can request again on " + QLocale(QLocale::English).monthName(time.date().month())
                                 + " " + QString::number(time.date().day() - 1) + (dayMod == 1 ? "st " : dayMod == 2 ? "nd " : dayMod == 3 ? "rd " : "th ")
                                 + QString::number(time.date().year()));
-                            requestText->setStyleSheet("color: #FFF;"
-                                                       "border: none;"  
-                                                       "background-color: none");
+                            requestText->setBackgroundColor(Settings::None);
+                            requestText->setTextColor(Settings::HeaderPrimary);
 
                             requestText->setFont(font);
                             requestLayout->addWidget(requestText, 0, Qt::AlignCenter);
@@ -238,29 +240,31 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                             layout->insertWidget(20, requestData);                            
 
                             popUp->deleteLater();
-                            PopUp *resultPopUp = new PopUp(new QWidget(), 440, 200, QString(), QString(), false, false, "Our privacy farmers have begun harvesting your data. This can take up to 30 days, but we'll email you when it's done.", QString(), QString(), false, true, parentWidget->size(), parentWidget);
+                            PopUp *resultPopUp = new PopUp(new Widget(nullptr), 440, 200, QString(), QString(), false, false, "Our privacy farmers have begun harvesting your data. This can take up to 30 days, but we'll email you when it's done.", QString(), QString(), false, true, parentWidget->size(), parentWidget);
                             QObject::connect(resultPopUp, &PopUp::cancelled, [resultPopUp](){resultPopUp->deleteLater();});
                         });
                     });
                     layout->addWidget(requestButton);
                 } else {
-                    QWidget *requestData = new QWidget(container);
+                    Widget *requestData = new Widget(container);
                     requestData->setFixedHeight(62);
-                    requestData->setStyleSheet("background-color: rgba(32, 34, 37, 0.6);"
-                                            "border-radius: 5px;"
-                                            "border: 1px solid #202225");
+                    requestData->setBackgroundColor(Settings::DeprecatedCardBg);
+                    requestData->setBorderRadius(5);
+                    requestData->setBorderSize(1);
+                    requestData->setBorderColor(Settings::BackgroundTertiary);
                     QHBoxLayout *requestLayout = new QHBoxLayout(requestData);
                     requestLayout->setContentsMargins(0, 0, 0, 0);
-                    QLabel *requestText = new QLabel();
+                    Label *requestText = new Label(nullptr);
 
                     QDateTime time = QDateTime::fromString(data["created_at"].toString(), Qt::ISODate).addMonths(1).toLocalTime();
                     int dayMod = (time.date().day() - 1) % 10;
-                    requestText->setText("You've recently requested a copy of your data. You can request again on " + QLocale(QLocale::English).monthName(time.date().month())
+                    QString requestStr = "You've recently requested a copy of your data. You can request again on " + QLocale(QLocale::English).monthName(time.date().month())
                         + " " + QString::number(time.date().day() - 1) + (dayMod == 1 ? "st " : dayMod == 2 ? "nd " : dayMod == 3 ? "rd " : "th ")
-                        + QString::number(time.date().year()));
-                    requestText->setStyleSheet("color: #FFF;"
-                                               "border: none;"  
-                                               "background-color: none");
+                        + QString::number(time.date().year());
+                    requestText->setText(requestStr);
+                    requestText->setTextColor(Settings::HeaderPrimary);
+                    requestText->setBackgroundColor(Settings::DeprecatedCardBg);
+                    requestText->setFixedSize(QFontMetrics(font).width(requestStr), 40);
 
                     requestText->setFont(font);
                     requestLayout->addWidget(requestText, 0, Qt::AlignCenter);
@@ -269,18 +273,19 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                 }
                 layout->addSpacing(60);
 
-                QWidget *footer = new QWidget(container);
+                Widget *footer = new Widget(container);
                 footer->setFixedHeight(62);
-                footer->setStyleSheet("background-color: rgba(32, 34, 37, 0.6);"
-                                      "border-radius: 5px;"
-                                      "border: 1px solid #202225");
+                footer->setBackgroundColor(Settings::DeprecatedCardBg);
+                footer->setBorderRadius(5);
+                footer->setBorderSize(1);
+                footer->setBorderColor(Settings::BackgroundTertiary);
                 QHBoxLayout *footerLayout = new QHBoxLayout(footer);
                 footerLayout->setContentsMargins(0, 0, 0, 0);
-                QLabel *footerText = new QLabel("Check out our Terms of Service (https://discord.com/terms) and Privacy Policy (https://discord.com/privacy)");
+                Label *footerText = new Label("Check out our Terms of Service (https://discord.com/terms) and Privacy Policy (https://discord.com/privacy)", nullptr);
                 footerText->setFont(font);
-                footerText->setStyleSheet("color: #FFF;"
-                                          "border: none;"  
-                                          "background-color: none");
+                footerText->setBackgroundColor(Settings::None);
+                footerText->setTextColor(Settings::HeaderPrimary);
+                footerText->setFixedSize(QFontMetrics(font).width("Check out our Terms of Service (https://discord.com/terms) and Privacy Policy (https://discord.com/privacy)"), 20);
                 footerLayout->addWidget(footerText, 0, Qt::AlignCenter);
 
                 layout->addWidget(footer);
@@ -289,22 +294,25 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
         });
     });
 
+    this->setWidgetResizable(true);
     this->setWidget(container);
-    this->setStyleSheet("QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
+    this->setStyleSheet("* {border: none;}"
+                        "QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
                         "QScrollBar {border: none; background-color: #36393F; border-radius: 8px; width: 3px;}"
                         "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}");
 }
 
-QLabel *PrivacySafety::createTitle(QString text)
+Label *PrivacySafety::createTitle(QString text)
 {
     QFont font;
     font.setPixelSize(11);
     font.setBold(true);
     font.setFamily("whitney");
 
-    QLabel *title = new QLabel(text, container);
+    Label *title = new Label(text, container);
     title->setFont(font);
-    title->setStyleSheet("color: #B9BBBE");
+    title->setTextColor(Settings::HeaderSecondary);
+    title->setMaximumHeight(20);
 
     return title;
 }
@@ -326,11 +334,13 @@ QWidget *PrivacySafety::createSection(std::function<void(bool)> callback, QStrin
     headerLayout->setSpacing(0);
     headerLayout->setContentsMargins(0, 0, 0, 0);
 
-    QLabel *title = new QLabel(titleStr, header);
+    Label *title = new Label(titleStr, header);
+    title->setFixedSize(QFontMetrics(font).width(titleStr), 24);
     title->setFont(font);
-    title->setStyleSheet("color: #FFF");
+    title->setTextColor(Settings::HeaderPrimary);
 
     headerLayout->addWidget(title);
+    headerLayout->addStretch(1);
 
     if (active != (optbool)Optional::None) {
         SwitchButton *button = new SwitchButton(active);
@@ -343,7 +353,6 @@ QWidget *PrivacySafety::createSection(std::function<void(bool)> callback, QStrin
                 mutualGuildsSwitch = button;
         }
         QObject::connect(button, &SwitchButton::clicked, callback);
-        headerLayout->addStretch(1);
         headerLayout->addWidget(button);
     }
 
@@ -352,9 +361,10 @@ QWidget *PrivacySafety::createSection(std::function<void(bool)> callback, QStrin
 
     if (!descriptionStr.isNull()) {
         font.setPixelSize(12);
-        QLabel *description = new QLabel(descriptionStr, section);
+        Label *description = new Label(descriptionStr, section);
         description->setFont(font);
-        description->setStyleSheet("color: #B9BBBE");
+        description->setTextColor(Settings::HeaderSecondary);
+        description->setFixedSize(QFontMetrics(font).width(descriptionStr), 20 * (descriptionStr.count('\n') + 1));
 
         layout->addWidget(description);
     }
@@ -362,9 +372,9 @@ QWidget *PrivacySafety::createSection(std::function<void(bool)> callback, QStrin
     layout->addSpacing(12);
 
     if (titleStr != "Request all of my Data") {
-        QWidget *line = new QWidget(section);
+        Widget *line = new Widget(section);
         line->setFixedHeight(1);
-        line->setStyleSheet("background-color: rgba(79, 84, 92, 0.48)");
+        line->setBackgroundColor(Settings::BackgroundModifierAccent);
         layout->addWidget(line);
     }
 
