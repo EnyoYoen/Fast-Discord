@@ -186,7 +186,7 @@ protected:\
 
 class Widget : public QWidget
 {
-	CUSTOM_WIDGET( )
+	CUSTOM_WIDGET(int a;)
 public:
 	Widget(QWidget *parent = nullptr) : QWidget(parent) {
 		this->setAttribute(Qt::WA_NoSystemBackground);
