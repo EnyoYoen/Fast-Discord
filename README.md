@@ -67,11 +67,17 @@ $ sudo apt-get install qtbase5-dev qtmultimedia5-dev libqt5networkauth5-dev libq
 $ brew install qt5 libpthread-stubs libsodium opus
 ```
 
-You will also need [CMake](https://cmake.org/download/) (Minimum version : 3.0)
+You will also need [CMake](https://cmake.org/download/) in your system PATH (Minimum version : 3.0)
 ### Build
 In 'Fast-Discord/bin' folder :
+On Windows :
 ```shell
-cmake ..
+cmake .. -DCMAKE_TOOLCHAIN_FILE=(path/to/)vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build .
+```
+Otherwise :
+```shell
+cmake .. 
 cmake --build .
 ```
 ### Run
