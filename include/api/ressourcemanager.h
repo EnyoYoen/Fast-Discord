@@ -25,7 +25,7 @@ public:
     void getGuildChannels(Callback callback, const Snowflake& id);
     void getPrivateChannel(Callback callback, const Snowflake& id);
     void getPrivateChannels(Callback callback);
-    void getMessages(Callback callback, const Snowflake& channelId, unsigned int limit, bool newMessages);
+    void getMessages(Callback callback, const Snowflake& channelId, int limit, bool newMessages);
     void getClient(Callback callback);
     void getClientSettings(Callback callback);
     void getImage(Callback callback, const QString& url, const QString& fileName);

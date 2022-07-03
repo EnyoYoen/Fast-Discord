@@ -15,7 +15,7 @@ SettingsButton::SettingsButton(SettingsButton::Type typep, QString text, QWidget
     font.setPixelSize(13);
     font.setFamily("whitney");
     content = new Label(text, this);
-    content->setFixedSize(QFontMetrics(font).width(text), 16);
+    content->setFixedSize(QFontMetrics(font).horizontalAdvance(text), 16);
     content->setFont(font);
 
     switch (type)
@@ -56,7 +56,7 @@ SettingsButton::SettingsButton(SettingsButton::Type typep, QString text, QWidget
     this->setCursor(Qt::CursorShape::PointingHandCursor);
     this->setBorderRadius(3);
     this->setContentsMargins(16, 2, 16, 2);
-    this->setFixedSize(QFontMetrics(font).width(text) + (type == Type::Critical ? 36 : 32), 32);
+    this->setFixedSize(QFontMetrics(font).horizontalAdvance(text) + (type == Type::Critical ? 36 : 32), 32);
 }
 
 

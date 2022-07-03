@@ -223,7 +223,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
 
         Label *content = new Label(ref->content, nullptr);
         content->setFont(font);
-        content->setFixedSize(QFontMetrics(font).width(ref->content), 18);
+        content->setFixedSize(QFontMetrics(font).horizontalAdvance(ref->content), 18);
         content->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         content->setCursor(QCursor(Qt::PointingHandCursor));
         content->setTextColor(Settings::InteractiveNormal);
@@ -266,12 +266,12 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         Label *name = new Label(author.username, messageInfos);
         font.setPixelSize(16);
         name->setTextColor(Settings::HeaderPrimary);
-        name->setFixedSize(QFontMetrics(font).width(author.username), 22);
+        name->setFixedSize(QFontMetrics(font).horizontalAdvance(author.username), 22);
         name->setFont(font);
         Label *date = new Label(processTimestamp(dateTime), messageInfos);
         font.setPixelSize(12);
         date->setTextColor(Settings::TextMuted);
-        date->setFixedSize(QFontMetrics(font).width(processTimestamp(dateTime)), 22);
+        date->setFixedSize(QFontMetrics(font).horizontalAdvance(processTimestamp(dateTime)), 22);
         date->setFont(font);
 
         // Style the name label
@@ -326,7 +326,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
 
     if (!message->attachments.empty()) {
         QVector<Api::Attachment *> attachments = message->attachments;
-        for (unsigned int i = 0 ; i < attachments.size() ; i++) {
+        for (int i = 0 ; i < attachments.size() ; i++) {
             Api::Attachment *attachment = attachments[i];
             if (attachment->contentType != nullptr
               && attachment->contentType.indexOf("image") != -1
@@ -372,12 +372,12 @@ void MessageWidget::iconMessage(const Api::Message *message, const QString &text
     QHBoxLayout *layout = new QHBoxLayout(this);
     QLabel *icon = new QLabel(this);
     textLabel = new Label(text, this);
-    textLabel->setFixedSize(QFontMetrics(font).width(text), 22);
+    textLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(text), 22);
     textLabel->setFont(font);
 
     font.setPixelSize(12);
     Label *timestampLabel = new Label(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime()), this);
-    timestampLabel->setFixedSize(QFontMetrics(font).width(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime())), 16);
+    timestampLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime())), 16);
     timestampLabel->setFont(font);
 
     icon->setFixedWidth(44);
@@ -426,7 +426,7 @@ void MessageWidget::callMessage(const Api::Message *message)
 
     QVector<Api::Snowflake> participants = message->call->participants;
     bool participated = false;
-    for (unsigned int i = 0 ; i < participants.size() ; i++) {
+    for (int i = 0 ; i < participants.size() ; i++) {
         if (participants[i] == clientId) participated = true;
     }
 

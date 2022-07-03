@@ -35,7 +35,7 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment 
     font.setPixelSize(12);
     font.setFamily("whitney");
     filesize->setFont(font);
-    filesize->setFixedSize(QFontMetrics(font).width(sizeStr), 16);
+    filesize->setFixedSize(QFontMetrics(font).horizontalAdvance(sizeStr), 16);
     filesize->setTextColor(Settings::FileSizeColor);
     filesize->setCursor(Qt::IBeamCursor);
 

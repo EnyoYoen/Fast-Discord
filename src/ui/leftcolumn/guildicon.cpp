@@ -25,7 +25,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
         bool nonLetterFound;
 
         // Loop through the different words (word = 1 split of the name)
-        for (size_t i = 0 ; i < nameSplit.size() ; i++) {
+        for (int i = 0 ; i < nameSplit.size() ; i++) {
             // Variables
             QString actualSplit = nameSplit[i]; // The actual word
             QString firstLetter;
@@ -33,7 +33,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
             nonLetterFound = false;
 
             // Loop through the word for every caracter
-            for (uint j = 0 ; j < actualSplit.length() ; j++) {
+            for (int j = 0 ; j < actualSplit.length() ; j++) {
                 if (!(actualSplit[j] >= 'a' && actualSplit[j] <= 'z')
                         && !(actualSplit[j] >= 'A' && actualSplit[j] <= 'Z')
                         && actualSplit[j] != '\'') {
@@ -75,7 +75,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
         } else {
             font.setPixelSize(16);
             QFontMetrics metrics(font);
-            int fontWidth = metrics.width(iconText);
+            int fontWidth = metrics.horizontalAdvance(iconText);
             if (fontWidth > 48) {
                 font.setPixelSize(10);
             } else {

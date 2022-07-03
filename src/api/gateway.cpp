@@ -71,9 +71,9 @@ void const Gateway::sendGuildChannelOpened(const QMap<Snowflake, QVector<QVector
     for (auto it = channels.begin() ; it != channels.end() ; it++, counter++) {
         data += QString(counter > 0 ? "," : "") + "\"" + it.key() + "\":[";
         QVector<QVector<int>> messagesNumbers = it.value();
-        for (unsigned int i = 0 ; i < messagesNumbers.size() ; i++) {
+        for (int i = 0 ; i < messagesNumbers.size() ; i++) {
             data += "[";
-            for (unsigned int j = 0 ; j < messagesNumbers[i].size() ; j++) {
+            for (int j = 0 ; j < messagesNumbers[i].size() ; j++) {
                 data += QString::number(messagesNumbers[i][j]) + (j + 1 < messagesNumbers[i].size() ? "," : "");
             }
             data += "]" + QString(i + 1 < messagesNumbers.size() ? "," : "");

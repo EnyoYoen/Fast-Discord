@@ -583,7 +583,7 @@ void UserProfile::profileChanged()
                         font.setBold(true);
                         font.setFamily("whitney");
 
-                        for (unsigned int i = 0 ; i < errors.size() ; i++) {
+                        for (int i = 0 ; i < errors.size() ; i++) {
                             Label *label = new Label(errors[i]->message, container);
                             label->setFont(font);
                             label->setTextColor(Settings::HeaderSecondary);

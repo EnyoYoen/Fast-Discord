@@ -178,7 +178,7 @@ void PrivateChannelWidget::userReceiver(void *user)
     users.append(reinterpret_cast<Api::User *>(user));
     if (++userCounter == nMembers) {
         QString nameStr;
-        for (unsigned int i = 0 ; i < users.size() ; ) {
+        for (int i = 0 ; i < users.size() ; ) {
             nameStr += users[i]->username;
             if (++i != users.size()) {
                 nameStr += ", ";

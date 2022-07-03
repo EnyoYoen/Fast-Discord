@@ -89,7 +89,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                 } else if (content[i] == '*') {
                     if (i + 1 < content.size() && content[i + 1] == '*') {
                         if (i + 2 < content.size() && content[i + 2] == '*') {
-                            unsigned int end = 0;
+                            int end = 0;
                             if (boldEnd == 0 && italicStarEnd == 0 && italicUnderscoreEnd == 0
                                     && (end = content.indexOf("***", i + 3)) != -1
                                     && end < content.indexOf('\n', i + 3)) {
@@ -146,8 +146,8 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                 } else if (content[i] == ' ' && !firstCharFound) {
                     html += "&nbsp;";
                 } else if (content[i] == '<') {
-                    unsigned int emojiNameEnd = content.indexOf(':', i + 2);
-                    unsigned int emojiIdEnd = content.indexOf('>', i + 1);
+                    int emojiNameEnd = content.indexOf(':', i + 2);
+                    int emojiIdEnd = content.indexOf('>', i + 1);
                     if (content[i + 1] == ':' && emojiNameEnd != -1 && emojiIdEnd != -1 && emojiIdEnd < content.indexOf("\n") && emojiNameEnd < emojiIdEnd) {
                         QString fileName = content.mid(emojiNameEnd + 1, emojiIdEnd - emojiNameEnd - 1) + ".webp";
                         //html += "<img src=\"cache/" + fileName + "\">";

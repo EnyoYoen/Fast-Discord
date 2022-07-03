@@ -38,7 +38,7 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     buttons[0]->setBackgroundColor(Settings::BackgroundModifierSelected);
     buttons[0]->setTextColor(Settings::InteractiveActive);
 
-    for (unsigned int i = 0 ; i < buttons.size() ; i++) {
+    for (int i = 0 ; i < buttons.size() ; i++) {
         if (i == 0) {
             layout->addWidget(createMenuTitle((char *)"USER SETTINGS"));
         } else if (i == 5) {
@@ -70,7 +70,7 @@ ScrollMenu::ScrollMenu(QWidget *parent)
 void ScrollMenu::resetButtons(MenuButton::ButtonType type)
 {
     if (actualType != type) {
-        for (unsigned int i = 0 ; i < buttons.size() ; i++) {
+        for (int i = 0 ; i < buttons.size() ; i++) {
             if (buttons[i]->type != type) 
                 buttons[i]->unclicked();
         }

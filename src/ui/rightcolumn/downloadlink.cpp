@@ -14,7 +14,7 @@ DownloadLink::DownloadLink(const QString& urlp, const QString& filename, Api::Re
     url = QString(urlp);
     requester = request;
 
-    this->setFixedSize(QFontMetrics(font).width(filename), 20);
+    this->setFixedSize(QFontMetrics(font).horizontalAdvance(filename), 20);
     this->setFont(font);
     this->setCursor(Qt::PointingHandCursor);
     this->setTextColor(Settings::Link);

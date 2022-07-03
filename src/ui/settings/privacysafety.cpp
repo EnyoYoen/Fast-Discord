@@ -25,13 +25,13 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
     font.setFamily("whitney");
 
     Label *title = new Label("Privacy & Safety", container);
-    title->setFixedSize(QFontMetrics(font).width("Privacy & Safety"), 16);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance("Privacy & Safety"), 16);
     title->setFont(font);
     title->setTextColor(Settings::HeaderPrimary);
 
     font.setPixelSize(12);
     Label *safeDMDescription = new Label("Automatically scan and delete direct messages you receive that contain explicit media content.", container);
-    safeDMDescription->setFixedSize(QFontMetrics(font).width("Automatically scan and delete direct messages you receive that contain explicit media content."), 20);
+    safeDMDescription->setFixedSize(QFontMetrics(font).horizontalAdvance("Automatically scan and delete direct messages you receive that contain explicit media content."), 20);
     safeDMDescription->setFont(font);
     safeDMDescription->setTextColor(Settings::HeaderSecondary);
 
@@ -72,7 +72,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                 rm->getGuilds([this](void *guildsPtr){
                     QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
                     QString settings("{\"default_guilds_restricted\":true,\"resticted_guilds\":[");
-                    for (unsigned int i = 0 ; i < guilds.size() ; i++)
+                    for (int i = 0 ; i < guilds.size() ; i++)
                         settings += guilds[i]->id + (i + 1 == guilds.size() ? "]}" : ",");
                     rm->requester->setSettings([](void *){}, settings);
                 });
@@ -264,7 +264,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                     requestText->setText(requestStr);
                     requestText->setTextColor(Settings::HeaderPrimary);
                     requestText->setBackgroundColor(Settings::DeprecatedCardBg);
-                    requestText->setFixedSize(QFontMetrics(font).width(requestStr), 40);
+                    requestText->setFixedSize(QFontMetrics(font).horizontalAdvance(requestStr), 40);
 
                     requestText->setFont(font);
                     requestLayout->addWidget(requestText, 0, Qt::AlignCenter);
@@ -285,7 +285,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                 footerText->setFont(font);
                 footerText->setBackgroundColor(Settings::None);
                 footerText->setTextColor(Settings::HeaderPrimary);
-                footerText->setFixedSize(QFontMetrics(font).width("Check out our Terms of Service (https://discord.com/terms) and Privacy Policy (https://discord.com/privacy)"), 20);
+                footerText->setFixedSize(QFontMetrics(font).horizontalAdvance("Check out our Terms of Service (https://discord.com/terms) and Privacy Policy (https://discord.com/privacy)"), 20);
                 footerLayout->addWidget(footerText, 0, Qt::AlignCenter);
 
                 layout->addWidget(footer);
@@ -335,7 +335,7 @@ QWidget *PrivacySafety::createSection(std::function<void(bool)> callback, QStrin
     headerLayout->setContentsMargins(0, 0, 0, 0);
 
     Label *title = new Label(titleStr, header);
-    title->setFixedSize(QFontMetrics(font).width(titleStr), 24);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance(titleStr), 24);
     title->setFont(font);
     title->setTextColor(Settings::HeaderPrimary);
 
@@ -364,7 +364,7 @@ QWidget *PrivacySafety::createSection(std::function<void(bool)> callback, QStrin
         Label *description = new Label(descriptionStr, section);
         description->setFont(font);
         description->setTextColor(Settings::HeaderSecondary);
-        description->setFixedSize(QFontMetrics(font).width(descriptionStr), 20 * (descriptionStr.count('\n') + 1));
+        description->setFixedSize(QFontMetrics(font).horizontalAdvance(descriptionStr), 20 * (descriptionStr.count('\n') + 1));
 
         layout->addWidget(description);
     }

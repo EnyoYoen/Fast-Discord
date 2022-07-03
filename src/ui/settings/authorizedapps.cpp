@@ -32,7 +32,7 @@ public:
         font.setFamily("whitney");
 
         Label *appName = new Label(app->application->name, header);
-        appName->setFixedSize(QFontMetrics(font).width(app->application->name), 18);
+        appName->setFixedSize(QFontMetrics(font).horizontalAdvance(app->application->name), 18);
         appName->setTextColor(Settings::TextNormal);
         appName->setFont(font);
 
@@ -81,7 +81,7 @@ public:
         font.setPixelSize(14);
         font.setBold(false);
         QVector<QString> scopes = app->scopes;
-        for (unsigned int i = 0 ; i < scopes.size() ; i++) {
+        for (int i = 0 ; i < scopes.size() ; i++) {
             Widget *permission = new Widget(this);
             permission->setFixedHeight(18);
             QHBoxLayout *permissionLayout = new QHBoxLayout(permission);
@@ -175,7 +175,7 @@ AuthorizedApps::AuthorizedApps(Api::RessourceManager *rmp, QWidget *parent)
     font.setFamily("whitney");
 
     Label *title = new Label("Authorized Apps", container);
-    title->setFixedSize(QFontMetrics(font).width("Authorized Apps"), 20);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance("Authorized Apps"), 20);
     title->setFont(font);
     title->setTextColor(Settings::HeaderPrimary);
 
@@ -211,7 +211,7 @@ AuthorizedApps::AuthorizedApps(Api::RessourceManager *rmp, QWidget *parent)
         if (apps.isEmpty()) {
             empty();
         } else {
-            for (unsigned int i = 0 ; i < apps.size() ; i++) {
+            for (int i = 0 ; i < apps.size() ; i++) {
                 AuthorizedApp *app = new AuthorizedApp(rm, apps[i], container);
                 QObject::connect(app, &AuthorizedApp::deleted, [this](){
                     if (layout->count() <= 2)
@@ -252,7 +252,7 @@ void AuthorizedApps::empty()
     font.setFamily("whitney");
 
     Label *title = new Label("NO AUTHORIZED APPS", noApps);
-    title->setFixedSize(QFontMetrics(font).width("NO AUTHORIZED APPS"), 22);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance("NO AUTHORIZED APPS"), 22);
     title->setTextColor(Settings::TextMuted);
     title->setFont(font);
 
@@ -261,7 +261,7 @@ void AuthorizedApps::empty()
     
     font.setBold(false);
     Label *desc = new Label("Enhance your Discord experience by authorizing and integrating\nthird-party services.", noApps);
-    desc->setFixedSize(QFontMetrics(font).width("Enhance your Discord experience by authorizing and integrating\nthird-party services."), 40);
+    desc->setFixedSize(QFontMetrics(font).horizontalAdvance("Enhance your Discord experience by authorizing and integrating\nthird-party services."), 40);
     desc->setTextColor(Settings::TextMuted);
     desc->setFont(font);
 

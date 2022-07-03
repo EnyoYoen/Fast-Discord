@@ -174,7 +174,7 @@ private:
     double rateLimitEnd;                        // Unix time that represents the moment of the end of the rate limit
     unsigned int requestsToCheck;               // The number of requests that we have to check when we need to remove
                                                 // callbacks for image requests
-    unsigned int currentRequestsNumber;         // The number of requests that are processed at the moment
+    int currentRequestsNumber;                  // The number of requests that are processed at the moment
     bool stopped;                               // Used to stop the request loop
 
     // The function that contains the request loop

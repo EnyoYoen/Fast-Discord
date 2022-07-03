@@ -53,11 +53,11 @@ void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
         const QVector<Api::GuildFolder *>& folders = reinterpret_cast<Api::ClientSettings *>(clientPtr)->guildFolders;
 
         unsigned int widgetCounter = 0;
-        for (unsigned int i = 0 ; i < folders.size() ; i++) {
+        for (int i = 0 ; i < folders.size() ; i++) {
             Api::GuildFolder *folder = folders[i];
             QVector<Api::Guild *> folderGuilds;
-            for (unsigned int j = 0 ; j < folder->guildIds.size() ; j++) {
-                for (unsigned int k = 0 ; k < guilds.size() ; k++) {
+            for (int j = 0 ; j < folder->guildIds.size() ; j++) {
+                for (int k = 0 ; k < guilds.size() ; k++) {
                     if (folder->guildIds[j] == guilds[k]->id) {
                         if (folder->intId == 0 && folder->strId.isNull()) {
                             GuildWidget *guildWidget = new GuildWidget(rm, *guilds[k], this);
@@ -82,7 +82,7 @@ void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
         }
         
         if (folders.empty() && !guilds.empty()) {
-            for (unsigned int i = 0 ; i < guilds.size() ; i++) {
+            for (int i = 0 ; i < guilds.size() ; i++) {
                 GuildWidget *guildWidget = new GuildWidget(rm, *guilds[i], this);
                 guildWidgets.push_back(guildWidget);
                 layout->insertWidget(i + 3, guildWidget);
@@ -99,10 +99,10 @@ void LeftColumn::clicHomeButton()
         homePageShown = true;
 
         // Reset the stylesheet of the actual clicked guild
-        for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
+        for (int i = 0 ; i < guildWidgets.size() ; i++) {
             guildWidgets[i]->unclicked();
         }
-        for (size_t i = 0 ; i < guildFolders.size() ; i++) {
+        for (int i = 0 ; i < guildFolders.size() ; i++) {
             guildFolders[i]->unclicked();
         }
 
@@ -123,12 +123,12 @@ void LeftColumn::clicGuild(const Api::Snowflake& guildId)
     }
 
     // Reset the stylesheet of the guild widgets except the one clicked
-    for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
+    for (int i = 0 ; i < guildWidgets.size() ; i++) {
         if (guildWidgets[i]->id != guildId) {
             guildWidgets[i]->unclicked();
         }
     }
-    for (size_t i = 0 ; i < guildFolders.size() ; i++) {
+    for (int i = 0 ; i < guildFolders.size() ; i++) {
         guildFolders[i]->unclickedExcept(guildId);
     }
 
@@ -139,16 +139,16 @@ void LeftColumn::clicGuild(const Api::Snowflake& guildId)
 
 void LeftColumn::setUnreadGuild(const Api::Snowflake& guildId)
 {
-    for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
+    for (int i = 0 ; i < guildWidgets.size() ; i++) {
         if (guildWidgets[i]->id == guildId) {
             guildWidgets[i]->setUnread(true);
             return;
         }
     }
 
-    for (unsigned int i = 0 ; i < guildFolders.size() ; i++) {
+    for (int i = 0 ; i < guildFolders.size() ; i++) {
         QVector<Api::Snowflake> guildIds = guildFolders[i]->guildIds;
-        for (unsigned int j = 0 ; j < guildIds.size() ; j++) {
+        for (int j = 0 ; j < guildIds.size() ; j++) {
             if (guildIds[j] == guildId) {
                 guildFolders[i]->setUnread(guildId);
                 return;

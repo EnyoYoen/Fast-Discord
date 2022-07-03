@@ -35,7 +35,7 @@ public:
         this->setTextColor(Settings::Link);
         this->setBackgroundColor(Settings::BackgroundSecondaryAlt);
         this->setCursor(Qt::CursorShape::PointingHandCursor);
-        this->setFixedSize(QFontMetrics(font).width("Reveal"), 16);
+        this->setFixedSize(QFontMetrics(font).horizontalAdvance("Reveal"), 16);
     }
 
 private:
@@ -146,7 +146,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         font.setFamily("whitney");
 
         Label *name = new Label(client.username, nameAndEdit);
-        name->setFixedSize(QFontMetrics(font).width(client.username), 24);
+        name->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), 24);
         name->setFont(font);
         name->setTextColor(Settings::HeaderPrimary);
 
@@ -221,12 +221,12 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         Widget *username = new Widget(usernameEdit);
         QHBoxLayout *usernameLayout = new QHBoxLayout(usernameEdit);
         name = new Label(client.username, username);
-        name->setFixedSize(QFontMetrics(font).width(client.username), 20);
+        name->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), 20);
         name->setFont(font);
         discriminator = new Label("#" + client.discriminator, username);
         discriminator->setFont(font);
         discriminator->setTextColor(Settings::HeaderSecondary);
-        discriminator->setFixedSize(QFontMetrics(font).width(client.username), 20);
+        discriminator->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), 20);
         usernameLayout->addWidget(name, 0, Qt::AlignBottom);
         usernameLayout->addWidget(discriminator, 0, Qt::AlignBottom);
         usernameLayout->addStretch(1);
@@ -255,7 +255,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             usernameLayout->setSpacing(8);
             usernameLayout->setContentsMargins(0, 0, 0, 0);
             Label *username = new Label("USERNAME", usernameSection);
-            username->setFixedSize(QFontMetrics(font).width("USERNAME"), 20);
+            username->setFixedSize(QFontMetrics(font).horizontalAdvance("USERNAME"), 20);
             username->setFont(font);
             username->setTextColor(Settings::HeaderSecondary);
             
@@ -318,7 +318,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             passwordLayout->setContentsMargins(0, 0, 0, 0);
             font.setPixelSize(12);
             Label *password = new Label("CURRENT PASSWORD", passwordSection);
-            password->setFixedSize(QFontMetrics(font).width("CURRENT PASSWORD"), 20);
+            password->setFixedSize(QFontMetrics(font).horizontalAdvance("CURRENT PASSWORD"), 20);
             password->setFont(font);
             password->setTextColor(Settings::HeaderSecondary);
             SettingsInput *passwordInput = new SettingsInput(QString(), QString(), false, true, passwordSection);
@@ -339,17 +339,17 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             QObject::connect(popUp, &PopUp::done, [this, popUp, nameInput, discriminator, passwordInput, username, password](){
                 username->setText("USERNAME");
-                username->setFixedSize(QFontMetrics(QFont()).width("USERNAME"), 16);
+                username->setFixedSize(QFontMetrics(QFont()).horizontalAdvance("USERNAME"), 16);
                 username->setTextColor(Settings::HeaderSecondary);
                 password->setText("CURRENT PASSWORD");
-                password->setFixedSize(QFontMetrics(QFont()).width("CURRENT PASSWORD"), 16);
+                password->setFixedSize(QFontMetrics(QFont()).horizontalAdvance("CURRENT PASSWORD"), 16);
                 password->setTextColor(Settings::HeaderSecondary);
                 rm->requester->changeUsername([this, popUp, username, password](void *errorsPtr){
                     if (errorsPtr == nullptr) {
                         popUp->deleteLater();
                     } else {
                         QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
-                        for (unsigned int i = 0 ; i < errors.size() ; i++) {
+                        for (int i = 0 ; i < errors.size() ; i++) {
                             if (errors[i]->intCode == 0 || errors[i]->intCode == 1) {
                                 username->setText("USERNAME - " + errors[i]->message);
                                 username->setTextColor(Settings::Error);
@@ -377,7 +377,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         Widget *emailAndReveal = new Widget(emailEdit);
         QHBoxLayout *emailAndRevealLayout = new QHBoxLayout(emailAndReveal);
         Label *email = new Label(emailAndReveal);
-        email->setFixedSize(QFontMetrics(font).width((client.email.size() > QString("**********" + client.email.mid(client.email.indexOf('@'))).size() ? client.email : QString("**********" + client.email.mid(client.email.indexOf('@'))))), 20);
+        email->setFixedSize(QFontMetrics(font).horizontalAdvance((client.email.size() > QString("**********" + client.email.mid(client.email.indexOf('@'))).size() ? client.email : QString("**********" + client.email.mid(client.email.indexOf('@'))))), 20);
         email->setFont(font);
         email->setTextColor(Settings::HeaderPrimary);
         email->setBackgroundColor(Settings::BackgroundSecondaryAlt);
@@ -409,7 +409,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 layout->setSpacing(8);
                 layout->setContentsMargins(0, 0, 0, 0);
                 Label *code = new Label("VERIFICATION CODE", content);
-                code->setFixedSize(QFontMetrics(font).width("VERIFICATION CODE"), 20);
+                code->setFixedSize(QFontMetrics(font).horizontalAdvance("VERIFICATION CODE"), 20);
                 code->setFont(font);
                 code->setTextColor(Settings::HeaderSecondary);
                 SettingsInput *codeInput = new SettingsInput(QString(), QString(), false, false, content);
@@ -438,7 +438,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                             emailLayout->setSpacing(8);
                             emailLayout->setContentsMargins(0, 0, 0, 0);
                             Label *email = new Label("EMAIL", emailSection);
-                            email->setFixedSize(QFontMetrics(font).width("EMAIL"), 20);
+                            email->setFixedSize(QFontMetrics(font).horizontalAdvance("EMAIL"), 20);
                             email->setFont(font);
                             email->setTextColor(Settings::HeaderSecondary);
                             SettingsInput *emailInput = new SettingsInput(QString(), QString(), false, false, emailSection);
@@ -451,7 +451,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                             passwordLayout->setContentsMargins(0, 0, 0, 0);
                             font.setPixelSize(12);
                             Label *password = new Label("CURRENT PASSWORD", passwordSection);
-                            password->setFixedSize(QFontMetrics(font).width("CURRENT PASSWORD"), 20);
+                            password->setFixedSize(QFontMetrics(font).horizontalAdvance("CURRENT PASSWORD"), 20);
                             password->setFont(font);
                             password->setTextColor(Settings::HeaderSecondary);
                             SettingsInput *passwordInput = new SettingsInput(QString(), QString(), false, true, passwordSection);
@@ -477,7 +477,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                                         emailPopUp->deleteLater();
                                     } else {
                                         QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
-                                        for (unsigned int i = 0 ; i < errors.size() ; i++) {
+                                        for (int i = 0 ; i < errors.size() ; i++) {
                                             if (errors[i]->intCode == 0) {
                                                 email->setText("EMAIL - " + errors[i]->message);
                                                 email->setTextColor(Settings::Error);
@@ -510,7 +510,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         if (client.phone.isNull()) {
             font.setPixelSize(14);
             Label *phone = new Label("You haven't added a phone number yet.", phoneEdit);
-            phone->setFixedSize(QFontMetrics(font).width("You haven't added a phone number yet."), 20);
+            phone->setFixedSize(QFontMetrics(font).horizontalAdvance("You haven't added a phone number yet."), 20);
             phone->setFont(font);
             phone->setTextColor(Settings::HeaderPrimary);
             phone->setBackgroundColor(Settings::BackgroundSecondaryAlt);
@@ -555,7 +555,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             Widget *phoneAndReveal = new Widget(phoneEdit);
             QHBoxLayout *phoneAndRevealLayout = new QHBoxLayout(phoneAndReveal);
             Label *phone = new Label(phoneAndReveal);
-            phone->setFixedSize(QFontMetrics(font).width((client.email.size() > QString("**********" + client.email.mid(client.email.indexOf('@'))).size() ? client.email : QString("**********" + client.email.mid(client.email.indexOf('@'))))), 20);
+            phone->setFixedSize(QFontMetrics(font).horizontalAdvance((client.email.size() > QString("**********" + client.email.mid(client.email.indexOf('@'))).size() ? client.email : QString("**********" + client.email.mid(client.email.indexOf('@'))))), 20);
             phone->setFont(font);
             phone->setTextColor(Settings::HeaderPrimary);
             phone->setBackgroundColor(Settings::BackgroundSecondaryAlt);
@@ -578,7 +578,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 QFont font;
                 font.setPixelSize(12);
                 font.setFamily("whitney");
-                password->setFixedSize(QFontMetrics(font).width("PASSWORD"), 20);
+                password->setFixedSize(QFontMetrics(font).horizontalAdvance("PASSWORD"), 20);
                 password->setFont(font);
                 password->setTextColor(Settings::HeaderSecondary);
                 SettingsInput *input = new SettingsInput(QString(), QString(), false, true, content);
@@ -647,7 +647,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
     });
 
     Label *sectionTitle = new Label("Password and Authentication", nullptr);
-    sectionTitle->setFixedSize(QFontMetrics(font).width("Password and Authentication"), 20);
+    sectionTitle->setFixedSize(QFontMetrics(font).horizontalAdvance("Password and Authentication"), 20);
     sectionTitle->setFont(font);
     sectionTitle->setTextColor(Settings::HeaderPrimary);
 
@@ -664,7 +664,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             currentLayout->setSpacing(8);
             currentLayout->setContentsMargins(0, 0, 0, 0);
             Label *current = new Label("CURRENT PASSWORD", currentSection);
-            current->setFixedSize(QFontMetrics(font).width("CURRENT PASSWORD"), 20);
+            current->setFixedSize(QFontMetrics(font).horizontalAdvance("CURRENT PASSWORD"), 20);
             current->setFont(font);
             current->setTextColor(Settings::HeaderSecondary);
             SettingsInput *currentInput = new SettingsInput(QString(), QString(), false, true, currentSection);
@@ -677,7 +677,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             newLayout->setContentsMargins(0, 0, 0, 0);
             font.setPixelSize(12);
             Label *newPassword = new Label("NEW PASSWORD", newSection);
-            newPassword->setFixedSize(QFontMetrics(font).width("NEW PASSWORD"), 20);
+            newPassword->setFixedSize(QFontMetrics(font).horizontalAdvance("NEW PASSWORD"), 20);
             newPassword->setFont(font);
             newPassword->setTextColor(Settings::HeaderSecondary);
             SettingsInput *newInput = new SettingsInput(QString(), QString(), false, true, newSection);
@@ -690,7 +690,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             confirmLayout->setContentsMargins(0, 0, 0, 0);
             font.setPixelSize(12);
             Label *confirm = new Label("CONFIRM NEW PASSWORD", confirmSection);
-            confirm->setFixedSize(QFontMetrics(font).width("CONFIRM NEW PASSWORD"), 20);
+            confirm->setFixedSize(QFontMetrics(font).horizontalAdvance("CONFIRM NEW PASSWORD"), 20);
             confirm->setFont(font);
             confirm->setTextColor(Settings::HeaderSecondary);
             SettingsInput *confirmInput = new SettingsInput(QString(), QString(), false, true, confirmSection);
@@ -725,7 +725,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                             popUp->deleteLater();
                         } else {
                             QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
-                            for (unsigned int i = 0 ; i < errors.size() ; i++) {
+                            for (int i = 0 ; i < errors.size() ; i++) {
                                 if (errors[i]->intCode == 0) {
                                     current->setText("CURRENT PASSWORD - " + errors[i]->message);
                                     current->setTextColor(Settings::Error);
@@ -745,7 +745,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
 
     Label *accountRemoval = new Label("ACCOUNT REMOVAL", container);
-    accountRemoval->setFixedSize(QFontMetrics(font).width("ACCOUNT REMOVAL"), 16);
+    accountRemoval->setFixedSize(QFontMetrics(font).horizontalAdvance("ACCOUNT REMOVAL"), 16);
     accountRemoval->setFont(font);
     accountRemoval->setTextColor(Settings::HeaderSecondary);
 
@@ -767,7 +767,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             rm->getGuilds([this, client](void *guildsPtr){
                 QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
                 bool owner = false;
-                for (unsigned int i = 0 ; i < guilds.size() ; i++) {
+                for (int i = 0 ; i < guilds.size() ; i++) {
                     if (guilds[i]->ownerId == client.id) {
                         owner = true;
                         break;
@@ -800,7 +800,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                     QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget, password, input](){
                         password->setText("PASSWORD");
                         password->setTextColor(Settings::HeaderSecondary);
-                        rm->requester->disableAccount([popUp, parentWidget, password](void *errorPtr){
+                        rm->requester->disableAccount([this, popUp, parentWidget, password](void *errorPtr){
                             if (errorPtr == nullptr) {
                                 popUp->deleteLater();
 
@@ -823,7 +823,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             rm->getGuilds([this, client](void *guildsPtr){
                 QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
                 bool owner = false;
-                for (unsigned int i = 0 ; i < guilds.size() ; i++) {
+                for (int i = 0 ; i < guilds.size() ; i++) {
                     if (guilds[i]->ownerId == client.id) {
                         owner = true;
                         break;
@@ -856,7 +856,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                     QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget, password, input](){
                         password->setText("CURRENT PASSWORD");
                         password->setTextColor(Settings::HeaderSecondary);
-                        rm->requester->deleteAccount([popUp, parentWidget, password](void *errorPtr){
+                        rm->requester->deleteAccount([this, popUp, parentWidget, password](void *errorPtr){
                             if (errorPtr == nullptr) {
                                 popUp->deleteLater();
 

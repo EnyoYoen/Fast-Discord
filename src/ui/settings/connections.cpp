@@ -164,13 +164,13 @@ public:
         font.setPixelSize(14);
         font.setFamily("whitney");
         Label *username = new Label(connection->name, nameContainer);
-        username->setFixedSize(QFontMetrics(font).width(connection->name), 18);
+        username->setFixedSize(QFontMetrics(font).horizontalAdvance(connection->name), 18);
         username->setFont(font);
         username->setTextColor(Settings::HeaderPrimary);
         Label *name = new Label((AccountButton::names.contains(connection->type) ? AccountButton::names[connection->type] : connection->type), nameContainer);
         font.setPixelSize(12);
         name->setFixedHeight(14);
-        name->setFixedSize(QFontMetrics(font).width(connection->name), 14);
+        name->setFixedSize(QFontMetrics(font).horizontalAdvance(connection->name), 14);
         name->setFont(font);
         name->setTextColor(Settings::HeaderSecondary);
 
@@ -208,7 +208,7 @@ public:
 
         font.setPixelSize(16);
         Label *description = new Label("Display on profile", switchContainer);
-        description->setFixedSize(QFontMetrics(font).width("Display on profile"), 24);
+        description->setFixedSize(QFontMetrics(font).horizontalAdvance("Display on profile"), 24);
         description->setFont(font);
         description->setTextColor(Settings::HeaderPrimary);
 
@@ -280,7 +280,7 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
     accountGridLayout->setSpacing(0);
     QList<QString> keys = AccountButton::names.keys();
     accountGridLayout->addWidget(new AccountButton(rm, keys.at(0), accountGrid));
-    for (unsigned int i = 1 ; i < keys.size() ; i++) {
+    for (int i = 1 ; i < keys.size() ; i++) {
         accountGridLayout->addSpacing(8);
         accountGridLayout->addWidget(new AccountButton(rm, keys.at(i), accountGrid));
     }
@@ -299,7 +299,7 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
         if (connections.size() == 0) {
             empty();
         } else {
-            for (unsigned int i = 0 ; i < connections.size() ; i++) {
+            for (int i = 0 ; i < connections.size() ; i++) {
                 ConnectedAccount *account = new ConnectedAccount(rm, connections[i], container);
                 QObject::connect(account, &ConnectedAccount::removed, [this](){
                     if (layout->count() <= 2)
@@ -340,7 +340,7 @@ void Connections::empty()
     font.setFamily("whitney");
 
     Label *title = new Label("NO CONNECTIONS", noConnections);
-    title->setFixedSize(QFontMetrics(font).width("NO CONNECTIONS"), 22);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance("NO CONNECTIONS"), 22);
     title->setTextColor(Settings::TextMuted);
     title->setFont(font);
 
@@ -349,7 +349,7 @@ void Connections::empty()
     
     font.setBold(false);
     Label *desc = new Label("Connect your account to unlock special Discord integrations", noConnections);
-    desc->setFixedSize(QFontMetrics(font).width("Connect your account to unlock special Discord integrations"), 20);
+    desc->setFixedSize(QFontMetrics(font).horizontalAdvance("Connect your account to unlock special Discord integrations"), 20);
     desc->setTextColor(Settings::TextMuted);
     desc->setFont(font);
 

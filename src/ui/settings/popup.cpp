@@ -88,7 +88,7 @@ PopUp::PopUp(Widget *content, int maximumWidth, int maximumHeight, QString icon,
         Label *titleCenteredWidget = new Label(title, titleWidget);
         titleCenteredWidget->setTextColor(Settings::HeaderPrimary);
         titleCenteredWidget->setFont(font);
-        titleCenteredWidget->setFixedSize(QFontMetrics(font).width(title), 30);
+        titleCenteredWidget->setFixedSize(QFontMetrics(font).horizontalAdvance(title), 30);
         titleCenteredWidget->setFlags(Qt::AlignCenter);
         titleLayout->addWidget(titleCenteredWidget, 0, Qt::AlignHCenter);
         if (!description.isNull()) {
@@ -107,7 +107,7 @@ PopUp::PopUp(Widget *content, int maximumWidth, int maximumHeight, QString icon,
         titleWidget = new Label(title, actualPopup);
         titleWidget->setTextColor(Settings::HeaderPrimary);
         titleWidget->setFont(font);
-        titleWidget->setFixedSize(QFontMetrics(font).width(title), 30);
+        titleWidget->setFixedSize(QFontMetrics(font).horizontalAdvance(title), 30);
         titleWidget->setFlags(Qt::AlignCenter);
     }
     titleWidget->setBackgroundColor(Settings::None);

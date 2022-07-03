@@ -59,7 +59,7 @@ void const RightColumn::setUserTyping(const Api::User *user)
     // Change the text of the typing label
     if (text != "") {
         // Somemone is already typing, so we change with the new user
-        size_t index = (text.indexOf(" is typing") != -1) ? text.indexOf(" is typing") : text.indexOf(" are typing");
+        int index = (text.indexOf(" is typing") != -1) ? text.indexOf(" is typing") : text.indexOf(" are typing");
         text.resize(text.size() - index);
         text += " " + username + " are typing";
     } else {

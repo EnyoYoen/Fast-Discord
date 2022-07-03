@@ -50,10 +50,10 @@ public:
 
         title = new Label(parameters.title, text);
         title->setFont(font);
-        title->setFixedSize(QFontMetrics(font).width(parameters.title), 20);
+        title->setFixedSize(QFontMetrics(font).horizontalAdvance(parameters.title), 20);
         font.setPixelSize(14);
         description = new Label(parameters.description, text);
-        description->setFixedSize(QFontMetrics(font).width(parameters.description), 18);
+        description->setFixedSize(QFontMetrics(font).horizontalAdvance(parameters.description), 18);
         description->setFont(font);
 
         textLayout->addWidget(title);
@@ -148,13 +148,13 @@ RadioGroup::RadioGroup(QVector<RadioParameters> radios, int selectedIndex, QWidg
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
 
-    for (unsigned int i = 0 ; i < radios.size() ; i++) {
+    for (int i = 0 ; i < radios.size() ; i++) {
         RadioButton *button = new RadioButton(radios[i], i, selectedIndex == i, this);
         layout->addWidget(button);
         buttons.append(button);
 
         QObject::connect(button, &RadioButton::clicked, [this](int index){
-            for (unsigned int i = 0 ; i < buttons.size() ; i++) {
+            for (int i = 0 ; i < buttons.size() ; i++) {
                 if (index != buttons[i]->index)
                     buttons[i]->setUnclicked();
             }

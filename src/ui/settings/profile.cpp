@@ -44,7 +44,7 @@ public:
             temp = temp.mid(idx + 1);
         }
         
-        textLabel->setMinimumSize(QFontMetrics(font).width(final), 14 * (text.count('\n') + 1));
+        textLabel->setMinimumSize(QFontMetrics(font).horizontalAdvance(final), 14 * (text.count('\n') + 1));
         textLabel->setFont(font);
         textLabel->setTextColor(Settings::White);
         textLabel->setBackgroundColor(Settings::None);
@@ -194,12 +194,12 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
     usernameLayout->setContentsMargins(0, 0, 16, 0);
 
     Label *name = new Label(client.username, username);
-    name->setFixedSize(QFontMetrics(font).width(client.username), 24);
+    name->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), 24);
     name->setFont(font);
     name->setTextColor(Settings::HeaderPrimary);
 
     Label *discriminator = new Label("#" + client.discriminator, username);
-    discriminator->setFixedSize(QFontMetrics(font).width("#" + client.discriminator), 24);
+    discriminator->setFixedSize(QFontMetrics(font).horizontalAdvance("#" + client.discriminator), 24);
     discriminator->setFont(font);
     discriminator->setTextColor(Settings::HeaderSecondary);
     

@@ -1,5 +1,7 @@
 #include "ui/middlecolumn/middlecolumn.h"
 
+#include <algorithm>
+
 namespace Ui {
 
 MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, QWidget *parent)
@@ -43,9 +45,9 @@ void MiddleColumn::setPresences(const QVector<Api::Presence *>& presences)
 {
     rm->getPrivateChannels([&](const void *channelsPtr){
         const QVector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const QVector<Api::PrivateChannel *> *>(channelsPtr);
-        for (unsigned int i = 0 ; i < presences.size() ; i++) {
+        for (int i = 0 ; i < presences.size() ; i++) {
             bool found = false;
-            for (unsigned int j = 0 ; j < privateChannels->size() ; j++) {
+            for (int j = 0 ; j < privateChannels->size() ; j++) {
                 if ((*privateChannels)[j]->type == Api::DM && ((*privateChannels)[j]->recipientIds)[0] == presences[i]->userId) {
                     privateChannelWidgets[j]->setStatus(presences[i]->status);
                     found = true;
@@ -61,7 +63,7 @@ void MiddleColumn::updatePresence(const Api::Presence& presence)
 {
     rm->getPrivateChannels([&](const void *channelsPtr){
         const QVector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const QVector<Api::PrivateChannel *> *>(channelsPtr);
-        for (unsigned int i = 0 ; i < privateChannels->size() ; i++) {
+        for (int i = 0 ; i < privateChannels->size() ; i++) {
             if ((*privateChannels)[i]->type == Api::DM && ((*privateChannels)[i]->recipientIds)[0] == presence.user->id) {
                 privateChannelWidgets[i]->setStatus(presence.status);
                 break;
@@ -77,7 +79,7 @@ void MiddleColumn::setPrivateChannels(const QVector<Api::PrivateChannel *>& priv
     QVBoxLayout *privateChannelListLayout = new QVBoxLayout(privateChannelList);
 
     // Create and display the private channels
-    for (unsigned int i = 0 ; i < privateChannels.size() ; i++) {
+    for (int i = 0 ; i < privateChannels.size() ; i++) {
         PrivateChannelWidget *privateChannelWidget = new PrivateChannelWidget(rm, *privateChannels[i], privateChannelList);
         privateChannelWidgets.push_back(privateChannelWidget);
         privateChannelListLayout->insertWidget(i, privateChannelWidget);
@@ -108,9 +110,9 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
 
     // Create the channels widgets
 
-    size_t channelsLen = channels.size();
+    int channelsLen = channels.size();
     // Loop to find channel that are not in a category
-    for (size_t i = 0 ; i < channelsLen ; i++) {
+    for (int i = 0 ; i < channelsLen ; i++) {
         if (channels[i]->type != Api::GuildCategory && channels[i]->parentId == 0) {
             // Create and add the channel widget to the list
             GuildChannelWidget *channelWidget = new GuildChannelWidget(*channels[i], guildChannelList);
@@ -124,21 +126,21 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
     // Loop through all channels to create widgets
     QMap<Api::Snowflake, Api::Channel *> categoriesId;
     QMap<Api::Channel *, QVector<Api::Channel *>> categories;
-    for (size_t i = 0 ; i < channelsLen ; i++) {
+    for (int i = 0 ; i < channelsLen ; i++) {
         if (channels[i]->type == Api::GuildCategory) {
             categoriesId[channels[i]->id] = channels[i];
             categories[channels[i]];
         }
     }
-    for (size_t i = 0 ; i < channelsLen ; i++) {
+    for (int i = 0 ; i < channelsLen ; i++) {
         if (channels[i]->parentId != 0) {
             QVector<qint32> idxs;
             QVector<Api::Channel *> categoryChannels = categories[categoriesId[channels[i]->parentId]];
-            for (size_t j = 0 ; j < categoryChannels.size() ; j++) {
+            for (int j = 0 ; j < categoryChannels.size() ; j++) {
                 idxs.append(categoryChannels[j]->position);
             }
             idxs.append(channels[i]->position);
-            qSort(idxs);
+            std::sort(idxs.begin(), idxs.end());
             int idx = idxs.indexOf(channels[i]->position);
             categories[categoriesId[channels[i]->parentId]].insert(idx, channels[i]);
         }
@@ -147,13 +149,13 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
     int index = 0;
     QList<Api::Channel *> keys = categories.keys();
     QList<QVector<Api::Channel *>> values = categories.values();
-    for (size_t i = 0 ; i < categories.count() ; i++) {
-        for (size_t j = 0 ; j != categories.count() ; j++) {
+    for (int i = 0 ; i < categories.count() ; i++) {
+        for (int j = 0 ; j != categories.count() ; j++) {
             if (keys.at(j)->position == index) {
                 GuildChannelWidget *channelWidget = new GuildChannelWidget(*keys.at(j), guildChannelList);
                 guildChannelListLayout->addWidget(channelWidget);
                 guildChannelWidgets.push_back(channelWidget);
-                for (size_t k = 0 ; k < values.at(j).size() ; k++) {
+                for (int k = 0 ; k < values.at(j).size() ; k++) {
                     GuildChannelWidget *channelWidget = new GuildChannelWidget(*values.at(j)[k], guildChannelList);
                     guildChannelListLayout->addWidget(channelWidget);
                     guildChannelWidgets.push_back(channelWidget);
@@ -180,7 +182,7 @@ void MiddleColumn::clicGuildChannel(const Api::Snowflake& id)
 {
     // Reset the stylesheet of the channels except the one that we just clicked
     QString name;
-    for (size_t i = 0 ; i < guildChannelWidgets.size() ; i++) {
+    for (int i = 0 ; i < guildChannelWidgets.size() ; i++) {
         if (guildChannelWidgets[i]->id != id) {
             guildChannelWidgets[i]->unclicked();
         } else {
@@ -194,7 +196,7 @@ void MiddleColumn::clicGuildChannel(const Api::Snowflake& id)
                 callChannel = id;
                 rm->getGuilds([this, name](void *guildsPtr){
                     QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
-                    for (unsigned int i = 0 ; i < guilds.size() ; i++) {
+                    for (int i = 0 ; i < guilds.size() ; i++) {
                         if (guilds[i]->id == openedGuildId)
                             callWidget->call(name, guilds[i]->name);
                     }
@@ -213,7 +215,7 @@ void MiddleColumn::clicPrivateChannel(const Api::Snowflake& id)
 {
     // Reset the stylesheet of the channels except the one that we just clicked
     QString name;
-    for (size_t i = 0 ; i < privateChannelWidgets.size() ; i++) {
+    for (int i = 0 ; i < privateChannelWidgets.size() ; i++) {
         if (privateChannelWidgets[i]->id != id) {
             privateChannelWidgets[i]->unclicked();
         } else {
@@ -235,7 +237,7 @@ void MiddleColumn::displayPrivateChannels()
     QVBoxLayout *privateChannelListLayout = new QVBoxLayout(privateChannelList);
 
     // Display the private channels
-    for (unsigned int i = 0 ; i < privateChannelWidgets.size() ; i++) {
+    for (int i = 0 ; i < privateChannelWidgets.size() ; i++) {
         privateChannelListLayout->insertWidget(i, privateChannelWidgets[i]);
     }
     privateChannelListLayout->insertStretch(-1, 1);
@@ -274,7 +276,7 @@ void MiddleColumn::updateChannel(const Api::Channel *channel, const Api::Private
 void MiddleColumn::createChannel(const Api::Channel *channel, const Api::PrivateChannel *privateChannel)
 {
     if (channel == nullptr) {
-        for (unsigned int i = 0 ; i < privateChannelWidgets.size() ; i++) {
+        for (int i = 0 ; i < privateChannelWidgets.size() ; i++) {
             if (privateChannel->id == privateChannelWidgets[i]->id) {
                 privateChannelWidgets.insert(privateChannelWidgets.begin(), new PrivateChannelWidget(rm, *privateChannel, this));
             }
@@ -289,7 +291,7 @@ void MiddleColumn::createChannel(const Api::Channel *channel, const Api::Private
 void MiddleColumn::deleteChannel(const Api::Snowflake& id, const Api::Snowflake& guildId, int type)
 {
     if (type == Api::DM || type == Api::GroupDM) {
-        for (unsigned int i = 0 ; i < privateChannelWidgets.size() ; i++) {
+        for (int i = 0 ; i < privateChannelWidgets.size() ; i++) {
             if (id == privateChannelWidgets[i]->id) {
                 delete privateChannelWidgets[i];
                 privateChannelWidgets.erase(privateChannelWidgets.begin() + i);

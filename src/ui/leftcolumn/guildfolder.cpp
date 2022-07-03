@@ -49,7 +49,7 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
     openedLayout->setContentsMargins(0, 0, 0, 10);
     openedLayout->addWidget(closeButton);
 
-    for (unsigned int i = 0 ; i < guilds.size() ; i++) {
+    for (int i = 0 ; i < guilds.size() ; i++) {
         Api::Guild actualGuild = *guilds[i];
 
         GuildWidget *guildWidget = new GuildWidget(rm, *guilds[i], openedContent);
@@ -97,14 +97,14 @@ void GuildFolder::unclicked()
     else 
         pill->setFixedHeight(0);
 
-    for (unsigned int i = 0 ; i < guildWidgets.size() ; i++)
+    for (int i = 0 ; i < guildWidgets.size() ; i++)
         guildWidgets[i]->unclicked();
 }
 
 void GuildFolder::unclickedExcept(const Api::Snowflake& id)
 {
     clicked = false;
-    for (size_t i = 0 ; i < guildWidgets.size() ; i++) {
+    for (int i = 0 ; i < guildWidgets.size() ; i++) {
         if (guildWidgets[i]->id != id) {
             guildWidgets[i]->unclicked();
         } else {
@@ -125,7 +125,7 @@ void GuildFolder::setUnread(const Api::Snowflake& id)
     if (!clicked) 
         pill->setFixedHeight(8);
     
-    for (unsigned int i = 0 ; i < guildWidgets.size() ; i++) {
+    for (int i = 0 ; i < guildWidgets.size() ; i++) {
         if (guildWidgets[i]->id == id)
             guildWidgets[i]->setUnread(true);
     }
