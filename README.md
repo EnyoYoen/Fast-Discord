@@ -73,7 +73,7 @@ In 'Fast-Discord/bin' folder :
 On Windows :
 ```shell
 cmake .. -DCMAKE_TOOLCHAIN_FILE=(path/to/)vcpkg/scripts/buildsystems/vcpkg.cmake
-cmake --build .
+cmake --build . --config Release
 ```
 Otherwise :
 ```shell

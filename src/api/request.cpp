@@ -35,7 +35,6 @@ Requester::~Requester()
 {
     // Stop the request loop
     stopped = true;
-    lock.unlock();
     loop->wait();
     requestWaiter.wakeAll();
 }
@@ -127,9 +126,7 @@ void Requester::readReply()
             case GetImage:
                 {
                     QString imageFileName = parameters.outputFile;
-                    lock.lock();
                     if (requestsToCheck == 0) parameters.callback(static_cast<void *>(&imageFileName));
-                    lock.unlock();
                     break;
                 }
             case ChangeUsername:
@@ -305,9 +302,7 @@ void Requester::readReply()
         }
         currentRequestsNumber--;
 
-        lock.lock();
         if (requestsToCheck > 0) requestsToCheck--;
-        lock.unlock();
     }
     finishWaiter.wakeOne();
 }
@@ -366,10 +361,14 @@ void Requester::RequestLoop()
                     emit requestEmit(Get, request, nullptr, nullptr);
                 }
 
-                finishWaiter.wait(&lock);
+                finishLock.lock();
+                finishWaiter.wait(&finishLock);
+                finishLock.unlock();
             } while (!requestQueue.empty() && requestQueue.size() > currentRequestsNumber);
         } else {
-            requestWaiter.wait(&lock);
+            requestLock.lock();
+            requestWaiter.wait(&requestLock);
+            requestLock.unlock();
         }
     }
 }
@@ -405,21 +404,17 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *
 
 void Requester::requestApi(const RequestParameters &parameters)
 {
-    lock.lock();
     requestQueue.enqueue(parameters);
     requestWaiter.wakeOne();
-    lock.unlock();
 }
 
 void Requester::removeImageRequests()
 {
-    lock.lock();
     requestsToCheck = currentRequestsNumber;
     for (unsigned int i = requestQueue.size() ; i > 0 ; i--) {
         RequestParameters temp = requestQueue.dequeue();
         if (temp.type != GetImage) requestQueue.enqueue(temp);
     }
-    lock.unlock();
 }
 
 // Functions that request the API to retrieve data

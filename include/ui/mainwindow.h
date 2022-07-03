@@ -4,7 +4,7 @@
 #include "ui/leftcolumn/leftcolumn.h"
 #include "ui/middlecolumn/middlecolumn.h"
 #include "ui/rightcolumn/rightcolumn.h"
-#include "ui/settings/settings.h"
+#include "ui/settings/settingsmenu.h"
 #include "api/ressourcemanager.h"
 
 #include <QWidget>

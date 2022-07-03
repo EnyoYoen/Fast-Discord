@@ -218,7 +218,6 @@ void const MessageArea::displaySeparator(const QDate& date, bool top)
 
 MessageArea::~MessageArea()
 {
-    lock.unlock();
     stopped = true;
     messageWaiter.wakeOne();
 }

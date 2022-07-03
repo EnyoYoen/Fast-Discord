@@ -164,7 +164,8 @@ private:
     QNetworkAccessManager netManager;
     QNetworkReply *reply;
     QQueue<RequestParameters> requestQueue;     // Queue of request parameters
-    QMutex lock;
+    QMutex finishLock;
+    QMutex requestLock;
     QWaitCondition requestWaiter;               // The loop waits when there is no request
     QWaitCondition finishWaiter;                // The loop waits when there is no request
     QThread *loop;                              // Request loop
