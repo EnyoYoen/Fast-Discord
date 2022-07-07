@@ -20,6 +20,7 @@ jobs:
         with:
           version: 5.15.2
           arch: x64
+          dir: '${{github.workspace}}/'
       
       - name: Install opus and sodium
         run: brew install libsodium opus
@@ -30,9 +31,12 @@ jobs:
           cd bin
           cmake ..
           cmake --build . --parallel $(nproc)
+          mkdir build
+          mv Fast-Discord build
+          cp -r res build
 
       - name: Upload Executable
         uses: actions/upload-artifact@v2
         with:
           name: "Fast-Discord - MacOs x64"
-          path: '${{github.workspace}}/bin/Fast-Discord'
+          path: '${{github.workspace}}/bin/build'

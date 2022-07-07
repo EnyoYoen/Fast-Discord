@@ -52,7 +52,7 @@ private:
     void showEvent(QShowEvent *event) override; // To scroll to the very end
     void loop();
 
-    QWidget *messageBox;
+    Widget *messageBox;
     QVBoxLayout *messageLayout; // The layout of this widget
 
     Api::RessourceManager *rm;  // To request the API

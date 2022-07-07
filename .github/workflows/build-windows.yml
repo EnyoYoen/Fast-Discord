@@ -18,7 +18,9 @@ jobs:
       - name: Install Qt        
         uses: jurplel/install-qt-action@v2
         with:
+          version: 5.15.2
           arch: 'win64_msvc2019_64'
+          dir: '${{github.workspace}}/'
 
       - name: Build
         shell: bash
@@ -27,11 +29,17 @@ jobs:
         run: |
           cd bin
           cmake ..
-          cmake --build . --parallel $(nproc)
-          ls
+          cmake --build . --parallel $(nproc) --config Release
+          cd $GITHUB_WORKSPACE/bin/Release
+          $GITHUB_WORKSPACE/Qt/5.15.2/msvc2019_64/bin/windeployqt.exe --release Fast-Discord.exe
+          cp $GITHUB_WORKSPACE/libs/64/bin/libsodium.dll .
+          cp $GITHUB_WORKSPACE/libs/64/bin/opus.dll .
+          cp $GITHUB_WORKSPACE/libs/64/bin/libcrypto-1_1-x64.dll .
+          cp $GITHUB_WORKSPACE/libs/64/bin/libssl-1_1-x64.dll .
+          cp -r ../res .
 
       - name: Upload Executable
         uses: actions/upload-artifact@v2
         with:
           name: "Fast-Discord - Windows x64"
-          path: '${{github.workspace}}/bin/Fast-Discord.exe'
+          path: '${{github.workspace}}/bin/Release'

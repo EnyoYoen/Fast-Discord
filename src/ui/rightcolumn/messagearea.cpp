@@ -21,7 +21,7 @@ MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget * /*parent*/)
     messageCreateThread->start();
 
     // Create widgets
-    messageBox = new QWidget(this);
+    messageBox = new Widget(this);
     messageLayout = new QVBoxLayout(messageBox);
 
     // Style the layout

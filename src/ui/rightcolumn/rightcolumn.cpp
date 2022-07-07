@@ -131,7 +131,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
 
         // Get the messages of the channel
         if (!rm->hasMessages(channelId)) {
-            QWidget *messageAreaPlaceholder = new QWidget(messagesContainer);
+            Widget *messageAreaPlaceholder = new Widget(messagesContainer);
             messagesLayout->addWidget(messageAreaPlaceholder);
             rm->getMessages([this](void *messages) {emit messagesReceived(*static_cast<QVector<Api::Message *> *>(messages));}, channelId, 50, false);
         } else {
@@ -142,7 +142,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         }
 
         // Create all the widgets
-        QWidget *inputContainer = new QWidget(messagesContainer);
+        Widget *inputContainer = new Widget(messagesContainer);
         QHBoxLayout *containerLayout = new QHBoxLayout(inputContainer);
         inputBox = new Widget(inputContainer);
         QHBoxLayout *inputLayout = new QHBoxLayout(inputBox);
