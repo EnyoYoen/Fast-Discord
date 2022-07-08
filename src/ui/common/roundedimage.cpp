@@ -23,14 +23,12 @@ RoundedImage::RoundedImage(const QString& imagePath, int width, int height, int 
 
     this->setBorderRadius(radius);
     this->setFixedSize(width, height);
-    //this->setFixedSize(100, 100);
 }
 
 RoundedImage::RoundedImage(int width, int height, int radius, QWidget *parent)
     : Widget(parent)
 {
     this->setBorderRadius(radius);
-    //this->setFixedSize(100, 100);
     this->setFixedSize(width, height);
 }
 

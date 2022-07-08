@@ -34,9 +34,11 @@ MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget * /*parent*/)
     this->setContentsMargins(0, 0, 0, 0);
     this->setWidgetResizable(true);
     this->setStyleSheet("QScrollArea {border: none; padding: 0px;}"
-                        "QScrollBar::handle:vertical {border: none; border-radius: 8px; background-color: #202225;}"
-                        "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 16px;}"
-                        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
+                        "QScrollBar::handle:vertical {border: none; border-radius: 4px; background-color: #202225;}"
+                        "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 4px; width: 8px;}"
+                        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
+                        "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
 
     QObject::connect(this->verticalScrollBar(), &QScrollBar::valueChanged, this, &MessageArea::scrollBarMoved);
     QObject::connect(this->verticalScrollBar(), &QScrollBar::rangeChanged, this, &MessageArea::changeSliderValue);
@@ -61,9 +63,7 @@ void MessageArea::setMessages(const QVector<Api::Message *>& messages)
         lock.unlock();
         messageWaiter.wakeOne();
 
-        QWidget *spacer = new QWidget(messageBox);
-        spacer->setFixedHeight(22);
-        messageLayout->addWidget(spacer);
+        messageLayout->addSpacing(22);
         messageLayout->insertStretch(0);
     }
 }
@@ -132,6 +132,7 @@ void MessageArea::showEvent(QShowEvent *)
 
 void const MessageArea::scrollBarMoved(int value)
 {
+    messageBox->setBackgroundColor(Settings::BackgroundPrimary);
     tempScrollBarValue = value;
     tempScrollBarRange = this->verticalScrollBar()->maximum() - this->verticalScrollBar()->minimum();
     if (value < tempScrollBarRange * 0.1 && emitScrollBarHigh && timestamp - QDateTime::currentSecsSinceEpoch() > 1) {

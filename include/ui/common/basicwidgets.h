@@ -87,6 +87,10 @@ public:\
 		update();\
 	}\
 protected:\
+	void resizeEvent(QResizeEvent *)\
+	{\
+		this->update();\
+	}\
 	void paintEvent(QPaintEvent *event)\
 	{\
 		QPainter p(this);\

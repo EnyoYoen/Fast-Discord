@@ -51,7 +51,7 @@ void Settings::initSettings(Api::RessourceManager *rm)
         {ButtonOutlineDangerBorderActive,     QColor::fromHsl(359, (int)(0.667 * saturation * 255), (int)(0.541 * 255))},
         {InfoDangerForeground,                QColor::fromHsl(359, (int)(0.826 * saturation * 255), (int)(0.594 * 255))},
         {StatusBackgroundHover,               QColor(57, 61, 67)},
-        {StatusBackgroundActive,              QColor(53, 55, 61)},
+        {StatusBackgroundActive,              QColor(61, 67, 73)},
         {TextPositive,                        QColor::fromHsl(139, (int)(0.516 * saturation * 255), (int)(0.522 * 255))},
         {Link,                                QColor::fromHsl(197, (int)(saturation * 255), (int)(0.478 * 255))},
         {Error,                               QColor::fromHsl(359, (int)(0.82 * saturation * 255), (int)(0.739 * 255))},

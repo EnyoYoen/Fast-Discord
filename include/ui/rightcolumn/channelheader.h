@@ -4,6 +4,7 @@
 #include "api/ressourcemanager.h"
 
 #include <QWidget>
+#include <QLabel>
 #include <QHBoxLayout>
 
 namespace Ui {
@@ -20,6 +21,8 @@ private:
     Api::RessourceManager *rm;
 
     QWidget *container;
+    QLabel *icon;
+    Label *name;
     QHBoxLayout *layout;
 };
 

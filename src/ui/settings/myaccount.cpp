@@ -221,12 +221,13 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         Widget *username = new Widget(usernameEdit);
         QHBoxLayout *usernameLayout = new QHBoxLayout(usernameEdit);
         name = new Label(client.username, username);
+        name->setTextColor(Settings::HeaderPrimary);
         name->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), 20);
         name->setFont(font);
         discriminator = new Label("#" + client.discriminator, username);
         discriminator->setFont(font);
         discriminator->setTextColor(Settings::HeaderSecondary);
-        discriminator->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), 20);
+        discriminator->setFixedSize(QFontMetrics(font).horizontalAdvance("#" + client.discriminator), 20);
         usernameLayout->addWidget(name, 0, Qt::AlignBottom);
         usernameLayout->addWidget(discriminator, 0, Qt::AlignBottom);
         usernameLayout->addStretch(1);
@@ -893,10 +894,12 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
     layout->addWidget(accountButtons);
 
     this->setWidget(container);
-    this->setStyleSheet("* {border: none;}"
+    this->setStyleSheet("* {border: none; background-color: " + Settings::colors[Settings::BackgroundPrimary].name() + "}"
                         "QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
                         "QScrollBar {border: none; background-color: #36393F; border-radius: 8px; width: 3px;}"
-                        "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}");
+                        "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}"
+                        "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
 }
 
 } // namespace Ui

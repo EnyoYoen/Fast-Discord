@@ -296,10 +296,12 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
 
     this->setWidgetResizable(true);
     this->setWidget(container);
-    this->setStyleSheet("* {border: none;}"
+    this->setStyleSheet("* {border: none; background-color: " + Settings::colors[Settings::BackgroundPrimary].name() + "}"
                         "QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
                         "QScrollBar {border: none; background-color: #36393F; border-radius: 8px; width: 3px;}"
-                        "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}");
+                        "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}"
+                        "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
 }
 
 Label *PrivacySafety::createTitle(QString text)

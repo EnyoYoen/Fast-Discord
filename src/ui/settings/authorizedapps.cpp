@@ -210,6 +210,7 @@ AuthorizedApps::AuthorizedApps(Api::RessourceManager *rmp, QWidget *parent)
         QVector<Api::AuthorizedApp *> apps = *reinterpret_cast<QVector<Api::AuthorizedApp *> *>(appsPtr);
         if (apps.isEmpty()) {
             empty();
+            layout->addStretch(1);
         } else {
             for (int i = 0 ; i < apps.size() ; i++) {
                 AuthorizedApp *app = new AuthorizedApp(rm, apps[i], container);
@@ -219,17 +220,18 @@ AuthorizedApps::AuthorizedApps(Api::RessourceManager *rmp, QWidget *parent)
                 });
                 layout->addWidget(app);
             }
+            layout->addStretch(1);
         }
     });
 
-    layout->addStretch(1);
-
     this->setWidgetResizable(true);
     this->setWidget(container);
-    this->setStyleSheet("* {border: none;}"
+    this->setStyleSheet("* {border: none; background-color: " + Settings::colors[Settings::BackgroundPrimary].name() + "}"
                         "QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
                         "QScrollBar {border: none; background-color: #36393F; border-radius: 8px; width: 3px;}"
-                        "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}");
+                        "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}"
+                        "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
 }
 
 void AuthorizedApps::empty()

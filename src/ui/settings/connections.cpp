@@ -247,6 +247,7 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
     font.setFamily("whitney");
 
     Label *title = new Label("Connections", container);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance("Connections"), 20);
     title->setFont(font);
     title->setTextColor(Settings::HeaderPrimary);
 
@@ -297,27 +298,31 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
     rm->requester->getConnections([container, this](void *connectionsPtr){
         QVector<Api::Connection *> connections = *reinterpret_cast<QVector<Api::Connection *> *>(connectionsPtr);
         if (connections.size() == 0) {
+            layout->addStretch(1);
             empty();
         } else {
             for (int i = 0 ; i < connections.size() ; i++) {
                 ConnectedAccount *account = new ConnectedAccount(rm, connections[i], container);
                 QObject::connect(account, &ConnectedAccount::removed, [this](){
-                    if (layout->count() <= 2)
+                    if (layout->count() <= 3)
                         empty();
                 });
                 layout->insertWidget(3 + i, account);
                 layout->insertSpacing(4 + i, 30);
             }
+            layout->addStretch(1);
         }
     });
 
 
     this->setWidgetResizable(true);
     this->setWidget(container);
-    this->setStyleSheet("* {border: none;}"
+    this->setStyleSheet("* {border: none; background-color: " + Settings::colors[Settings::BackgroundPrimary].name() + "}"
                         "QScrollBar::handle {border: none; border-radius: 2px; background-color: #202225;}"
                         "QScrollBar {border: none; background-color: #36393F; border-radius: 8px; width: 3px;}"
-                        "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}");
+                        "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}"
+                        "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
 }
 
 void Connections::empty()
@@ -355,7 +360,7 @@ void Connections::empty()
 
     noConnectionsLayout->addWidget(desc, 0, Qt::AlignHCenter);
 
-    layout->insertWidget(3, noConnections);
+    layout->insertWidget(4, noConnections);
 }
 
 } // namespace Ui

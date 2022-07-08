@@ -48,7 +48,8 @@ void MiddleColumn::setPresences(const QVector<Api::Presence *>& presences)
         for (int i = 0 ; i < presences.size() ; i++) {
             bool found = false;
             for (int j = 0 ; j < privateChannels->size() ; j++) {
-                if ((*privateChannels)[j]->type == Api::DM && ((*privateChannels)[j]->recipientIds)[0] == presences[i]->userId) {
+                if ((*privateChannels)[j]->type == Api::DM && ((*privateChannels)[j]->recipientIds)[0] == presences[i]->userId
+                 && privateChannelWidgets.size() > 0) {
                     privateChannelWidgets[j]->setStatus(presences[i]->status);
                     found = true;
                     break;
@@ -64,7 +65,8 @@ void MiddleColumn::updatePresence(const Api::Presence& presence)
     rm->getPrivateChannels([&](const void *channelsPtr){
         const QVector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const QVector<Api::PrivateChannel *> *>(channelsPtr);
         for (int i = 0 ; i < privateChannels->size() ; i++) {
-            if ((*privateChannels)[i]->type == Api::DM && ((*privateChannels)[i]->recipientIds)[0] == presence.user->id) {
+            if ((*privateChannels)[i]->type == Api::DM && ((*privateChannels)[i]->recipientIds)[0] == presence.user->id
+             && privateChannelWidgets.size() > 0) {
                 privateChannelWidgets[i]->setStatus(presence.status);
                 break;
             }
@@ -95,7 +97,9 @@ void MiddleColumn::setPrivateChannels(const QVector<Api::PrivateChannel *>& priv
     channelList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
                                "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
                                "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
-                               "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
+                               "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
+                               "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                               "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
 }
 
 void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
@@ -175,7 +179,9 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
     channelList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
                                "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
                                "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
-                               "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}");
+                               "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
+                               "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                               "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
 }
 
 void MiddleColumn::clicGuildChannel(const Api::Snowflake& id)

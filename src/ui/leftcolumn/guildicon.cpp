@@ -4,16 +4,11 @@
 
 namespace Ui {
 
-GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, QString guildName, const QString& guildIcon, bool smallp, QWidget *parent)
-    : Widget(parent)
+class TextIcon : public Widget
 {
-    small = smallp;
-    QObject::connect(this, &GuildIcon::iconRecieved, this, &GuildIcon::setIcon);
-
-    // Create the guild icon
-    if (guildIcon.isNull()) {
-        // The guild doesn't have icon : we need to create one with the name
-
+public:
+    TextIcon(QString guildName, bool small)
+    {
         // Split the name for every space in it
         QStringList nameSplit(guildName.split(' '));
 
@@ -64,9 +59,8 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
 
         // Create and add the text icon
 
-        textIcon = new Label(this);
-        QHBoxLayout *iconTextLayout = new QHBoxLayout(textIcon);
-        text = new QLabel(iconText, textIcon);
+        QHBoxLayout *iconTextLayout = new QHBoxLayout(this);
+        text = new QLabel(iconText, this);
         text->setStyleSheet("background: none;color:" + Settings::colors[Settings::TextNormal].name());
         QFont font;
         font.setFamily("whitney");
@@ -88,12 +82,27 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
         iconTextLayout->addWidget(text, 0, Qt::AlignHCenter);
 
         text->setFixedHeight(small ? 10 : 16);
-        textIcon->setFixedSize(small ? 16 : 48, small ? 16 : 48);
-        textIcon->setBorderRadius(small ? 8 : 24);
-        textIcon->setTextColor(Settings::TextNormal);
-        textIcon->setBackgroundColor(Settings::BackgroundPrimary);
-        icon = nullptr;
+        this->setBackgroundColor(Settings::BackgroundPrimary);
+        this->setFixedSize(small ? 16 : 48, small ? 16 : 48);
+        this->setBorderRadius(small ? 8 : 24);
+    }
+    QLabel *text;
+};
 
+GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, QString guildName, const QString& guildIcon, bool smallp, QWidget *parent)
+    : Widget(parent)
+{
+    small = smallp;
+    QObject::connect(this, &GuildIcon::iconRecieved, this, &GuildIcon::setIcon);
+
+    // Create the guild icon
+    if (guildIcon.isNull()) {
+        // The guild doesn't have icon : we need to create one with the name
+        textIcon = new TextIcon(guildName, small);
+        QHBoxLayout *l = new QHBoxLayout(this);
+        l->setContentsMargins(0, 0, 0, 0);
+        l->addWidget(textIcon, 0, Qt::AlignLeft);
+        icon = nullptr;
     } else {
         // This guild has an icon
 
@@ -120,7 +129,7 @@ void const GuildIcon::setIcon(const QString& guildIconFileName)
 void GuildIcon::setActive()
 {
     if (!icon) {
-        text->setStyleSheet("background: none;color:" + Settings::colors[Settings::White].name());
+        textIcon->text->setStyleSheet("background: none;color:" + Settings::colors[Settings::White].name());
         textIcon->setBackgroundColor(Settings::BrandExperiment);
         textIcon->setBorderRadius(16);
     }
@@ -129,7 +138,7 @@ void GuildIcon::setActive()
 void GuildIcon::setInactive()
 {
     if (!icon) {
-        text->setStyleSheet("background: none;color:" + Settings::colors[Settings::TextNormal].name());
+        textIcon->text->setStyleSheet("background: none;color:" + Settings::colors[Settings::TextNormal].name());
         textIcon->setBackgroundColor(Settings::BackgroundPrimary);
         textIcon->setBorderRadius(24);
     }

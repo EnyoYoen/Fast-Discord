@@ -17,9 +17,10 @@ SettingsMenu::SettingsMenu(Api::RessourceManager *rmp, QWidget *parent)
 
     layout = new QHBoxLayout(this);
     CloseButton *close = new CloseButton(this);
-    QWidget *closeContainer = new QWidget(this);
+    Widget *closeContainer = new Widget(this);
     QVBoxLayout *closeLayout = new QVBoxLayout(closeContainer);
     closeContainer->setFixedWidth(57);
+    closeContainer->setBackgroundColor(Settings::BackgroundPrimary);
     closeLayout->setContentsMargins(0, 0, 0, 0);
     closeLayout->addWidget(close);
     closeLayout->addWidget(new QWidget(closeContainer));
@@ -56,8 +57,6 @@ SettingsMenu::SettingsMenu(Api::RessourceManager *rmp, QWidget *parent)
             layout->replaceWidget(layout->itemAt(1)->widget(), menu);
         }
     });
-    
-    this->setBackgroundColor(Settings::BackgroundPrimary);
 }
 
 } // namespace Ui

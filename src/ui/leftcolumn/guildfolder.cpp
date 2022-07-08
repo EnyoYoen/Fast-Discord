@@ -9,7 +9,7 @@
 namespace Ui {
 
 GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guildFolder, const QVector<Api::Guild *>& guilds, QWidget *parent)
-    : QLabel(parent)
+    : Widget(parent)
 {
     int color = guildFolder->color;
     guildIds = guildFolder->guildIds;
@@ -23,6 +23,8 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
     closedContent->setBorderRadius(16);
     closedContent->setBackgroundColor(QColor((color & 0x00FF0000) >> 16, (color & 0x0000FF00) >> 8, color & 0x000000FF, 101));
     QGridLayout *contentLayout = new QGridLayout(closedContent);
+    contentLayout->setContentsMargins(6, 6, 0, 0);
+    contentLayout->setSpacing(0);
 
     pill = new GuildPill(this);
     closedLayout->addWidget(pill);
@@ -58,7 +60,7 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
         guildWidgets.push_back(guildWidget);
 
         if (i < 4) {
-            contentLayout->addWidget(new GuildIcon(rm, actualGuild.id, actualGuild.name, actualGuild.icon, true, closedContent), (i < 2 ? 0 : 1), i%2);
+            contentLayout->addWidget(new GuildIcon(rm, actualGuild.id, actualGuild.name, actualGuild.icon, closedContent, this), (i < 2 ? 0 : 1), i%2);
         }
     }
 

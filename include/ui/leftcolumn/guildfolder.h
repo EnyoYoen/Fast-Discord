@@ -9,7 +9,7 @@
 
 namespace Ui {
 
-class GuildFolder : public QLabel
+class GuildFolder : public Widget
 {
     Q_OBJECT
 public:

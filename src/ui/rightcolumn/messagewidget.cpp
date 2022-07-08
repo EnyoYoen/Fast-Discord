@@ -190,7 +190,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
 
     if (message->referencedMessage != nullptr && message->referencedMessage->id != 0) {
         Api::Message *ref = message->referencedMessage;
-        height += 18;
+        height += 22;
         isFirst = true;
 
         reply = new Widget(this);
@@ -216,10 +216,11 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
 
         QLabel *username = new QLabel(ref->author.username, reply);
         username->setFont(font);
-        username->setFixedHeight(18);
+        username->setFixedHeight(22);
         username->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
         username->setTextInteractionFlags(Qt::TextSelectableByMouse);
         username->setCursor(QCursor(Qt::PointingHandCursor));
+        username->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name());
 
         Label *content = new Label(ref->content, nullptr);
         content->setFont(font);
@@ -243,7 +244,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         const Api::User& author = message->author;
         QString avatarId = author.avatar;
 
-        height += 48;
+        height += 52;
 
         // Get the icon of the message
         if (avatarId.isNull()) {
@@ -263,22 +264,18 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         // Widget to show some infos of the message
         Widget *messageInfos = new Widget(data);
         QHBoxLayout *infosLayout = new QHBoxLayout(messageInfos);
-        Label *name = new Label(author.username, messageInfos);
+        QLabel *name = new QLabel(author.username, messageInfos);
         font.setPixelSize(16);
-        name->setTextColor(Settings::HeaderPrimary);
-        name->setFixedSize(QFontMetrics(font).horizontalAdvance(author.username), 22);
         name->setFont(font);
+        name->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        name->setCursor(QCursor(Qt::PointingHandCursor));
+        name->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name());
+        name->setCursor(QCursor(Qt::IBeamCursor));
         Label *date = new Label(processTimestamp(dateTime), messageInfos);
         font.setPixelSize(12);
         date->setTextColor(Settings::TextMuted);
         date->setFixedSize(QFontMetrics(font).horizontalAdvance(processTimestamp(dateTime)), 22);
         date->setFont(font);
-
-        // Style the name label
-        name->setCursor(QCursor(Qt::IBeamCursor));
-        name->setTextColor(Settings::HeaderPrimary);
-
-        // Style the date
         date->setTextColor(Settings::TextMuted);
 
         // Add widgets and style the infos layout

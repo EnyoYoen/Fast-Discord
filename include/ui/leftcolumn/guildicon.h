@@ -9,6 +9,8 @@
 
 namespace Ui {
 
+class TextIcon;
+
 class GuildIcon : public Widget
 {
     Q_OBJECT
@@ -25,8 +27,7 @@ private slots:
 
 private:
     RoundedImage *icon;
-    Label        *textIcon;
-    QLabel       *text;
+    TextIcon     *textIcon;
     bool          small;
 };
 

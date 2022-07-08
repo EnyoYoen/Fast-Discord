@@ -48,15 +48,16 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
 
         privateChannels = Api::unmarshalMultiple<Api::PrivateChannel>(data["private_channels"].toArray());
         std::sort(privateChannels.begin(), privateChannels.end(),
-            [](const Api::PrivateChannel *a, const Api::PrivateChannel *b) {
+            [](const Api::PrivateChannel *a, const Api::PrivateChannel *b) -> bool {
                 if (a->lastMessageId == 0 && b->lastMessageId == 0)
-                    return a->id > b->id;
+                    return a->id < b->id;
                 if (a->lastMessageId == 0) 
-                    return a->id > a->lastMessageId;
+                    return a->id < a->lastMessageId;
                 if (b->lastMessageId == 0)
-                    return a->lastMessageId > b->id;
-                return a->lastMessageId > b->lastMessageId;
+                    return a->lastMessageId < b->id;
+                return a->lastMessageId < b->lastMessageId;
             });
+        std::reverse(privateChannels.begin(), privateChannels.end());
 
         users = Api::unmarshalMultiple<Api::User>(data["users"].toArray());
         emit privateChannelsReceived(privateChannels);
