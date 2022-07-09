@@ -135,7 +135,7 @@ void const MessageArea::scrollBarMoved(int value)
     messageBox->setBackgroundColor(Settings::BackgroundPrimary);
     tempScrollBarValue = value;
     tempScrollBarRange = this->verticalScrollBar()->maximum() - this->verticalScrollBar()->minimum();
-    if (value < tempScrollBarRange * 0.1 && emitScrollBarHigh && timestamp - QDateTime::currentSecsSinceEpoch() > 1) {
+    if (value < tempScrollBarRange * 0.1 && emitScrollBarHigh && timestamp - QDateTime::currentSecsSinceEpoch() < -1) {
         emitScrollBarHigh = false;
         emit scrollbarHigh();
     }
