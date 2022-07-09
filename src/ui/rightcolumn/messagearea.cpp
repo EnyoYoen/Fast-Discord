@@ -34,8 +34,8 @@ MessageArea::MessageArea(Api::RessourceManager *rmp, QWidget * /*parent*/)
     this->setContentsMargins(0, 0, 0, 0);
     this->setWidgetResizable(true);
     this->setStyleSheet("QScrollArea {border: none; padding: 0px;}"
-                        "QScrollBar::handle:vertical {border: none; border-radius: 4px; background-color: #202225;}"
-                        "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 4px; width: 8px;}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 4px; width: 8px;}"
                         "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
                         "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                         "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");

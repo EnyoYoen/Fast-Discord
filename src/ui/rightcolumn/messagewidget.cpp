@@ -179,8 +179,6 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
     Widget *iconContainer = new Widget(mainMessage);
     QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
 
-    int height = 0;
-
     QFont font;
     font.setPixelSize(14);
     font.setFamily("whitney");
@@ -194,7 +192,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         isFirst = true;
 
         reply = new Widget(this);
-        reply->setFixedHeight(22);
+        reply->setFixedHeight(28);
         QHBoxLayout *replyLayout = new QHBoxLayout(reply);
 
         Widget *replyIcon = new Widget(reply);
@@ -222,7 +220,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         username->setCursor(QCursor(Qt::PointingHandCursor));
         username->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name());
 
-        Label *content = new Label(ref->content, nullptr);
+        Label *content = new Label(ref->content.replace('\n', "  "), nullptr);
         content->setFont(font);
         content->setFixedSize(QFontMetrics(font).horizontalAdvance(ref->content), 18);
         content->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -244,20 +242,20 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         const Api::User& author = message->author;
         QString avatarId = author.avatar;
 
-        height += 52;
+        height += 40;
 
         // Get the icon of the message
         if (avatarId.isNull()) {
             // Use an asset if the user doesn't have an icon
             avatar = new RoundedImage("res/images/png/user-icon-asset0.png", 40, 40, 20, iconContainer);
             iconLayout->addWidget(avatar);
-            iconLayout->setAlignment(avatar, Qt::AlignHCenter);
+            iconLayout->setAlignment(avatar, Qt::AlignTop | Qt::AlignHCenter);
         } else {
             // Request the avatar
             QString avatarFileName = avatarId + (avatarId.indexOf("a_") == 0 ? ".gif" : ".png");
             avatar = new RoundedImage(40, 40, 20, iconContainer);
             iconLayout->addWidget(avatar);
-            iconLayout->setAlignment(avatar, Qt::AlignHCenter);
+            iconLayout->setAlignment(avatar, Qt::AlignTop | Qt::AlignHCenter);
             rm->getImage([this](void *avatarFileName) {this->setAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + author.id + "/" + avatarFileName, avatarFileName);
         }
 
@@ -514,7 +512,7 @@ void MessageWidget::guildMemberJoinMessage(const Api::Message *message)
 
 void MessageWidget::channelFollowAdd(const Api::Message *message)
 {
-    iconMessage(message, message->author.username + " has added " + message->content
+    iconMessage(message, message->content + " has added " + message->author.username
      + " to this channel. Its most important updates will show up here.", "green-right-arrow.svg");
 }
 

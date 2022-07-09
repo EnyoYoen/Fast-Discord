@@ -89,14 +89,14 @@ void MiddleColumn::setPrivateChannels(const QVector<Api::PrivateChannel *>& priv
         QObject::connect(privateChannelWidget, &PrivateChannelWidget::closeButtonClicked, this, &MiddleColumn::deleteChannel);
     }
     privateChannelListLayout->insertStretch(-1, 1);
-    privateChannelListLayout->setSpacing(0);
+    privateChannelListLayout->setSpacing(2);
     privateChannelListLayout->setContentsMargins(8, 8, 8, 0);
 
     // Set the channels to the column
     channelList->setWidget(privateChannelList);
     channelList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
-                               "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
-                               "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
+                               "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                               "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 8px; width: 3px;}"
                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
                                "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                                "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
@@ -177,8 +177,8 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
     // Style the channel list
     channelList->setWidget(guildChannelList);
     channelList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
-                               "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
-                               "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
+                               "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                               "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 8px; width: 3px;}"
                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
                                "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                                "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");

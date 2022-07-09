@@ -62,8 +62,8 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     this->setFixedWidth(218);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setStyleSheet("* {border: none; background-color:  " + Settings::colors[Settings::BackgroundSecondary].name() + "}"
-                        "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: #202225;}"
-                        "QScrollBar:vertical {border: none; background-color: #2F3136; border-radius: 8px; width: 3px;}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 8px; width: 3px;}"
                         "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
                         "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                         "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");

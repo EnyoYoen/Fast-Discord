@@ -9,10 +9,6 @@ namespace Ui {
 MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, QWidget *parent)
     : QLabel(parent)
 {
-    QFont font;
-    font.setPixelSize(16);
-    font.setFamily("whitney");
-    setFont(font);
     if (!content.isNull() && !content.isEmpty()) {
         QString html = "<html>";
         bool block = false, firstCharFound = false;
@@ -174,19 +170,25 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
         }
         if (block) {
             html.insert(6, "<style>"
-                    "*{color:#DCDDDE;}"
+                    "*{color:" + Settings::colors[Settings::TextNormal].name() + ";}"
                     "span{"
-                      "background-color:#4F545C;"
+                      "background-color:" + Settings::colors[Settings::InteractiveMuted].name() + ";"
+                      "border-radius:2px;"
                     "}"
                     "code,div{"
-                      "background-color:#2F3136;"
+                      "background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + ";"
                       "margin-bottom:0px;"
                     "}"
                     "</style>");
         }
         html += "</html>";
 
+        QFont font;
+        font.setPixelSize(16);
+        font.setFamily("whitney");
+        this->setFont(font);
         this->setText(html);
+        this->setWordWrap(true);
         this->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
         this->setCursor(QCursor(Qt::IBeamCursor));
         this->setStyleSheet("background-color:" + Settings::colors[Settings::BackgroundPrimary].name()

@@ -49,6 +49,7 @@ private:
     Widget *reply = nullptr;
     MarkdownLabel *content = nullptr;
     QVBoxLayout *dataLayout = nullptr;
+    int height = 0;
     bool isFirst;
 
 };

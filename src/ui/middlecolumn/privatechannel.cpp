@@ -17,6 +17,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     statusIcon = nullptr;
     statusBackground = nullptr;
     userCounter = 0;
+    clicked = false;
 
     // Variables initialization
     QString channelIconFileName;
