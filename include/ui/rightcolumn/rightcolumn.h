@@ -3,6 +3,7 @@
 #include "ui/common/basicwidgets.h"
 #include "ui/rightcolumn/messagearea.h"
 #include "ui/rightcolumn/channelheader.h"
+#include "ui/rightcolumn/memberlist.h"
 #include "api/jsonutils.h"
 #include "api/ressourcemanager.h"
 #include "api/objects/channel.h"
@@ -35,6 +36,7 @@ public slots:
     void openGuildChannel(const QString& channelName, const Api::Snowflake& guildId, const Api::Snowflake& id);
     void openPrivateChannel(const QString& channelName, const Api::Snowflake& id);
     void const addMessage(const Api::Message& message);
+    void setMembers(Api::GuildMemberGateway members);
 
 private slots:
     void const setMessages(const QVector<Api::Message *>& messages);
@@ -45,13 +47,14 @@ private slots:
     void const setUploadFilePath(const QString& filepath);
 
 private:
-    void openChannel(const Api::Snowflake& channelId, const QString& channelName, int type);
+    void openChannel(const Api::Snowflake& channelId, const QString& channelName, int type, const QVector<Api::Snowflake>& recipientIds);
 
     // Main widgets
     ChannelHeader *header;
     QHBoxLayout   *layout;
     QVBoxLayout   *messagesLayout;
     MessageArea   *messageArea;
+    MemberList    *memberList;
     Label         *typingLabel;
     QLabel        *fileLabel;
     Widget        *inputBox = nullptr;

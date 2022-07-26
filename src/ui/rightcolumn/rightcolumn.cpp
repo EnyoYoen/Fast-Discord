@@ -16,6 +16,7 @@ RightColumn::RightColumn(Api::RessourceManager *rmp, QWidget *parent)
     rm = rmp;
     placeholder = true;
     messagesLayout = nullptr;
+    memberList = nullptr;
 
     // Create some widgets
     header = new ChannelHeader(rm, this);
@@ -97,7 +98,8 @@ void RightColumn::clean()
 void RightColumn::openGuildChannel(const QString& channelName, const Api::Snowflake& guildId, const Api::Snowflake& id)
 {
     rm->getGuildChannel([&](void *channel){
-        openChannel(id, "#" + channelName, reinterpret_cast<Api::Channel *>(channel)->type);
+        openChannel(id, "#" + channelName, reinterpret_cast<Api::Channel *>(channel)->type, 
+            QVector<Api::Snowflake>());
     }, guildId, id);
 }
 
@@ -105,11 +107,12 @@ void RightColumn::openPrivateChannel(const QString& channelName, const Api::Snow
 {
     rm->getPrivateChannel([&](void *channel){
         int type = reinterpret_cast<Api::PrivateChannel *>(channel)->type;
-        openChannel(id, (type == Api::DM ? "@" : "") + channelName, type);
+        openChannel(id, (type == Api::DM ? "@" : "") + channelName, reinterpret_cast<Api::PrivateChannel *>(channel)->type, 
+            reinterpret_cast<Api::PrivateChannel *>(channel)->recipientIds);
     }, id);
 }
 
-void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& channelName, int type)
+void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& channelName, int type, const QVector<Api::Snowflake>& recipientIds)
 {
     if (type != Api::GuildVoice) {
         rm->requester->removeImageRequests();
@@ -183,11 +186,34 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         typingLabel->setFixedHeight(24);
         typingLabel->setTextColor(Settings::TextNormal);
 
+        Widget *messagesInputContainer = new Widget(messagesContainer);
+        QVBoxLayout *messagesInputContainerLayout = new QVBoxLayout(messagesInputContainer);
+        messagesInputContainerLayout->setContentsMargins(0, 0, 0, 0);
+        messagesInputContainerLayout->setSpacing(0);
+        messagesInputContainerLayout->addWidget(messageArea);
+        messagesInputContainerLayout->addWidget(inputContainer);
+        messagesInputContainerLayout->addWidget(typingLabel);
+
+        Widget *container = new Widget(messagesContainer);
+        QHBoxLayout *layoutContainer = new QHBoxLayout(container);
+        layoutContainer->setContentsMargins(0, 0, 0, 0);
+        layoutContainer->setSpacing(0);
+        layoutContainer->addWidget(messagesInputContainer);
+        if (type != Api::DM) {
+            rm->getGuildMembers([](void *){}, channelId);
+            
+            if (memberList) memberList->deleteLater();
+            memberList = new MemberList(rm, recipientIds, messagesInputContainer);
+            layoutContainer->addWidget(memberList);
+
+            QObject::connect(memberList, &MemberList::loadMoreMembers, [this](){
+                rm->getGuildMembers([](void *){}, currentOpenedChannel);
+            });
+        }
+
         // Add widgets to the message layout and style it
         messagesLayout->addWidget(header);
-        messagesLayout->addWidget(messageArea);
-        messagesLayout->addWidget(inputContainer);
-        messagesLayout->addWidget(typingLabel);
+        messagesLayout->addWidget(container);
         messagesLayout->setSpacing(0);
         messagesLayout->setContentsMargins(0, 0, 0, 0);
 
@@ -261,6 +287,11 @@ void const RightColumn::setUploadFilePath(const QString& file)
 {
     filePath = file;
     fileLabel->show();
+}
+
+void RightColumn::setMembers(Api::GuildMemberGateway members)
+{
+    if (memberList) memberList->setMembers(members);
 }
 
 } // namespace Ui

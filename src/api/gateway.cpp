@@ -73,14 +73,13 @@ void const Gateway::sendGuildChannelOpened(const QMap<Snowflake, QVector<QVector
         QVector<QVector<int>> messagesNumbers = it.value();
         for (int i = 0 ; i < messagesNumbers.size() ; i++) {
             data += "[";
-            for (int j = 0 ; j < messagesNumbers[i].size() ; j++) {
-                data += QString::number(messagesNumbers[i][j]) + (j + 1 < messagesNumbers[i].size() ? "," : "");
+            for (int j = 0 ; j < 2 ; j++) {
+                data += QString::number(messagesNumbers[i][j]) + (j ? "" : ",");
             }
             data += "]" + QString(i + 1 < messagesNumbers.size() ? "," : "");
         }
         data += "]";
     }
-
     send(GuildChannelOpened, data + "}}");
 }
 
@@ -167,7 +166,7 @@ void const Gateway::processBinaryMessage(const QByteArray& message)
 // Process a text message that the gateway recieves
 void const Gateway::processTextMessage(const QString& message)
 {
-    //qDebug() << "⇩" << message.mid(0, 198);
+    qDebug() << "⇩" << message.mid(0, 198);
     QJsonDocument payload = QJsonDocument::fromJson(message.toUtf8());
     QJsonValue data = payload["d"];
 

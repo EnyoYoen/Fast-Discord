@@ -22,6 +22,12 @@ void Label::setTextColor(Settings::ColorEnum color)
     update();
 }
 
+void Label::setTextColor(QColor color)
+{
+    tc = color;
+    update();
+}
+
 void Label::setFont(QFont fontp)
 {
     font = fontp;

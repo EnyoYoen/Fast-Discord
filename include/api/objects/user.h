@@ -10,12 +10,6 @@ namespace Api {
 //https://discord.com/developers/docs/resources/user#user-object
 struct User
 {
-    ~User() {
-        int a = 0;
-        a++;
-        int b = a +1;
-    }
-
     QString   username;
     QString   discriminator;
     QString   avatar;

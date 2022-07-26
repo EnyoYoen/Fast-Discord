@@ -21,6 +21,7 @@ public:
     ~RessourceManager();
 
     void getGuilds(Callback callback);
+    void getGuildMembers(Callback callback, Snowflake channelId);
     void getGuildChannel(Callback callback, const Snowflake& guildId, const Snowflake& id);
     void getGuildChannels(Callback callback, const Snowflake& id);
     void getPrivateChannel(Callback callback, const Snowflake& id);
@@ -55,6 +56,7 @@ signals:
     void unreadUpdateReceived(const Api::Snowflake&);
     void presenceReceived(const Api::Presence&);
     void messageReceived(const Api::Message&);
+    void memberUpdateReceived(const Api::GuildMemberGateway&);
     void channelCreated(const Api::Channel *, const Api::PrivateChannel *);
     void channelUpdated(const Api::Channel *, const Api::PrivateChannel *);
     void channelDeleted(const Api::Snowflake&, const Api::Snowflake&, int);
@@ -73,7 +75,7 @@ private:
 
     QVector<Snowflake> openedDMChannels;
     QMap<Snowflake, QMap<Snowflake, QVector<QVector<int>>>> openedGuildsChannels;
-    //       ^ guild ID  ^ channels  ^ channel ID  ^ indexes of messages that we have
+    //   ^ guild ID  ^ channels  ^ channel ID  ^ indexes of members that we have
 
     Client         *client = nullptr;
     ClientSettings *clientSettings = nullptr;

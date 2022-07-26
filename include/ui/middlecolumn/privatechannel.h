@@ -35,7 +35,7 @@ public slots:
 
 private:
     void mouseReleaseEvent(QMouseEvent *event) override;
-    void mousePressEvent (QMouseEvent *) override;
+    void mousePressEvent(QMouseEvent *) override;
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
     void setIcon(const QString& iconFileName);

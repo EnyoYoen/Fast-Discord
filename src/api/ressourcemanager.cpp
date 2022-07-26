@@ -188,6 +188,59 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
         Api::Presence *presence;
         Api::unmarshal<Api::Presence>(data.toObject(), &presence);
         emit presenceReceived(*presence);
+    } else if (eventName == "GUILD_MEMBER_LIST_UPDATE") {
+        Api::GuildMemberGateway *members;
+        Api::unmarshal<Api::GuildMemberGateway>(data.toObject(), &members);
+        emit memberUpdateReceived(*members);
+    }
+}
+
+void RessourceManager::getGuildMembers(Callback callback, Snowflake channelId)
+{
+    bool found = false;
+    for (auto it = openedGuildsChannels.begin() ; it != openedGuildsChannels.end() ; it++) {
+        QMap<Snowflake, QVector<QVector<int>>> channels = it.value();
+        if (channels.find(channelId) != channels.end()) {
+            found = true;
+            
+            int index = channels[channelId].size();
+
+            if (index == 0) {
+                for (auto it2 = openedGuildsChannels.begin() ; it2 != openedGuildsChannels.end() ; it2++) {
+                    for (auto it3 = it2.value().begin() ; it3 != it2.value().end() ; it3++) {
+                        if (it3.key() != channelId)
+                            it3.value().clear();
+                    }
+                }
+                
+                QVector<int> indexes;
+                indexes.push_back(0);
+                indexes.push_back(99);
+                channels[channelId].push_back(indexes);
+                openedGuildsChannels[it.key()] = channels;
+            } else {
+                
+            }
+            
+            gw->sendGuildChannelOpened(channels, it.key(), !(bool)index, !(bool)index, !(bool)index);
+            break;
+        }
+    }
+    if (!found) {
+        gw->sendDMChannelOpened(channelId);
+    }
+
+    for (auto it = openedGuildsChannels.begin() ; it != openedGuildsChannels.end() ; it++) {
+        QMap<Snowflake, QVector<QVector<int>>> channels = it.value();
+        if (channels.find(channelId) != channels.end()) {
+            int index = channels[channelId].size() * 100;
+            QVector<int> indexes;
+            indexes.push_back(index);
+            indexes.push_back(index + 99);
+            channels[channelId].push_back(indexes);
+            gw->sendGuildChannelOpened(channels, it.key(), false, false, false);
+            break;
+        }
     }
 }
 
@@ -255,25 +308,6 @@ void RessourceManager::getPrivateChannels(Callback callback)
 
 void RessourceManager::getMessages(Callback callback, const Snowflake& channelId, int limit, bool newMessages)
 {
-    bool found = false;
-    for (auto it = openedGuildsChannels.begin() ; it != openedGuildsChannels.end() ; it++) {
-        QMap<Snowflake, QVector<QVector<int>>> channels = it.value();
-        if (channels.find(channelId) != channels.end()) {
-            found = true;
-            unsigned int size = messages[channelId].size();
-
-            QVector<int> indexes;
-            indexes.push_back(size);
-            indexes.push_back(size + limit);
-            channels[channelId].push_back(indexes);
-            gw->sendGuildChannelOpened(channels, it.key(), true, true, true);
-            break;
-        }
-    }
-    if (!found) {
-        gw->sendDMChannelOpened(channelId);
-    }
-
     if (newMessages) {
         if (messages[channelId].size() >= 50)
             requester->getMessages([&, callback](void *messagesPtr) {

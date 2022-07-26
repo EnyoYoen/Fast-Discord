@@ -368,6 +368,7 @@ void MessageWidget::iconMessage(const Api::Message *message, const QString &text
     QLabel *icon = new QLabel(this);
     textLabel = new Label(text, this);
     textLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(text), 22);
+    textLabel->setFlags(Qt::AlignVCenter);
     textLabel->setFont(font);
 
     font.setPixelSize(12);

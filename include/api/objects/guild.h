@@ -55,6 +55,7 @@ struct Guild
     QVector<Channel *>        channels;
     QVector<Channel *>        threads;
     void                     *presences; // TODO
+    QVector<Role *>           roles;
     QVector<StageInstance *>  stageInstances;
     QVector<Sticker *>        stickers;
     QString                   name;
@@ -91,10 +92,12 @@ struct Guild
     qint32                    maxVideoChannelUsers;
     qint32                    approximateMemberCount;
     qint32                    approximatePresenceCount;
+    qint32                    nsfw;
     qint32                    nsfwLevel;
     optbool                   owner;
     optbool                   widgetEnabled;
     optbool                   large;
+    optbool                   lazy;
     optbool                   unavailable;
     bool                      premiumProgressBarEnabled;
 };

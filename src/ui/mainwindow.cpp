@@ -69,6 +69,7 @@ MainWindow::MainWindow() : Widget(nullptr)
     QObject::connect(rm, &Api::RessourceManager::channelCreated, middleColumn, &MiddleColumn::createChannel);
     QObject::connect(rm, &Api::RessourceManager::channelUpdated, middleColumn, &MiddleColumn::updateChannel);
     QObject::connect(rm, &Api::RessourceManager::channelDeleted, middleColumn, &MiddleColumn::deleteChannel);
+    QObject::connect(rm, &Api::RessourceManager::memberUpdateReceived, rightColumn, &RightColumn::setMembers);
 }
 
 void const MainWindow::addAccountInConfig(QSettings *settings, const QMap<QString, QString> accountMap) {

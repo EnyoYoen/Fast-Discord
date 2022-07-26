@@ -201,7 +201,7 @@ class Label : public QWidget
 {
 	CUSTOM_WIDGET(
 		if (!text.isNull()) {
-			p.setPen(QPen(Settings::colors[textColor]));
+			p.setPen(QPen(tc == Settings::colors[Settings::None] ? Settings::colors[textColor] : tc));
 			p.setFont(font);
 			p.drawText((textCoords.isNull() ? this->rect() : textCoords), flags, text);
 		}
@@ -212,6 +212,7 @@ public:
 
 	void setText(QString text);
 	void setTextColor(Settings::ColorEnum color);
+	void setTextColor(QColor color);
 	void setFont(QFont fontp);
 	void setFlags(int flagsp);
 	void setTextCoordinates(QRect coordinates);
@@ -221,6 +222,7 @@ public:
 private:
 	QFont font;
 	QRect textCoords;
+	QColor tc = Settings::colors[Settings::None];
 	Settings::ColorEnum textColor = Settings::None;
 	int flags = Qt::AlignVCenter | Qt::AlignLeft;
 };

@@ -681,12 +681,15 @@ template <>
 void unmarshal<GuildMember>(const QJsonObject& jsonObj, GuildMember **object)
 {
     User *user = new User;
+    Presence *presence = new Presence;
 
     unmarshal<User>(jsonObj, "user", &user);
+    unmarshal<Presence>(jsonObj, "presence", &presence);
 
     *object = new GuildMember {
         user,
-        getStringsFromJson(jsonObj["roles"].toArray()),
+        presence,
+        getSnowflakesFromJson(jsonObj["roles"].toArray()),
 
         getString(jsonObj, "nick"),
         getString(jsonObj, "avatar"),
@@ -698,6 +701,157 @@ void unmarshal<GuildMember>(const QJsonObject& jsonObj, GuildMember **object)
         jsonObj["deaf"].toBool(),
         jsonObj["mute"].toBool(),
         jsonObj["pending"].toBool()
+    };
+}
+
+template <>
+void unmarshal<GuildGroup>(const QJsonObject& jsonObj, GuildGroup **object)
+{
+    *object = new GuildGroup {
+        getString(jsonObj, "id"),
+
+        jsonObj["count"].toInt()
+    };
+}
+
+template <>
+void unmarshal<MemberOrGroup>(const QJsonObject& jsonObj, MemberOrGroup **object)
+{
+    if (jsonObj["member"].isUndefined()) {
+        GuildGroup *group = new GuildGroup;
+        unmarshal<GuildGroup>(jsonObj, "group", &group);
+        *object = new MemberOrGroup {
+            reinterpret_cast<void *>(group),
+
+            false
+        };
+    } else {
+        GuildMember *member = new GuildMember;
+        unmarshal<GuildMember>(jsonObj, "member", &member);
+        *object = new MemberOrGroup {
+            reinterpret_cast<void *>(member),
+
+            true
+        };
+    }
+}
+
+template <>
+void unmarshal<GuildMemberSync>(const QJsonObject& jsonObj, GuildMemberSync **object)
+{
+    QMap<QString, QVector<GuildMember *>> groupsMembers;
+    QMap<QString, qint32>                 groupsCount;
+    QVector<qint32>                       membersRange;
+
+    QJsonArray range = jsonObj["range"].toArray();
+    QJsonArray items = jsonObj["items"].toArray();
+
+    membersRange.append(range[0].toInt());
+    membersRange.append(range[1].toInt());
+
+    QString groupId;
+    for (int i = 0 ; i < items.size() ; i++) {
+        if (items[i].toObject()["group"].isObject()) {
+            groupId = getString(items[i].toObject()["group"].toObject(), "id");
+            groupsCount[groupId] = items[i].toObject()["group"].toObject()["count"].toInt();
+        } else {
+            GuildMember *member;
+            unmarshal<GuildMember>(items[i].toObject()["member"].toObject(), &member);
+            groupsMembers[groupId].append(member);
+        }
+    }
+
+    *object = new GuildMemberSync {
+        groupsMembers,
+        groupsCount,
+        membersRange,
+    };
+}
+
+template <>
+void unmarshal<GuildMemberUpdate>(const QJsonObject& jsonObj, GuildMemberUpdate **object)
+{
+    MemberOrGroup *memberOrGroup = new MemberOrGroup;
+
+    unmarshal<MemberOrGroup>(jsonObj, "item", &memberOrGroup);
+
+    *object = new GuildMemberUpdate {
+        memberOrGroup,
+
+        jsonObj["index"].toInt()
+    };
+};
+
+template <>
+void unmarshal<GuildMemberDelete>(const QJsonObject& jsonObj, GuildMemberDelete **object)
+{
+    *object = new GuildMemberDelete {
+        jsonObj["index"].toInt()
+    };
+};
+
+template <>
+void unmarshal<GuildMemberInsert>(const QJsonObject& jsonObj, GuildMemberInsert **object)
+{
+    MemberOrGroup *memberOrGroup = new MemberOrGroup;
+
+    unmarshal<MemberOrGroup>(jsonObj, "item", &memberOrGroup);
+
+    *object = new GuildMemberInsert {
+        memberOrGroup,
+
+        jsonObj["index"].toInt()
+    };
+};
+
+template <>
+void unmarshal<GuildMemberGateway>(const QJsonObject& jsonObj, GuildMemberGateway **object)
+{
+    QMap<QString, qint32> groups;
+    QVector<void *> structs;
+    QVector<GuildMemberOp> ops;
+
+    QJsonArray groupsj = jsonObj["groups"].toArray();
+    QJsonArray opsj = jsonObj["ops"].toArray();
+
+    for (int i = 0 ; i < groupsj.size() ; i++) {
+        QJsonObject actualGroup = groupsj[i].toObject();
+        groups[actualGroup["id"].toString()] = actualGroup["count"].toInt();
+    }
+
+    for (int i = 0 ; i < opsj.size() ; i++) {
+        void *s;
+        GuildMemberOp op;
+        QJsonObject actualOp = opsj[i].toObject();
+        QString opName = actualOp["op"].toString();
+        if (opName == "SYNC") {
+            op = GuildMemberOp::Sync;
+            unmarshal<GuildMemberSync>(actualOp, reinterpret_cast<GuildMemberSync **>(&s));
+        } else if (opName == "UPDATE") {
+            op = GuildMemberOp::Update;
+            unmarshal<GuildMemberUpdate>(actualOp, reinterpret_cast<GuildMemberUpdate **>(&s));
+        } else if (opName == "DELETE") {
+            op = GuildMemberOp::Delete;
+            unmarshal<GuildMemberDelete>(actualOp, reinterpret_cast<GuildMemberDelete **>(&s));
+        } else if (opName == "INSERT") {
+            op = GuildMemberOp::Insert;
+            unmarshal<GuildMemberInsert>(actualOp, reinterpret_cast<GuildMemberInsert **>(&s));
+        }
+        structs.append(s);
+        ops.append(op);
+    }
+
+    *object = new GuildMemberGateway {
+        groups,
+        structs,
+        ops,
+
+        getString(jsonObj, "id"),
+        
+        jsonObj["guild_id"].toVariant().toULongLong(),
+
+        jsonObj["online_count"].toInt(),
+        jsonObj["member_count"].toInt(),
     };
 }
 
@@ -768,6 +922,38 @@ void unmarshal<StageInstance>(const QJsonObject& jsonObj, StageInstance **object
 }
 
 template <>
+void unmarshal<RoleTags>(const QJsonObject& jsonObj, RoleTags **object)
+{
+    *object = new RoleTags {
+        getString(jsonObj, "bot_id"),
+        getString(jsonObj, "integration_id")
+    };
+}
+
+template <>
+void unmarshal<Role>(const QJsonObject& jsonObj, Role **object)
+{
+    RoleTags *roleTags = new RoleTags;
+
+    unmarshal<RoleTags>(jsonObj["tags"].toObject(), &roleTags);
+
+    *object = new Role {
+        roleTags,
+
+        getString(jsonObj, "id"),
+        getString(jsonObj, "name"),
+        getString(jsonObj, "permissions"),
+
+        jsonObj["color"].toInt(),
+        jsonObj["position"].toInt(),
+
+        jsonObj["hoist"].toBool(),
+        jsonObj["managed"].toBool(),
+        jsonObj["mentionnable"].toBool()
+    };
+}
+
+template <>
 void unmarshal<Guild>(const QJsonObject& jsonObj, Guild **object)
 {
     WelcomeScreen *welcomeScreen = new WelcomeScreen;
@@ -782,6 +968,7 @@ void unmarshal<Guild>(const QJsonObject& jsonObj, Guild **object)
         unmarshalMultiple<Channel>(jsonObj["channels"].toArray()),
         unmarshalMultiple<Channel>(jsonObj["threads"].toArray()),
         nullptr,
+        unmarshalMultiple<Role>(jsonObj["roles"].toArray()),
         unmarshalMultiple<StageInstance>(jsonObj["stage_instances"].toArray()),
         unmarshalMultiple<Sticker>(jsonObj["stickers"].toArray()),
 
@@ -821,11 +1008,13 @@ void unmarshal<Guild>(const QJsonObject& jsonObj, Guild **object)
         jsonObj["max_video_channel_users"].toInt(),
         jsonObj["approximate_member_count"].toInt(),
         jsonObj["approximate_presence_count"].toInt(),
+        jsonObj["nsfw"].toInt(),
         jsonObj["nsfw_level"].toInt(),
 
         (optbool)jsonObj["owner"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
         (optbool)jsonObj["widget_enabled"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
         (optbool)jsonObj["large"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
+        (optbool)jsonObj["lazy"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
         (optbool)jsonObj["unavailable"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
         jsonObj["premium_progress_bar_enabled"].toBool()
     };

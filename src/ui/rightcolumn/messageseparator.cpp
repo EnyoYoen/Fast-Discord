@@ -61,6 +61,7 @@ MessageSeparator::MessageSeparator(const QDate& date, QWidget *parent)
     font.setPixelSize(12);
     font.setFamily("whitney");
     dateLabel->setFont(font);
+    dateLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(month + " " + QString::number(date.day()) + ", " + QString::number(date.year())), 17);
 
     // Add the widgets to the layout
     layout->addWidget(line1);
