@@ -19,6 +19,9 @@ class MainWindow : public Widget
 
 public:
     MainWindow();
+    ~MainWindow();
+
+    void updateTheme();
 
 signals:
     void clientAndSettingsReceived();

@@ -19,8 +19,8 @@ MainWindow::MainWindow() : Widget(nullptr)
 {
     // Style the window
     // this->setWindowFlags(Qt::CustomizeWindowHint); Soon
-    QFontDatabase::addApplicationFont("res/fonts/whitney.otf");
     this->setGeometry(0, 0, 940, 728);
+    QFontDatabase::addApplicationFont("res/fonts/whitney.otf");
 
     // Get account token from accounts list
     QString token = getAccountToken();
@@ -28,7 +28,7 @@ MainWindow::MainWindow() : Widget(nullptr)
     // Create the ressource manager
     rm = new Api::RessourceManager(token);
 
-    Settings::initSettings(rm);
+    Settings::initSettings(rm, token);
 
     // Create all the widgets
     mainLayout = new QHBoxLayout(this);
@@ -137,16 +137,14 @@ QString const MainWindow::getAccountToken() {
     if (accountsMap.isEmpty()) {
         // Add token if it's empty
         QMap<QString, QString> tknmp = getNewAccount();
-        if (tknmp.isEmpty()) {
+        if (tknmp.isEmpty())
             exit(0);
-        }
 
         name = tknmp.firstKey();
         token = tknmp.first();
 
         addAccountInConfig(settings, tknmp);
-    }
-    else {
+    } else {
         // Get account from list
         bool ok;
         QString accountName = QInputDialog::getItem(nullptr, "Accounts", "Choose your account", accountsMap.keys(), 0, false, &ok);
@@ -193,6 +191,24 @@ void MainWindow::closeSettingsMenu()
     leftColumn->show();
     middleColumn->show();
     rightColumn->show();
+}
+
+void MainWindow::updateTheme()
+{
+    leftColumn->setStyleSheet("border: none;"
+                              "background-color:" + Settings::colors[Settings::BackgroundTertiary].name());
+    middleColumn->channelList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
+                               "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                               "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(8)) + "px; width: " + QString::number(Settings::scale(3)) + "px;}"
+                               "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
+                               "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                               "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
+    rightColumn->updateTheme();
+}
+
+MainWindow::~MainWindow()
+{
+    Settings::saveSettings();
 }
 
 } // namespace Ui

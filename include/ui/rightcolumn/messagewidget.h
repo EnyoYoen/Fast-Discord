@@ -17,6 +17,10 @@ class MessageWidget : public Widget
 public:
     MessageWidget(Api::RessourceManager *rm, const Api::Message *message, bool isFirst, bool separatorBefore, QWidget *parent);
 
+    void updateSpacing();
+    void updateFont();
+    void updateTheme();
+
     Api::RessourceManager *rm; // To request the API
 
 private:
@@ -43,15 +47,20 @@ private:
     QString hoveredTimestamp;
     RoundedImage *avatar = nullptr;
     RoundedImage *replyAvatar = nullptr;
+    QLabel *name = nullptr;
+    QLabel *username = nullptr;
     Label *timestampLabel = nullptr;
     Label *textLabel = nullptr;
+    Label *date = nullptr;
+    Label *replyContent = nullptr;
     Widget *mainMessage = nullptr;
     Widget *reply = nullptr;
+    Widget *iconContainer = nullptr;
     MarkdownLabel *content = nullptr;
     QVBoxLayout *dataLayout = nullptr;
-    int height = 0;
+    int heightp = 0;
     bool isFirst;
-
+    bool separatorBefore;
 };
 
 } // namespace Ui

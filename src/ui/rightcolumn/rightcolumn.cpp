@@ -154,36 +154,36 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         
         fileLabel = new QLabel(inputBox);
         QPixmap pix("res/images/svg/archive-icon.svg");
-        fileLabel->setPixmap(pix.scaled(18, 24, Qt::KeepAspectRatio));
-        fileLabel->setFixedSize(18, 24);
+        fileLabel->setPixmap(pix.scaled(Settings::scale(18), Settings::scale(24), Qt::KeepAspectRatio));
+        fileLabel->setFixedSize(Settings::scale(18), Settings::scale(24));
         fileLabel->hide();
 
         // Add widget to the layout and style it
         inputLayout->addWidget(uploadButton);
         inputLayout->addWidget(textInput);
         inputLayout->addWidget(fileLabel);
-        inputLayout->setContentsMargins(16, 0, 16, 0);
+        inputLayout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
         inputLayout->setSpacing(0);
 
         // Style the input box
-        inputBox->setFixedHeight(44);
+        inputBox->setFixedHeight(Settings::scale(44));
         inputBox->setBackgroundColor(Settings::ChanneltextareaBackground);
-        inputBox->setFixedHeight(44);
-        inputBox->setBorderRadius(8);
+        inputBox->setFixedHeight(Settings::scale(44));
+        inputBox->setBorderRadius(Settings::scale(8));
 
         // Add the input in an other container
         containerLayout->addWidget(inputBox);
-        containerLayout->setContentsMargins(16, 0, 16, 0);
+        containerLayout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
         inputLayout->setSpacing(0);
 
         // Create and style the typing label
         typingLabel = new Label(messagesContainer);
         QFont font;
-        font.setPixelSize(14);
+        font.setPixelSize(Settings::scale(14));
         font.setFamily("whitney");
         typingLabel->setFont(font);
         typingLabel->setText("");
-        typingLabel->setFixedHeight(24);
+        typingLabel->setFixedHeight(Settings::scale(24));
         typingLabel->setTextColor(Settings::TextNormal);
 
         Widget *messagesInputContainer = new Widget(messagesContainer);
@@ -292,6 +292,19 @@ void const RightColumn::setUploadFilePath(const QString& file)
 void RightColumn::setMembers(Api::GuildMemberGateway members)
 {
     if (memberList) memberList->setMembers(members);
+}
+
+void RightColumn::updateTheme()
+{
+    if (memberList) {
+        memberList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(2)) + "px; width: " + QString::number(Settings::scale(4)) + "px;}"
+                        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
+                        "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
+    }
+    messageArea->updateTheme();
 }
 
 } // namespace Ui

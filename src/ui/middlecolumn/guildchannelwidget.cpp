@@ -16,7 +16,7 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     font.setFamily("whitney");
 
     container = new Widget(this);
-    container->setBorderRadius(4);
+    container->setBorderRadius(Settings::scale(4));
 
     //  Determine the icon of this channel with its type
     QString iconNumber;
@@ -44,15 +44,15 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
 
     if (type == Api::GuildCategory) {
         hoverColor = clickedColor = Settings::None;
-        font.setPixelSize(11);
+        font.setPixelSize(Settings::scale(11));
         font.setBold(true);
-        this->setFixedSize(224, 36);
-        this->setContentsMargins(0, 18, 0, 0);
+        this->setFixedSize(Settings::scale(224), Settings::scale(36));
+        this->setContentsMargins(0, Settings::scale(18), 0, 0);
     } else {
         hoverColor = Settings::BackgroundModifierHover;
         clickedColor = Settings::BackgroundModifierActive;
-        font.setPixelSize(16);
-        this->setFixedSize(224, 32);
+        font.setPixelSize(Settings::scale(16));
+        this->setFixedSize(Settings::scale(224), Settings::scale(32));
     }
 
     QHBoxLayout *layout = new QHBoxLayout(container);
@@ -61,9 +61,9 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     icon = new Widget(container);
     icon->setImage(iconName);
     if (type == Api::GuildCategory)
-        icon->setFixedSize(16, 16);
+        icon->setFixedSize(Settings::scale(16), Settings::scale(16));
     else
-        icon->setFixedSize(26, 26);
+        icon->setFixedSize(Settings::scale(26), Settings::scale(26));
 
     // Create the name label
     name = new Label((type == Api::GuildCategory ? guildChannel.name.toUpper() : guildChannel.name), container);
@@ -77,7 +77,7 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
     layout->setContentsMargins(0, 0, 0, 0);
 
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
-    mainLayout->setContentsMargins((type == Api::GuildCategory ? 0 : 16), 0, 0, 0);
+    mainLayout->setContentsMargins((type == Api::GuildCategory ? 0 : Settings::scale(16)), 0, 0, 0);
     mainLayout->addWidget(container);
 }
 

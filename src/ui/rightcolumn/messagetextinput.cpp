@@ -14,7 +14,7 @@ MessageTextInput::MessageTextInput(const QString& channelName, QWidget *parent)
     lastTypingTimestamp = 0;
 
     QFont font;
-    font.setPixelSize(16);
+    font.setPixelSize(Settings::scale(16));
     font.setFamily("whitney");
     this->setFont(font);
 
@@ -22,7 +22,7 @@ MessageTextInput::MessageTextInput(const QString& channelName, QWidget *parent)
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setPlaceholderText("Message " + channelName);
-    this->setFixedHeight(30);
+    this->setFixedHeight(Settings::scale(30));
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     this->setStyleSheet("color:" + Settings::colors[Settings::ChanneltextareaPlaceholder].name() + ";"
                         "border: 0px;"

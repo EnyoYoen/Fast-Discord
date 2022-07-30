@@ -17,7 +17,7 @@ FileUploadButton::FileUploadButton(QWidget *parent)
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
     qp.end();
     this->setPixmap(img);
-    this->setFixedSize(40, 24);
+    this->setFixedSize(Settings::scale(40), Settings::scale(24));
     this->setCursor(Qt::PointingHandCursor);
 }
 

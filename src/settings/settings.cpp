@@ -1,14 +1,40 @@
 #include "settings/settings.h"
 
 #include <QPalette>
+#include <QLabel>
+
+int Settings::fontScaling;
+int Settings::messageGroupSpace;
+int Settings::lastMessageGroupSpace;
+bool Settings::compactModeEnabled;
 
 QMap<Settings::ColorEnum, QColor> Settings::darkColors;
 QMap<Settings::ColorEnum, QColor> Settings::lightColors;
 QMap<Settings::ColorEnum, QColor> Settings::colors;
+Settings::Theme Settings::theme;
+Settings::Theme Settings::actualTheme;
+float Settings::saturation;
+float Settings::scaleFactor;
+float Settings::newScaleFactor;
 
-void Settings::initSettings(Api::RessourceManager *rm)
+QString Settings::token;
+
+void Settings::initSettings(Api::RessourceManager *rm, QString tokenp)
 {
-    float saturation = 1;
+    token = tokenp;
+    
+    QSettings settings("Fast-Discord", "config");
+    settings.beginGroup(token);
+    fontScaling        = settings.value("fontScaling", 16).toInt();
+    messageGroupSpace  = settings.value("messageGroupSpace", 16).toInt();
+    compactModeEnabled = settings.value("compactModeEnabled", false).toBool();
+    theme              = (Settings::Theme)settings.value("theme", (int)Theme::Sync).toInt();
+    saturation         = settings.value("saturation", 1.0f).toFloat();
+    scaleFactor        = settings.value("scaleFactor", 1.0f).toFloat();
+    settings.endGroup();
+    
+    newScaleFactor = scaleFactor;
+    
     darkColors = {
         {None,                                QColor(0, 0, 0, 0)},
         {HeaderPrimary,                       QColor(255, 255, 255)},
@@ -55,7 +81,8 @@ void Settings::initSettings(Api::RessourceManager *rm)
         {TextPositive,                        QColor::fromHsl(139, (int)(0.516 * saturation * 255), (int)(0.522 * 255))},
         {Link,                                QColor::fromHsl(197, (int)(saturation * 255), (int)(0.478 * 255))},
         {Error,                               QColor::fromHsl(359, (int)(0.82 * saturation * 255), (int)(0.739 * 255))},
-        {SettingsButtonTextColor,             QColor(255, 255, 255)}
+        {SettingsButtonTextColor,             QColor(255, 255, 255)},
+        {SliderBackground,                    QColor::fromHsl(217, (int)(0.076 * saturation * 255), (int)(0.335 * 255))}
     };
     lightColors = {
         {None,                                QColor(0, 0, 0, 0)},
@@ -103,7 +130,8 @@ void Settings::initSettings(Api::RessourceManager *rm)
         {TextPositive,                        QColor::fromHsl(139, (int)(0.471 * saturation * 255), (int)(0.333 * 255))},
         {Link,                                QColor::fromHsl(212, (int)(saturation * 255), (int)(0.439 * 255))},
         {Error,                               QColor::fromHsl(359, (int)(0.563 * saturation * 255), (int)(0.404 * 255))},
-        {SettingsButtonTextColor,             QColor(116, 127, 141)}
+        {SettingsButtonTextColor,             QColor(116, 127, 141)},
+        {SliderBackground,                    QColor::fromHsl(210, (int)(0.029 * saturation * 255), (int)(0.867 * 255))}
     };
     colors = darkColors;
     colors[White]              = QColor(255, 255, 255);
@@ -124,6 +152,10 @@ void Settings::initSettings(Api::RessourceManager *rm)
     colors[RadioBarOrange]     = QColor::fromHsl(37, (int)(0.812 * saturation * 255), (int)(0.439 * 255));
     colors[RadioBarRed]        = QColor::fromHsl(359, (int)(0.826 * saturation * 255), (int)(0.594 * 255));
     colors[FileSizeColor]      = QColor(114, 118, 125);
+    colors[SliderBorder]       = QColor::fromHsl(210, (int)(0.029 * saturation * 255), (int)(0.867 * 255));
+    theme = Theme::Dark;
+    actualTheme = Theme::Dark;
+
     rm->getClientSettings([](void *settingsPtr){
 
 
@@ -131,5 +163,71 @@ void Settings::initSettings(Api::RessourceManager *rm)
 
 
     });
+
+}
+
+void Settings::saveSettings()
+{
+    QSettings settings("Fast-Discord", "config");
+    settings.beginGroup(token);
+    settings.setValue("fontScaling"       , fontScaling);
+    settings.setValue("messageGroupSpace" , messageGroupSpace);
+    settings.setValue("compactModeEnabled", compactModeEnabled);
+    settings.setValue("theme"             , (int)theme);
+    settings.setValue("saturation"        , saturation);
+    settings.setValue("scaleFactor"       , newScaleFactor);
+    settings.endGroup();
+}
+
+void Settings::setTheme(Settings::Theme themep)
+{
+    theme = themep;
+
+    if (theme == Theme::Sync) {
+        QLabel label("Am I in the dark?");
+        int textColorValue = label.palette().color(QPalette::WindowText).value();
+        int bgColorValue = label.palette().color(QPalette::Window).value();
+        
+        if (textColorValue < bgColorValue) 
+            actualTheme = Theme::Dark;
+        else
+            actualTheme = Theme::Light;
+    } else {
+        actualTheme = theme;
+    }
+
+    if (actualTheme == Theme::Dark)
+        colors = darkColors;
+    else
+        colors = lightColors;
+
+    colors[White]              = QColor(255, 255, 255);
+    colors[Black40]            = QColor(0, 0, 0, 101);
+    colors[Black85]            = QColor(0, 0, 0, 217);
+    colors[Black85]            = QColor(0, 0, 0);
+    colors[StatusOffline]      = QColor(90, 90, 90);
+    colors[StatusOnline]       = QColor(0, 224, 71);
+    colors[StatusIdle]         = QColor(255, 169, 21);
+    colors[StatusDND]          = QColor(255, 48, 51);
+    colors[BrandExperiment]    = QColor::fromHsl(235, (int)(0.856 * saturation * 255), (int)(0.647 * 255));
+    colors[BrandExperiment560] = QColor::fromHsl(235, (int)(0.514 * saturation * 255), (int)(0.524 * 255));
+    colors[BrandExperiment600] = QColor::fromHsl(235, (int)(0.467 * saturation * 255), (int)(0.441 * 255));
+    colors[UnsavedBackground]  = QColor(32, 34, 37, 229);
+    colors[SwitchActive]       = QColor::fromHsl(139, (int)(0.473 * saturation * 255), (int)(0.439 * 255));
+    colors[SwitchInactive]     = QColor::fromHsl(218, (int)(0.046 * saturation * 255), (int)(0.469 * 255));
+    colors[RadioBarGreen]      = QColor::fromHsl(139, (int)(0.473 * saturation * 255), (int)(0.439 * 255));
+    colors[RadioBarOrange]     = QColor::fromHsl(37, (int)(0.812 * saturation * 255), (int)(0.439 * 255));
+    colors[RadioBarRed]        = QColor::fromHsl(359, (int)(0.826 * saturation * 255), (int)(0.594 * 255));
+    colors[FileSizeColor]      = QColor(114, 118, 125);
+    colors[SliderBorder]       = QColor::fromHsl(210, (int)(0.029 * saturation * 255), (int)(0.867 * 255));
+}
+
+void Settings::setSaturation(int saturation)
+{
+
+}
+
+void Settings::applySaturationToCustom(bool applyToCustom)
+{
 
 }

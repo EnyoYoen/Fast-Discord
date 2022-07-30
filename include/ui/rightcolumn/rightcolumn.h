@@ -22,6 +22,7 @@ class RightColumn : public Widget
     Q_OBJECT
 public:
     RightColumn(Api::RessourceManager *rm, QWidget *parent);
+    void updateTheme();
     void userTyping(const json& data); // Used when we recieve TYPING_START event
                                        // from the gateway to show the typing label
 

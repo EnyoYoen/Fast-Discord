@@ -75,6 +75,8 @@ public:
         RadioBarRed,
         SettingsButtonTextColor,
         FileSizeColor,
+        SliderBackground,
+        SliderBorder,
     };
     enum class MessageDisplay : quint8 {
         Cozy,
@@ -96,8 +98,7 @@ public:
     };
 
     // Has to be called before using settings
-    static void initSettings(Api::RessourceManager *rm);
-    
+    static void initSettings(Api::RessourceManager *rm, QString token);
     static void saveSettings();
     
     static void setTheme(Theme theme);
@@ -106,16 +107,23 @@ public:
 
 
     static QMap<ColorEnum, QColor> colors;
+    static Theme theme;
+    static Theme actualTheme; // Only Dark or Light
+    static float saturation;
+    static float scaleFactor;
+    static float newScaleFactor;
 
     static float ttsRate;
     static int fontScaling;
     static int messageGroupSpace;
+    static int lastMessageGroupSpace;
     static AnimateStickers animateStickers;
     static bool reducedMotion;
     static bool playGifs;
     static bool animatedEmoji;
     static bool showSendMessageButton;
     static bool playbackAndTtsCommand;
+    static bool compactModeEnabled;
 
     static VoiceInputMode voiceInputMode;
     static int inputSensitivity;
@@ -123,7 +131,15 @@ public:
     static int outputVolume;
     static bool previewVideo;
 
+    
+    static inline int scale(int value)
+    {
+        if (value == 1 && scaleFactor < 1.0f) return 1;
+        return value * scaleFactor;
+    }
+
 private:
     static QMap<ColorEnum, QColor> darkColors;
     static QMap<ColorEnum, QColor> lightColors;
+    static QString token;
 };

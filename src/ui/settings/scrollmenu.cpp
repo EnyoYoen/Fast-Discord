@@ -12,15 +12,15 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     scrollWidget = new Widget(this);
     scrollWidget->setBackgroundColor(Settings::BackgroundSecondary);
     QVBoxLayout *layout = new QVBoxLayout(scrollWidget);
-    layout->setSpacing(2);
-    layout->setContentsMargins(20, 60, 6, 60);
+    layout->setSpacing(Settings::scale(2));
+    layout->setContentsMargins(Settings::scale(20), Settings::scale(60), Settings::scale(6), Settings::scale(60));
 
     buttons.append(new MenuButton(MenuButton::ButtonType::MyAccount, scrollWidget, true));
     buttons.append(new MenuButton(MenuButton::ButtonType::UserProfile, scrollWidget, true));
     buttons.append(new MenuButton(MenuButton::ButtonType::PrivacySafety, scrollWidget, true));
     buttons.append(new MenuButton(MenuButton::ButtonType::AuthorizedApps, scrollWidget, true));
     buttons.append(new MenuButton(MenuButton::ButtonType::Connections, scrollWidget, true));
-    buttons.append(new MenuButton(MenuButton::ButtonType::Appearance, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::Appearance, scrollWidget, true));
     buttons.append(new MenuButton(MenuButton::ButtonType::Accessibility, scrollWidget, false));
     buttons.append(new MenuButton(MenuButton::ButtonType::VoiceVideo, scrollWidget, false));
     buttons.append(new MenuButton(MenuButton::ButtonType::TextImages, scrollWidget, false));
@@ -59,12 +59,12 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     layout->addWidget(createSeparator());
 
     this->setWidget(scrollWidget);
-    this->setFixedWidth(218);
+    this->setFixedWidth(Settings::scale(218));
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    this->setStyleSheet("* {border: none; background-color:  " + Settings::colors[Settings::BackgroundSecondary].name() + "}"
-                        "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
-                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 8px; width: 3px;}"
-                        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
+    this->setStyleSheet("* {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(8)) + "px; width: " + QString::number(Settings::scale(3)) + "px;}"
+                        "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}"
                         "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                         "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
 }
@@ -85,11 +85,11 @@ Label *ScrollMenu::createMenuTitle(char *title)
 {
     Label *menuTitle = new Label(title, scrollWidget);
     QFont font;
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(12));
     font.setFamily("whitney");
     font.setBold(true);
     menuTitle->setFont(font);
-    menuTitle->setFixedSize(192, 28);
+    menuTitle->setFixedSize(Settings::scale(192), Settings::scale(28));
     menuTitle->setTextColor(Settings::ChannelsDefault);
     return menuTitle;
 }
@@ -97,11 +97,11 @@ Label *ScrollMenu::createMenuTitle(char *title)
 Widget *ScrollMenu::createSeparator()
 {
     Widget *separator = new Widget(scrollWidget);
-    separator->setFixedSize(172, 17);
-    separator->setContentsMargins(10, 8, 10, 8);
+    separator->setFixedSize(Settings::scale(172), Settings::scale(17));
+    separator->setContentsMargins(Settings::scale(10), Settings::scale(8), Settings::scale(10), Settings::scale(8));
     Widget *lineSeparator = new Widget(separator);
-    lineSeparator->move(0, 9);
-    lineSeparator->setFixedSize(172, 1);
+    lineSeparator->move(0, Settings::scale(9));
+    lineSeparator->setFixedSize(Settings::scale(172), Settings::scale(1));
     lineSeparator->setBackgroundColor(Settings::BackgroundModifierAccent);
     return separator;
 }

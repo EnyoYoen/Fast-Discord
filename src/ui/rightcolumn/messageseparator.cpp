@@ -58,10 +58,10 @@ MessageSeparator::MessageSeparator(const QDate& date, QWidget *parent)
     // Create the label with the timestamp
     Label *dateLabel = new Label(month + " " + QString::number(date.day()) + ", " + QString::number(date.year()), this);
     QFont font;
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(12));
     font.setFamily("whitney");
     dateLabel->setFont(font);
-    dateLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(month + " " + QString::number(date.day()) + ", " + QString::number(date.year())), 17);
+    dateLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(month + " " + QString::number(date.day()) + ", " + QString::number(date.year())), Settings::scale(17));
 
     // Add the widgets to the layout
     layout->addWidget(line1);
@@ -76,11 +76,11 @@ MessageSeparator::MessageSeparator(const QDate& date, QWidget *parent)
 
     // Style the date label
     dateLabel->setTextColor(Settings::TextMuted);
-    dateLabel->setFixedHeight(21);
+    dateLabel->setFixedHeight(Settings::scale(21));
     dateLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     // Style the layout
-    layout->setContentsMargins(16, 24, 14, 8);
+    layout->setContentsMargins(Settings::scale(16), Settings::scale(24), Settings::scale(14), Settings::scale(8));
 }
 
 } // namespace Ui

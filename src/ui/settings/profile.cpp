@@ -27,7 +27,7 @@ public:
         textLabel = new Label(text, this);
         textLabel->hide();
         QFont font;
-        font.setPixelSize(11);
+        font.setPixelSize(Settings::scale(11));
         font.setFamily("whitney");
         font.setBold(true);
 
@@ -44,7 +44,7 @@ public:
             temp = temp.mid(idx + 1);
         }
         
-        textLabel->setMinimumSize(QFontMetrics(font).horizontalAdvance(final), 14 * (text.count('\n') + 1));
+        textLabel->setMinimumSize(QFontMetrics(font).horizontalAdvance(final), Settings::scale(14) * (text.count('\n') + 1));
         textLabel->setFont(font);
         textLabel->setTextColor(Settings::White);
         textLabel->setBackgroundColor(Settings::None);
@@ -80,25 +80,25 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
     : Widget(parent)
 {
     Widget *container = new Widget(this);
-    container->setBorderRadius(8);
+    container->setBorderRadius(Settings::scale(8));
     QVBoxLayout *mainLayout = new QVBoxLayout(container);
 
     QFont font;
-    font.setPixelSize(20);
+    font.setPixelSize(Settings::scale(20));
     font.setFamily("whitney");
     font.setBold(true);
 
 
     banner = new Widget(container);
-    banner->setBorderRadius(8, 8, 0, 0);
-    banner->setFixedWidth(300);
+    banner->setBorderRadius(Settings::scale(8), Settings::scale(8), 0, 0);
+    banner->setFixedWidth(Settings::scale(300));
     if (!client.banner.isNull()) {
-        banner->setFixedHeight(120);
+        banner->setFixedHeight(Settings::scale(120));
         rm->getImage([this](void *imageFileName){
             banner->setPixmap(QPixmap(*reinterpret_cast<QString *>(imageFileName)).scaledToWidth(300));
         }, "https://cdn.discordapp.com/banners/" + client.id + "/" + client.banner + ".png?size=600", client.banner);
     } else if (client.bannerColor != 0) {
-        banner->setFixedHeight(60);
+        banner->setFixedHeight(Settings::scale(60));
         banner->setBackgroundColor(QColor((client.bannerColor & 0xFF000000) >> 24, (client.bannerColor & 0x00FF0000) >> 16, (client.bannerColor & 0x0000FF00) >> 8));
     } else {
         if (client.avatar.isNull()) {
@@ -125,11 +125,11 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
                 banner->setBackgroundColor(QColor(r, g, b));
             }, "https://cdn.discordapp.com/avatars/" + client.id + "/" + client.avatar, channelIconFileName);
         }
-        banner->setFixedHeight(60);
+        banner->setFixedHeight(Settings::scale(60));
     }
 
     ImageHoverWidget *bannerHover = new ImageHoverWidget((client.purchasedFlags ? "CHANGE BANNER" : "UNLOCK BANNER"), banner);
-    bannerHover->setBorderRadius(8, 8, 0, 0);
+    bannerHover->setBorderRadius(Settings::scale(8), Settings::scale(8), 0, 0);
     if (client.purchasedFlags) {
         QObject::connect(bannerHover, &ImageHoverWidget::clicked, [this](){
             QWidget *parentWidget = this;
@@ -139,15 +139,15 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
             font.setPixelSize(12);
             font.setFamily("whitney");
             Widget *container = new Widget(nullptr);
-            container->setFixedSize(200, 212);
+            container->setFixedSize(Settings::scale(200), Settings::scale(212));
             QHBoxLayout *mainLayout = new QHBoxLayout(container);
-            mainLayout->setContentsMargins(16, 0, 16, 16);
+            mainLayout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), Settings::scale(16));
             Label *content = new Label(container);
-            content->setFixedSize(160, 196);
+            content->setFixedSize(Settings::scale(160), Settings::scale(196));
             content->setBackgroundColor(Settings::BackgroundSecondaryAlt);
             QVBoxLayout *layout = new QVBoxLayout(content);
-            layout->setSpacing(32);
-            layout->setContentsMargins(16, 16, 16, 16);
+            layout->setSpacing(Settings::scale(32));
+            layout->setContentsMargins(Settings::scale(16), Settings::scale(16), Settings::scale(16), Settings::scale(16));
             SelectImageButton *button = new SelectImageButton(content);
             QLabel *desc = new QLabel("Upload Image", content);
             desc->setFont(font);
@@ -155,7 +155,7 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
             layout->addWidget(desc, 0, Qt::AlignHCenter);
             mainLayout->addWidget(content, 0, Qt::AlignCenter);
 
-            PopUp *popUp = new PopUp(container, 240, 280, QString(), "Select Image", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
+            PopUp *popUp = new PopUp(container, Settings::scale(240), Settings::scale(280), QString(), "Select Image", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             QObject::connect(button, &SelectImageButton::clicked, [this, parentWidget, popUp](){
                 QString defaultFolder = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + "/";
@@ -174,32 +174,32 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
         QObject::connect(bannerHover, &ImageHoverWidget::clicked, [this](){
             QWidget *parentWidget = this;
             while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-            PopUp *popUp = new PopUp(new Widget(nullptr), 440, 120, QString(), "Get Nitro", true, false, "<div style=\"text-align: center\">You can get nitro at <a style=\"color: #00AFF4; text-decoration: none;\" href=\"https://discord.com/nitro\">https://discord.com/nitro</a></div>", QString(), QString(), false, false, parentWidget->size(), parentWidget);
+            PopUp *popUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(120), QString(), "Get Nitro", true, false, "<div style=\"text-align: center\">You can get nitro at <a style=\"color: #00AFF4; text-decoration: none;\" href=\"https://discord.com/nitro\">https://discord.com/nitro</a></div>", QString(), QString(), false, false, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
         });
     }
 
     Widget *content = new Widget(container);
-    content->move(0, client.banner.isNull() ? 124 : 184);
+    content->move(0, client.banner.isNull() ? Settings::scale(124) : Settings::scale(184));
     content->setBackgroundColor(Settings::BackgroundFloating);
     layout = new QVBoxLayout(content);
-    layout->setSpacing(16);
-    layout->setContentsMargins(16, 0, 16, 0);
+    layout->setSpacing(Settings::scale(16));
+    layout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
 
     Widget *username = new Widget(content);
     username->setBackgroundColor(Settings::BackgroundFloating);
-    username->setFixedHeight(32);
+    username->setFixedHeight(Settings::scale(32));
     QHBoxLayout *usernameLayout = new QHBoxLayout(username);
     usernameLayout->setSpacing(0);
-    usernameLayout->setContentsMargins(0, 0, 16, 0);
+    usernameLayout->setContentsMargins(0, 0, Settings::scale(16), 0);
 
     Label *name = new Label(client.username, username);
-    name->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), 24);
+    name->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), Settings::scale(24));
     name->setFont(font);
     name->setTextColor(Settings::HeaderPrimary);
 
     Label *discriminator = new Label("#" + client.discriminator, username);
-    discriminator->setFixedSize(QFontMetrics(font).horizontalAdvance("#" + client.discriminator), 24);
+    discriminator->setFixedSize(QFontMetrics(font).horizontalAdvance("#" + client.discriminator), Settings::scale(24));
     discriminator->setFont(font);
     discriminator->setTextColor(Settings::HeaderSecondary);
     
@@ -215,20 +215,20 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
         username->setBackgroundColor(Settings::BackgroundFloating);
         QVBoxLayout *bioLayout = new QVBoxLayout(bioSection);
         bioLayout->setContentsMargins(0, 0, 0, 0);
-        bioLayout->setSpacing(8);
+        bioLayout->setSpacing(Settings::scale(8));
         
         Divider *divider = new Divider();
-        divider->setContentsMargins(0, 0, 0, 4);
-        divider->setFixedHeight(5);
+        divider->setContentsMargins(0, 0, 0, Settings::scale(4));
+        divider->setFixedHeight(Settings::scale(5));
 
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(12));
         Label *bioTitle = new Label("ABOUT ME", bioSection);
-        bioTitle->setFixedHeight(16);
+        bioTitle->setFixedHeight(Settings::scale(16));
         bioTitle->setFont(font);
         bioTitle->setTextColor(Settings::HeaderSecondary);
 
         bio = new Label(client.bio, bioSection);
-        bio->setFixedHeight(16);
+        bio->setFixedHeight(Settings::scale(16));
         bio->setFont(font);
         bio->setTextColor(Settings::TextNormal);
 
@@ -245,29 +245,29 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
     Widget *customizingSection = new Widget(content);
     customizingSection->setBackgroundColor(Settings::BackgroundFloating);
     QVBoxLayout *customizingLayout = new QVBoxLayout(customizingSection);
-    customizingLayout->setSpacing(8);
+    customizingLayout->setSpacing(Settings::scale(8));
     customizingLayout->setContentsMargins(0, 0, 0, 0);
 
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(12));
     Label *customizingTitle = new Label("CUSTOMIZING MY PROFILE", customizingSection);
-    customizingTitle->setFixedHeight(16);
+    customizingTitle->setFixedHeight(Settings::scale(16));
     customizingTitle->setFont(font);
     customizingTitle->setTextColor(Settings::HeaderSecondary);
 
     Widget *activityContainer = new Widget(customizingSection);
     activityContainer->setBackgroundColor(Settings::BackgroundFloating);
     QHBoxLayout *activityContainerLayout = new QHBoxLayout(activityContainer);
-    activityContainerLayout->setSpacing(16);
+    activityContainerLayout->setSpacing(Settings::scale(16));
     activityContainerLayout->setContentsMargins(0, 0, 0, 0);
 
     Widget *icon = new Widget(activityContainer);
     icon->setBackgroundColor(Settings::BackgroundFloating);
-    icon->setFixedSize(64, 64);
-    icon->setContentsMargins(8, 8, 8, 8);
+    icon->setFixedSize(Settings::scale(64), Settings::scale(64));
+    icon->setContentsMargins(Settings::scale(8), Settings::scale(8), Settings::scale(8), Settings::scale(8));
     Widget *image = new Widget(icon);
-    image->setFixedSize(48, 48);
-    image->move(8, 8);
-    image->setPixmap(QPixmap("res/images/png/pen.png").scaled(48, 48));
+    image->setFixedSize(Settings::scale(48), Settings::scale(48));
+    image->move(Settings::scale(8), Settings::scale(8));
+    image->setPixmap(QPixmap("res/images/png/pen.png").scaled(Settings::scale(48), Settings::scale(48)));
 
     Widget *activity = new Widget(activityContainer);
     activity->setBackgroundColor(Settings::BackgroundFloating);
@@ -276,7 +276,7 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
     activityLayout->setContentsMargins(0, 0, 0, 0);
 
     Label *activityTitle = new Label("User Profile", activityContainer);
-    activityTitle->setFixedHeight(18);
+    activityTitle->setFixedHeight(Settings::scale(18));
     activityTitle->setFont(font);
     activityTitle->setTextColor(Settings::TextNormal);
 
@@ -285,7 +285,7 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
     timer->setInterval(1000);
     timer->setSingleShot(false);
     Label *timeElapsed = new Label("00:00 elapsed", activity);
-    timeElapsed->setFixedHeight(19);
+    timeElapsed->setFixedHeight(Settings::scale(19));
     timeElapsed->setFont(font);
     timeElapsed->setTextColor(Settings::TextNormal);
     counter = 0;
@@ -308,62 +308,62 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
 
     layout->addWidget(customizingSection);
 
-    mainLayout->setSpacing(64);
-    mainLayout->setContentsMargins(0, 0, 0, 16);
+    mainLayout->setSpacing(Settings::scale(64));
+    mainLayout->setContentsMargins(0, 0, 0, Settings::scale(16));
     mainLayout->addWidget(banner);
     mainLayout->addWidget(content);
 
 
     avatarBorders = new Widget(container);
-    avatarBorders->setFixedSize(94, 94);
-    avatarBorders->move(16, client.banner.isNull() ? 16 : 76);
+    avatarBorders->setFixedSize(Settings::scale(94), Settings::scale(94));
+    avatarBorders->move(Settings::scale(16), client.banner.isNull() ? Settings::scale(16) : Settings::scale(76));
     avatarBorders->setBorderColor(Settings::BackgroundFloating);
-    avatarBorders->setBorderSize(7);
-    avatarBorders->setBorderRadius(47);
+    avatarBorders->setBorderSize(Settings::scale(7));
+    avatarBorders->setBorderRadius(Settings::scale(47));
 
     if (client.avatar.isNull()) {
-        avatar = new RoundedImage("res/images/png/user-icon-asset0.png", 80, 80, 40, container);
+        avatar = new RoundedImage("res/images/png/user-icon-asset0.png", Settings::scale(80), Settings::scale(80), Settings::scale(40), container);
     } else {
-        avatar = new RoundedImage(80, 80, 40, container);
+        avatar = new RoundedImage(Settings::scale(80), Settings::scale(80), Settings::scale(40), container);
         QString channelIconFileName = client.id + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
         rm->getImage([this](void *imageFileName){
             avatar->setImage(*reinterpret_cast<QString *>(imageFileName));
         }, "https://cdn.discordapp.com/avatars/" + client.id + "/" + client.avatar, channelIconFileName);
     }
-    avatar->move(23, client.banner.isNull() ? 23 : 83);
+    avatar->move(Settings::scale(23), client.banner.isNull() ? Settings::scale(23) : Settings::scale(83));
     avatar->setBackgroundColor(Settings::None);
-    avatar->setBorderRadius(40);
+    avatar->setBorderRadius(Settings::scale(40));
     
     imageUpload = new Widget(container);
-    imageUpload->setFixedSize(28, 28);
-    imageUpload->move(75, client.banner.isNull() ? 21 : 81);
+    imageUpload->setFixedSize(Settings::scale(28), Settings::scale(28));
+    imageUpload->move(Settings::scale(75), client.banner.isNull() ? Settings::scale(21) : Settings::scale(81));
     imageUpload->setBackgroundColor(Settings::BackgroundFloating);
-    imageUpload->setBorderRadius(14);
+    imageUpload->setBorderRadius(Settings::scale(14));
     Widget *imageUploadIcon = new Widget(imageUpload);
-    imageUploadIcon->setFixedSize(18, 18);
+    imageUploadIcon->setFixedSize(Settings::scale(18), Settings::scale(18));
     imageUploadIcon->setBackgroundColor(Settings::BackgroundFloating);
     imageUploadIcon->setPixmap(QPixmap("res/images/svg/add-file-icon.svg"));
-    imageUploadIcon->move(5, 5);
+    imageUploadIcon->move(Settings::scale(5), Settings::scale(5));
 
     ImageHoverWidget *avatarHover = new ImageHoverWidget("CHANGE\nAVATAR", avatar);
-    avatarHover->setBorderRadius(40);
+    avatarHover->setBorderRadius(Settings::scale(40));
     QObject::connect(avatarHover, &ImageHoverWidget::clicked, [this](){
         QWidget *parentWidget = this;
         while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
 
         QFont font;
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(12));
         font.setFamily("whitney");
         Widget *container = new Widget(nullptr);
-        container->setFixedSize(200, 212);
+        container->setFixedSize(Settings::scale(200), Settings::scale(212));
         QHBoxLayout *mainLayout = new QHBoxLayout(container);
-        mainLayout->setContentsMargins(16, 0, 16, 16);
+        mainLayout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), Settings::scale(16));
         Label *content = new Label(container);
-        content->setFixedSize(160, 196);
+        content->setFixedSize(Settings::scale(160), Settings::scale(196));
         content->setBackgroundColor(Settings::BackgroundSecondaryAlt);
         QVBoxLayout *layout = new QVBoxLayout(content);
-        layout->setSpacing(32);
-        layout->setContentsMargins(16, 16, 16, 16);
+        layout->setSpacing(Settings::scale(32));
+        layout->setContentsMargins(Settings::scale(16), Settings::scale(16), Settings::scale(16), Settings::scale(16));
         SelectImageButton *button = new SelectImageButton(content);
         QLabel *desc = new QLabel("Upload Image", content);
         desc->setFont(font);
@@ -371,7 +371,7 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
         layout->addWidget(desc, 0, Qt::AlignHCenter);
         mainLayout->addWidget(content, 0, Qt::AlignCenter);
 
-        PopUp *popUp = new PopUp(container, 240, 280, QString(), "Select Image", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
+        PopUp *popUp = new PopUp(container, Settings::scale(240), Settings::scale(280), QString(), "Select Image", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
         QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
         QObject::connect(button, &SelectImageButton::clicked, [this, parentWidget, popUp](){
             QString defaultFolder = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + "/";
@@ -387,11 +387,11 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
         });
     });
 
-    container->setFixedWidth(300);
-    this->setFixedHeight(500);
-    this->setFixedWidth(300);
+    container->setFixedWidth(Settings::scale(300));
+    this->setFixedHeight(Settings::scale(500));
+    this->setFixedWidth(Settings::scale(300));
     this->setBackgroundColor(Settings::BackgroundFloating);
-    this->setBorderRadius(8);
+    this->setBorderRadius(Settings::scale(8));
 }
 
 Profile::~Profile()
@@ -416,19 +416,19 @@ void Profile::setBanner(QString file, QColor color)
         banner->setPixmap(QPixmap());
         banner->repaint();
         banner->setBackgroundColor(color);
-        banner->setFixedHeight(60);
+        banner->setFixedHeight(Settings::scale(60));
         
-        avatarBorders->move(16, 16);
-        avatar->move(23, 23);
-        imageUpload->move(75, 21);
+        avatarBorders->move(Settings::scale(16), Settings::scale(16));
+        avatar->move(Settings::scale(23), Settings::scale(23));
+        imageUpload->move(Settings::scale(75), Settings::scale(21));
     } else {
         avatar->setPixmap(QPixmap(file));
         avatar->repaint();
-        banner->setFixedHeight(120);
+        banner->setFixedHeight(Settings::scale(120));
 
-        avatarBorders->move(16, 76);
-        avatar->move(23, 83);
-        imageUpload->move(75, 81);
+        avatarBorders->move(Settings::scale(16), Settings::scale(76));
+        avatar->move(Settings::scale(23), Settings::scale(83));
+        imageUpload->move(Settings::scale(75), Settings::scale(81));
     }
 }
 
@@ -439,26 +439,26 @@ void Profile::setBio(QString bioText)
     } else if (!bioText.isNull()) {
         if (bio == nullptr) {
             QFont font;
-            font.setPixelSize(12);
+            font.setPixelSize(Settings::scale(12));
             font.setFamily("whitney");
             
-            bioSection->setFixedHeight(45 + 18 * bioText.count());
+            bioSection->setFixedHeight(Settings::scale(45) + Settings::scale(18) * bioText.count());
 
             QVBoxLayout *bioLayout = new QVBoxLayout(bioSection);
             bioLayout->setContentsMargins(0, 0, 0, 0);
-            bioLayout->setSpacing(8);
+            bioLayout->setSpacing(Settings::scale(8));
             
             Divider *divider = new Divider();
-            divider->setContentsMargins(0, 0, 0, 4);
-            divider->setFixedHeight(5);
+            divider->setContentsMargins(0, 0, 0, Settings::scale(4));
+            divider->setFixedHeight(Settings::scale(5));
 
             Label *bioTitle = new Label("ABOUT ME", bioSection);
-            bioTitle->setFixedHeight(16);
+            bioTitle->setFixedHeight(Settings::scale(16));
             bioTitle->setFont(font);
             bioTitle->setTextColor(Settings::HeaderSecondary);
 
             bio = new Label(bioText, bioSection);
-            bio->setFixedHeight(bioText.count() * 18);
+            bio->setFixedHeight(bioText.count() * Settings::scale(18));
             bio->setFont(font);
             bio->setTextColor(Settings::TextNormal);
 

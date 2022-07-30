@@ -184,7 +184,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
         html += "</html>";
 
         QFont font;
-        font.setPixelSize(16);
+        font.setPixelSize(Settings::scale(Settings::fontScaling));
         font.setFamily("whitney");
         this->setFont(font);
         this->setText(html);

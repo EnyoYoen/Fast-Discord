@@ -94,6 +94,8 @@ void MessageArea::clear()
             delete item;
         }
     }
+    
+    messages.clear();
 
     lock.tryLock();
     messageQueue.clear();
@@ -114,6 +116,23 @@ void MessageArea::addMessages(const QVector<Api::Message *>& messages)
         lock.unlock();
         messageWaiter.wakeOne();
     }
+}
+
+void MessageArea::updateMessagesFont()
+{
+    for (int i = 0 ; i < messages.size() ; i++) {
+        messages[i]->updateFont();
+    }
+}
+
+void MessageArea::updateMessagesSpacing()
+{
+    for (int i = 0 ; i < messages.size() ; i++) {
+        messages[i]->updateSpacing();
+        messages[i]->update();
+    }
+    this->update();
+    messageLayout->update();
 }
 
 void const MessageArea::changeSliderValue(int min, int max)
@@ -179,7 +198,7 @@ void MessageArea::loop()
                     bool first;
                     // If the messages are separated by more than 7.30 minutes
                     // or the authors are not the same
-                    if (secondTime - firstTime > 450 || lastMessage->author.id != message->author.id) {
+                    if (secondTime - firstTime > 450 || lastMessage->author.id != message->author.id || (lastMessage->type != Api::Default && lastMessage->type != Api::Reply)) {
                         // The message is not grouped to another message
                         first = true;
                     } else {
@@ -203,10 +222,12 @@ void MessageArea::loop()
 
 void const MessageArea::displayMessage(const Api::Message *message, bool top, bool first, bool separator)
 {
+    MessageWidget *messageWidget = new MessageWidget(rm, message, first, separator, this);
+    messages.append(messageWidget);
     if (top)
-        messageLayout->insertWidget(separator ? 1 : 0, new MessageWidget(rm, message, first, separator, this));
+        messageLayout->insertWidget(separator ? 1 : 0, messageWidget);
     else
-        messageLayout->insertWidget(messageLayout->count() - 1, new MessageWidget(rm, message, first, separator, this));
+        messageLayout->insertWidget(messageLayout->count() - 1, messageWidget);
 }
 
 void const MessageArea::displaySeparator(const QDate& date, bool top)
@@ -215,6 +236,20 @@ void const MessageArea::displaySeparator(const QDate& date, bool top)
         messageLayout->insertWidget(0, new MessageSeparator(date, this));
     else
         messageLayout->insertWidget(messageLayout->count() - 1, new MessageSeparator(date, this));
+}
+
+void MessageArea::updateTheme()
+{
+    for (int i = 0 ; i < messages.size() ; i++) {
+        messages[i]->updateTheme();
+    }
+    
+    this->setStyleSheet("QScrollArea {border: none; padding: 0px;}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(8)) + "px; width: " + QString::number(Settings::scale(4)) + "px;}"
+                        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
+                        "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
 }
 
 MessageArea::~MessageArea()

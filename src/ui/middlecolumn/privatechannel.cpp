@@ -26,9 +26,9 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     if (channelType == Api::DM) {
         rm->getUser([&](void *user){
             subtext = new Label(this);
-            subtext->move(52, 24);
+            subtext->move(Settings::scale(52), Settings::scale(24));
             QFont font;
-            font.setPixelSize(13);
+            font.setPixelSize(Settings::scale(13));
             font.setFamily("whitney");
             subtext->setFont(font);
             subtext->setTextColor(Settings::ChannelsDefault);
@@ -40,11 +40,11 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
                 channelIconFileName = "res/images/png/user-icon-asset0.png";
 
                 // Create the icon
-                icon = new RoundedImage(channelIconFileName, 32, 32, 16, this);
-                icon->move(8, 6);
+                icon = new RoundedImage(channelIconFileName, Settings::scale(32), Settings::scale(32), Settings::scale(16), this);
+                icon->move(Settings::scale(8), Settings::scale(6));
             } else {
                 // Create the icon
-                icon = new RoundedImage(32, 32, 16, this);
+                icon = new RoundedImage(Settings::scale(32), Settings::scale(32), Settings::scale(16), this);
 
                 // Request the icon image
                 channelIconFileName = dmUser->id + (avatar.indexOf("a_") == 0 ? ".gif" : ".png");
@@ -53,29 +53,29 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 
             // Set the background of the status icon
             statusBackground = new Widget(this);
-            statusBackground->setFixedSize(16, 16);
-            statusBackground->move(28, 24);
-            statusBackground->setBorderRadius(8);
+            statusBackground->setFixedSize(Settings::scale(16), Settings::scale(16));
+            statusBackground->move(Settings::scale(28), Settings::scale(24));
+            statusBackground->setBorderRadius(Settings::scale(8));
             statusBackground->setBackgroundColor(Settings::BackgroundSecondary);
 
             // Set the status icon
             statusIcon = new StatusIcon(this);
-            statusIcon->move(31, 27);
+            statusIcon->move(Settings::scale(31), Settings::scale(27));
 
             // Set the DM name to the other user name
             name = new Label(dmUser->username, this);
-            font.setPixelSize(15);
+            font.setPixelSize(Settings::scale(15));
             name->setFont(font);
             name->setTextColor(Settings::ChannelsDefault);
-            name->move(52, (subtext->text.isEmpty() ? 16 : 8));
+            name->move(Settings::scale(52), (subtext->text.isEmpty() ? Settings::scale(16) : Settings::scale(8)));
 
             // Style the widgets
-            if (name) name->setFixedSize(145, 20);
-            subtext->setFixedSize(145, 0);
+            if (name) name->setFixedSize(Settings::scale(145), Settings::scale(20));
+            subtext->setFixedSize(Settings::scale(145), 0);
 
             closeButton = new CloseChannelButton(this);
             closeButton->hide();
-            closeButton->move(200, 3);
+            closeButton->move(Settings::scale(200), Settings::scale(3));
             QObject::connect(closeButton, &CloseChannelButton::clicked, this, &PrivateChannelWidget::closeChannel);
 
             // Create the main layout
@@ -83,8 +83,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             mainLayout->setContentsMargins(0, 0, 0, 0);
 
             // Style this widget
-            this->setFixedSize(224, 44);
-            this->setBorderRadius(4);
+            this->setFixedSize(Settings::scale(224), Settings::scale(44));
+            this->setBorderRadius(Settings::scale(4));
         }, privateChannel.recipientIds[0]);
     } else if (channelType == Api::GroupDM) {
         // Get the subtext of the group DM with the number of people in it
@@ -95,13 +95,13 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             str_member += "s";
         }
         subtext = new Label(QString::number(nMembers+1) + str_member, this);
-        subtext->move(52, 24);
+        subtext->move(Settings::scale(52), Settings::scale(24));
         QFont font;
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(12));
         font.setFamily("whitney");
         subtext->setFont(font);
         subtext->setTextColor(Settings::ChannelsDefault);
-        font.setPixelSize(15);
+        font.setPixelSize(Settings::scale(15));
 
         // Get the name of the group
         QString channelName = privateChannel.name;
@@ -111,8 +111,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
                 // Set it with 'Unnamed'
                 name = new Label("Unnamed", this);
                 name->setFont(font);
-                name->setFixedSize(145, 20);
-                name->move(52, 8);
+                name->setFixedSize(Settings::scale(145), Settings::scale(20));
+                name->move(Settings::scale(52), Settings::scale(8));
                 name->setTextColor(Settings::ChannelsDefault);
             } else {
                 // Get the name of the other users if there is more than one person
@@ -122,8 +122,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
         } else {
             name = new Label(channelName, this);
             name->setFont(font);
-            name->setFixedSize(145, 20);
-            name->move(52, 8);
+            name->setFixedSize(Settings::scale(145), Settings::scale(20));
+            name->move(Settings::scale(52), Settings::scale(8));
             name->setTextColor(Settings::ChannelsDefault);
         }
 
@@ -134,11 +134,11 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             channelIconFileName = "res/images/png/group-icon-asset1.png";
 
             // Create the icon
-            icon = new RoundedImage(channelIconFileName, 32, 32, 16, this);
-            icon->move(8, 6);
+            icon = new RoundedImage(channelIconFileName, Settings::scale(32), Settings::scale(32), Settings::scale(16), this);
+            icon->move(Settings::scale(8), Settings::scale(6));
         } else {
             // Create the icon
-            icon = new RoundedImage(32, 32, 16, this);
+            icon = new RoundedImage(Settings::scale(32), Settings::scale(32), Settings::scale(16), this);
 
             // Request the icon image
             channelIconFileName = channelIcon + ".png";
@@ -146,11 +146,11 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
         }
 
         // Style the subtext
-        subtext->setFixedSize(145, 14);
+        subtext->setFixedSize(Settings::scale(145), Settings::scale(14));
 
         closeButton = new CloseChannelButton(this);
         closeButton->hide();
-        closeButton->move(200, 3);
+        closeButton->move(Settings::scale(200), Settings::scale(3));
         QObject::connect(closeButton, &CloseChannelButton::clicked, this, &PrivateChannelWidget::closeChannel);
 
         // Create the main layout
@@ -158,8 +158,8 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
         mainLayout->setContentsMargins(0, 0, 0, 0);
 
         // Style this widget
-        this->setFixedSize(224, 44);
-        this->setBorderRadius(4);
+        this->setFixedSize(Settings::scale(224), Settings::scale(44));
+        this->setBorderRadius(Settings::scale(4));
     }
 }
 
@@ -171,7 +171,7 @@ void PrivateChannelWidget::setStatus(const QString& status)
 void PrivateChannelWidget::setIcon(const QString& iconFileName)
 {
     icon->setImage(iconFileName);
-    icon->move(8, 6);
+    icon->move(Settings::scale(8), Settings::scale(6));
 }
 
 void PrivateChannelWidget::userReceiver(void *user)
@@ -186,12 +186,12 @@ void PrivateChannelWidget::userReceiver(void *user)
             }
         }
         QFont font;
-        font.setPixelSize(16);
+        font.setPixelSize(Settings::scale(16));
         font.setFamily("whitney");
         name = new Label(nameStr, this);
         name->setFont(font);
-        name->setFixedSize(145, 20);
-        name->move(52, 8);
+        name->setFixedSize(Settings::scale(145), Settings::scale(20));
+        name->move(Settings::scale(52), Settings::scale(8));
         name->setTextColor(Settings::ChannelsDefault);
     }
 }

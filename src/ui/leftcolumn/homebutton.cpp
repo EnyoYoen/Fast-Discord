@@ -18,16 +18,16 @@ HomeButton::HomeButton(QWidget *parent)
     pill = new GuildPill(this);
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(8);
+    layout->setSpacing(Settings::scale(8));
     layout->addWidget(pill);
     layout->addWidget(image);
 
     // Style
-    this->setFixedSize(60, 48);
-    pill->setFixedHeight(40);
-    image->setFixedSize(48, 48);
+    this->setFixedSize(Settings::scale(60), Settings::scale(48));
+    pill->setFixedHeight(Settings::scale(40));
+    image->setFixedSize(Settings::scale(48), Settings::scale(48));
     image->setBackgroundColor(Settings::BrandExperiment);
-    image->setBorderRadius(16);
+    image->setBorderRadius(Settings::scale(16));
     image->setImage("res/images/svg/home-icon.svg");
 }
 
@@ -47,11 +47,11 @@ void HomeButton::unclicked()
         QPixmap img("res/images/svg/home-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        qp.fillRect(img.rect(),QColor(220, 221, 222));
+        qp.fillRect(QRect(img.rect().topLeft(), QSize(Settings::scale(img.rect().width()), Settings::scale(img.rect().height()))), QColor(220, 221, 222));
         qp.end();
         image->setPixmap(img);
         image->setBackgroundColor(Settings::BackgroundPrimary);
-        image->setBorderRadius(24);
+        image->setBorderRadius(Settings::scale(24));
     }
     pill->setFixedHeight(0);
 }
@@ -67,7 +67,7 @@ void HomeButton::mousePressEvent(QMouseEvent *)
         qp.end();
         image->setPixmap(img);
         image->setBackgroundColor(Settings::BrandExperiment);
-        image->setBorderRadius(16);
+        image->setBorderRadius(Settings::scale(16));
         clic = true;
     }
     pill->setFixedHeight(40);
@@ -84,9 +84,9 @@ void HomeButton::enterEvent(QEvent *)
         qp.end();
         image->setPixmap(img);
         image->setBackgroundColor(Settings::BrandExperiment);
-        image->setBorderRadius(16);
+        image->setBorderRadius(Settings::scale(16));
     }
-    if (pill->height() != 40) pill->setFixedHeight(20);
+    if (pill->height() != Settings::scale(40)) pill->setFixedHeight(Settings::scale(20));
 }
 
 void HomeButton::leaveEvent(QEvent *)
@@ -100,9 +100,9 @@ void HomeButton::leaveEvent(QEvent *)
         qp.end();
         image->setPixmap(img);
         image->setBackgroundColor(Settings::BackgroundPrimary);
-        image->setBorderRadius(24);
+        image->setBorderRadius(Settings::scale(24));
     }
-    if (pill->height() != 40) pill->setFixedHeight(0);
+    if (pill->height() != Settings::scale(40)) pill->setFixedHeight(0);
 }
 
 } // namespace Ui

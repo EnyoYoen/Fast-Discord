@@ -65,15 +65,15 @@ public:
         QFont font;
         font.setFamily("whitney");
         if (small) {
-            font.setPixelSize(6);
+            font.setPixelSize(Settings::scale(6));
         } else {
-            font.setPixelSize(16);
+            font.setPixelSize(Settings::scale(16));
             QFontMetrics metrics(font);
             int fontWidth = metrics.horizontalAdvance(iconText);
-            if (fontWidth > 48) {
-                font.setPixelSize(10);
+            if (fontWidth > Settings::scale(48)) {
+                font.setPixelSize(Settings::scale(10));
             } else {
-                font.setPixelSize(16);
+                font.setPixelSize(Settings::scale(16));
             }
         }
         text->setFont(font);
@@ -81,10 +81,10 @@ public:
         iconTextLayout->setContentsMargins(0, 0, 0, 0);
         iconTextLayout->addWidget(text, 0, Qt::AlignHCenter);
 
-        text->setFixedHeight(small ? 10 : 16);
+        text->setFixedHeight(small ? Settings::scale(10) : Settings::scale(16));
         this->setBackgroundColor(Settings::BackgroundPrimary);
-        this->setFixedSize(small ? 16 : 48, small ? 16 : 48);
-        this->setBorderRadius(small ? 8 : 24);
+        this->setFixedSize(small ? Settings::scale(16) : Settings::scale(48), small ? Settings::scale(16) : Settings::scale(48));
+        this->setBorderRadius(small ? Settings::scale(8) : Settings::scale(24));
     }
     QLabel *text;
 };
@@ -110,13 +110,13 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
         QString guildIconFileName(guildIcon);
         guildIconFileName += ".png";
         if (!QFile::exists("cache/" + guildIconFileName)) {
-            icon = new RoundedImage(small ? 16 : 48, small ? 16 : 48, small ? 8 : 24, this);
+            icon = new RoundedImage(small ? Settings::scale(16) : Settings::scale(48), small ? Settings::scale(16) : Settings::scale(48), small ? Settings::scale(8) : Settings::scale(24), this);
             rm->getImage([this](void *iconFileName) {emit iconRecieved(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + guildId + "/" + guildIconFileName, guildIconFileName);
         } else {
             guildIconFileName = "cache/" + guildIconFileName;
 
             // Create the icon and add it to the layout
-            icon = new RoundedImage(guildIconFileName, small ? 16 : 48, small ? 16 : 48, small ? 8 : 24, this);
+            icon = new RoundedImage(guildIconFileName, small ? Settings::scale(16) : Settings::scale(48), small ? Settings::scale(16) : Settings::scale(48), small ? Settings::scale(8) : Settings::scale(24), this);
         }
     }
 }
@@ -131,7 +131,7 @@ void GuildIcon::setActive()
     if (!icon) {
         textIcon->text->setStyleSheet("background: none;color:" + Settings::colors[Settings::White].name());
         textIcon->setBackgroundColor(Settings::BrandExperiment);
-        textIcon->setBorderRadius(16);
+        textIcon->setBorderRadius(Settings::scale(16));
     }
 }
 
@@ -140,7 +140,7 @@ void GuildIcon::setInactive()
     if (!icon) {
         textIcon->text->setStyleSheet("background: none;color:" + Settings::colors[Settings::TextNormal].name());
         textIcon->setBackgroundColor(Settings::BackgroundPrimary);
-        textIcon->setBorderRadius(24);
+        textIcon->setBorderRadius(Settings::scale(24));
     }
 }
 

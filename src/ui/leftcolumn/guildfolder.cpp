@@ -15,12 +15,12 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
     guildIds = guildFolder->guildIds;
 
     QHBoxLayout *closedLayout = new QHBoxLayout(this);
-    closedLayout->setSpacing(8);
+    closedLayout->setSpacing(Settings::scale(8));
     closedLayout->setContentsMargins(0, 0, 0, 0);
 
     closedContent = new Widget(this);
-    closedContent->setFixedSize(48, 48);
-    closedContent->setBorderRadius(16);
+    closedContent->setFixedSize(Settings::scale(48), Settings::scale(48));
+    closedContent->setBorderRadius(Settings::scale(16));
     closedContent->setBackgroundColor(QColor((color & 0x00FF0000) >> 16, (color & 0x0000FF00) >> 8, color & 0x000000FF, 101));
     QGridLayout *contentLayout = new QGridLayout(closedContent);
     contentLayout->setContentsMargins(6, 6, 0, 0);
@@ -33,8 +33,8 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
 
     openedContent = new Widget(this);
     openedContent->hide();
-    openedContent->setFixedHeight(guilds.size() * (48 + 10) + 48 - 10);
-    openedContent->setBorderRadius(16);
+    openedContent->setFixedHeight(guilds.size() * (Settings::scale(48) + Settings::scale(10)) + Settings::scale(48) - Settings::scale(10));
+    openedContent->setBorderRadius(Settings::scale(16));
     openedContent->setBackgroundColor(QColor((color & 0x00FF0000) >> 16, (color & 0x0000FF00) >> 8, color & 0x000000FF, 101));
 
     QPixmap img("res/images/svg/folder-icon.svg");
@@ -44,11 +44,11 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
     qp.end();
     closeButton = new Widget(openedContent);
     closeButton->setPixmap(img);
-    closeButton->setFixedSize(72, 48);
+    closeButton->setFixedSize(Settings::scale(72), Settings::scale(48));
 
     QVBoxLayout *openedLayout = new QVBoxLayout(openedContent);
-    openedLayout->setSpacing(10);
-    openedLayout->setContentsMargins(0, 0, 0, 10);
+    openedLayout->setSpacing(Settings::scale(10));
+    openedLayout->setContentsMargins(0, 0, 0, Settings::scale(10));
     openedLayout->addWidget(closeButton);
 
     for (int i = 0 ; i < guilds.size() ; i++) {
@@ -64,15 +64,15 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
         }
     }
 
-    this->setFixedSize(72, 48);
-    this->setContentsMargins(0, 0, 12, 0);
+    this->setFixedSize(Settings::scale(72), Settings::scale(48));
+    this->setContentsMargins(0, 0, Settings::scale(12), 0);
 }
 
 void GuildFolder::mouseReleaseEvent(QMouseEvent *event)
 {
     if (!opened) {
-        this->setFixedHeight(guildWidgets.size() * (48 + 10) + 48);
-        this->setContentsMargins(0, 0, 0, 10);
+        this->setFixedHeight(guildWidgets.size() * (Settings::scale(48) + Settings::scale(10)) + Settings::scale(48));
+        this->setContentsMargins(0, 0, 0, Settings::scale(10));
 
         closedContent->hide();
         pill->hide();
@@ -80,8 +80,8 @@ void GuildFolder::mouseReleaseEvent(QMouseEvent *event)
 
         opened = !opened;
     } else if (closeButton->contentsRect().contains(event->pos())) {
-        this->setFixedSize(72, 48);
-        this->setContentsMargins(0, 0, 12, 0);
+        this->setFixedSize(Settings::scale(72), Settings::scale(48));
+        this->setContentsMargins(0, 0, Settings::scale(12), 0);
 
         openedContent->hide();
         closedContent->show();
@@ -95,7 +95,7 @@ void GuildFolder::unclicked()
 {
     clicked = false;
     if (unread)
-        pill->setFixedHeight(8);
+        pill->setFixedHeight(Settings::scale(8));
     else 
         pill->setFixedHeight(0);
 
@@ -115,7 +115,7 @@ void GuildFolder::unclickedExcept(const Api::Snowflake& id)
     }
     if (!clicked) {
         if (unread)
-            pill->setFixedHeight(8);
+            pill->setFixedHeight(Settings::scale(8));
         else 
             pill->setFixedHeight(0);
     }
@@ -137,7 +137,7 @@ void GuildFolder::setUnread(const Api::Snowflake& id)
 void GuildFolder::propagateGuildClic(const Api::Snowflake& id)
 {
     clicked = true;
-    pill->setFixedHeight(40);
+    pill->setFixedHeight(Settings::scale(40));
 
     emit guildClicked(id);
 }
@@ -145,15 +145,15 @@ void GuildFolder::propagateGuildClic(const Api::Snowflake& id)
 void GuildFolder::enterEvent(QEvent *)
 {
     if (!clicked)
-        pill->setFixedHeight(20);
+        pill->setFixedHeight(Settings::scale(20));
 }
 
 void GuildFolder::leaveEvent(QEvent *)
 {
     if (clicked)
-        pill->setFixedHeight(40);
+        pill->setFixedHeight(Settings::scale(40));
     else if (unread)
-        pill->setFixedHeight(8);
+        pill->setFixedHeight(Settings::scale(8));
     else
         pill->setFixedHeight(0);
 }

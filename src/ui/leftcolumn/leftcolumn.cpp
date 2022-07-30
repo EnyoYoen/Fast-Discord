@@ -16,11 +16,11 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     Widget *guildSeparator = new Widget(content);
 
     // Style the guild separator
-    guildSeparator->setFixedSize(32, 2);
+    guildSeparator->setFixedSize(Settings::scale(32), Settings::scale(2));
     guildSeparator->setBackgroundColor(Settings::BackgroundModifierAccent);
 
     // Add widgets to the layout
-    layout->addSpacing(6);
+    layout->addSpacing(Settings::scale(6));
     layout->addWidget(homeButton);
     layout->addWidget(guildSeparator);
 
@@ -29,14 +29,14 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     layout->setAlignment(guildSeparator, Qt::AlignHCenter);
 
     // Style the layout
-    layout->setSpacing(8);
+    layout->setSpacing(Settings::scale(8));
     layout->setContentsMargins(0, 0, 0, 0);
 
 
     // Style this widget
     this->setWidget(content);
     this->setWidgetResizable(true);
-    this->setFixedWidth(72);
+    this->setFixedWidth(Settings::scale(72));
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setStyleSheet("border: none;"

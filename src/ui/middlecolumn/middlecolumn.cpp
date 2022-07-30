@@ -8,7 +8,7 @@ MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, QWidget *parent)
     : Widget(parent)
 {
     // Style this column
-    this->setFixedWidth(240);
+    this->setFixedWidth(Settings::scale(240));
     this->setBackgroundColor(Settings::BackgroundSecondary);
     
     // Set the requester
@@ -89,8 +89,8 @@ void MiddleColumn::setPrivateChannels(const QVector<Api::PrivateChannel *>& priv
         QObject::connect(privateChannelWidget, &PrivateChannelWidget::closeButtonClicked, this, &MiddleColumn::deleteChannel);
     }
     privateChannelListLayout->insertStretch(-1, 1);
-    privateChannelListLayout->setSpacing(2);
-    privateChannelListLayout->setContentsMargins(8, 8, 8, 0);
+    privateChannelListLayout->setSpacing(Settings::scale(2));
+    privateChannelListLayout->setContentsMargins(Settings::scale(8), Settings::scale(8), Settings::scale(8), 0);
 
     // Set the channels to the column
     channelList->setWidget(privateChannelList);
@@ -171,14 +171,14 @@ void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
     }
 
     guildChannelListLayout->insertStretch(-1, 1);
-    guildChannelListLayout->setSpacing(3);
-    guildChannelListLayout->setContentsMargins(0, 8, 8, 8);
+    guildChannelListLayout->setSpacing(Settings::scale(3));
+    guildChannelListLayout->setContentsMargins(0, Settings::scale(8), Settings::scale(8), Settings::scale(8));
 
     // Style the channel list
     channelList->setWidget(guildChannelList);
     channelList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
-                               "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
-                               "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 8px; width: 3px;}"
+                               "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                               "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(8)) + "px; width: " + QString::number(Settings::scale(3)) + "px;}"
                                "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
                                "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                                "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
@@ -247,8 +247,8 @@ void MiddleColumn::displayPrivateChannels()
         privateChannelListLayout->insertWidget(i, privateChannelWidgets[i]);
     }
     privateChannelListLayout->insertStretch(-1, 1);
-    privateChannelListLayout->setSpacing(2);
-    privateChannelListLayout->setContentsMargins(8, 8, 8, 0);
+    privateChannelListLayout->setSpacing(Settings::scale(2));
+    privateChannelListLayout->setContentsMargins(Settings::scale(8), Settings::scale(8), Settings::scale(8), 0);
 
     // Set the channels to the column
     channelList->setWidget(privateChannelList);

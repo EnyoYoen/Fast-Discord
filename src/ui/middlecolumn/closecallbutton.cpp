@@ -7,10 +7,10 @@ CloseCallButton::CloseCallButton(Api::RessourceManager *rmp, QWidget *parent)
 {
     rm = rmp;
 
-    this->setFixedSize(32, 32);
+    this->setFixedSize(Settings::scale(32), Settings::scale(32));
     this->setCursor(Qt::PointingHandCursor);
     this->setImage("res/images/svg/close-call-icon.svg");
-    this->setBorderRadius(4);
+    this->setBorderRadius(Settings::scale(4));
 }
 
 void CloseCallButton::mouseReleaseEvent(QMouseEvent *)

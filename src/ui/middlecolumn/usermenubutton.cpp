@@ -35,8 +35,8 @@ UserMenuButton::UserMenuButton(int typep, QWidget *parent)
     this->setPixmap(img);
 
     // Style
-    this->setFixedSize(32, 32);
-    this->setBorderRadius(4);
+    this->setFixedSize(Settings::scale(32), Settings::scale(32));
+    this->setBorderRadius(Settings::scale(4));
 }
 
 void UserMenuButton::setClicked(bool active)

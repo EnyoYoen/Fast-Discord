@@ -31,6 +31,10 @@ public:
     void setMessages(const QVector<Api::Message *>& messages);
     void addMessage(const Api::Message *newMessage, const Api::Message *lastMessage);
     void clear();
+    
+    void updateMessagesFont();
+    void updateMessagesSpacing();
+    void updateTheme();
 
 signals:
     void messagesEnd();
@@ -52,6 +56,7 @@ private:
     void showEvent(QShowEvent *event) override; // To scroll to the very end
     void loop();
 
+    QVector<MessageWidget *> messages;
     Widget *messageBox;
     QVBoxLayout *messageLayout; // The layout of this widget
 

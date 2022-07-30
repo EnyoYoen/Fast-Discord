@@ -28,9 +28,9 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, QWidget *parent)
             // Use an asset if the user doesn't have an icon
             channelIconFileName = "res/images/png/user-icon-asset0.png";
 
-            avatar = new RoundedImage(channelIconFileName, 32, 32, 16, this);
+            avatar = new RoundedImage(channelIconFileName, Settings::scale(32), Settings::scale(32), Settings::scale(16), this);
         } else {
-            avatar = new RoundedImage(32, 32, 16, this);
+            avatar = new RoundedImage(Settings::scale(32), Settings::scale(32), Settings::scale(16), this);
 
             // Request the icon
             channelIconFileName = client->id + (client->avatar.indexOf("a_") == 0 ? ".gif" : ".png");
@@ -39,17 +39,17 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, QWidget *parent)
 
         // Set the background of the status icon
         Widget *statusBackground = new Widget(this);
-        statusBackground->setFixedSize(16, 16);
-        statusBackground->move(28, 29);
-        statusBackground->setBorderRadius(8);
+        statusBackground->setFixedSize(Settings::scale(16), Settings::scale(16));
+        statusBackground->move(Settings::scale(28), Settings::scale(29));
+        statusBackground->setBorderRadius(Settings::scale(8));
         statusBackground->setBackgroundColor(Settings::BackgroundSecondaryAlt);
         statusBackground->show();
 
         // Set the status icon
         statusIcon = new Label(this);
-        statusIcon->setFixedSize(10, 10);
-        statusIcon->setBorderRadius(5);
-        statusIcon->move(31, 32);
+        statusIcon->setFixedSize(Settings::scale(10), Settings::scale(10));
+        statusIcon->setBorderRadius(Settings::scale(5));
+        statusIcon->move(Settings::scale(31), Settings::scale(32));
         statusIcon->show();
         rm->getClientSettings([&](void *settingsPtr){
             QString status = reinterpret_cast<Api::ClientSettings *>(settingsPtr)->status;
@@ -60,7 +60,7 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, QWidget *parent)
         });
 
         QFont font;
-        font.setPixelSize(14);
+        font.setPixelSize(Settings::scale(14));
         font.setFamily("whitney");
 
         // Create the widgets of the user menu
@@ -69,27 +69,27 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, QWidget *parent)
         QVBoxLayout *userInfosLayout = new QVBoxLayout(userInfos);
         Label *name = new Label(client->username, userInfos);
         name->setFont(font);
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(12));
 
         // Style the name label
-        name->setFixedSize(84, 18);
+        name->setFixedSize(Settings::scale(84), Settings::scale(18));
         name->setTextColor(Settings::TextNormal);
 
         // Create and style the discriminator label
         Label *discriminator = new Label("#" + client->discriminator, userInfos);
         discriminator->setFont(font);
-        discriminator->setFixedSize(84, 13);
+        discriminator->setFixedSize(Settings::scale(84), Settings::scale(13));
         discriminator->setTextColor(Settings::HeaderSecondary);
 
         // Add the widgets and style the user infos layout
         userInfosLayout->addWidget(name);
         userInfosLayout->addWidget(discriminator);
-        userInfosLayout->setContentsMargins(8, 10, 4, 10);
+        userInfosLayout->setContentsMargins(Settings::scale(8), Settings::scale(10), Settings::scale(4), Settings::scale(10));
 
         // Add the icon and the infos of the user to the layout and style it
         layout->addWidget(avatar);
         layout->addWidget(userInfos);
-        layout->setContentsMargins(8, 0, 8, 0);
+        layout->setContentsMargins(Settings::scale(8), 0, Settings::scale(8), 0);
         layout->setSpacing(0);
         layout->addStretch(100);
 
@@ -102,7 +102,7 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, QWidget *parent)
         layout->addWidget(settingsButton);
 
         // Style the user menu
-        this->setFixedHeight(53);
+        this->setFixedHeight(Settings::scale(53));
         this->setBackgroundColor(Settings::BackgroundSecondaryAlt);
 
         // Connect buttons clicked signals

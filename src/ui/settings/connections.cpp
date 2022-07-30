@@ -17,8 +17,8 @@ public:
         : Widget(parent)
     {
         rm = rmp;
-        this->setFixedSize(48, 48);
-        this->setBorderRadius(5);
+        this->setFixedSize(Settings::scale(48), Settings::scale(48));
+        this->setBorderRadius(Settings::scale(5));
         this->setBackgroundColor(Settings::BackgroundSecondary);
         this->setImage("res/images/svg/" + type + "-icon.svg");
     }
@@ -64,14 +64,14 @@ public:
     {
         pressed = false;
         rm = rmp;
-        this->setFixedSize(16, 16);
+        this->setFixedSize(Settings::scale(16), Settings::scale(16));
         this->setBackgroundColor(Settings::BackgroundSecondaryAlt);
         QPixmap img("res/images/svg/close-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
         qp.end();
-        this->setPixmap(img.scaled(16, 16));
+        this->setPixmap(img.scaled(Settings::scale(16), Settings::scale(16)));
     }
 
 signals:
@@ -88,7 +88,7 @@ private:
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
         qp.end();
-        this->setPixmap(img.scaled(16, 16));
+        this->setPixmap(img.scaled(Settings::scale(16), Settings::scale(16)));
         emit clicked();
     }
 
@@ -100,7 +100,7 @@ private:
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveActive]);
         qp.end();
-        this->setPixmap(img.scaled(16, 16));
+        this->setPixmap(img.scaled(Settings::scale(16), Settings::scale(16)));
     }
 
     void enterEvent(QEvent *)
@@ -111,7 +111,7 @@ private:
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
             qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
             qp.end();
-            this->setPixmap(img.scaled(16, 16));
+            this->setPixmap(img.scaled(Settings::scale(16), Settings::scale(16)));
         }
     }
 
@@ -123,7 +123,7 @@ private:
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
             qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
             qp.end();
-            this->setPixmap(img.scaled(16, 16));
+            this->setPixmap(img.scaled(Settings::scale(16), Settings::scale(16)));
         }
     }
 };
@@ -135,42 +135,42 @@ public:
     ConnectedAccount(Api::RessourceManager *rm, Api::Connection *connection, QWidget *parent)
         : Widget(parent)
     {
-        this->setFixedHeight(136);
-        this->setBorderRadius(8);
+        this->setFixedHeight(Settings::scale(136));
+        this->setBorderRadius(Settings::scale(8));
 
         QVBoxLayout *layout = new QVBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
 
         Widget *header = new Widget(this);
-        header->setFixedHeight(72);
+        header->setFixedHeight(Settings::scale(72));
         header->setBackgroundColor(Settings::BackgroundSecondaryAlt);
-        header->setBorderRadius(8, 8, 0, 0);
+        header->setBorderRadius(Settings::scale(8), Settings::scale(8), 0, 0);
         QHBoxLayout *headerLayout = new QHBoxLayout(header);
-        headerLayout->setContentsMargins(20, 20, 20, 20);
+        headerLayout->setContentsMargins(Settings::scale(20), Settings::scale(20), Settings::scale(20), Settings::scale(20));
         headerLayout->setSpacing(0);
 
         Widget *icon = new Widget(header);
-        icon->setFixedSize(32, 32);
+        icon->setFixedSize(Settings::scale(32), Settings::scale(32));
         icon->setImage("res/images/svg/" + connection->type + "-icon.svg");
         
         Widget *nameContainer = new Widget(header);
-        nameContainer->setFixedHeight(32);
+        nameContainer->setFixedHeight(Settings::scale(32));
         QVBoxLayout *nameLayout = new QVBoxLayout(nameContainer);
         nameLayout->setContentsMargins(0, 0, 0, 0);
         nameLayout->setSpacing(0);
 
         QFont font;
-        font.setPixelSize(14);
+        font.setPixelSize(Settings::scale(14));
         font.setFamily("whitney");
         Label *username = new Label(connection->name, nameContainer);
-        username->setFixedSize(QFontMetrics(font).horizontalAdvance(connection->name), 18);
+        username->setFixedSize(QFontMetrics(font).horizontalAdvance(connection->name), Settings::scale(18));
         username->setFont(font);
         username->setTextColor(Settings::HeaderPrimary);
         Label *name = new Label((AccountButton::names.contains(connection->type) ? AccountButton::names[connection->type] : connection->type), nameContainer);
         font.setPixelSize(12);
         name->setFixedHeight(14);
-        name->setFixedSize(QFontMetrics(font).horizontalAdvance(connection->name), 14);
+        name->setFixedSize(QFontMetrics(font).horizontalAdvance(connection->name), Settings::scale(14));
         name->setFont(font);
         name->setTextColor(Settings::HeaderSecondary);
 
@@ -181,7 +181,7 @@ public:
         QObject::connect(button, &RemoveAccountButton::clicked, [rm, connection, this](){
             QWidget *parentWidget = this;
             while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-            PopUp *popUp = new PopUp(new Widget(nullptr), 440, 210, QString(), "DISCONNECT " + connection->type.toUpper(), true, false, "Disconnecting your account might remove you from servers\nyou joined via this account.", "Cancel", "Disconnect", true, true, parentWidget->size(), parentWidget);
+            PopUp *popUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(210), QString(), "DISCONNECT " + connection->type.toUpper(), true, false, "Disconnecting your account might remove you from servers\nyou joined via this account.", "Cancel", "Disconnect", true, true, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             QObject::connect(popUp, &PopUp::done, [popUp, connection, rm, this](){
                 rm->requester->removeConnection(connection->type, connection->id);
@@ -192,7 +192,7 @@ public:
         });
 
         headerLayout->addWidget(icon);
-        headerLayout->addSpacing(20);
+        headerLayout->addSpacing(Settings::scale(20));
         headerLayout->addWidget(nameContainer);
         headerLayout->addStretch(1);
         headerLayout->addWidget(button, 0, Qt::AlignVCenter);
@@ -200,15 +200,15 @@ public:
 
         Widget *switchContainer = new Widget(this);
         switchContainer->setBackgroundColor(Settings::BackgroundSecondary);
-        switchContainer->setBorderRadius(0, 0, 8, 8);
-        switchContainer->setFixedHeight(64);
+        switchContainer->setBorderRadius(0, 0, Settings::scale(8), Settings::scale(8));
+        switchContainer->setFixedHeight(Settings::scale(64));
         QHBoxLayout *switchLayout = new QHBoxLayout(switchContainer);
-        switchLayout->setContentsMargins(20, 20, 20, 20);
+        switchLayout->setContentsMargins(Settings::scale(20), Settings::scale(20), Settings::scale(20), Settings::scale(20));
         switchLayout->setSpacing(0);
 
-        font.setPixelSize(16);
+        font.setPixelSize(Settings::scale(16));
         Label *description = new Label("Display on profile", switchContainer);
-        description->setFixedSize(QFontMetrics(font).horizontalAdvance("Display on profile"), 24);
+        description->setFixedSize(QFontMetrics(font).horizontalAdvance("Display on profile"), Settings::scale(24));
         description->setFont(font);
         description->setTextColor(Settings::HeaderPrimary);
 
@@ -235,41 +235,41 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
     rm = rmp;
 
     Widget *container = new Widget(this);
-    container->setMaximumWidth(740);
-    container->setContentsMargins(40, 60, 40, 80);
+    container->setMaximumWidth(Settings::scale(740));
+    container->setContentsMargins(Settings::scale(40), Settings::scale(60), Settings::scale(40), Settings::scale(80));
     container->setBackgroundColor(Settings::BackgroundPrimary);
     layout = new QVBoxLayout(container);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(8);
+    layout->setSpacing(Settings::scale(8));
 
     QFont font;
-    font.setPixelSize(20);
+    font.setPixelSize(Settings::scale(20));
     font.setFamily("whitney");
 
     Label *title = new Label("Connections", container);
-    title->setFixedSize(QFontMetrics(font).horizontalAdvance("Connections"), 20);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance("Connections"), Settings::scale(20));
     title->setFont(font);
     title->setTextColor(Settings::HeaderPrimary);
 
     layout->addWidget(title);
-    layout->addSpacing(20);
+    layout->addSpacing(Settings::scale(20));
 
 
     Widget *accountList = new Widget(container);
-    accountList->setMinimumHeight(134);
+    accountList->setMinimumHeight(Settings::scale(134));
     accountList->setBackgroundColor(Settings::BackgroundSecondaryAlt);
-    accountList->setBorderRadius(8);
+    accountList->setBorderRadius(Settings::scale(8));
     QVBoxLayout *accountLayout = new QVBoxLayout(accountList);
-    accountLayout->setContentsMargins(20, 20, 20, 20);
+    accountLayout->setContentsMargins(Settings::scale(20), Settings::scale(20), Settings::scale(20), Settings::scale(20));
     accountLayout->setSpacing(0);
 
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(12));
     font.setBold(true);
     Label *accountTitle = new Label("CONNECT YOUR ACCOUNTS", accountList);
     accountTitle->setFont(font);
     accountTitle->setTextColor(Settings::HeaderSecondary);
 
-    font.setPixelSize(14);
+    font.setPixelSize(Settings::scale(14));
     font.setBold(false);
     Label *description = new Label("Connect these accounts and unlock special Discord integrations.", accountList);
     description->setFont(font);
@@ -277,7 +277,7 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
 
     Widget *accountGrid = new Widget(accountList);
     QHBoxLayout *accountGridLayout = new QHBoxLayout(accountGrid);
-    accountGridLayout->setContentsMargins(0, 0, 0, 8);
+    accountGridLayout->setContentsMargins(0, 0, 0, Settings::scale(8));
     accountGridLayout->setSpacing(0);
     QList<QString> keys = AccountButton::names.keys();
     accountGridLayout->addWidget(new AccountButton(rm, keys.at(0), accountGrid));
@@ -293,7 +293,7 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
     accountLayout->addWidget(accountGrid);
 
     layout->addWidget(accountList);
-    layout->addSpacing(20);
+    layout->addSpacing(Settings::scale(20));
 
     rm->requester->getConnections([container, this](void *connectionsPtr){
         QVector<Api::Connection *> connections = *reinterpret_cast<QVector<Api::Connection *> *>(connectionsPtr);
@@ -308,7 +308,7 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
                         empty();
                 });
                 layout->insertWidget(3 + i, account);
-                layout->insertSpacing(4 + i, 30);
+                layout->insertSpacing(4 + i, Settings::scale(30));
             }
             layout->addStretch(1);
         }
@@ -319,8 +319,8 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
     this->setWidget(container);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setStyleSheet("* {border: none; background-color: " + Settings::colors[Settings::BackgroundPrimary].name() + "}"
-                        "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
-                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 8px; width: 3px;}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(8)) + "px; width: " + QString::number(Settings::scale(3)) + "px;}"
                         "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}"
                         "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                         "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
@@ -334,28 +334,28 @@ void Connections::empty()
     noConnectionsLayout->setSpacing(0);
     
     Widget *image = new Widget(noConnections);
-    image->setFixedSize(262, 226);
+    image->setFixedSize(Settings::scale(262), Settings::scale(226));
     image->setImage("res/images/svg/no-connections-icon.svg");
 
     noConnectionsLayout->addWidget(image, 0, Qt::AlignHCenter);
-    noConnectionsLayout->addSpacing(40);
+    noConnectionsLayout->addSpacing(Settings::scale(40));
 
     QFont font;
-    font.setPixelSize(17);
+    font.setPixelSize(Settings::scale(17));
     font.setBold(true);
     font.setFamily("whitney");
 
     Label *title = new Label("NO CONNECTIONS", noConnections);
-    title->setFixedSize(QFontMetrics(font).horizontalAdvance("NO CONNECTIONS"), 22);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance("NO CONNECTIONS"), Settings::scale(22));
     title->setTextColor(Settings::TextMuted);
     title->setFont(font);
 
     noConnectionsLayout->addWidget(title, 0, Qt::AlignHCenter);
-    noConnectionsLayout->addSpacing(8);
+    noConnectionsLayout->addSpacing(Settings::scale(8));
     
     font.setBold(false);
     Label *desc = new Label("Connect your account to unlock special Discord integrations", noConnections);
-    desc->setFixedSize(QFontMetrics(font).horizontalAdvance("Connect your account to unlock special Discord integrations"), 20);
+    desc->setFixedSize(QFontMetrics(font).horizontalAdvance("Connect your account to unlock special Discord integrations"), Settings::scale(20));
     desc->setTextColor(Settings::TextMuted);
     desc->setFont(font);
 

@@ -5,13 +5,13 @@ namespace Ui {
 SelectImageButton::SelectImageButton(QWidget *parent)
     : Label(parent)
 {
-    this->setFixedSize(128, 128);
-    this->setBorderRadius(64);
+    this->setFixedSize(Settings::scale(128), Settings::scale(128));
+    this->setBorderRadius(Settings::scale(64));
     this->setBackgroundColor(Settings::BrandExperiment);
     Widget *icon = new Widget(this);
     icon->setImage("res/images/svg/add-image-icon.svg");
-    icon->setFixedSize(24, 24);
-    icon->move(52, 52);
+    icon->setFixedSize(Settings::scale(24), Settings::scale(24));
+    icon->move(Settings::scale(52), Settings::scale(52));
 }
 
 void SelectImageButton::mouseReleaseEvent(QMouseEvent *event)

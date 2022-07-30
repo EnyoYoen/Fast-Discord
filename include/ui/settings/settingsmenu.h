@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ui/common/basicwidgets.h"
+#include "ui/settings/scrollmenu.h"
 #include "api/ressourcemanager.h"
 
 #include <QWidget>
@@ -14,11 +15,15 @@ class SettingsMenu : public Widget
 public:
     SettingsMenu(Api::RessourceManager *rm, QWidget *parent);
 
+    void updateTheme();
+
 signals:
     void closeClicked();
 
 private:
     QHBoxLayout *layout;
+    ScrollMenu *scrollMenu;
+    QWidget *menu = nullptr;
     Api::RessourceManager *rm;
 };
 

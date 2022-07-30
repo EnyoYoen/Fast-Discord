@@ -18,8 +18,8 @@ MemberList::MemberList(Api::RessourceManager *rmp, const QVector<Api::Snowflake>
 
     QWidget *container = new QWidget(this);
     layout = new QVBoxLayout(container);
-    layout->setContentsMargins(8, 0, 8, 0);
-    layout->setSpacing(2);
+    layout->setContentsMargins(Settings::scale(8), 0, Settings::scale(8), 0);
+    layout->setSpacing(Settings::scale(2));
 
     if (!recipientIds.isEmpty()) {
         nMembers = recipientIds.size() + 1;
@@ -55,13 +55,13 @@ MemberList::MemberList(Api::RessourceManager *rmp, const QVector<Api::Snowflake>
         }
     });
     
-    this->setFixedWidth(240);
+    this->setFixedWidth(Settings::scale(240));
     this->setWidget(container);
     this->setWidgetResizable(true);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
-                        "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
-                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 2px; width: 4px;}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(2)) + "px; width: " + QString::number(Settings::scale(4)) + "px;}"
                         "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
                         "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                         "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
@@ -70,16 +70,16 @@ MemberList::MemberList(Api::RessourceManager *rmp, const QVector<Api::Snowflake>
 QWidget *MemberList::createTitle(QString name)
 {
     QWidget *titleContainer = new QWidget(this);
-    titleContainer->setFixedHeight(40);
+    titleContainer->setFixedHeight(Settings::scale(40));
     QHBoxLayout *layout = new QHBoxLayout(titleContainer);
-    layout->setContentsMargins(0, 24, 0, 0);
+    layout->setContentsMargins(0, Settings::scale(24), 0, 0);
 
     QFont font;
     font.setBold(true);
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(12));
     font.setFamily("whitney");
     Label *title = new Label(name, titleContainer);
-    title->setFixedSize(QFontMetrics(font).horizontalAdvance(name), 16);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance(name), Settings::scale(16));
     title->setFont(font);
     title->setTextColor(Settings::ChannelsDefault);
 

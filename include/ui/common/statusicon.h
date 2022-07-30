@@ -12,9 +12,6 @@ class StatusIcon : public Widget
 public:
     StatusIcon(QWidget *parent);
     void setStatus(const QString& status);
-/*
-private:
-    void paintEvent(QPaintEvent *);*/
 };
 
 } // namespace Ui

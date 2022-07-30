@@ -25,16 +25,16 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     Widget *container = new Widget(this);
     layout = new QVBoxLayout(container);
     layout->setContentsMargins(0, 0, 0, 0);
-    container->setMaximumWidth(752);
-    container->setContentsMargins(40, 60, 40, 80);
+    container->setMaximumWidth(Settings::scale(752));
+    container->setContentsMargins(Settings::scale(40), Settings::scale(60), Settings::scale(40), Settings::scale(80));
     container->setBackgroundColor(Settings::BackgroundPrimary);
 
     QFont font;
-    font.setPixelSize(20);
+    font.setPixelSize(Settings::scale(20));
     font.setFamily("whitney");
 
     Label *title = new Label("User Profile", container);
-    title->setFixedHeight(24);
+    title->setFixedHeight(Settings::scale(24));
     title->setFont(font);
     title->setTextColor(Settings::HeaderPrimary);
 
@@ -43,10 +43,10 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
 
     Widget *profileEdit = new Widget(container);
     QHBoxLayout *profileLayout = new QHBoxLayout(profileEdit);
-    profileLayout->setSpacing(20);
+    profileLayout->setSpacing(Settings::scale(20));
     profileLayout->setContentsMargins(0, 0, 0, 0);
 
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(12));
     Widget *customization = new Widget(profileEdit);
     QVBoxLayout *customizationLayout = new QVBoxLayout(customization);
     customizationLayout->setSpacing(0);
@@ -55,17 +55,17 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
 
     Widget *avatarSection = new Widget(customization);
     QVBoxLayout *avatarLayout = new QVBoxLayout(avatarSection);
-    avatarLayout->setSpacing(8);
+    avatarLayout->setSpacing(Settings::scale(8));
     avatarLayout->setContentsMargins(0, 0, 0, 0);
 
     Label *avatarTitle = new Label("AVATAR", avatarSection);
-    avatarTitle->setFixedHeight(16);
+    avatarTitle->setFixedHeight(Settings::scale(16));
     avatarTitle->setFont(font);
     avatarTitle->setTextColor(Settings::HeaderSecondary);
     
     Widget *avatarButtons = new Widget(avatarSection);
     QHBoxLayout *avatarButtonsLayout = new QHBoxLayout(avatarButtons);
-    avatarButtonsLayout->setSpacing(4);
+    avatarButtonsLayout->setSpacing(Settings::scale(4));
     avatarButtonsLayout->setContentsMargins(0, 0, 0, 0);
     SettingsButton *changeAvatar = new SettingsButton(SettingsButton::Type::Normal, "Change Avatar", avatarButtons);
     SettingsButton *removeAvatar = new SettingsButton(SettingsButton::Type::NoBackground, "Remove Avatar", avatarButtons);
@@ -79,27 +79,27 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
 
     Widget *colorSection = new Widget(customization);
     QVBoxLayout *colorLayout = new QVBoxLayout(colorSection);
-    colorLayout->setSpacing(16);
+    colorLayout->setSpacing(Settings::scale(16));
     colorLayout->setContentsMargins(0, 0, 0, 0);
 
     Label *colorTitle = new Label("PROFILE COLOR", colorSection);
-    colorTitle->setFixedHeight(16);
+    colorTitle->setFixedHeight(Settings::scale(16));
     colorTitle->setFont(font);
     colorTitle->setTextColor(Settings::HeaderSecondary);
 
     Widget *colorButtons = new Widget(colorSection);
     QHBoxLayout *colorButtonsLayout = new QHBoxLayout(colorButtons);
-    colorButtonsLayout->setSpacing(16);
+    colorButtonsLayout->setSpacing(Settings::scale(16));
     colorButtonsLayout->setContentsMargins(0, 0, 0, 0);
 
-    font.setPixelSize(11);
+    font.setPixelSize(Settings::scale(11));
     Widget *defaultColorContainer = new Widget(colorButtons);
-    defaultColorContainer->setFixedSize(69, 70);
+    defaultColorContainer->setFixedSize(Settings::scale(69), Settings::scale(70));
     QVBoxLayout *defaultColorLayout = new QVBoxLayout(defaultColorContainer);
-    defaultColorLayout->setSpacing(4);
+    defaultColorLayout->setSpacing(Settings::scale(4));
     defaultColorLayout->setContentsMargins(0, 0, 0, 0);
     Label *defaultColorTitle = new Label("Default", defaultColorContainer);
-    defaultColorTitle->setFixedSize(69, 16);
+    defaultColorTitle->setFixedSize(Settings::scale(69), Settings::scale(16));
     defaultColorTitle->setFlags(Qt::AlignCenter);
     defaultColorTitle->setFont(font);
     defaultColorTitle->setTextColor(Settings::HeaderSecondary);
@@ -108,33 +108,33 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     defaultColorLayout->addWidget(defaultColorTitle, 1, Qt::AlignHCenter);
 
     Widget *customColorContainer = new Widget(colorButtons);
-    customColorContainer->setFixedSize(69, 70);
+    customColorContainer->setFixedSize(Settings::scale(69), Settings::scale(70));
     QVBoxLayout *customColorLayout = new QVBoxLayout(customColorContainer);
-    customColorLayout->setSpacing(4);
+    customColorLayout->setSpacing(Settings::scale(4));
     customColorLayout->setContentsMargins(0, 0, 0, 0);
     Label *customColorTitle = new Label("Custom", customColorContainer);
-    customColorTitle->setFixedSize(69, 16);
+    customColorTitle->setFixedSize(Settings::scale(69), Settings::scale(16));
     customColorTitle->setFlags(Qt::AlignCenter);
     customColorTitle->setFont(font);
     customColorTitle->setTextColor(Settings::HeaderSecondary);
     customColor = new ColorLabel(customColorContainer);
     Widget *colorIcon = new Widget(customColor);
-    colorIcon->setPixmap(QPixmap("res/images/svg/grab-color-icon.svg").scaled(14, 14));
-    colorIcon->move(50, 0);
+    colorIcon->setPixmap(QPixmap("res/images/svg/grab-color-icon.svg").scaled(Settings::scale(14), Settings::scale(14)));
+    colorIcon->move(Settings::scale(50), 0);
     customColorLayout->addWidget(customColor);
     customColorLayout->addWidget(customColorTitle, 0, Qt::AlignHCenter);
     
     rm->getClient([this](void *clientPtr){
         Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
 
-        bannerColor = "#" + QString::number(client->bannerColor, 16);
+        bannerColor = "#" + QString::number(client->bannerColor, Settings::scale(16));
         avatarFile = client->avatar;
         bannerFile = client->banner;
         bio = client->bio;
 
         if (client->bannerColor != 0) {
             customColor->setClicked();
-            customColor->setColor("#" + QString::number(client->bannerColor, 16));
+            customColor->setColor("#" + QString::number(client->bannerColor, Settings::scale(16)));
         } else {
             defaultColor->setClicked();
             customColor->setColor("#000");
@@ -178,32 +178,32 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
 
     Widget *bannerSection = new Widget(customization);
     QVBoxLayout *bannerLayout = new QVBoxLayout(bannerSection);
-    bannerLayout->setSpacing(8);
+    bannerLayout->setSpacing(Settings::scale(8));
     bannerLayout->setContentsMargins(0, 0, 0, 0);
 
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(12));
     Widget *bannerTitle = new Widget(bannerSection);
     QHBoxLayout *bannerTitleLayout = new QHBoxLayout(bannerTitle);
     bannerTitleLayout->setSpacing(0);
     bannerTitleLayout->setContentsMargins(0, 0, 0, 0);
     Label *bannerTitleText = new Label("PROFILE BANNER", bannerTitle);
-    bannerTitleText->setMinimumSize(104, 16);
+    bannerTitleText->setMinimumSize(Settings::scale(104), Settings::scale(16));
     bannerTitleText->setFont(font);
     bannerTitleText->setTextColor(Settings::HeaderSecondary);
     QLabel *bannerTitleIcon = new QLabel(bannerTitle);
-    bannerTitleIcon->setPixmap(QPixmap("res/images/svg/nitro-icon.svg").scaled(16, 16));
+    bannerTitleIcon->setPixmap(QPixmap("res/images/svg/nitro-icon.svg").scaled(Settings::scale(16), Settings::scale(16)));
     bannerTitleLayout->addWidget(bannerTitleText);
     bannerTitleLayout->addWidget(bannerTitleIcon);
     bannerTitleLayout->addStretch(1);
 
     Label *bannerDescription = new Label("We recommend an image of at least 600x240. You can\nupload a PNG, JPG, or an animated GIF under 10 MB.", bannerSection);
-    bannerDescription->setMinimumHeight(40);
+    bannerDescription->setMinimumHeight(Settings::scale(40));
     bannerDescription->setFont(font);
     bannerDescription->setTextColor(Settings::HeaderSecondary);
 
     Widget *bannerButtons = new Widget(bannerSection);
     QHBoxLayout *bannerButtonsLayout = new QHBoxLayout(bannerButtons);
-    bannerButtonsLayout->setSpacing(4);
+    bannerButtonsLayout->setSpacing(Settings::scale(4));
     bannerButtonsLayout->setContentsMargins(0, 0, 0, 0);
     rm->getClient([bannerButtons, bannerButtonsLayout, this](void *clientPtr){
         Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
@@ -225,27 +225,27 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
                 while (parentWidget->parent()) parentWidget = (Widget *)parentWidget->parent();
 
                 QFont font;
-                font.setPixelSize(12);
+                font.setPixelSize(Settings::scale(12));
                 font.setFamily("whitney");
                 Widget *container = new Widget(nullptr);
-                container->setFixedSize(200, 212);
+                container->setFixedSize(Settings::scale(200), Settings::scale(212));
                 QHBoxLayout *mainLayout = new QHBoxLayout(container);
-                mainLayout->setContentsMargins(16, 0, 16, 16);
+                mainLayout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), Settings::scale(16));
                 Label *content = new Label(container);
-                content->setFixedSize(160, 196);
+                content->setFixedSize(Settings::scale(160), Settings::scale(196));
                 content->setTextColor(Settings::BackgroundSecondaryAlt);
                 QVBoxLayout *layout = new QVBoxLayout(content);
-                layout->setSpacing(32);
-                layout->setContentsMargins(16, 16, 16, 16);
+                layout->setSpacing(Settings::scale(32));
+                layout->setContentsMargins(Settings::scale(16), Settings::scale(16), Settings::scale(16), Settings::scale(16));
                 SelectImageButton *button = new SelectImageButton(content);
                 QLabel *desc = new QLabel("Upload Image", content);
-                desc->setFixedHeight(16);
+                desc->setFixedHeight(Settings::scale(16));
                 desc->setFont(font);
                 layout->addWidget(button);
                 layout->addWidget(desc, 0, Qt::AlignHCenter);
                 mainLayout->addWidget(content, 0, Qt::AlignCenter);
 
-                PopUp *popUp = new PopUp(container, 240, 280, QString(), "Select Image", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
+                PopUp *popUp = new PopUp(container, Settings::scale(240), Settings::scale(280), QString(), "Select Image", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
                 QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                 QObject::connect(button, &SelectImageButton::clicked, [this, parentWidget, popUp](){
                     QString defaultFolder = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + "/";
@@ -268,7 +268,7 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
             QObject::connect(getNitroButton, &SettingsButton::clicked, [this](){
                 QWidget *parentWidget = this;
                 while (parentWidget->parent()) parentWidget = (Widget *)parentWidget->parent();
-                PopUp *popUp = new PopUp(new Widget(nullptr), 440, 120, QString(), "Get Nitro", true, false, "<div style=\"text-align: center\">You can get nitro at <a style=\"color: #00AFF4; text-decoration: none;\" href=\"https://discord.com/nitro\">https://discord.com/nitro</a></div>", QString(), QString(), false, false, parentWidget->size(), parentWidget);
+                PopUp *popUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(120), QString(), "Get Nitro", true, false, "<div style=\"text-align: center\">You can get nitro at <a style=\"color: #00AFF4; text-decoration: none;\" href=\"https://discord.com/nitro\">https://discord.com/nitro</a></div>", QString(), QString(), false, false, parentWidget->size(), parentWidget);
                 QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             });
             bannerButtonsLayout->addWidget(getNitroButton);
@@ -278,39 +278,39 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
 
     bannerLayout->addWidget(bannerTitle);
     bannerLayout->addWidget(bannerDescription);
-    bannerLayout->addSpacing(4);
+    bannerLayout->addSpacing(Settings::scale(4));
     bannerLayout->addWidget(bannerButtons);
 
 
     Widget *aboutSection = new Widget(customization);
     QVBoxLayout *aboutLayout = new QVBoxLayout(aboutSection);
-    aboutLayout->setSpacing(8);
+    aboutLayout->setSpacing(Settings::scale(8));
     aboutLayout->setContentsMargins(0, 0, 0, 0);
 
     Label *aboutTitle = new Label("ABOUT ME", aboutSection);
-    aboutTitle->setFixedHeight(16);
+    aboutTitle->setFixedHeight(Settings::scale(16));
     aboutTitle->setFont(font);
     aboutTitle->setTextColor(Settings::HeaderSecondary);
 
     Label *aboutDescription = new Label("You can use markdown and links if you'd like.", aboutSection);
-    aboutDescription->setFixedHeight(16);
+    aboutDescription->setFixedHeight(Settings::scale(16));
     aboutDescription->setFont(font);
     aboutDescription->setTextColor(Settings::HeaderSecondary);
 
-    font.setPixelSize(14);
+    font.setPixelSize(Settings::scale(14));
     Widget *aboutEdit = new Widget(aboutSection);
-    aboutEdit->setFixedSize(340, 136);
+    aboutEdit->setFixedSize(Settings::scale(340), Settings::scale(136));
     aboutEdit->setBackgroundColor(Settings::BackgroundTertiary);
-    aboutEdit->setBorderRadius(3);
+    aboutEdit->setBorderRadius(Settings::scale(3));
     QHBoxLayout *aboutEditLayout = new QHBoxLayout(aboutEdit);
-    aboutEditLayout->setSpacing(10);
-    aboutEditLayout->setContentsMargins(16, 11, 16, 11);
+    aboutEditLayout->setSpacing(Settings::scale(10));
+    aboutEditLayout->setContentsMargins(Settings::scale(16), Settings::scale(11), Settings::scale(16), Settings::scale(11));
     aboutTextEdit = new QTextEdit(aboutEdit);
     aboutTextEdit->setFont(font);
     aboutTextEdit->setTextColor(Settings::colors[Settings::TextNormal]);
     aboutTextEdit->setStyleSheet(QString("background-color: ") + Settings::colors[Settings::BackgroundTertiary].name());
     Label *charCount = new Label(aboutEdit);
-    charCount->setFixedSize(25, 16);
+    charCount->setFixedSize(Settings::scale(25), Settings::scale(16));
     charCount->setTextColor(Settings::TextNormal);
     charCount->setBackgroundColor(Settings::BackgroundTertiary);
     rm->getClient([charCount, this](void *clientPtr){
@@ -345,34 +345,34 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
 
 
     Widget *line1 = new Widget(this);
-    line1->setFixedSize(660, 1);
+    line1->setFixedSize(Settings::scale(660), 1);
     line1->setBackgroundColor(Settings::BackgroundModifierActive);
     Widget *line2 = new Widget(this);
-    line2->setFixedSize(660, 1);
+    line2->setFixedSize(Settings::scale(660), 1);
     line2->setBackgroundColor(Settings::BackgroundModifierActive);
 
     customizationLayout->addWidget(avatarSection);
-    customizationLayout->addSpacing(24);
+    customizationLayout->addSpacing(Settings::scale(24));
     customizationLayout->addWidget(line1);
-    customizationLayout->addSpacing(24);
+    customizationLayout->addSpacing(Settings::scale(24));
     customizationLayout->addWidget(colorSection);
-    customizationLayout->addSpacing(24);
+    customizationLayout->addSpacing(Settings::scale(24));
     customizationLayout->addWidget(bannerSection);
-    customizationLayout->addSpacing(24);
+    customizationLayout->addSpacing(Settings::scale(24));
     customizationLayout->addWidget(line2);
-    customizationLayout->addSpacing(24);
+    customizationLayout->addSpacing(Settings::scale(24));
     customizationLayout->addWidget(aboutSection);
     customizationLayout->addStretch(1);
 
 
     Widget *preview = new Widget(profileEdit);
     QVBoxLayout *previewLayout = new QVBoxLayout(preview);
-    previewLayout->setSpacing(8);
+    previewLayout->setSpacing(Settings::scale(8));
     previewLayout->setContentsMargins(0, 0, 0, 0);
 
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(12));
     Label *previewTitle = new Label("PREVIEW", preview);
-    previewTitle->setFixedHeight(16);
+    previewTitle->setFixedHeight(Settings::scale(16));
     previewTitle->setFont(font);
     previewTitle->setTextColor(Settings::HeaderSecondary);
     previewLayout->addWidget(previewTitle);
@@ -393,16 +393,16 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     profileLayout->addWidget(customization);
     profileLayout->addWidget(preview);
 
-    layout->addSpacing(20);
+    layout->addSpacing(Settings::scale(20));
     layout->addWidget(profileEdit);
 
-    mainLayout->addWidget(container, 10);
+    mainLayout->addWidget(container, Settings::scale(10));
 
     this->setWidget(container);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setStyleSheet("* {border: none; background-color: " + Settings::colors[Settings::BackgroundPrimary].name() + "}"
-                        "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
-                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 8px; width: 3px;}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(8)) + "px; width: " + QString::number(Settings::scale(3)) + "px;}"
                         "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}"
                         "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                         "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
@@ -439,18 +439,18 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
         while (parentWidget->parent()) parentWidget = (Widget *)parentWidget->parent();
 
         QFont font;
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(12));
         font.setFamily("whitney");
         Widget *container = new Widget(nullptr);
-        container->setFixedSize(200, 212);
+        container->setFixedSize(Settings::scale(200), Settings::scale(212));
         QHBoxLayout *mainLayout = new QHBoxLayout(container);
-        mainLayout->setContentsMargins(16, 0, 16, 16);
+        mainLayout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), Settings::scale(16));
         Label *content = new Label(container);
-        content->setFixedSize(160, 196);
+        content->setFixedSize(Settings::scale(160), Settings::scale(196));
         content->setBackgroundColor(Settings::BackgroundSecondaryAlt);
         QVBoxLayout *layout = new QVBoxLayout(content);
-        layout->setSpacing(32);
-        layout->setContentsMargins(16, 16, 16, 16);
+        layout->setSpacing(Settings::scale(32));
+        layout->setContentsMargins(Settings::scale(16), Settings::scale(16), Settings::scale(16), Settings::scale(16));
         SelectImageButton *button = new SelectImageButton(content);
         QLabel *desc = new QLabel("Upload Image", content);
         desc->setFont(font);
@@ -458,7 +458,7 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
         layout->addWidget(desc, 0, Qt::AlignHCenter);
         mainLayout->addWidget(content, 0, Qt::AlignCenter);
 
-        PopUp *popUp = new PopUp(container, 240, 280, QString(), "Select Image", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
+        PopUp *popUp = new PopUp(container, Settings::scale(240), Settings::scale(280), QString(), "Select Image", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
         QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
         QObject::connect(button, &SelectImageButton::clicked, [this, parentWidget, popUp](){
             QString defaultFolder = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + "/";
@@ -482,19 +482,19 @@ void UserProfile::profileChanged()
         modified = true;
 
         QFont font;
-        font.setPixelSize(13);
+        font.setPixelSize(Settings::scale(13));
         font.setFamily("whitney");
 
         Widget *unsaved = new Widget(this);
-        unsaved->setFixedHeight(52);
-        unsaved->setMaximumWidth(700);
+        unsaved->setFixedHeight(Settings::scale(52));
+        unsaved->setMaximumWidth(Settings::scale(700));
         unsaved->setBackgroundColor(Settings::UnsavedBackground);
-        unsaved->setBorderRadius(5);
+        unsaved->setBorderRadius(Settings::scale(5));
         QHBoxLayout *layout = new QHBoxLayout(unsaved);
-        layout->setSpacing(10);
-        layout->setContentsMargins(16, 10, 10, 10);
+        layout->setSpacing(Settings::scale(10));
+        layout->setContentsMargins(Settings::scale(16), Settings::scale(10), Settings::scale(10), Settings::scale(10));
         Label *careful = new Label("Careful - you have unsaved changes!", unsaved);
-        careful->setFixedHeight(20);
+        careful->setFixedHeight(Settings::scale(20));
         careful->setFont(font);
         careful->setTextColor(Settings::White);
         SettingsButton *reset = new SettingsButton(SettingsButton::Type::NoBackground, "Reset", unsaved);
@@ -578,11 +578,11 @@ void UserProfile::profileChanged()
 
                         Widget *container = new Widget(nullptr);
                         QHBoxLayout *layout = new QHBoxLayout(container);
-                        layout->setContentsMargins(32, 32, 32, 32);
-                        layout->setSpacing(10);
+                        layout->setContentsMargins(Settings::scale(32), Settings::scale(32), Settings::scale(32), Settings::scale(32));
+                        layout->setSpacing(Settings::scale(10));
                         
                         QFont font;
-                        font.setPixelSize(14);
+                        font.setPixelSize(Settings::scale(14));
                         font.setBold(true);
                         font.setFamily("whitney");
 
@@ -597,7 +597,7 @@ void UserProfile::profileChanged()
                         QWidget *parentWidget = this;
                         while (parentWidget->parent()) parentWidget = (Widget *)parentWidget->parent();
 
-                        PopUp *popUp = new PopUp(container, 400, 300, QString(), "Errors", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
+                        PopUp *popUp = new PopUp(container, Settings::scale(400), Settings::scale(300), QString(), "Errors", false, true, QString(), QString(), QString(), false, false, parentWidget->size(), parentWidget);
                         QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                     }
                 }, data);

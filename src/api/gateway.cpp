@@ -166,7 +166,7 @@ void const Gateway::processBinaryMessage(const QByteArray& message)
 // Process a text message that the gateway recieves
 void const Gateway::processTextMessage(const QString& message)
 {
-    qDebug() << "⇩" << message.mid(0, 198);
+    //qDebug() << "⇩" << message.mid(0, 198);
     QJsonDocument payload = QJsonDocument::fromJson(message.toUtf8());
     QJsonValue data = payload["d"];
 

@@ -14,6 +14,7 @@ class RoundedImage : public Widget
 public:
     RoundedImage(const QString& imagePath, int width, int height, int radius, QWidget *parent);
     RoundedImage(int width, int height, int radius, QWidget *parent);
+    void changeSize(int width, int height, int radius);
     void setRoundedImage(const QString& imagePath);
     void clear();
 
@@ -21,7 +22,7 @@ private:
     void enterEvent(QEvent *);
     void leaveEvent(QEvent *);
 
-    int w, h;
+    QString imgPath;
 };
 
 } // namespace Ui

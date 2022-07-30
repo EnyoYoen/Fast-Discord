@@ -18,8 +18,8 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment 
 
     QPixmap pix("res/images/svg/archive-icon.svg");
     QLabel *image = new QLabel(container);
-    image->setPixmap(pix.scaled(30, 40, Qt::KeepAspectRatio));
-    image->setFixedSize(30, 40);
+    image->setPixmap(pix.scaled(Settings::scale(30), Settings::scale(40), Qt::KeepAspectRatio));
+    image->setFixedSize(Settings::scale(30), Settings::scale(40));
 
     QString sizeStr;
     int size = attachment->size;
@@ -32,10 +32,10 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment 
     }
     Label *filesize = new Label(sizeStr, infos);
     QFont font;
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(12));
     font.setFamily("whitney");
     filesize->setFont(font);
-    filesize->setFixedSize(QFontMetrics(font).horizontalAdvance(sizeStr), 16);
+    filesize->setFixedSize(QFontMetrics(font).horizontalAdvance(sizeStr), Settings::scale(16));
     filesize->setTextColor(Settings::FileSizeColor);
     filesize->setCursor(Qt::IBeamCursor);
 
@@ -47,15 +47,15 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment 
     layout->addWidget(image);
     layout->addWidget(infos);
     layout->addWidget(new DownloadButton(attachment->url, requester, container));
-    layout->setContentsMargins(10, 10, 10, 10);
-    layout->setSpacing(8);
+    layout->setContentsMargins(Settings::scale(10), Settings::scale(10), Settings::scale(10), Settings::scale(10));
+    layout->setSpacing(Settings::scale(8));
 
-    container->setFixedHeight(62);
+    container->setFixedHeight(Settings::scale(62));
     container->setBackgroundColor(Settings::BackgroundSecondary);
-    container->setBorderSize(1);
+    container->setBorderSize(Settings::scale(1));
     container->setBorderColor(Settings::BackgroundSecondaryAlt);
-    this->setFixedHeight(62);
-    this->setBorderRadius(3);
+    this->setFixedHeight(Settings::scale(62));
+    this->setBorderRadius(Settings::scale(3));
 }
 
 } // namespace Ui

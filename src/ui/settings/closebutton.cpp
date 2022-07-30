@@ -15,48 +15,48 @@ CloseButton::CloseButton(QWidget *parent)
     Widget *container = new Widget(mainContainer);
 
     iconContainer = new Widget(container);
-    iconContainer->move(0, 60);
-    iconContainer->setFixedSize(36, 36);
-    iconContainer->setBorderRadius(18);
-    iconContainer->setBorderSize(2);
+    iconContainer->move(0, Settings::scale(60));
+    iconContainer->setFixedSize(Settings::scale(36), Settings::scale(36));
+    iconContainer->setBorderRadius(Settings::scale(18));
+    iconContainer->setBorderSize(Settings::scale(2));
     iconContainer->setBorderColor(Settings::InteractiveNormal);
     icon = new Widget(iconContainer);
-    icon->move(7, 7);
-    icon->setFixedSize(18, 18);
+    icon->move(Settings::scale(7), Settings::scale(7));
+    icon->setFixedSize(Settings::scale(18), Settings::scale(18));
     QPixmap img("res/images/svg/close-settings-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
     qp.end();
-    icon->setPixmap(img.scaled(18, 18));
+    icon->setPixmap(img.scaled(Settings::scale(18), Settings::scale(18)));
 
     QFont font;
     font.setBold(true);
-    font.setPixelSize(13);
+    font.setPixelSize(Settings::scale(13));
     font.setFamily("whitney");
     text = new Label("  ESC", container);
     text->setFont(font);
-    text->setFixedSize(36, 13);
-    text->move(0, 104);
+    text->setFixedSize(Settings::scale(36), Settings::scale(13));
+    text->move(0, Settings::scale(104));
     text->setTextColor(Settings::InteractiveNormal);
 
     QWidget *spacer = new QWidget(this);
-    spacer->setFixedHeight(52);
+    spacer->setFixedHeight(Settings::scale(52));
 
     QVBoxLayout *layout = new QVBoxLayout(container);
     layout->addWidget(spacer);
     layout->addWidget(iconContainer);
     layout->addWidget(text);
-    layout->setSpacing(8);
+    layout->setSpacing(Settings::scale(8));
     layout->setContentsMargins(0, 0, 0, 0);
 
-    container->setFixedSize(36, 117);
+    container->setFixedSize(Settings::scale(36), Settings::scale(117));
     container->setBackgroundColor(Settings::BackgroundPrimary);
 
-    mainContainer->setFixedSize(57, 117);
+    mainContainer->setFixedSize(Settings::scale(57), Settings::scale(117));
     mainContainer->setBackgroundColor(Settings::BackgroundPrimary);
     
-    this->setFixedSize(57, 117);
+    this->setFixedSize(Settings::scale(57), Settings::scale(117));
     this->setBackgroundColor(Settings::BackgroundPrimary);
 }
 
@@ -70,7 +70,7 @@ void CloseButton::mouseReleaseEvent(QMouseEvent *event)
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
     qp.end();
-    icon->setPixmap(img.scaled(18, 18));
+    icon->setPixmap(img.scaled(Settings::scale(18), Settings::scale(18)));
     if (event->button() == Qt::LeftButton) {
         emit clicked();
     }
@@ -86,7 +86,7 @@ void CloseButton::mousePressEvent(QMouseEvent *event)
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveActive]);
     qp.end();
-    icon->setPixmap(img.scaled(18, 18));
+    icon->setPixmap(img.scaled(Settings::scale(18), Settings::scale(18)));
 }
 
 void CloseButton::enterEvent(QEvent *)
@@ -99,7 +99,7 @@ void CloseButton::enterEvent(QEvent *)
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
         qp.end();
-        icon->setPixmap(img.scaled(18, 18));
+        icon->setPixmap(img.scaled(Settings::scale(18), Settings::scale(18)));
     }
 }
 
@@ -113,7 +113,7 @@ void CloseButton::leaveEvent(QEvent *)
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
         qp.end();
-        icon->setPixmap(img.scaled(18, 18));
+        icon->setPixmap(img.scaled(Settings::scale(18), Settings::scale(18)));
     }
 }
 

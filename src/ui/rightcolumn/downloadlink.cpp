@@ -9,7 +9,7 @@ DownloadLink::DownloadLink(const QString& urlp, const QString& filename, Api::Re
     : Label(filename, parent)
 {
     QFont font;
-    font.setPixelSize(16);
+    font.setPixelSize(Settings::scale(16));
     font.setFamily("whitney");
     url = QString(urlp);
     requester = request;

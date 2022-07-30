@@ -16,14 +16,14 @@ public:
     PrivacySafety(Api::RessourceManager *rm, QWidget *parent);
 
 private:
-    Label *createTitle(QString text);
-    
     enum class SectionType : quint8 {
         None,
         All,
         MutualFriends,
         MutualGuilds
     };
+    
+    Label *createTitle(QString text);
     QWidget *createSection(std::function<void(bool)> callback, QString title, QString description, optbool active, SectionType type);
 
     Widget *container;

@@ -10,12 +10,12 @@ ChannelHeader::ChannelHeader(Api::RessourceManager *rmp, QWidget *parent)
     icon = nullptr;
     
     layout = new QHBoxLayout(this);
-    layout->setSpacing(8);
-    layout->setContentsMargins(16, 0, 0, 0);
+    layout->setSpacing(Settings::scale(8));
+    layout->setContentsMargins(Settings::scale(16), 0, 0, 0);
 
-    this->setFixedHeight(50);
+    this->setFixedHeight(Settings::scale(50));
     this->setBackgroundColor(Settings::BackgroundPrimary);
-    this->setBorderSize(0, 0, 2, 0);
+    this->setBorderSize(0, 0, Settings::scale(2), 0);
     this->setBorderColor(Settings::BackgroundTertiary);
     this->hide();
 }
@@ -66,11 +66,11 @@ void ChannelHeader::openChannel(const QString& channelName, int channelType)
     }
     iconName += ".svg";
     icon->setPixmap(QPixmap("res/images/svg/" + iconName));
-    icon->setFixedSize(24, 24);
+    icon->setFixedSize(Settings::scale(24), Settings::scale(24));
 
     name = new Label((channelType == Api::GroupDM ? channelName : channelName.mid(1)), nullptr);
     QFont font;
-    font.setPixelSize(16);
+    font.setPixelSize(Settings::scale(16));
     font.setFamily("whitney");
     font.setBold(true);
     name->setFont(font);

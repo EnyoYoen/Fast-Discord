@@ -16,7 +16,7 @@ public:
 private slots:
     void empty();
 
-private:
+private:    
     Widget *container;
     QVBoxLayout *layout;
 

@@ -16,7 +16,7 @@ public:
     ColorLabel(QWidget *parent)
         : Widget(parent)
     {
-        this->setFixedSize(69, 50);
+        this->setFixedSize(Settings::scale(69), Settings::scale(50));
         pressed = false;
         QVBoxLayout *layout = new QVBoxLayout(this);
         icon = new Widget(this);
@@ -38,7 +38,7 @@ public:
     {
         color = colorp;
         this->setBackgroundColor(colorp);
-        this->setBorderRadius(4);
+        this->setBorderRadius(Settings::scale(4));
     }
 
     QColor color;

@@ -21,11 +21,11 @@ GuildWidget::GuildWidget(Api::RessourceManager *rmp, const Api::Guild& guild, QW
 
     // Style the widget
     this->setMouseTracking(true);
-    this->setFixedSize(72, 48);
+    this->setFixedSize(Settings::scale(72), Settings::scale(48));
 
     // Create and style the layout
     layout = new QHBoxLayout(this);
-    layout->setSpacing(8);
+    layout->setSpacing(Settings::scale(8));
     layout->setContentsMargins(0, 0, 0, 0);
 
     // Create the white pill
@@ -55,7 +55,7 @@ void GuildWidget::unclicked()
     }
 
     if (unreadMessages) {
-        pill->setFixedHeight(8);
+        pill->setFixedHeight(Settings::scale(8));
     } else {
         pill->setFixedHeight(0);
     }
@@ -64,9 +64,9 @@ void GuildWidget::unclicked()
 void GuildWidget::setUnread(bool unread)
 {
     unreadMessages = unread;
-    if (pill->height() <= 8) {
+    if (pill->height() <= Settings::scale(8)) {
         if (unread) {
-            pill->setFixedHeight(8);
+            pill->setFixedHeight(Settings::scale(8));
         } else {
             pill->setFixedHeight(0);
         }
@@ -80,7 +80,7 @@ void GuildWidget::mousePressEvent(QMouseEvent *)
         icon->setActive();
         clicked = true;
     }
-    pill->setFixedHeight(40);
+    pill->setFixedHeight(Settings::scale(40));
 }
 
 void GuildWidget::enterEvent(QEvent *)
@@ -89,7 +89,7 @@ void GuildWidget::enterEvent(QEvent *)
     if (!clicked) {
         icon->setActive();
     }
-    if (pill->height() != 40) pill->setFixedHeight(20);
+    if (pill->height() != Settings::scale(20)) pill->setFixedHeight(Settings::scale(20));
 }
 
 void GuildWidget::leaveEvent(QEvent *)
@@ -98,9 +98,9 @@ void GuildWidget::leaveEvent(QEvent *)
     if (!clicked) {
         icon->setInactive();
     }
-    if (pill->height() != 40) {
+    if (pill->height() != Settings::scale(40)) {
         if (unreadMessages) {
-            pill->setFixedHeight(8);
+            pill->setFixedHeight(Settings::scale(8));
         } else {
             pill->setFixedHeight(0);
         }

@@ -11,12 +11,13 @@
 
 namespace Ui {
 
-MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message *message, bool isFirstp, bool separatorBefore, QWidget *parent)
+MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message *message, bool isFirstp, bool separatorBeforep, QWidget *parent)
     : Widget(parent)
 {
     // Attributes initialization
     rm = rmp;
     isFirst = isFirstp;
+    separatorBefore = separatorBeforep;
 
     switch (message->type) {
         case Api::Default:
@@ -65,26 +66,76 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message *mes
     }
 }
 
+void MessageWidget::updateSpacing()
+{
+    if (isFirst) {
+        this->setContentsMargins(0, Settings::scale(Settings::messageGroupSpace), 0, 0);
+        this->setMinimumHeight(height() - Settings::scale(Settings::lastMessageGroupSpace + Settings::messageGroupSpace));
+    }
+}
+
+void MessageWidget::updateFont()
+{
+    if (iconContainer != nullptr) {
+        iconContainer->setFixedWidth(Settings::scale(Settings::fontScaling * 4.5));
+    }
+    if (avatar != nullptr) {
+        avatar->changeSize(Settings::scale(Settings::fontScaling * 2.5), Settings::scale(Settings::fontScaling * 2.5), Settings::scale(Settings::fontScaling * 1.25));
+    }
+
+    QFont font;
+    font.setFamily("whitney");
+
+    font.setPixelSize(Settings::scale(Settings::fontScaling));
+    if (content != nullptr) {
+        content->setFont(font);
+    }
+    if (name != nullptr) {
+        name->setFont(font);
+    }
+    if (textLabel != nullptr) {
+        textLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(textLabel->text), Settings::scale(22));
+        textLabel->setFont(font);
+    }
+
+    font.setPixelSize(Settings::scale(Settings::fontScaling - 2));
+    if (replyContent != nullptr) {
+        username->setFont(font);
+        replyContent->setFont(font);
+        replyContent->setFixedSize(QFontMetrics(font).horizontalAdvance(replyContent->text), Settings::scale(18));
+    }
+    
+    font.setPixelSize(Settings::scale(Settings::fontScaling - 4));
+    if (date != nullptr) {
+        date->setFixedSize(QFontMetrics(font).horizontalAdvance(date->text), Settings::scale(22));
+        date->setFont(font);
+    }
+    if (timestampLabel != nullptr) {
+        timestampLabel->setFixedSize(Settings::scale(Settings::fontScaling * 4.5), Settings::scale(16));
+        timestampLabel->setFont(font);
+    }
+}
+
 void const MessageWidget::setAvatar(const QString& avatarFileName)
 {
-    avatar->setImage(avatarFileName);
+    avatar->setRoundedImage(avatarFileName);
 }
 
 void const MessageWidget::setReplyAvatar(const QString& avatarFileName)
 {
-    replyAvatar->setImage(avatarFileName);
+    replyAvatar->setRoundedImage(avatarFileName);
 }
 
 void MessageWidget::addImage(const QString& filename, int width, int height)
 {
     QLabel *imageLabel = new QLabel(this);
 
-    if (width >= height && width > 400) {
-        float ratio = width / 400;
+    if (width >= height && width > Settings::scale(400)) {
+        float ratio = width / Settings::scale(400);
         width /= ratio;
         height /= ratio;
-    } else if (height > width && height > 400) {
-        float ratio = height / 400;
+    } else if (height > width && height > Settings::scale(400)) {
+        float ratio = height / Settings::scale(400);
         height /= ratio;
         width /= ratio;
     }
@@ -176,11 +227,13 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
     QHBoxLayout *mainLayout = new QHBoxLayout(mainMessage);
     Widget *data = new Widget(mainMessage);
     dataLayout = new QVBoxLayout(data);
-    Widget *iconContainer = new Widget(mainMessage);
+    Widget *compactMessageContent = new Widget(data);
+    QHBoxLayout *compactLayout = new QHBoxLayout(compactMessageContent);
+    iconContainer = new Widget(mainMessage);
     QVBoxLayout *iconLayout = new QVBoxLayout(iconContainer);
-
+    
     QFont font;
-    font.setPixelSize(14);
+    font.setPixelSize(Settings::scale(Settings::fontScaling - 2));
     font.setFamily("whitney");
 
     // Get the date and time of the message
@@ -188,72 +241,73 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
 
     if (message->referencedMessage != nullptr && message->referencedMessage->id != 0) {
         Api::Message *ref = message->referencedMessage;
-        height += 22;
+        heightp += Settings::scale(22);
         isFirst = true;
 
         reply = new Widget(this);
-        reply->setFixedHeight(28);
+        reply->setFixedHeight(Settings::scale(28));
         QHBoxLayout *replyLayout = new QHBoxLayout(reply);
 
         Widget *replyIcon = new Widget(reply);
         replyIcon->setImage("res/images/png/reply.png");
-        replyIcon->setFixedSize(68, 22);
+        replyIcon->setFixedSize(Settings::scale(68), Settings::scale(22));
         replyLayout->addWidget(replyIcon);
 
-        // Get the icon of the message
-        if (ref->author.avatar.isNull()) {
-            // Use an asset if the user doesn't have an icon
-            replyLayout->addWidget(new RoundedImage("res/images/png/user-icon-asset0.png", 16, 16, 8, reply));
-        } else {
-            // Request the avatar
-            QString avatarFileName = ref->author.avatar + (ref->author.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
-            replyAvatar = new RoundedImage(16, 16, 8, reply);
-            replyLayout->addWidget(replyAvatar);
-            rm->getImage([this](void *avatarFileName) {this->setReplyAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + ref->author.id + "/" + avatarFileName, avatarFileName);
+        if (!Settings::compactModeEnabled) {
+            // Get the icon of the message
+            if (ref->author.avatar.isNull()) {
+                // Use an asset if the user doesn't have an icon
+                replyLayout->addWidget(new RoundedImage("res/images/png/user-icon-asset0.png", Settings::scale(16), Settings::scale(16), Settings::scale(8), reply));
+            } else {
+                // Request the avatar
+                QString avatarFileName = ref->author.avatar + (ref->author.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
+                replyAvatar = new RoundedImage(Settings::scale(16), Settings::scale(16), Settings::scale(8), reply);
+                replyLayout->addWidget(replyAvatar);
+                rm->getImage([this](void *avatarFileName) {this->setReplyAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + ref->author.id + "/" + avatarFileName, avatarFileName);
+            }
         }
 
-        QLabel *username = new QLabel(ref->author.username, reply);
+        username = new QLabel(ref->author.username, reply);
         username->setFont(font);
-        username->setFixedHeight(22);
+        username->setFixedHeight(Settings::scale(22));
         username->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
         username->setTextInteractionFlags(Qt::TextSelectableByMouse);
         username->setCursor(QCursor(Qt::PointingHandCursor));
-        username->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name());
+        username->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name() + "; background-color: none");
 
-        Label *content = new Label(ref->content.replace('\n', "  "), nullptr);
-        content->setFont(font);
-        content->setFixedSize(QFontMetrics(font).horizontalAdvance(ref->content), 18);
-        content->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-        content->setCursor(QCursor(Qt::PointingHandCursor));
-        content->setTextColor(Settings::InteractiveNormal);
+        replyContent = new Label(ref->content.replace('\n', "  "), nullptr);
+        replyContent->setFont(font);
+        replyContent->setFixedSize(QFontMetrics(font).horizontalAdvance(ref->content), Settings::scale(18));
+        replyContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        replyContent->setCursor(QCursor(Qt::PointingHandCursor));
+        replyContent->setTextColor(Settings::InteractiveNormal);
 
         replyLayout->addWidget(username);
-        replyLayout->addWidget(content);
-        replyLayout->setSpacing(4);
+        replyLayout->addWidget(replyContent);
+        replyLayout->setSpacing(Settings::scale(4));
         replyLayout->addStretch(1);
 
         layout->addWidget(reply);
     }
-
-    if (isFirst) {
+    if (isFirst && !Settings::compactModeEnabled) {
         // The message is not grouped to another message
 
         // Variable creation
         const Api::User& author = message->author;
         QString avatarId = author.avatar;
 
-        height += 40;
+        heightp += Settings::scale(40);
 
         // Get the icon of the message
         if (avatarId.isNull()) {
             // Use an asset if the user doesn't have an icon
-            avatar = new RoundedImage("res/images/png/user-icon-asset0.png", 40, 40, 20, iconContainer);
+            avatar = new RoundedImage("res/images/png/user-icon-asset0.png", Settings::scale(40), Settings::scale(40), Settings::scale(20), iconContainer);
             iconLayout->addWidget(avatar);
             iconLayout->setAlignment(avatar, Qt::AlignTop | Qt::AlignHCenter);
         } else {
             // Request the avatar
             QString avatarFileName = avatarId + (avatarId.indexOf("a_") == 0 ? ".gif" : ".png");
-            avatar = new RoundedImage(40, 40, 20, iconContainer);
+            avatar = new RoundedImage(Settings::scale(40), Settings::scale(40), Settings::scale(20), iconContainer);
             iconLayout->addWidget(avatar);
             iconLayout->setAlignment(avatar, Qt::AlignTop | Qt::AlignHCenter);
             rm->getImage([this](void *avatarFileName) {this->setAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + author.id + "/" + avatarFileName, avatarFileName);
@@ -262,17 +316,17 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         // Widget to show some infos of the message
         Widget *messageInfos = new Widget(data);
         QHBoxLayout *infosLayout = new QHBoxLayout(messageInfos);
-        QLabel *name = new QLabel(author.username, messageInfos);
-        font.setPixelSize(16);
+        name = new QLabel(author.username, messageInfos);
+        font.setPixelSize(Settings::scale(Settings::fontScaling));
         name->setFont(font);
         name->setTextInteractionFlags(Qt::TextSelectableByMouse);
         name->setCursor(QCursor(Qt::PointingHandCursor));
-        name->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name());
+        name->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name() + "; background-color: none");
         name->setCursor(QCursor(Qt::IBeamCursor));
-        Label *date = new Label(processTimestamp(dateTime), messageInfos);
-        font.setPixelSize(12);
+        date = new Label(processTimestamp(dateTime), messageInfos);
+        font.setPixelSize(Settings::scale(Settings::fontScaling - 4));
         date->setTextColor(Settings::TextMuted);
-        date->setFixedSize(QFontMetrics(font).horizontalAdvance(processTimestamp(dateTime)), 22);
+        date->setFixedSize(QFontMetrics(font).horizontalAdvance(processTimestamp(dateTime)), Settings::scale(22));
         date->setFont(font);
         date->setTextColor(Settings::TextMuted);
 
@@ -287,33 +341,72 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         dataLayout->setSpacing(0);
 
         // Style the message widget
-        this->setContentsMargins(0, separatorBefore ? 0 : 20, 0, 0);
+        this->setContentsMargins(0, separatorBefore ? 0 : Settings::scale(Settings::messageGroupSpace), 0, 0);
     } else {
-        height += 22;
+        heightp += Settings::scale(22);
 
         // Add the label that shows the timestamp when the message is hovered
         hoveredTimestamp = processTime(dateTime.time());
         timestampLabel = new Label(this);
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(Settings::fontScaling - 4));
         timestampLabel->setFont(font);
-        timestampLabel->setFixedHeight(22);
+        timestampLabel->setFixedHeight(Settings::scale(22));
         timestampLabel->setTextColor(Settings::TextMuted);
         timestampLabel->setFlags(Qt::AlignCenter);
         iconLayout->addWidget(timestampLabel);
         iconLayout->setContentsMargins(0, 0, 0, 0);
         mainLayout->setContentsMargins(0, 0, 0, 0);
+
+        if (Settings::compactModeEnabled) {
+            heightp += Settings::scale(4);
+
+            if (isFirst) {
+                timestampLabel->setText(hoveredTimestamp);
+                timestampLabel->setFixedSize(Settings::scale(Settings::fontScaling * 4.5), Settings::scale(16));
+                timestampLabel->setFlags(Qt::AlignCenter);
+            }
+
+            // Widget to show some infos of the message
+            Widget *messageInfos = new Widget(data);
+            QHBoxLayout *infosLayout = new QHBoxLayout(messageInfos);
+            name = new QLabel(message->author.username, messageInfos);
+            font.setBold(true);
+            font.setPixelSize(Settings::scale(Settings::fontScaling));
+            name->setFont(font);
+            name->setTextInteractionFlags(Qt::TextSelectableByMouse);
+            name->setCursor(QCursor(Qt::PointingHandCursor));
+            name->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name() + "; background-color: none");
+            name->setCursor(QCursor(Qt::IBeamCursor));
+            font.setBold(false);
+
+            // Add widgets and style the infos layout
+            infosLayout->addWidget(name);
+            infosLayout->insertStretch(-1);
+            infosLayout->setContentsMargins(0, 0, 0, 0);
+            
+            compactLayout->addWidget(messageInfos, 0, Qt::AlignmentFlag::AlignTop);
+            compactLayout->setSpacing(8);
+            compactLayout->setContentsMargins(0, 0, 0, 0);
+        }
     }
 
     // Style the icon container
-    iconContainer->setFixedWidth(72);
+    iconContainer->setFixedWidth(Settings::scale(Settings::fontScaling * 4.5));
     iconContainer->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
-    iconContainer->setLayout(iconLayout);
 
     // Create and style the content label
     content = nullptr;
     if (!message->content.isNull() && !message->content.isEmpty()) {
         content = new MarkdownLabel(message->content, rm, this);
-        dataLayout->addWidget(content);
+        if (Settings::compactModeEnabled) {
+            compactLayout->addWidget(content, 1);
+        } else {
+            dataLayout->addWidget(content, 0, Qt::AlignmentFlag::AlignVCenter);
+        }
+    }
+
+    if (Settings::compactModeEnabled) {
+        dataLayout->addWidget(compactMessageContent);
     }
 
     // Style the data layout
@@ -324,28 +417,27 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         for (int i = 0 ; i < attachments.size() ; i++) {
             Api::Attachment *attachment = attachments[i];
             if (attachment->contentType != nullptr
-              && attachment->contentType.indexOf("image") != -1
-              && attachment->contentType.indexOf("svg") == -1) {
+            && attachment->contentType.indexOf("image") != -1
+            && attachment->contentType.indexOf("svg") == -1) {
                 QString filename = attachment->id +
                         attachment->filename.mid(0, attachment->filename.lastIndexOf('.'));
                 if (attachment->width >= attachment->height && attachment->width > 400)
-                    height += attachment->height / (attachment->width / 400);
+                    heightp += attachment->height / (attachment->width / 400);
                 else if (attachment->height > attachment->width && attachment->height > 400)
-                    height += attachment->height / (attachment->height / 400);
+                    heightp += attachment->height / (attachment->height / 400);
                 else 
-                    height += attachment->height;
+                    heightp += attachment->height;
                 rm->getImage([this, attachment](void *filename) {
                     this->addImage(*reinterpret_cast<QString *>(filename), attachment->width, attachment->height);
                 }, attachment->proxyUrl, filename);
             } else {
                 dataLayout->addWidget(new AttachmentFile(rm->requester, attachment, data));
-                height += 52;
+                heightp += 52;
             }
         }
     }
-    dataLayout->addStretch(1);
 
-    mainMessage->setMinimumHeight(height);
+    mainMessage->setMinimumHeight(heightp);
 
     // Add widgets to the main layout and style it
     mainLayout->addWidget(iconContainer);
@@ -361,32 +453,32 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
 void MessageWidget::iconMessage(const Api::Message *message, const QString &text, const QString& iconName)
 {
     QFont font;
-    font.setPixelSize(16);
+    font.setPixelSize(Settings::scale(Settings::fontScaling));
     font.setFamily("whitney");
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     QLabel *icon = new QLabel(this);
     textLabel = new Label(text, this);
-    textLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(text), 22);
+    textLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(text), Settings::scale(22));
     textLabel->setFlags(Qt::AlignVCenter);
     textLabel->setFont(font);
 
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(Settings::fontScaling - 4));
     Label *timestampLabel = new Label(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime()), this);
-    timestampLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime())), 16);
+    timestampLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(processTimestamp(QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime())), Settings::scale(16));
     timestampLabel->setFont(font);
 
-    icon->setFixedWidth(44);
+    icon->setFixedWidth(Settings::scale(44));
     icon->setPixmap(QPixmap("res/images/svg/" + iconName));
 
     textLabel->setTextColor(Settings::ChannelIcon);
     textLabel->setCursor(QCursor(Qt::IBeamCursor));
     timestampLabel->setTextColor(Settings::TextMuted);
 
-    layout->addSpacing(28);
+    layout->addSpacing(Settings::scale(28));
     layout->addWidget(icon);
-    layout->addWidget(textLabel);
-    layout->addSpacing(4);
+    layout->addWidget(textLabel, 0, Qt::AlignmentFlag::AlignBottom);
+    layout->addSpacing(Settings::scale(4));
     layout->addWidget(timestampLabel);
     layout->addStretch(1);
 
@@ -515,6 +607,13 @@ void MessageWidget::channelFollowAdd(const Api::Message *message)
 {
     iconMessage(message, message->content + " has added " + message->author.username
      + " to this channel. Its most important updates will show up here.", "green-right-arrow.svg");
+}
+
+void MessageWidget::updateTheme()
+{
+    if (content)
+        content->setStyleSheet("background-color:" + Settings::colors[Settings::BackgroundPrimary].name()
+            + ";color:" + Settings::colors[Settings::InteractiveHover].name());
 }
 
 } // namespace Ui

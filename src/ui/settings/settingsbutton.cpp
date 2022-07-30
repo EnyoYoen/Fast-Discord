@@ -12,10 +12,10 @@ SettingsButton::SettingsButton(SettingsButton::Type typep, QString text, QWidget
     pressed = false;
 
     QFont font;
-    font.setPixelSize(13);
+    font.setPixelSize(Settings::scale(13));
     font.setFamily("whitney");
     content = new Label(text, this);
-    content->setFixedSize(QFontMetrics(font).horizontalAdvance(text), 16);
+    content->setFixedSize(QFontMetrics(font).horizontalAdvance(text), Settings::scale(16));
     content->setFont(font);
 
     switch (type)
@@ -35,13 +35,13 @@ SettingsButton::SettingsButton(SettingsButton::Type typep, QString text, QWidget
             content->setTextColor(Settings::ButtonOutlineDangerText);
             this->setBackgroundColor(Settings::None);
             this->setBorderColor(Settings::ButtonOutlineDangerBorder);
-            this->setBorderSize(1);
+            this->setBorderSize(Settings::scale(1));
             break;
         case SettingsButton::Type::NormalOutlined:
             content->setTextColor(Settings::White);
             this->setBackgroundColor(Settings::None);
             this->setBorderColor(Settings::BrandExperiment);
-            this->setBorderSize(1);
+            this->setBorderSize(Settings::scale(1));
             break;
         case SettingsButton::Type::Normal:    
         default:
@@ -54,9 +54,9 @@ SettingsButton::SettingsButton(SettingsButton::Type typep, QString text, QWidget
     layout->addWidget(content, 0, Qt::AlignHCenter);
 
     this->setCursor(Qt::CursorShape::PointingHandCursor);
-    this->setBorderRadius(3);
-    this->setContentsMargins(16, 2, 16, 2);
-    this->setFixedSize(QFontMetrics(font).horizontalAdvance(text) + (type == Type::Critical ? 36 : 32), 32);
+    this->setBorderRadius(Settings::scale(3));
+    this->setContentsMargins(Settings::scale(16), Settings::scale(2), Settings::scale(16), Settings::scale(2));
+    this->setFixedSize(QFontMetrics(font).horizontalAdvance(text) + (type == Type::Critical ? Settings::scale(36) : Settings::scale(32)), Settings::scale(32));
 }
 
 
@@ -69,7 +69,7 @@ void SettingsButton::mouseReleaseEvent(QMouseEvent *event)
             case SettingsButton::Type::NoBackground:
             {
                 QFont font;
-                font.setPixelSize(13);
+                font.setPixelSize(Settings::scale(13));
                 font.setFamily("whitney");
                 font.setUnderline(false);
                 content->setFont(font);
@@ -88,13 +88,13 @@ void SettingsButton::mouseReleaseEvent(QMouseEvent *event)
                 content->setTextColor(Settings::ButtonOutlineDangerText);
                 this->setBackgroundColor(Settings::None);
                 this->setBorderColor(Settings::ButtonOutlineDangerBorder);
-                this->setBorderSize(1);
+                this->setBorderSize(Settings::scale(1));
                 break;
             case SettingsButton::Type::NormalOutlined:
                 content->setTextColor(Settings::White);
                 this->setBackgroundColor(Settings::None);
                 this->setBorderColor(Settings::BrandExperiment);
-                this->setBorderSize(1);
+                this->setBorderSize(Settings::scale(1));
                 break;
             case SettingsButton::Type::Normal:    
             default:
@@ -113,7 +113,7 @@ void SettingsButton::mousePressEvent(QMouseEvent *)
         case SettingsButton::Type::NoBackground:
         {
             QFont font;
-            font.setPixelSize(13);
+            font.setPixelSize(Settings::scale(13));
             font.setFamily("whitney");
             font.setUnderline(true);
             content->setFont(font);
@@ -132,13 +132,13 @@ void SettingsButton::mousePressEvent(QMouseEvent *)
             content->setTextColor(Settings::ButtonOutlineDangerTextActive);
             this->setBackgroundColor(Settings::ButtonOutlineDangerBackgroundActive);
             this->setBorderColor(Settings::ButtonOutlineDangerBorderActive);
-            this->setBorderSize(1);
+            this->setBorderSize(Settings::scale(1));
             break;
         case SettingsButton::Type::NormalOutlined:
             content->setTextColor(Settings::White);
             this->setBackgroundColor(Settings::BrandExperiment560);
             this->setBorderColor(Settings::BrandExperiment560);
-            this->setBorderSize(1);
+            this->setBorderSize(Settings::scale(1));
             break;
         case SettingsButton::Type::Normal:    
         default:
@@ -155,7 +155,7 @@ void SettingsButton::enterEvent(QEvent *)
             case SettingsButton::Type::NoBackground:
             {
                 QFont font;
-                font.setPixelSize(13);
+                font.setPixelSize(Settings::scale(13));
                 font.setFamily("whitney");
                 font.setUnderline(true);
                 content->setFont(font);
@@ -174,13 +174,13 @@ void SettingsButton::enterEvent(QEvent *)
                 content->setTextColor(Settings::ButtonOutlineDangerTextHover);
                 this->setBackgroundColor(Settings::ButtonOutlineDangerBackgroundHover);
                 this->setBorderColor(Settings::ButtonOutlineDangerBorderHover);
-                this->setBorderSize(1);
+                this->setBorderSize(Settings::scale(1));
                 break;
             case SettingsButton::Type::NormalOutlined:
                 content->setTextColor(Settings::White);
                 this->setBackgroundColor(Settings::BrandExperiment);
                 this->setBorderColor(Settings::BrandExperiment);
-                this->setBorderSize(1);
+                this->setBorderSize(Settings::scale(1));
                 break;
             case SettingsButton::Type::Normal:    
             default:
@@ -198,7 +198,7 @@ void SettingsButton::leaveEvent(QEvent *)
             case SettingsButton::Type::NoBackground:
             {
                 QFont font;
-                font.setPixelSize(13);
+                font.setPixelSize(Settings::scale(13));
                 font.setFamily("whitney");
                 font.setUnderline(false);
                 content->setFont(font);
@@ -217,13 +217,13 @@ void SettingsButton::leaveEvent(QEvent *)
                 content->setTextColor(Settings::ButtonOutlineDangerText);
                 this->setBackgroundColor(Settings::None);
                 this->setBorderColor(Settings::ButtonOutlineDangerBorder);
-                this->setBorderSize(1);
+                this->setBorderSize(Settings::scale(1));
                 break;
             case SettingsButton::Type::NormalOutlined:
                 content->setTextColor(Settings::White);
                 this->setBackgroundColor(Settings::None);
                 this->setBorderColor(Settings::BrandExperiment);
-                this->setBorderSize(1);
+                this->setBorderSize(Settings::scale(1));
                 break;
             case SettingsButton::Type::Normal:    
             default:

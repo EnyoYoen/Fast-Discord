@@ -17,7 +17,7 @@ class PopUpCloseButton : public Widget
 public:
     PopUpCloseButton(QWidget *parent) : Widget(parent)
     {
-        this->setFixedSize(24, 24);
+        this->setFixedSize(Settings::scale(24), Settings::scale(24));
         this->setPixmap(QPixmap("res/images/svg/close-settings-icon.svg"));
     }
 
@@ -63,20 +63,20 @@ PopUp::PopUp(Widget *content, int maximumWidth, int maximumHeight, QString icon,
 
     actualPopup = new Widget(this);
     actualPopup->setFixedSize(maximumWidth, maximumHeight);
-    actualPopup->setBorderRadius(4);
+    actualPopup->setBorderRadius(Settings::scale(4));
     actualPopup->setBackgroundColor(Settings::BackgroundPrimary);
 
     QVBoxLayout *popUpLayout = new QVBoxLayout(actualPopup);
-    popUpLayout->setSpacing(16);
+    popUpLayout->setSpacing(Settings::scale(16));
     popUpLayout->setContentsMargins(0, 0, 0, 0);
 
     Widget *header = new Widget(actualPopup);
-    header->setContentsMargins(20, 12, 16, 0);
+    header->setContentsMargins(Settings::scale(20), Settings::scale(12), Settings::scale(16), 0);
     header->setBackgroundColor(Settings::None);
     QHBoxLayout *headerLayout = new QHBoxLayout(header);
     
     QFont font;
-    font.setPixelSize(24);
+    font.setPixelSize(Settings::scale(24));
     font.setFamily("whitney");
     font.setBold(true);
     Label *titleWidget;
@@ -84,21 +84,21 @@ PopUp::PopUp(Widget *content, int maximumWidth, int maximumHeight, QString icon,
         titleWidget = new Label(header);
         QVBoxLayout *titleLayout = new QVBoxLayout(titleWidget);
         titleLayout->setContentsMargins(0, 0, 0, 0);
-        titleLayout->setSpacing(8);
+        titleLayout->setSpacing(Settings::scale(8));
         Label *titleCenteredWidget = new Label(title, titleWidget);
         titleCenteredWidget->setTextColor(Settings::HeaderPrimary);
         titleCenteredWidget->setFont(font);
-        titleCenteredWidget->setFixedSize(QFontMetrics(font).horizontalAdvance(title), 30);
+        titleCenteredWidget->setFixedSize(QFontMetrics(font).horizontalAdvance(title), Settings::scale(30));
         titleCenteredWidget->setFlags(Qt::AlignCenter);
         titleLayout->addWidget(titleCenteredWidget, 0, Qt::AlignHCenter);
         if (!description.isNull()) {
             font.setBold(false);
-            font.setPixelSize(16);
+            font.setPixelSize(Settings::scale(16));
             QTextEdit *descriptionWidget = new QTextEdit(titleWidget);
             descriptionWidget->setHtml(description);
             descriptionWidget->setReadOnly(true);
             descriptionWidget->setFont(font);
-            descriptionWidget->setFixedWidth(maximumWidth - 60);
+            descriptionWidget->setFixedWidth(maximumWidth - Settings::scale(60));
             descriptionWidget->viewport()->setCursor(Qt::CursorShape::ArrowCursor);
             descriptionWidget->setStyleSheet("border:none;background-color:" + Settings::colors[Settings::BackgroundPrimary].name() + ";color:" + Settings::colors[Settings::HeaderSecondary].name());
             titleLayout->addWidget(descriptionWidget, 0, Qt::AlignHCenter);
@@ -107,7 +107,7 @@ PopUp::PopUp(Widget *content, int maximumWidth, int maximumHeight, QString icon,
         titleWidget = new Label(title, actualPopup);
         titleWidget->setTextColor(Settings::HeaderPrimary);
         titleWidget->setFont(font);
-        titleWidget->setFixedSize(QFontMetrics(font).horizontalAdvance(title), 30);
+        titleWidget->setFixedSize(QFontMetrics(font).horizontalAdvance(title), Settings::scale(30));
         titleWidget->setFlags(Qt::AlignCenter);
     }
     titleWidget->setBackgroundColor(Settings::None);
@@ -125,8 +125,8 @@ PopUp::PopUp(Widget *content, int maximumWidth, int maximumHeight, QString icon,
     
     if (controlButtons) {
         Widget *footer = new Widget(actualPopup);
-        footer->setFixedHeight(horizontalButtons ? 70 : 116);
-        footer->setContentsMargins(16, horizontalButtons ? 16 : 24, 16, 16);
+        footer->setFixedHeight(horizontalButtons ? Settings::scale(70) : Settings::scale(116));
+        footer->setContentsMargins(Settings::scale(16), horizontalButtons ? Settings::scale(16) : Settings::scale(24), Settings::scale(16), Settings::scale(16));
 
         SettingsButton *doneButton = new SettingsButton(SettingsButton::Type::Normal, doneButtonStr, footer);
         SettingsButton *cancelButton = new SettingsButton(SettingsButton::Type::NoBackground, cancelButtonStr, footer);
@@ -135,8 +135,8 @@ PopUp::PopUp(Widget *content, int maximumWidth, int maximumHeight, QString icon,
         
         if (horizontalButtons) {
             footer->setBackgroundColor(Settings::BackgroundSecondary);
-            cancelButton->setFixedSize(96, 38);
-            doneButton->setFixedSize(96, 38);
+            cancelButton->setFixedSize(Settings::scale(96), Settings::scale(38));
+            doneButton->setFixedSize(Settings::scale(96), Settings::scale(38));
             QHBoxLayout *footerLayout = new QHBoxLayout(footer);
             footerLayout->setContentsMargins(0, 0, 0, 0);
             footerLayout->setSpacing(0);
@@ -145,11 +145,11 @@ PopUp::PopUp(Widget *content, int maximumWidth, int maximumHeight, QString icon,
             footerLayout->addWidget(doneButton);
         } else {
             cancelButton->setMinimumSize(0, 0);
-            cancelButton->setMaximumWidth(408);
-            cancelButton->setFixedHeight(34);
+            cancelButton->setMaximumWidth(Settings::scale(408));
+            cancelButton->setFixedHeight(Settings::scale(34));
             doneButton->setMinimumSize(0, 0);
-            doneButton->setMaximumWidth(408);
-            doneButton->setFixedHeight(34);
+            doneButton->setMaximumWidth(Settings::scale(408));
+            doneButton->setFixedHeight(Settings::scale(34));
             QVBoxLayout *footerLayout = new QVBoxLayout(footer);
             footerLayout->setContentsMargins(0, 0, 0, 0);
             footerLayout->setSpacing(0);

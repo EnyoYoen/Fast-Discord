@@ -1,5 +1,7 @@
 #include "ui/rightcolumn/downloadbutton.h"
 
+#include "settings/settings.h"
+
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QPainter>
@@ -12,7 +14,7 @@ DownloadButton::DownloadButton(const QString& urlp, Api::Requester *request, QWi
     url = QString(urlp);
     requester = request;
 
-    this->setFixedSize(24, 24);
+    this->setFixedSize(Settings::scale(24), Settings::scale(24));
     this->setCursor(Qt::PointingHandCursor);
 
     QPixmap img("res/images/svg/download-icon.svg");

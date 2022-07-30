@@ -28,14 +28,14 @@ public:
         hiddenStr = hiddenStrp;
         label->setText(hiddenStrp);
         
-        font.setPixelSize(14);
+        font.setPixelSize(Settings::scale(14));
         font.setFamily("whitney");
         this->setText("Reveal");
         this->setFont(font);
         this->setTextColor(Settings::Link);
         this->setBackgroundColor(Settings::BackgroundSecondaryAlt);
         this->setCursor(Qt::CursorShape::PointingHandCursor);
-        this->setFixedSize(QFontMetrics(font).horizontalAdvance("Reveal"), 16);
+        this->setFixedSize(QFontMetrics(font).horizontalAdvance("Reveal"), Settings::scale(16));
     }
 
 private:
@@ -76,29 +76,29 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
     Widget *container = new Widget(this);
     QVBoxLayout *layout = new QVBoxLayout(container);
-    container->setMaximumWidth(752);
-    container->setContentsMargins(40, 60, 40, 80);
+    container->setMaximumWidth(Settings::scale(752));
+    container->setContentsMargins(Settings::scale(40), Settings::scale(60), Settings::scale(40), Settings::scale(80));
     container->setBackgroundColor(Settings::BackgroundPrimary);
 
     QFont font;
-    font.setPixelSize(20);
+    font.setPixelSize(Settings::scale(20));
     font.setFamily("whitney");
 
     Label *title = new Label("My Account", container);
-    title->setFixedHeight(24);
+    title->setFixedHeight(Settings::scale(24));
     title->setFont(font);
     title->setTextColor(Settings::HeaderPrimary);
 
     Widget *profile = new Widget(container);
-    profile->setFixedHeight(408);
-    profile->setBorderRadius(8);
+    profile->setFixedHeight(Settings::scale(408));
+    profile->setBorderRadius(Settings::scale(8));
     profile->setBackgroundColor(Settings::BackgroundTertiary);
     rm->getClient([this, profile](void *clientPtr){
         Api::Client client = *reinterpret_cast<Api::Client *>(clientPtr);
     
         Widget *banner = new Widget(profile);
-        banner->setBorderRadius(8, 8, 0, 0);
-        banner->setFixedSize(660, 100);
+        banner->setBorderRadius(Settings::scale(8), Settings::scale(8), 0, 0);
+        banner->setFixedSize(Settings::scale(660), Settings::scale(100));
         
         if (!client.banner.isNull()) {
             rm->getImage([this, banner](void *imageFileName){
@@ -135,23 +135,23 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         }
 
         Widget *nameAndEdit = new Widget(profile);
-        nameAndEdit->setFixedHeight(32);
-        nameAndEdit->move(120, 116);
+        nameAndEdit->setFixedHeight(Settings::scale(32));
+        nameAndEdit->move(Settings::scale(120), Settings::scale(116));
         QHBoxLayout *nameAndEditLayout = new QHBoxLayout(nameAndEdit);
         nameAndEditLayout->setSpacing(0);
-        nameAndEditLayout->setContentsMargins(0, 0, 16, 0);
+        nameAndEditLayout->setContentsMargins(0, 0, Settings::scale(16), 0);
 
         QFont font;
-        font.setPixelSize(20);
+        font.setPixelSize(Settings::scale(20));
         font.setFamily("whitney");
 
         Label *name = new Label(client.username, nameAndEdit);
-        name->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), 24);
+        name->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), Settings::scale(24));
         name->setFont(font);
         name->setTextColor(Settings::HeaderPrimary);
 
         Label *discriminator = new Label("#" + client.discriminator, nameAndEdit);
-        discriminator->setFixedSize(60, 24);
+        discriminator->setFixedSize(Settings::scale(60), Settings::scale(24));
         discriminator->setFont(font);
         discriminator->setTextColor(Settings::HeaderSecondary);
         
@@ -160,41 +160,41 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         nameAndEditLayout->addStretch(1);
     
         SettingsButton *editUserProfile = new SettingsButton(SettingsButton::Type::Normal, "Edit User Profile", profile);
-        editUserProfile->move(526, 116);
+        editUserProfile->move(Settings::scale(526), Settings::scale(116));
 
 
         Widget *avatarBorders = new Widget(profile);
-        avatarBorders->setFixedSize(94, 94);
-        avatarBorders->move(16, 76);
-        avatarBorders->setBorderRadius(47);
-        avatarBorders->setBorderSize(7);
+        avatarBorders->setFixedSize(Settings::scale(94), Settings::scale(94));
+        avatarBorders->move(Settings::scale(16), Settings::scale(76));
+        avatarBorders->setBorderRadius(Settings::scale(47));
+        avatarBorders->setBorderSize(Settings::scale(7));
         avatarBorders->setBorderColor(Settings::BackgroundTertiary);
                               
         RoundedImage *avatar;
         if (client.avatar.isNull()) {
-            avatar = new RoundedImage("res/images/png/user-icon-asset0.png", 80, 80, 40, profile);
+            avatar = new RoundedImage("res/images/png/user-icon-asset0.png", Settings::scale(80), Settings::scale(80), Settings::scale(40), profile);
         } else {
-            avatar = new RoundedImage(80, 80, 40, profile);
+            avatar = new RoundedImage(Settings::scale(80), Settings::scale(80), Settings::scale(40), profile);
             QString channelIconFileName = client.id + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
             rm->getImage([avatar](void *imageFileName){
                 avatar->setRoundedImage(*reinterpret_cast<QString *>(imageFileName));
             }, "https://cdn.discordapp.com/avatars/" + client.id + "/" + client.avatar, channelIconFileName);
         }
-        avatar->move(23, 83);
-        avatar->setBorderRadius(40);
+        avatar->move(Settings::scale(23), Settings::scale(83));
+        avatar->setBorderRadius(Settings::scale(40));
         avatar->setBackgroundColor(Settings::None);
 
         Widget *statusBorders = new Widget(profile);
-        statusBorders->setFixedSize(26, 26);
-        statusBorders->move(75, 137);
-        statusBorders->setBorderRadius(13);
-        statusBorders->setBorderSize(5);
+        statusBorders->setFixedSize(Settings::scale(26), Settings::scale(26));
+        statusBorders->move(Settings::scale(75), Settings::scale(137));
+        statusBorders->setBorderRadius(Settings::scale(13));
+        statusBorders->setBorderSize(Settings::scale(5));
         statusBorders->setBorderColor(Settings::BackgroundTertiary);
 
         Widget *statusIcon = new Widget(profile);
-        statusIcon->setFixedSize(16, 16);
-        statusIcon->setBorderRadius(8);
-        statusIcon->move(80, 142);
+        statusIcon->setFixedSize(Settings::scale(16), Settings::scale(16));
+        statusIcon->setBorderRadius(Settings::scale(8));
+        statusIcon->move(Settings::scale(80), Settings::scale(142));
         rm->getClientSettings([statusIcon](void *settingsPtr){
             QString status = reinterpret_cast<Api::ClientSettings *>(settingsPtr)->status;
             if (status == "online") statusIcon->setBackgroundColor(Settings::StatusOnline);
@@ -205,84 +205,84 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
 
         Widget *editSection = new Widget(profile);
-        editSection->move(16, 180);
-        editSection->setFixedSize(628, 202);
+        editSection->move(Settings::scale(16), Settings::scale(180));
+        editSection->setFixedSize(Settings::scale(628), Settings::scale(202));
         editSection->setBackgroundColor(Settings::BackgroundSecondaryAlt);
-        editSection->setBorderRadius(8);
+        editSection->setBorderRadius(Settings::scale(8));
         QVBoxLayout *editLayout = new QVBoxLayout(editSection);
-        editLayout->setContentsMargins(16, 16, 16, 16);
-        editLayout->setSpacing(24);
+        editLayout->setContentsMargins(Settings::scale(16), Settings::scale(16), Settings::scale(16), Settings::scale(16));
+        editLayout->setSpacing(Settings::scale(24));
 
 
         Widget *usernameEdit = new Widget(editSection);
-        usernameEdit->setFixedSize(596, 40);
+        usernameEdit->setFixedSize(Settings::scale(596), Settings::scale(40));
 
-        font.setPixelSize(14);
+        font.setPixelSize(Settings::scale(14));
         Widget *username = new Widget(usernameEdit);
         QHBoxLayout *usernameLayout = new QHBoxLayout(usernameEdit);
         name = new Label(client.username, username);
         name->setTextColor(Settings::HeaderPrimary);
-        name->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), 20);
+        name->setFixedSize(QFontMetrics(font).horizontalAdvance(client.username), Settings::scale(20));
         name->setFont(font);
         discriminator = new Label("#" + client.discriminator, username);
         discriminator->setFont(font);
         discriminator->setTextColor(Settings::HeaderSecondary);
-        discriminator->setFixedSize(QFontMetrics(font).horizontalAdvance("#" + client.discriminator), 20);
+        discriminator->setFixedSize(QFontMetrics(font).horizontalAdvance("#" + client.discriminator), Settings::scale(20));
         usernameLayout->addWidget(name, 0, Qt::AlignBottom);
         usernameLayout->addWidget(discriminator, 0, Qt::AlignBottom);
         usernameLayout->addStretch(1);
         usernameLayout->setSpacing(0);
         usernameLayout->setContentsMargins(0, 0, 0, 0);
-        username->move(0, 20);
+        username->move(0, Settings::scale(20));
         
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(12));
         Label *usernameTitle = new Label("USERNAME", usernameEdit);
-        usernameTitle->setFixedHeight(16);
+        usernameTitle->setFixedHeight(Settings::scale(16));
         usernameTitle->setFont(font);
         usernameTitle->setTextColor(Settings::HeaderSecondary);
 
         SettingsButton *usernameEditButton = new SettingsButton(SettingsButton::Type::Edit, "Edit", usernameEdit);
-        usernameEditButton->move(536, 4);
+        usernameEditButton->move(Settings::scale(536), Settings::scale(4));
         QObject::connect(usernameEditButton, &SettingsButton::clicked, [this, client](){
             QFont font;
-            font.setPixelSize(12);
+            font.setPixelSize(Settings::scale(12));
             font.setFamily("whitney");
 
             Widget *content = new Widget(nullptr);
 
             Widget *usernameSection = new Widget(content);
-            usernameSection->setFixedHeight(68);
+            usernameSection->setFixedHeight(Settings::scale(68));
             QVBoxLayout *usernameLayout = new QVBoxLayout(usernameSection);
-            usernameLayout->setSpacing(8);
+            usernameLayout->setSpacing(Settings::scale(8));
             usernameLayout->setContentsMargins(0, 0, 0, 0);
             Label *username = new Label("USERNAME", usernameSection);
-            username->setFixedSize(QFontMetrics(font).horizontalAdvance("USERNAME"), 20);
+            username->setFixedSize(QFontMetrics(font).horizontalAdvance("USERNAME"), Settings::scale(20));
             username->setFont(font);
             username->setTextColor(Settings::HeaderSecondary);
             
             Widget *inputs = new Widget(usernameSection);
             inputs->setBackgroundColor(Settings::BackgroundTertiary);
-            inputs->setFixedHeight(40);
-            inputs->setBorderRadius(3);
+            inputs->setFixedHeight(Settings::scale(40));
+            inputs->setBorderRadius(Settings::scale(3));
             QHBoxLayout *inputsLayout = new QHBoxLayout(inputs);
             inputsLayout->setSpacing(0);
-            inputsLayout->setContentsMargins(0, 0, 4, 0);
+            inputsLayout->setContentsMargins(0, 0, Settings::scale(4), 0);
             SettingsInput *nameInput = new SettingsInput(QString(), client.username, false, false, inputs);
             
             Widget *separator = new Widget(inputs);
-            separator->setFixedWidth(32);
+            separator->setFixedWidth(Settings::scale(32));
             QHBoxLayout *separatorLayout = new QHBoxLayout(separator);
             separatorLayout->setSpacing(0);
             separatorLayout->setContentsMargins(0, 0, 0, 0);
             Widget *line = new Widget(separator);
-            line->setFixedSize(1, 30);
+            line->setFixedSize(Settings::scale(1), Settings::scale(30));
             line->setBackgroundColor(Settings::TextMuted);
-            font.setPixelSize(16);
+            font.setPixelSize(Settings::scale(16));
             Label *prefix = new Label("#", separator);
             prefix->setFont(font);
             prefix->setTextColor(Settings::TextMuted);
             separatorLayout->addWidget(line);
-            separatorLayout->addSpacing(20);
+            separatorLayout->addSpacing(Settings::scale(20));
             separatorLayout->addWidget(prefix);
 
             inputsLayout->addWidget(nameInput);
@@ -291,17 +291,17 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             SettingsInput *discriminator;
             if (client.purchasedFlags) {
                 discriminator = new SettingsInput(QString(), client.discriminator, false, false, inputs);
-                discriminator->setFixedWidth(70);
-                discriminator->setContentsMargins(0, 10, 10, 10);
+                discriminator->setFixedWidth(Settings::scale(70));
+                discriminator->setContentsMargins(0, Settings::scale(10), Settings::scale(10), Settings::scale(10));
                 inputsLayout->addWidget(discriminator);
             } else {
                 discriminator = new SettingsInput(QString(), client.discriminator, true, false, inputs);
-                discriminator->setFixedWidth(70);
+                discriminator->setFixedWidth(Settings::scale(70));
                 SettingsButton *infoButton = new SettingsButton(SettingsButton::Type::Normal, "?", inputs);
                 QObject::connect(infoButton, &SettingsButton::clicked, [this](){
                     QWidget *parentWidget = this;
                     while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-                    PopUp *popUp = new PopUp(new Widget(nullptr), 440, 120, QString(), QString(), true, false, "Get Nitro if you want to customize your tag", QString(), QString(), false, false, parentWidget->size(), parentWidget);
+                    PopUp *popUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(120), QString(), QString(), true, false, "Get Nitro if you want to customize your tag", QString(), QString(), false, false, parentWidget->size(), parentWidget);
                     QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                 });
 
@@ -313,13 +313,13 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             usernameLayout->addWidget(inputs);
 
             Widget *passwordSection = new Widget(content);
-            passwordSection->setFixedHeight(68);
+            passwordSection->setFixedHeight(Settings::scale(68));
             QVBoxLayout *passwordLayout = new QVBoxLayout(passwordSection);
-            passwordLayout->setSpacing(8);
+            passwordLayout->setSpacing(Settings::scale(8));
             passwordLayout->setContentsMargins(0, 0, 0, 0);
-            font.setPixelSize(12);
+            font.setPixelSize(Settings::scale(12));
             Label *password = new Label("CURRENT PASSWORD", passwordSection);
-            password->setFixedSize(QFontMetrics(font).horizontalAdvance("CURRENT PASSWORD"), 20);
+            password->setFixedSize(QFontMetrics(font).horizontalAdvance("CURRENT PASSWORD"), Settings::scale(20));
             password->setFont(font);
             password->setTextColor(Settings::HeaderSecondary);
             SettingsInput *passwordInput = new SettingsInput(QString(), QString(), false, true, passwordSection);
@@ -327,23 +327,23 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             passwordLayout->addWidget(passwordInput);
 
             QVBoxLayout *layout = new QVBoxLayout(content);
-            layout->setSpacing(16);
+            layout->setSpacing(Settings::scale(16));
             layout->setContentsMargins(0, 0, 0, 0);
             layout->addWidget(usernameSection);
             layout->addWidget(passwordSection);
-            content->setContentsMargins(16, 0, 16, 0);
+            content->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
 
             
             QWidget *parentWidget = this;
             while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-            PopUp *popUp = new PopUp(content, 440, 380, QString(), "Change your username", true, true, "<div style=\"text-align: center\">Enter a new username and your existing password.<div style=\"text-align: center\">", "Cancel", "Done", true, true, parentWidget->size(), parentWidget);
+            PopUp *popUp = new PopUp(content, Settings::scale(440), Settings::scale(380), QString(), "Change your username", true, true, "<div style=\"text-align: center\">Enter a new username and your existing password.<div style=\"text-align: center\">", "Cancel", "Done", true, true, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             QObject::connect(popUp, &PopUp::done, [this, popUp, nameInput, discriminator, passwordInput, username, password](){
                 username->setText("USERNAME");
-                username->setFixedSize(QFontMetrics(QFont()).horizontalAdvance("USERNAME"), 16);
+                username->setFixedSize(QFontMetrics(QFont()).horizontalAdvance("USERNAME"), Settings::scale(16));
                 username->setTextColor(Settings::HeaderSecondary);
                 password->setText("CURRENT PASSWORD");
-                password->setFixedSize(QFontMetrics(QFont()).horizontalAdvance("CURRENT PASSWORD"), 16);
+                password->setFixedSize(QFontMetrics(QFont()).horizontalAdvance("CURRENT PASSWORD"), Settings::scale(16));
                 password->setTextColor(Settings::HeaderSecondary);
                 rm->requester->changeUsername([this, popUp, username, password](void *errorsPtr){
                     if (errorsPtr == nullptr) {
@@ -366,19 +366,19 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
 
         Widget *emailEdit = new Widget(editSection);
-        emailEdit->setFixedSize(596, 42);
+        emailEdit->setFixedSize(Settings::scale(596), Settings::scale(42));
 
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(12));
         Label *emailTitle = new Label("EMAIL", emailEdit);
-        emailTitle->setFixedHeight(16);
+        emailTitle->setFixedHeight(Settings::scale(16));
         emailTitle->setFont(font);
         emailTitle->setTextColor(Settings::HeaderSecondary);
 
-        font.setPixelSize(14);
+        font.setPixelSize(Settings::scale(14));
         Widget *emailAndReveal = new Widget(emailEdit);
         QHBoxLayout *emailAndRevealLayout = new QHBoxLayout(emailAndReveal);
         Label *email = new Label(emailAndReveal);
-        email->setFixedSize(QFontMetrics(font).horizontalAdvance((client.email.size() > QString("**********" + client.email.mid(client.email.indexOf('@'))).size() ? client.email : QString("**********" + client.email.mid(client.email.indexOf('@'))))), 20);
+        email->setFixedSize(QFontMetrics(font).horizontalAdvance((client.email.size() > QString("**********" + client.email.mid(client.email.indexOf('@'))).size() ? client.email : QString("**********" + client.email.mid(client.email.indexOf('@'))))), Settings::scale(20));
         email->setFont(font);
         email->setTextColor(Settings::HeaderPrimary);
         email->setBackgroundColor(Settings::BackgroundSecondaryAlt);
@@ -386,31 +386,31 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         emailAndRevealLayout->addWidget(email);
         emailAndRevealLayout->addWidget(reveal, 0, Qt::AlignTop);
         emailAndRevealLayout->addStretch(1);
-        emailAndRevealLayout->setSpacing(2);
+        emailAndRevealLayout->setSpacing(Settings::scale(2));
         emailAndRevealLayout->setContentsMargins(0, 0, 0, 0);
-        emailAndReveal->move(0, 20);
+        emailAndReveal->move(0, Settings::scale(20));
 
         SettingsButton *emailEditButton = new SettingsButton(SettingsButton::Type::Edit, "Edit", emailEdit);
-        emailEditButton->move(536, 5);
+        emailEditButton->move(Settings::scale(536), Settings::scale(5));
         QObject::connect(emailEditButton, &SettingsButton::clicked, [this, client](){
             QWidget *parentWidget = this;
             while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-            PopUp *popUp = new PopUp(new Widget(nullptr), 440, 306, QString(), "Verify email address", true, true, "<div style=\"text-align: center\">We'll need to verify your old email address, <b>" + client.email + "</b> in order to change it. <a style=\"color: #00AFF4; text-decoration: none;\" href=\"https://support.discord.com/hc/en-us/requests/new\">Lost access to your email? Go to https://support.discord.com/hc/en-us/requests/new.</a></div>", "Cancel", "Send Verification Code", true, false, parentWidget->size(), parentWidget);
+            PopUp *popUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(306), QString(), "Verify email address", true, true, "<div style=\"text-align: center\">We'll need to verify your old email address, <b>" + client.email + "</b> in order to change it. <a style=\"color: #00AFF4; text-decoration: none;\" href=\"https://support.discord.com/hc/en-us/requests/new\">Lost access to your email? Go to https://support.discord.com/hc/en-us/requests/new.</a></div>", "Cancel", "Send Verification Code", true, false, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget](){
                 rm->requester->sendVerificationEmail();
                 popUp->deleteLater();
 
                 QFont font;
-                font.setPixelSize(12);
+                font.setPixelSize(Settings::scale(12));
                 font.setFamily("whitney");
                 Widget *content = new Widget(nullptr);
-                content->setContentsMargins(16, 0, 16, 0);
+                content->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
                 QVBoxLayout *layout = new QVBoxLayout(content);
-                layout->setSpacing(8);
+                layout->setSpacing(Settings::scale(8));
                 layout->setContentsMargins(0, 0, 0, 0);
                 Label *code = new Label("VERIFICATION CODE", content);
-                code->setFixedSize(QFontMetrics(font).horizontalAdvance("VERIFICATION CODE"), 20);
+                code->setFixedSize(QFontMetrics(font).horizontalAdvance("VERIFICATION CODE"), Settings::scale(20));
                 code->setFont(font);
                 code->setTextColor(Settings::HeaderSecondary);
                 SettingsInput *codeInput = new SettingsInput(QString(), QString(), false, false, content);
@@ -419,7 +419,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 layout->addWidget(codeInput);
                 layout->addWidget(resend);
 
-                PopUp *codePopUp = new PopUp(content, 440, 320, QString(), "Enter code", true, true, "Check your email: we sent you a verification code. Enter it here to verify you're really you.", "", "Next", true, true, parentWidget->size(), parentWidget);
+                PopUp *codePopUp = new PopUp(content, Settings::scale(440), Settings::scale(320), QString(), "Enter code", true, true, "Check your email: we sent you a verification code. Enter it here to verify you're really you.", "", "Next", true, true, parentWidget->size(), parentWidget);
                 QObject::connect(codePopUp, &PopUp::cancelled, [codePopUp](){codePopUp->deleteLater();});
                 QObject::connect(codePopUp, &PopUp::done, [this, parentWidget, codePopUp, codeInput, code](){
                     code->setText("VERIFICATION CODE");
@@ -436,10 +436,10 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
                             Widget *emailSection = new Widget(content);
                             QVBoxLayout *emailLayout = new QVBoxLayout(emailSection);
-                            emailLayout->setSpacing(8);
+                            emailLayout->setSpacing(Settings::scale(8));
                             emailLayout->setContentsMargins(0, 0, 0, 0);
                             Label *email = new Label("EMAIL", emailSection);
-                            email->setFixedSize(QFontMetrics(font).horizontalAdvance("EMAIL"), 20);
+                            email->setFixedSize(QFontMetrics(font).horizontalAdvance("EMAIL"), Settings::scale(20));
                             email->setFont(font);
                             email->setTextColor(Settings::HeaderSecondary);
                             SettingsInput *emailInput = new SettingsInput(QString(), QString(), false, false, emailSection);
@@ -448,11 +448,11 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
                             Widget *passwordSection = new Widget(content);
                             QVBoxLayout *passwordLayout = new QVBoxLayout(passwordSection);
-                            passwordLayout->setSpacing(8);
+                            passwordLayout->setSpacing(Settings::scale(8));
                             passwordLayout->setContentsMargins(0, 0, 0, 0);
-                            font.setPixelSize(12);
+                            font.setPixelSize(Settings::scale(12));
                             Label *password = new Label("CURRENT PASSWORD", passwordSection);
-                            password->setFixedSize(QFontMetrics(font).horizontalAdvance("CURRENT PASSWORD"), 20);
+                            password->setFixedSize(QFontMetrics(font).horizontalAdvance("CURRENT PASSWORD"), Settings::scale(20));
                             password->setFont(font);
                             password->setTextColor(Settings::HeaderSecondary);
                             SettingsInput *passwordInput = new SettingsInput(QString(), QString(), false, true, passwordSection);
@@ -460,13 +460,13 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                             passwordLayout->addWidget(passwordInput);
 
                             QVBoxLayout *layout = new QVBoxLayout(content);
-                            layout->setSpacing(16);
+                            layout->setSpacing(Settings::scale(16));
                             layout->setContentsMargins(0, 0, 0, 0);
                             layout->addWidget(emailSection);
                             layout->addWidget(passwordSection);
-                            content->setContentsMargins(16, 0, 16, 0);
+                            content->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
 
-                            PopUp *emailPopUp = new PopUp(content, 440, 348, QString(), "Enter an email address", true, true, "Enter a new email address and your existing password.", "Back", "Done", true, true, parentWidget->size(), parentWidget);
+                            PopUp *emailPopUp = new PopUp(content, Settings::scale(440), Settings::scale(348), QString(), "Enter an email address", true, true, "Enter a new email address and your existing password.", "Back", "Done", true, true, parentWidget->size(), parentWidget);
                             QObject::connect(emailPopUp, &PopUp::cancelled, [emailPopUp](){emailPopUp->deleteLater();});
                             QObject::connect(emailPopUp, &PopUp::done, [this, emailPopUp, email, password, emailInput, passwordInput](){
                                 email->setText("EMAIL");
@@ -501,9 +501,9 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
 
         Widget *phoneEdit = new Widget(editSection);
-        phoneEdit->setFixedSize(596, 40);
+        phoneEdit->setFixedSize(Settings::scale(596), Settings::scale(40));
 
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(12));
         Label *phoneTitle = new Label("PHONE NUMBER", phoneEdit);
         phoneTitle->setFont(font);
         phoneTitle->setTextColor(Settings::HeaderSecondary);
@@ -511,27 +511,27 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         if (client.phone.isNull()) {
             font.setPixelSize(14);
             Label *phone = new Label("You haven't added a phone number yet.", phoneEdit);
-            phone->setFixedSize(QFontMetrics(font).horizontalAdvance("You haven't added a phone number yet."), 20);
+            phone->setFixedSize(QFontMetrics(font).horizontalAdvance("You haven't added a phone number yet."), Settings::scale(20));
             phone->setFont(font);
             phone->setTextColor(Settings::HeaderPrimary);
             phone->setBackgroundColor(Settings::BackgroundSecondaryAlt);
-            phone->move(0, 20);
+            phone->move(0, Settings::scale(20));
 
             SettingsButton *phoneEditButton = new SettingsButton(SettingsButton::Type::Edit, "Add", phoneEdit);
-            phoneEditButton->move(536, 4);
+            phoneEditButton->move(Settings::scale(536), Settings::scale(4));
             QObject::connect(phoneEditButton, &SettingsButton::clicked, [this, client](){
                 Widget *margins = new Widget(nullptr);
                 QHBoxLayout *marginsLayout = new QHBoxLayout(margins);
                 
                 Widget *content = new Widget(margins);
-                content->setFixedHeight(46);
-                content->setContentsMargins(4, 4, 4, 4);
+                content->setFixedHeight(Settings::scale(46));
+                content->setContentsMargins(Settings::scale(4), Settings::scale(4), Settings::scale(4), Settings::scale(4));
                 content->setBackgroundColor(Settings::BackgroundTertiary);
                 content->setBorderColor(Settings::Black);
-                content->setBorderSize(1);
+                content->setBorderSize(Settings::scale(1));
 
                 marginsLayout->addWidget(content);
-                marginsLayout->setContentsMargins(16, 0, 16, 16);
+                marginsLayout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), Settings::scale(16));
                 
                 SettingsInput *phone = new SettingsInput(QString(), "Not yet implemented", true, false, content);
                 SettingsButton *send = new SettingsButton(SettingsButton::Type::Normal, "Send", nullptr);
@@ -544,7 +544,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
                 QWidget *parentWidget = this;
                 while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-                PopUp *popUp = new PopUp(margins, 472, 300, QString(), "Enter a Phone Number", true, false, "<div style=\"text-align: center\">You will receive a text message with a verification code.<br><br>Your phone number can be used to verify <b>one Discord account</b> at a time and is only used for verification and login.</div>", "", "", false, false, parentWidget->size(), parentWidget);
+                PopUp *popUp = new PopUp(margins, Settings::scale(472), Settings::scale(300), QString(), "Enter a Phone Number", true, false, "<div style=\"text-align: center\">You will receive a text message with a verification code.<br><br>Your phone number can be used to verify <b>one Discord account</b> at a time and is only used for verification and login.</div>", "", "", false, false, parentWidget->size(), parentWidget);
                 QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                 QObject::connect(send, &SettingsButton::clicked, [popUp, parentWidget](){
                     popUp->deleteLater();
@@ -552,11 +552,11 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 });
             });
         } else {
-            font.setPixelSize(14);
+            font.setPixelSize(Settings::scale(14));
             Widget *phoneAndReveal = new Widget(phoneEdit);
             QHBoxLayout *phoneAndRevealLayout = new QHBoxLayout(phoneAndReveal);
             Label *phone = new Label(phoneAndReveal);
-            phone->setFixedSize(QFontMetrics(font).horizontalAdvance((client.email.size() > QString("**********" + client.email.mid(client.email.indexOf('@'))).size() ? client.email : QString("**********" + client.email.mid(client.email.indexOf('@'))))), 20);
+            phone->setFixedSize(QFontMetrics(font).horizontalAdvance((client.email.size() > QString("**********" + client.email.mid(client.email.indexOf('@'))).size() ? client.email : QString("**********" + client.email.mid(client.email.indexOf('@'))))), Settings::scale(20));
             phone->setFont(font);
             phone->setTextColor(Settings::HeaderPrimary);
             phone->setBackgroundColor(Settings::BackgroundSecondaryAlt);
@@ -564,22 +564,22 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             phoneAndRevealLayout->addWidget(phone);
             phoneAndRevealLayout->addWidget(reveal, 0, Qt::AlignTop);
             phoneAndRevealLayout->addStretch(1);
-            phoneAndRevealLayout->setSpacing(2);
+            phoneAndRevealLayout->setSpacing(Settings::scale(2));
             phoneAndRevealLayout->setContentsMargins(0, 0, 0, 0);
-            phoneAndReveal->move(0, 20);
+            phoneAndReveal->move(0, Settings::scale(20));
 
             SettingsButton *phoneRemoveButton = new SettingsButton(SettingsButton::Type::NoBackground, "Remove", phoneEdit);
-            phoneRemoveButton->move(449, 4);
+            phoneRemoveButton->move(Settings::scale(449), Settings::scale(4));
             QObject::connect(phoneRemoveButton, &SettingsButton::clicked, [this, client](){
                 Widget *content = new Widget(nullptr);
                 QVBoxLayout *layout = new QVBoxLayout(content);
                 layout->setSpacing(0);
-                layout->setContentsMargins(16, 0, 16, 0);
+                layout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
                 Label *password = new Label("PASSWORD", content);
                 QFont font;
-                font.setPixelSize(12);
+                font.setPixelSize(Settings::scale(12));
                 font.setFamily("whitney");
-                password->setFixedSize(QFontMetrics(font).horizontalAdvance("PASSWORD"), 20);
+                password->setFixedSize(QFontMetrics(font).horizontalAdvance("PASSWORD"), Settings::scale(20));
                 password->setFont(font);
                 password->setTextColor(Settings::HeaderSecondary);
                 SettingsInput *input = new SettingsInput(QString(), QString(), false, true, content);
@@ -588,7 +588,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
                 QWidget *parentWidget = this;
                 while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-                PopUp *popUp = new PopUp(content, 440, 272, QString(), "Remove phone number", false, false, (client.mfaEnabled ? "<div style=\"background-color: #FAA81A\">Removing your phone number will disable SMS backup for two-factor authentication.</div>" : QString()), "Cancel", "Remove", true, true, parentWidget->size(), parentWidget);
+                PopUp *popUp = new PopUp(content, Settings::scale(440), Settings::scale(272), QString(), "Remove phone number", false, false, (client.mfaEnabled ? "<div style=\"background-color: #FAA81A\">Removing your phone number will disable SMS backup for two-factor authentication.</div>" : QString()), "Cancel", "Remove", true, true, parentWidget->size(), parentWidget);
                 QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                 QObject::connect(popUp, &PopUp::done, [this, popUp, password, input](){
                     password->setText("PASSWORD");
@@ -606,20 +606,20 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             });
 
             SettingsButton *phoneEditButton = new SettingsButton(SettingsButton::Type::Edit, "Add", phoneEdit);
-            phoneEditButton->move(536, 4);
+            phoneEditButton->move(Settings::scale(536), Settings::scale(4));
             QObject::connect(phoneEditButton, &SettingsButton::clicked, [this, client](){
                 Widget *margins = new Widget(nullptr);
                 QHBoxLayout *marginsLayout = new QHBoxLayout(margins);
                 
                 Widget *content = new Widget(margins);
-                content->setFixedHeight(46);
-                content->setContentsMargins(4, 4, 4, 4);
+                content->setFixedHeight(Settings::scale(46));
+                content->setContentsMargins(Settings::scale(4), Settings::scale(4), Settings::scale(4), Settings::scale(4));
                 content->setBackgroundColor(Settings::BackgroundTertiary);
                 content->setBorderColor(Settings::Black);
-                content->setBorderSize(1);
+                content->setBorderSize(Settings::scale(1));
 
                 marginsLayout->addWidget(content);
-                marginsLayout->setContentsMargins(16, 0, 16, 16);
+                marginsLayout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), Settings::scale(16));
                 
                 SettingsInput *phone = new SettingsInput(QString(), "Not yet implemented", true, false, content);
                 SettingsButton *send = new SettingsButton(SettingsButton::Type::Normal, "Send", nullptr);
@@ -632,7 +632,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
                 QWidget *parentWidget = this;
                 while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-                PopUp *popUp = new PopUp(margins, 472, 300, QString(), "Enter a Phone Number", true, false, "<div style=\"text-align: center\">You will receive a text message with a verification code.<br><br>Your phone number can be used to verify <b>one Discord account</b> at a time and is only used for verification and login.</div>", "", "", false, false, parentWidget->size(), parentWidget);
+                PopUp *popUp = new PopUp(margins, Settings::scale(472), Settings::scale(300), QString(), "Enter a Phone Number", true, false, "<div style=\"text-align: center\">You will receive a text message with a verification code.<br><br>Your phone number can be used to verify <b>one Discord account</b> at a time and is only used for verification and login.</div>", "", "", false, false, parentWidget->size(), parentWidget);
                 QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                 QObject::connect(send, &SettingsButton::clicked, [popUp, parentWidget](){
                     popUp->deleteLater();
@@ -648,24 +648,24 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
     });
 
     Label *sectionTitle = new Label("Password and Authentication", nullptr);
-    sectionTitle->setFixedSize(QFontMetrics(font).horizontalAdvance("Password and Authentication"), 20);
+    sectionTitle->setFixedSize(QFontMetrics(font).horizontalAdvance("Password and Authentication"), Settings::scale(20));
     sectionTitle->setFont(font);
     sectionTitle->setTextColor(Settings::HeaderPrimary);
 
     SettingsButton *changePassword = new SettingsButton(SettingsButton::Type::Normal, "Change Password", container);
         QObject::connect(changePassword, &SettingsButton::clicked, [this](){
             QFont font;
-            font.setPixelSize(12);
+            font.setPixelSize(Settings::scale(12));
             font.setFamily("whitney");
 
             Widget *content = new Widget(nullptr);
 
             QWidget *currentSection = new QWidget(content);
             QVBoxLayout *currentLayout = new QVBoxLayout(currentSection);
-            currentLayout->setSpacing(8);
+            currentLayout->setSpacing(Settings::scale(8));
             currentLayout->setContentsMargins(0, 0, 0, 0);
             Label *current = new Label("CURRENT PASSWORD", currentSection);
-            current->setFixedSize(QFontMetrics(font).horizontalAdvance("CURRENT PASSWORD"), 20);
+            current->setFixedSize(QFontMetrics(font).horizontalAdvance("CURRENT PASSWORD"), Settings::scale(20));
             current->setFont(font);
             current->setTextColor(Settings::HeaderSecondary);
             SettingsInput *currentInput = new SettingsInput(QString(), QString(), false, true, currentSection);
@@ -674,11 +674,11 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
             QWidget *newSection = new QWidget(content);
             QVBoxLayout *newLayout = new QVBoxLayout(newSection);
-            newLayout->setSpacing(8);
+            newLayout->setSpacing(Settings::scale(8));
             newLayout->setContentsMargins(0, 0, 0, 0);
-            font.setPixelSize(12);
+            font.setPixelSize(Settings::scale(12));
             Label *newPassword = new Label("NEW PASSWORD", newSection);
-            newPassword->setFixedSize(QFontMetrics(font).horizontalAdvance("NEW PASSWORD"), 20);
+            newPassword->setFixedSize(QFontMetrics(font).horizontalAdvance("NEW PASSWORD"), Settings::scale(20));
             newPassword->setFont(font);
             newPassword->setTextColor(Settings::HeaderSecondary);
             SettingsInput *newInput = new SettingsInput(QString(), QString(), false, true, newSection);
@@ -687,11 +687,11 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
 
             QWidget *confirmSection = new QWidget(content);
             QVBoxLayout *confirmLayout = new QVBoxLayout(confirmSection);
-            confirmLayout->setSpacing(8);
+            confirmLayout->setSpacing(Settings::scale(8));
             confirmLayout->setContentsMargins(0, 0, 0, 0);
-            font.setPixelSize(12);
+            font.setPixelSize(Settings::scale(12));
             Label *confirm = new Label("CONFIRM NEW PASSWORD", confirmSection);
-            confirm->setFixedSize(QFontMetrics(font).horizontalAdvance("CONFIRM NEW PASSWORD"), 20);
+            confirm->setFixedSize(QFontMetrics(font).horizontalAdvance("CONFIRM NEW PASSWORD"), Settings::scale(20));
             confirm->setFont(font);
             confirm->setTextColor(Settings::HeaderSecondary);
             SettingsInput *confirmInput = new SettingsInput(QString(), QString(), false, true, confirmSection);
@@ -699,16 +699,16 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             confirmLayout->addWidget(confirmInput);
 
             QVBoxLayout *layout = new QVBoxLayout(content);
-            layout->setSpacing(16);
+            layout->setSpacing(Settings::scale(16));
             layout->setContentsMargins(0, 0, 0, 0);
             layout->addWidget(currentSection);
             layout->addWidget(newSection);
             layout->addWidget(confirmSection);
-            content->setContentsMargins(16, 0, 16, 0);
+            content->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
 
             QWidget *parentWidget = this;
             while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
-            PopUp *popUp = new PopUp(content, 440, 416, QString(), "Update your password", true, true, "Enter your current password and a new password.", "Cancel", "Done", true, true, parentWidget->size(), parentWidget);
+            PopUp *popUp = new PopUp(content, Settings::scale(440), Settings::scale(416), QString(), "Update your password", true, true, "Enter your current password and a new password.", "Cancel", "Done", true, true, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             QObject::connect(popUp, &PopUp::done, [this, popUp, current, currentInput, newPassword, newInput, confirm, confirmInput](){
                 current->setText("CURRENT PASSWORD");
@@ -741,20 +741,20 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             });
         });
 
-    font.setPixelSize(12);
+    font.setPixelSize(Settings::scale(12));
     font.setBold(true);
 
 
     Label *accountRemoval = new Label("ACCOUNT REMOVAL", container);
-    accountRemoval->setFixedSize(QFontMetrics(font).horizontalAdvance("ACCOUNT REMOVAL"), 16);
+    accountRemoval->setFixedSize(QFontMetrics(font).horizontalAdvance("ACCOUNT REMOVAL"), Settings::scale(16));
     accountRemoval->setFont(font);
     accountRemoval->setTextColor(Settings::HeaderSecondary);
 
     font.setBold(false);
-    font.setPixelSize(13);
+    font.setPixelSize(Settings::scale(13));
     Label *accountRemovalDesc = new Label("Disabling your account means you can recover "
                                           "it at any time after taking this action", nullptr);
-    accountRemovalDesc->setFixedHeight(40);
+    accountRemovalDesc->setFixedHeight(Settings::scale(40));
     accountRemovalDesc->setTextColor(Settings::HeaderSecondary);
     accountRemovalDesc->setFont(font);
 
@@ -777,18 +777,18 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 QWidget *parentWidget = this;
                 while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
                 if (owner) {
-                    PopUp *popUp = new PopUp(new Widget(nullptr), 440, 240, QString(), "You Own Servers", false, false, "In order to delete or disable your account you must first transfer ownership of all servers that you own.", "", "Okay", true, true, parentWidget->size(), parentWidget);
+                    PopUp *popUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(240), QString(), "You Own Servers", false, false, "In order to delete or disable your account you must first transfer ownership of all servers that you own.", "", "Okay", true, true, parentWidget->size(), parentWidget);
                     QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                     QObject::connect(popUp, &PopUp::done, [popUp](){popUp->deleteLater();});
                 } else {
                     Widget *content = new Widget(nullptr);
-                    content->setContentsMargins(16, 0, 16, 0);
+                    content->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
                     QVBoxLayout *layout = new QVBoxLayout(content);
-                    layout->setSpacing(8);
+                    layout->setSpacing(Settings::scale(8));
                     layout->setContentsMargins(0, 0, 0, 0);
                     Label *password = new Label("PASSWORD", content);
                     QFont font;
-                    font.setPixelSize(12);
+                    font.setPixelSize(Settings::scale(12));
                     font.setFamily("whitney");
                     password->setFont(font);
                     password->setTextColor(Settings::HeaderSecondary);
@@ -796,7 +796,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                     layout->addWidget(password);
                     layout->addWidget(input);
 
-                    PopUp *popUp = new PopUp(content, 440, 312, QString(), "Delete Account", false, false, "<div style=\"background-color: #FAA81A\">Are you sure that you want to disable your account? This will immediatly log you out of your account and make your account inaccessible to anyone.", "Cancel", "Disable Account", true, true, parentWidget->size(), parentWidget);
+                    PopUp *popUp = new PopUp(content, Settings::scale(440), Settings::scale(312), QString(), "Delete Account", false, false, "<div style=\"background-color: #FAA81A\">Are you sure that you want to disable your account? This will immediatly log you out of your account and make your account inaccessible to anyone.", "Cancel", "Disable Account", true, true, parentWidget->size(), parentWidget);
                     QObject::connect(popUp, &PopUp::cancelled, [this, popUp](){popUp->deleteLater();});
                     QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget, password, input](){
                         password->setText("PASSWORD");
@@ -805,8 +805,11 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                             if (errorPtr == nullptr) {
                                 popUp->deleteLater();
 
-                                PopUp *closePopUp = new PopUp(new Widget(nullptr), 440, 200, QString(), QString(), true, false, "Your account has been disabled successfully, Fast-Discord will now exit.", QString(), QString(), false, false, parentWidget->size(), parentWidget);
-                                QObject::connect(closePopUp, &PopUp::cancelled, [](){exit(0);});
+                                PopUp *closePopUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(200), QString(), QString(), true, false, "Your account has been disabled successfully, Fast-Discord will now exit.", QString(), QString(), false, false, parentWidget->size(), parentWidget);
+                                QObject::connect(closePopUp, &PopUp::cancelled, [](){
+                                    Settings::saveSettings();
+                                    exit(0);
+                                });
                             } else {
                                 password->setText("PASSWORD - " + reinterpret_cast<Api::Error *>(errorPtr)->message);
                                 password->setTextColor(Settings::Error);
@@ -833,18 +836,18 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 QWidget *parentWidget = this;
                 while (parentWidget->parent()) parentWidget = (QWidget *)parentWidget->parent();
                 if (owner) {
-                    PopUp *popUp = new PopUp(new Widget(nullptr), 440, 240, QString(), "You Own Servers", false, false, "In order to delete or disable your account you must first transfer ownership of all servers that you own.", "", "Okay", true, true, parentWidget->size(), parentWidget);
+                    PopUp *popUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(240), QString(), "You Own Servers", false, false, "In order to delete or disable your account you must first transfer ownership of all servers that you own.", "", "Okay", true, true, parentWidget->size(), parentWidget);
                     QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                     QObject::connect(popUp, &PopUp::done, [popUp](){popUp->deleteLater();});
                 } else {
                     Widget *content = new Widget(nullptr);
-                    content->setContentsMargins(16, 0, 16, 0);
+                    content->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
                     QVBoxLayout *layout = new QVBoxLayout(content);
-                    layout->setSpacing(8);
+                    layout->setSpacing(Settings::scale(8));
                     layout->setContentsMargins(0, 0, 0, 0);
                     Label *password = new Label("PASSWORD", content);
                     QFont font;
-                    font.setPixelSize(12);
+                    font.setPixelSize(Settings::scale(12));
                     font.setFamily("whitney");
                     password->setFont(font);
                     password->setTextColor(Settings::HeaderSecondary);
@@ -852,7 +855,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                     layout->addWidget(password);
                     layout->addWidget(input);
 
-                    PopUp *popUp = new PopUp(content, 440, 312, QString(), "Disable Account", false, false, "<div style=\"background-color: #FAA81A\">Are you sure that you want to delete your account? This will immediatly log you out of your account and you will not be able to log in again.", "Cancel", "Delete Account", true, true, parentWidget->size(), parentWidget);
+                    PopUp *popUp = new PopUp(content, Settings::scale(440), Settings::scale(312), QString(), "Disable Account", false, false, "<div style=\"background-color: #FAA81A\">Are you sure that you want to delete your account? This will immediatly log you out of your account and you will not be able to log in again.", "Cancel", "Delete Account", true, true, parentWidget->size(), parentWidget);
                     QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                     QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget, password, input](){
                         password->setText("CURRENT PASSWORD");
@@ -861,8 +864,11 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                             if (errorPtr == nullptr) {
                                 popUp->deleteLater();
 
-                                PopUp *closePopUp = new PopUp(new Widget(nullptr), 440, 200, QString(), QString(), true, false, "Your account has been deleted successfully, Fast-Discord will now exit.", QString(), QString(), false, false, parentWidget->size(), parentWidget);
-                                QObject::connect(closePopUp, &PopUp::cancelled, [](){exit(0);});
+                                PopUp *closePopUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(200), QString(), QString(), true, false, "Your account has been deleted successfully, Fast-Discord will now exit.", QString(), QString(), false, false, parentWidget->size(), parentWidget);
+                                QObject::connect(closePopUp, &PopUp::cancelled, [](){
+                                    Settings::saveSettings();
+                                    exit(0);
+                                });
                             } else {
                                 password->setText("PASSWORD - " + reinterpret_cast<Api::Error *>(errorPtr)->message);
                                 password->setTextColor(Settings::Error);
@@ -876,28 +882,28 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
     accountButtonsLayout->addWidget(disableAccount);
     accountButtonsLayout->addWidget(deleteAccount);
     accountButtonsLayout->addStretch(1);
-    accountButtonsLayout->setSpacing(16);
+    accountButtonsLayout->setSpacing(Settings::scale(16));
     accountButtonsLayout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(title);
-    layout->addSpacing(20);
+    layout->addSpacing(Settings::scale(20));
     layout->addWidget(profile);
     layout->addWidget(new Divider());
     layout->addWidget(sectionTitle);
-    layout->addSpacing(20);
+    layout->addSpacing(Settings::scale(20));
     layout->addWidget(changePassword);
     layout->addWidget(new Divider());
     layout->addWidget(accountRemoval);
-    layout->addSpacing(8);
+    layout->addSpacing(Settings::scale(8));
     layout->addWidget(accountRemovalDesc);
-    layout->addSpacing(16);
+    layout->addSpacing(Settings::scale(16));
     layout->addWidget(accountButtons);
 
     this->setWidget(container);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setStyleSheet("* {border: none; background-color: " + Settings::colors[Settings::BackgroundPrimary].name() + "}"
-                        "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
-                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 8px; width: 3px;}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(8)) + "px; width: " + QString::number(Settings::scale(3)) + "px;}"
                         "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}"
                         "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                         "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");

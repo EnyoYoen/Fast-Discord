@@ -37,13 +37,13 @@ MenuButton::MenuButton(MenuButton::ButtonType typep, QWidget *parent, bool activ
         default:                         text = (char *)"";
     }
     QFont font;
-    font.setPixelSize(16);
+    font.setPixelSize(Settings::scale(16));
     font.setFamily("whitney");
     this->setFont(font);
     this->setText(text);
 
-    this->setFixedSize(192, 32);
-    this->setBorderRadius(4);
+    this->setFixedSize(Settings::scale(192), Settings::scale(32));
+    this->setBorderRadius(Settings::scale(4));
     this->setBackgroundColor(Settings::BackgroundSecondary);
     this->setTextColor(Settings::InteractiveNormal);
 }

@@ -9,7 +9,7 @@ namespace Ui {
 CloseChannelButton::CloseChannelButton(QWidget *parent)
     : Widget(parent)
 {
-    this->setFixedSize(16, 38);
+    this->setFixedSize(Settings::scale(16), Settings::scale(38));
     this->setPixmap(QPixmap("res/images/svg/close-icon.svg"));
 }
 

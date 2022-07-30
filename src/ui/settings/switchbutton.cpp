@@ -9,34 +9,34 @@ SwitchButton::SwitchButton(bool statep)
     state = statep;
 
     iconBackground = new Widget(this);
-    iconBackground->setFixedSize(20, 20);
+    iconBackground->setFixedSize(Settings::scale(20), Settings::scale(20));
     iconBackground->setBackgroundColor(Settings::White);
-    iconBackground->setBorderRadius(10);
+    iconBackground->setBorderRadius(Settings::scale(10));
 
     checkIcon = new Widget(this);
-    checkIcon->setFixedSize(20, 20);
-    checkIcon->move(17, 2);
+    checkIcon->setFixedSize(Settings::scale(20), Settings::scale(20));
+    checkIcon->move(Settings::scale(17), Settings::scale(2));
     checkIcon->setImage("res/images/svg/switch-check-icon.svg");
 
     crossIcon = new Widget(this);
-    crossIcon->setFixedSize(20, 20);
-    crossIcon->move(3, 2);
+    crossIcon->setFixedSize(Settings::scale(20), Settings::scale(20));
+    crossIcon->move(Settings::scale(3), Settings::scale(2));
     crossIcon->setImage("res/images/svg/switch-cross-icon.svg");
 
     if (state) {
-        iconBackground->move(17, 2);
+        iconBackground->move(Settings::scale(17), Settings::scale(2));
         crossIcon->hide();
         iconBackground->setBackgroundColor(Settings::White);
-        iconBackground->setBorderRadius(10);
+        iconBackground->setBorderRadius(Settings::scale(10));
         this->setBackgroundColor(Settings::SwitchActive);
     } else {
-        iconBackground->move(3, 2);
+        iconBackground->move(Settings::scale(3), Settings::scale(2));
         checkIcon->hide();
         this->setBackgroundColor(Settings::SwitchInactive);
     }
 
-    this->setBorderRadius(12);
-    this->setFixedSize(40, 24);
+    this->setBorderRadius(Settings::scale(12));
+    this->setFixedSize(Settings::scale(40), Settings::scale(24));
     this->setCursor(Qt::CursorShape::PointingHandCursor);
 }
 
@@ -44,12 +44,12 @@ void SwitchButton::setState(bool statep)
 {
     this->state = statep;
     if (state) {
-        iconBackground->move(17, 2);
+        iconBackground->move(Settings::scale(17), Settings::scale(2));
         crossIcon->hide();
         checkIcon->show();
         this->setBackgroundColor(Settings::SwitchActive);
     } else {
-        iconBackground->move(3, 2);
+        iconBackground->move(Settings::scale(3), Settings::scale(2));
         checkIcon->hide();
         crossIcon->show();
         this->setBackgroundColor(Settings::SwitchInactive);
@@ -60,13 +60,13 @@ void SwitchButton::mouseReleaseEvent(QMouseEvent *event)
 {
     if (state) {
         state = false;
-        iconBackground->move(3, 2);
+        iconBackground->move(Settings::scale(3), Settings::scale(2));
         checkIcon->hide();
         crossIcon->show();
         this->setBackgroundColor(Settings::SwitchInactive);
     } else {
         state = true;
-        iconBackground->move(17, 2);
+        iconBackground->move(Settings::scale(17), Settings::scale(2));
         crossIcon->hide();
         checkIcon->show();
         this->setBackgroundColor(Settings::SwitchActive);

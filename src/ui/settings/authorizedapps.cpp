@@ -13,26 +13,26 @@ public:
         : Widget(parent)
     {
         QVBoxLayout *layout = new QVBoxLayout(this);
-        layout->setContentsMargins(20, 20, 20, 20);
+        layout->setContentsMargins(Settings::scale(20), Settings::scale(20), Settings::scale(20), Settings::scale(20));
         layout->setSpacing(0);
 
         Widget *header = new Widget(this);
         header->setFixedHeight(32);
         QHBoxLayout *headerLayout = new QHBoxLayout(header);
         headerLayout->setContentsMargins(0, 0, 0, 0);
-        headerLayout->setSpacing(10);
+        headerLayout->setSpacing(Settings::scale(10));
 
-        RoundedImage *avatar = new RoundedImage(32, 32, 16, header);
+        RoundedImage *avatar = new RoundedImage(Settings::scale(32), Settings::scale(32), Settings::scale(16), header);
         rm->getImage([avatar](void *imageFileName){
             avatar->setRoundedImage(*reinterpret_cast<QString *>(imageFileName));
         }, "https://cdn.discordapp.com/app-icons/" + app->application->id + "/" + app->application->icon + ".webp", app->application->id + ".webp");
 
         QFont font;
-        font.setPixelSize(14);
+        font.setPixelSize(Settings::scale(14));
         font.setFamily("whitney");
 
         Label *appName = new Label(app->application->name, header);
-        appName->setFixedSize(QFontMetrics(font).horizontalAdvance(app->application->name), 18);
+        appName->setFixedSize(QFontMetrics(font).horizontalAdvance(app->application->name), Settings::scale(18));
         appName->setTextColor(Settings::TextNormal);
         appName->setFont(font);
 
@@ -50,27 +50,27 @@ public:
         headerLayout->addWidget(deauthorize);
 
         layout->addWidget(header);
-        layout->addSpacing(20);
+        layout->addSpacing(Settings::scale(20));
 
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(12));
         font.setBold(true);
         Label *aboutTitle = new Label("ABOUT THIS APP", this);
         aboutTitle->setTextColor(Settings::HeaderSecondary);
         aboutTitle->setFont(font);
 
         layout->addWidget(aboutTitle);
-        layout->addSpacing(8);
+        layout->addSpacing(Settings::scale(8));
 
-        font.setPixelSize(14);
+        font.setPixelSize(Settings::scale(14));
         font.setBold(false);
         Label *description = new Label(app->application->description, this);
         description->setTextColor(Settings::TextNormal);
         description->setFont(font);
 
         layout->addWidget(description);
-        layout->addSpacing(20);
+        layout->addSpacing(Settings::scale(20));
 
-        font.setPixelSize(12);
+        font.setPixelSize(Settings::scale(12));
         font.setBold(true);
         Label *permissions = new Label("PERMISSIONS", this);
         permissions->setTextColor(Settings::HeaderSecondary);
@@ -78,15 +78,15 @@ public:
 
         layout->addWidget(permissions);
 
-        font.setPixelSize(14);
+        font.setPixelSize(Settings::scale(14));
         font.setBold(false);
         QVector<QString> scopes = app->scopes;
         for (int i = 0 ; i < scopes.size() ; i++) {
             Widget *permission = new Widget(this);
-            permission->setFixedHeight(18);
+            permission->setFixedHeight(Settings::scale(18));
             QHBoxLayout *permissionLayout = new QHBoxLayout(permission);
             permissionLayout->setContentsMargins(0, 0, 0, 0);
-            permissionLayout->setSpacing(5);
+            permissionLayout->setSpacing(Settings::scale(5));
 
             Widget *checkmark = new Widget(permission);
             checkmark->setFixedSize(18, 18);
@@ -103,9 +103,9 @@ public:
             layout->addWidget(permission);
         }
 
-        this->setFixedHeight(170 + scopes.size() * 26);
-        this->setBorderRadius(5);
-        this->setBorderSize(1);
+        this->setFixedHeight(Settings::scale(170) + scopes.size() * Settings::scale(26));
+        this->setBorderRadius(Settings::scale(5));
+        this->setBorderSize(Settings::scale(1));
         this->setBorderColor(Settings::BackgroundTertiary);
     }
 
@@ -163,48 +163,48 @@ AuthorizedApps::AuthorizedApps(Api::RessourceManager *rmp, QWidget *parent)
     rm = rmp;
 
     container = new Widget(this);
-    container->setMaximumWidth(740);
-    container->setContentsMargins(40, 60, 40, 80);
+    container->setMaximumWidth(Settings::scale(740));
+    container->setContentsMargins(Settings::scale(40), Settings::scale(60), Settings::scale(40), Settings::scale(80));
     container->setBackgroundColor(Settings::BackgroundPrimary);
     layout = new QVBoxLayout(container);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(8);
+    layout->setSpacing(Settings::scale(8));
 
     QFont font;
-    font.setPixelSize(20);
+    font.setPixelSize(Settings::scale(20));
     font.setFamily("whitney");
 
     Label *title = new Label("Authorized Apps", container);
-    title->setFixedSize(QFontMetrics(font).horizontalAdvance("Authorized Apps"), 20);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance("Authorized Apps"), Settings::scale(20));
     title->setFont(font);
     title->setTextColor(Settings::HeaderPrimary);
 
     layout->addWidget(title);
-    layout->addSpacing(12);
+    layout->addSpacing(Settings::scale(12));
 
     Widget *description = new Widget(container);
-    description->setMinimumHeight(98);
-    description->setMaximumHeight(116);
-    description->setBorderRadius(5);
-    description->setBorderSize(1);
+    description->setMinimumHeight(Settings::scale(98));
+    description->setMaximumHeight(Settings::scale(116));
+    description->setBorderRadius(Settings::scale(5));
+    description->setBorderSize(Settings::scale(1));
     description->setBorderColor(Settings::BackgroundTertiary);
     description->setBackgroundColor(Settings::DeprecatedCardBg);
     QVBoxLayout *descriptionLayout = new QVBoxLayout(description);
-    descriptionLayout->setContentsMargins(20, 20, 20, 20);
-    descriptionLayout->setSpacing(4);
-    font.setPixelSize(12);
+    descriptionLayout->setContentsMargins(Settings::scale(20), Settings::scale(20), Settings::scale(20), Settings::scale(20));
+    descriptionLayout->setSpacing(Settings::scale(4));
+    font.setPixelSize(Settings::scale(12));
     Label *descriptionTitle = new Label("APPLICATIONS AND CONNECTIONS", nullptr);
     descriptionTitle->setFont(font);
     descriptionTitle->setTextColor(Settings::HeaderSecondary);
     Label *descriptionText = new Label("Here's all the apps that are doing super cool things to make\nyour Discord experience super cooler. If it gets too chilly, you\ncan remove them at any time.", nullptr);
-    descriptionText->setMinimumHeight(54);
+    descriptionText->setMinimumHeight(Settings::scale(54));
     descriptionText->setFont(font);
     descriptionText->setTextColor(Settings::TextNormal);
     descriptionLayout->addWidget(descriptionTitle);
     descriptionLayout->addWidget(descriptionText);
 
     layout->addWidget(description);
-    layout->addSpacing(32);
+    layout->addSpacing(Settings::scale(32));
 
     rm->requester->getAuthorizedApp([this](void *appsPtr){
         QVector<Api::AuthorizedApp *> apps = *reinterpret_cast<QVector<Api::AuthorizedApp *> *>(appsPtr);
@@ -228,8 +228,8 @@ AuthorizedApps::AuthorizedApps(Api::RessourceManager *rmp, QWidget *parent)
     this->setWidget(container);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setStyleSheet("* {border: none; background-color: " + Settings::colors[Settings::BackgroundPrimary].name() + "}"
-                        "QScrollBar::handle:vertical {border: none; border-radius: 2px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
-                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: 8px; width: 3px;}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(8)) + "px; width: " + QString::number(Settings::scale(3)) + "px;}"
                         "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}"
                         "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                         "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
@@ -243,28 +243,28 @@ void AuthorizedApps::empty()
     noAppsLayout->setSpacing(0);
     
     Widget *image = new Widget(noApps);
-    image->setFixedSize(438, 270);
+    image->setFixedSize(Settings::scale(438), Settings::scale(270));
     image->setImage("res/images/svg/no-app-icon.svg");
 
     noAppsLayout->addWidget(image, 0, Qt::AlignHCenter);
-    noAppsLayout->addSpacing(40);
+    noAppsLayout->addSpacing(Settings::scale(40));
 
     QFont font;
-    font.setPixelSize(17);
+    font.setPixelSize(Settings::scale(17));
     font.setBold(true);
     font.setFamily("whitney");
 
     Label *title = new Label("NO AUTHORIZED APPS", noApps);
-    title->setFixedSize(QFontMetrics(font).horizontalAdvance("NO AUTHORIZED APPS"), 22);
+    title->setFixedSize(QFontMetrics(font).horizontalAdvance("NO AUTHORIZED APPS"), Settings::scale(22));
     title->setTextColor(Settings::TextMuted);
     title->setFont(font);
 
     noAppsLayout->addWidget(title, 0, Qt::AlignHCenter);
-    noAppsLayout->addSpacing(8);
+    noAppsLayout->addSpacing(Settings::scale(8));
     
     font.setBold(false);
     Label *desc = new Label("Enhance your Discord experience by authorizing and integrating\nthird-party services.", noApps);
-    desc->setFixedSize(QFontMetrics(font).horizontalAdvance("Enhance your Discord experience by authorizing and integrating\nthird-party services."), 40);
+    desc->setFixedSize(QFontMetrics(font).horizontalAdvance("Enhance your Discord experience by authorizing and integrating\nthird-party services."), Settings::scale(40));
     desc->setTextColor(Settings::TextMuted);
     desc->setFont(font);
 

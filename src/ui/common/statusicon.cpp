@@ -9,9 +9,9 @@ namespace Ui {
 StatusIcon::StatusIcon(QWidget *parent)
     : Widget(parent)
 {
-    this->setFixedSize(10, 10);
+    this->setFixedSize(Settings::scale(10), Settings::scale(10));
     this->setBackgroundColor(Settings::StatusOffline);
-    this->setBorderRadius(5);
+    this->setBorderRadius(Settings::scale(5));
 }
 
 void StatusIcon::setStatus(const QString& status)

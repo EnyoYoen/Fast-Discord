@@ -22,6 +22,8 @@ class MiddleColumn : public Widget
     Q_OBJECT
 public:
     MiddleColumn(Api::RessourceManager *rm, QWidget *parent);
+    
+    QScrollArea *channelList;
 
 signals:
     void guildChannelsReceived(const QVector<Api::Channel *> channels);
@@ -49,7 +51,6 @@ private slots:
 private:
     // Main widgets
     QVBoxLayout *layout;
-    QScrollArea *channelList;
     CallWidget  *callWidget;
     UserMenu    *userMenu;
 

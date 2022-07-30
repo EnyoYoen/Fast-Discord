@@ -1,12 +1,13 @@
 #include "ui/settings/settingsmenu.h"
 
-#include "ui/settings/scrollmenu.h"
 #include "ui/settings/closebutton.h"
 #include "ui/settings/myaccount.h"
 #include "ui/settings/userprofile.h"
 #include "ui/settings/privacysafety.h"
 #include "ui/settings/authorizedapps.h"
 #include "ui/settings/connections.h"
+#include "ui/settings/appearance.h"
+#include "ui/mainwindow.h"
 
 namespace Ui {
 
@@ -19,13 +20,13 @@ SettingsMenu::SettingsMenu(Api::RessourceManager *rmp, QWidget *parent)
     CloseButton *close = new CloseButton(this);
     Widget *closeContainer = new Widget(this);
     QVBoxLayout *closeLayout = new QVBoxLayout(closeContainer);
-    closeContainer->setFixedWidth(57);
+    closeContainer->setFixedWidth(Settings::scale(57));
     closeContainer->setBackgroundColor(Settings::BackgroundPrimary);
     closeLayout->setContentsMargins(0, 0, 0, 0);
     closeLayout->addWidget(close);
     closeLayout->addWidget(new QWidget(closeContainer));
 
-    ScrollMenu *scrollMenu = new ScrollMenu(this);
+    scrollMenu = new ScrollMenu(this);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(scrollMenu);
@@ -34,7 +35,10 @@ SettingsMenu::SettingsMenu(Api::RessourceManager *rmp, QWidget *parent)
     
     QObject::connect(close, &CloseButton::clicked, [this](){emit closeClicked();});
     QObject::connect(scrollMenu, &ScrollMenu::buttonClicked, [this](MenuButton::ButtonType type){
-        QWidget *menu = nullptr;
+        if (menu != nullptr) {
+            menu->deleteLater();
+        }
+
         switch (type) {
             case MenuButton::ButtonType::MyAccount:
                 menu = new MyAccount(rm, this);
@@ -51,12 +55,27 @@ SettingsMenu::SettingsMenu(Api::RessourceManager *rmp, QWidget *parent)
             case MenuButton::ButtonType::Connections:
                 menu = new Connections(rm, this);
                 break;
+            case MenuButton::ButtonType::Appearance:
+                menu = new Appearance(rm, this);
+                break;
         }
 
         if (menu != nullptr) {
             layout->replaceWidget(layout->itemAt(1)->widget(), menu);
         }
     });
+}
+
+
+void SettingsMenu::updateTheme()
+{
+    scrollMenu->setStyleSheet("* {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "}"
+                        "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
+                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(8)) + "px; width: " + QString::number(Settings::scale(3)) + "px;}"
+                        "QScrollBar::add-line, QScrollBar::sub-line {border:none; background: none; height: 0;}"
+                        "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
+                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
+    reinterpret_cast<MainWindow *>(this->parent())->updateTheme();
 }
 
 } // namespace Ui

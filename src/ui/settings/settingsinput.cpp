@@ -7,13 +7,13 @@ namespace Ui {
 SettingsInput::SettingsInput(QString placeholder, QString text, bool readOnly, bool password, QWidget *parent)
     : Widget(parent)
 {
-    this->setFixedHeight(40);
-    this->setContentsMargins(10, 10, 10, 10);
-    this->setBorderRadius(3);
+    this->setFixedHeight(Settings::scale(40));
+    this->setContentsMargins(Settings::scale(10), Settings::scale(10), Settings::scale(10), Settings::scale(10));
+    this->setBorderRadius(Settings::scale(3));
     this->setBackgroundColor(Settings::BackgroundTertiary);
 
     QFont font;
-    font.setPixelSize(16);
+    font.setPixelSize(Settings::scale(16));
     font.setFamily("whitney");
     input = new QLineEdit(text, this);
     input->setFont(font);
