@@ -216,6 +216,7 @@ void MessageArea::loop()
         } else {
             lock.lock();
             messageWaiter.wait(&lock);
+            lock.unlock();
         }
     }
 }
@@ -256,6 +257,7 @@ MessageArea::~MessageArea()
 {
     stopped = true;
     messageWaiter.wakeOne();
+    messageCreateThread->wait();
 }
 
 } // namespace Ui

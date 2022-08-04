@@ -20,8 +20,7 @@ Requester::Requester(const QString& tokenp, QObject *parent)
     // Attributes initialization
     token = tokenp;
     currentRequestsNumber = 0;
-    rateLimitEnd = 0; // No rate limit for now
-    requestsToCheck = 0;
+    rateLimitEnd = 0;
     stopped = false;
 
     // Start the request loop
@@ -50,6 +49,23 @@ void const Requester::writeFile()
 void Requester::readReply()
 {
     RequestParameters parameters = requestQueue.dequeue();
+    if (typesToCheck.size() != 0) {
+        if (typesToCheck.contains((RequestTypes)parameters.type)) {
+            typesToCheck[(RequestTypes)parameters.type]--;
+            if (typesToCheck[(RequestTypes)parameters.type] <= 0)
+                typesToCheck.remove((RequestTypes)parameters.type);
+            return;
+        }
+    }
+    if (urlsTocheck.size() != 0) {
+        qDebug() << urlsTocheck.keys() << parameters.url;
+        if (urlsTocheck.contains(parameters.url)) {
+            urlsTocheck[parameters.url]--;
+            if (urlsTocheck[parameters.url] <= 0)
+                urlsTocheck.remove(parameters.url);
+            return;
+        }
+    } 
     if (parameters.outputFile != "" && parameters.type == GetImage) {
         QDir dir("cache/");
         if (!dir.exists()) dir.mkpath(".");
@@ -71,62 +87,65 @@ void Requester::readReply()
                 {
                     User *user;
                     unmarshal<User>(QJsonDocument::fromJson(ba).object(), &user);
-                    parameters.callback(static_cast<void *>(user));
+                    callCallbacks(parameters, reinterpret_cast<void *>(user));
                     break;
                 }
             case GetGuilds:
                 {
                     QVector<Guild *> guilds = unmarshalMultiple<Guild>(QJsonDocument::fromJson(ba).array());
-                    parameters.callback(static_cast<void *>(&guilds));
+                    callCallbacks(parameters, reinterpret_cast<void *>(&guilds));
+                    break;
+                }
+            case GetGuildMember:
+                {
+                    GuildMember *guildMember;
+                    unmarshal<GuildMember>(QJsonDocument::fromJson(ba).object(), &guildMember);
+                    callCallbacks(parameters, reinterpret_cast<void *>(guildMember));
                     break;
                 }
             case GetGuildChannels:
                 {
                     QVector<Channel *> channels = unmarshalMultiple<Channel>(QJsonDocument::fromJson(ba).array());
-                    parameters.callback(static_cast<void *>(&channels));
+                    callCallbacks(parameters, reinterpret_cast<void *>(&channels));
                     break;
                 }
             case GetPrivateChannels:
                 {
                     QVector<Channel *> privateChannels = unmarshalMultiple<Channel>(QJsonDocument::fromJson(ba).array());
-                    parameters.callback(static_cast<void *>(&privateChannels));
+                    callCallbacks(parameters, reinterpret_cast<void *>(&privateChannels));
                     break;
                 }
             case GetMessages:
                 {
                     QVector<Message *> messages = unmarshalMultiple<Message>(QJsonDocument::fromJson(ba).array());
-                    parameters.callback(static_cast<void *>(&messages));
+                    callCallbacks(parameters, reinterpret_cast<void *>(&messages));
                     break;
                 }
             case GetClient:
                 {
                     Client *client;
                     unmarshal<Client>(QJsonDocument::fromJson(ba).object(), &client);
-                    parameters.callback(static_cast<void *>(client));
+                    callCallbacks(parameters, reinterpret_cast<void *>(client));
                     break;
                 }
             case GetClientSettings:
                 {
                     ClientSettings *clientSettings;
                     unmarshal<ClientSettings>(QJsonDocument::fromJson(ba).object(), &clientSettings);
-                    parameters.callback(static_cast<void *>(clientSettings));
+                    callCallbacks(parameters, reinterpret_cast<void *>(clientSettings));
                     break;
                 }
             case GetWsUrl:
                 {
-                    try {
-                        QJsonValue jsonUrl = QJsonDocument::fromJson(ba)["url"];
-                        QString url = jsonUrl.toString();
-                        parameters.callback(static_cast<void *>(&url));
-                    } catch(...) {
-                        break;
-                    }
-                break;
+                    QJsonValue jsonUrl = QJsonDocument::fromJson(ba)["url"];
+                    QString url = jsonUrl.toString();
+                    callCallbacks(parameters, reinterpret_cast<void *>(&url));
+                    break;
                 }
             case GetImage:
                 {
                     QString imageFileName = parameters.outputFile;
-                    if (requestsToCheck == 0) parameters.callback(static_cast<void *>(&imageFileName));
+                    callCallbacks(parameters, reinterpret_cast<void *>(&imageFileName));
                     break;
                 }
             case ChangeUsername:
@@ -137,7 +156,7 @@ void Requester::readReply()
                         unmarshal<Client>(doc.object(), &client);
                         reinterpret_cast<RessourceManager *>(parent())->setClient(client);
                         reinterpret_cast<RessourceManager *>(parent())->setToken(doc.object()["token"].toString());
-                        parameters.callback(nullptr);
+                        callCallbacks(parameters, nullptr);
                     } else {
                         QVector<Error *> errors;
                         Error *error;
@@ -157,7 +176,7 @@ void Requester::readReply()
                             error->intCode = 2;
                             errors.append(new Error(*error));
                         }                            
-                        parameters.callback(static_cast<void *>(&errors));
+                        callCallbacks(parameters, reinterpret_cast<void *>(&errors));
                     }
                     break;
                 }
@@ -169,7 +188,7 @@ void Requester::readReply()
                         unmarshal<Client>(doc.object(), &client);
                         reinterpret_cast<RessourceManager *>(parent())->setClient(client);
                         reinterpret_cast<RessourceManager *>(parent())->setToken(doc.object()["token"].toString());
-                        parameters.callback(nullptr);
+                        callCallbacks(parameters, nullptr);
                     } else {
                         QVector<Error *> errors;
                         Error *error;
@@ -184,7 +203,7 @@ void Requester::readReply()
                             error->intCode = 1;
                             errors.append(new Error(*error));
                         }                            
-                        parameters.callback(static_cast<void *>(&errors));
+                        callCallbacks(parameters, reinterpret_cast<void *>(&errors));
                     }
                     break;
                 }
@@ -196,7 +215,7 @@ void Requester::readReply()
                         unmarshal<Client>(doc.object(), &client);
                         reinterpret_cast<RessourceManager *>(parent())->setClient(client);
                         reinterpret_cast<RessourceManager *>(parent())->setToken(doc.object()["token"].toString());
-                        parameters.callback(nullptr);
+                        callCallbacks(parameters, nullptr);
                     } else {
                         QVector<Error *> errors;
                         Error *error;
@@ -211,7 +230,7 @@ void Requester::readReply()
                             error->intCode = 1;
                             errors.append(new Error(*error));
                         }                         
-                        parameters.callback(static_cast<void *>(&errors));
+                        callCallbacks(parameters, reinterpret_cast<void *>(&errors));
                     }
                     break;
                 }
@@ -220,11 +239,11 @@ void Requester::readReply()
                     QJsonDocument doc = QJsonDocument::fromJson(ba);
                     if (doc["errors"].isUndefined()) {
                         emailToken = doc["token"].toString();
-                        parameters.callback(nullptr);
+                        callCallbacks(parameters, nullptr);
                     } else {
                         Error *error;
                         unmarshal<Error>(doc["errors"].toObject()["code"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                        parameters.callback(error);
+                        callCallbacks(parameters, error);
                     }
                     break;
                 }
@@ -233,14 +252,14 @@ void Requester::readReply()
                 {
                     QJsonDocument doc = QJsonDocument::fromJson(ba);
                     if (doc["message"].isUndefined()) {
-                        parameters.callback(nullptr);
+                        callCallbacks(parameters, nullptr);
                     } else {
                         Error *error = new Error {
                             doc["message"].toString(),
                             doc["code"].toString(),
                             doc["code"].toInt(),
                         };
-                        parameters.callback(error);
+                        callCallbacks(parameters, error);
                     }
                     break;
                 }
@@ -252,7 +271,7 @@ void Requester::readReply()
                         unmarshal<Client>(doc.object(), &client);
                         reinterpret_cast<RessourceManager *>(parent())->setClient(client);
                         reinterpret_cast<RessourceManager *>(parent())->setToken(doc.object()["token"].toString());
-                        parameters.callback(nullptr);
+                        callCallbacks(parameters, nullptr);
                     } else {
                         QVector<Error *> errors;
                         Error *error;
@@ -277,32 +296,30 @@ void Requester::readReply()
                             error->intCode = 3;
                             errors.append(new Error(*error));
                         }
-                        parameters.callback(static_cast<void *>(&errors));
+                        callCallbacks(parameters, reinterpret_cast<void *>(&errors));
                     }
                     break;
                 }
             case GetConsent:
             case GetHarvest:
                 {
-                    parameters.callback(reinterpret_cast<void *>(new QJsonDocument(QJsonDocument::fromJson(ba))));
+                    callCallbacks(parameters, reinterpret_cast<void *>(new QJsonDocument(QJsonDocument::fromJson(ba))));
                     break;
                 }
             case GetAuthorizedApp:
                 {
                     QVector<AuthorizedApp *> apps = unmarshalMultiple<AuthorizedApp>(QJsonDocument::fromJson(ba).array());
-                    parameters.callback(static_cast<void *>(&apps));
+                    callCallbacks(parameters, reinterpret_cast<void *>(&apps));
                     break;
                 }
             case GetConnections:
                 {
                     QVector<Connection *> connections = unmarshalMultiple<Connection>(QJsonDocument::fromJson(ba).array());
-                    parameters.callback(static_cast<void *>(&connections));
+                    callCallbacks(parameters, reinterpret_cast<void *>(&connections));
                     break;
                 }
         }
         currentRequestsNumber--;
-
-        if (requestsToCheck > 0) requestsToCheck--;
     }
     finishWaiter.wakeOne();
 }
@@ -404,16 +421,39 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *
 
 void Requester::requestApi(const RequestParameters &parameters)
 {
-    requestQueue.enqueue(parameters);
-    requestWaiter.wakeOne();
+    if (!requestsCallbacks.contains(parameters)) {
+        requestQueue.enqueue(parameters);
+    }
+    requestsCallbacks[parameters].append(parameters.callback);
+    requestWaiter.wakeAll();
 }
 
-void Requester::removeImageRequests()
+void Requester::callCallbacks(const RequestParameters& parameters, void *data)
 {
-    requestsToCheck = currentRequestsNumber;
+    QVector<Callback> callbacks = requestsCallbacks[parameters];
+    requestsCallbacks.remove(parameters);
+    for (int i = 0 ; i < callbacks.size() ; i++) {
+        callbacks[i](data);
+    }
+}
+
+void Requester::removeRequests(RequestTypes type)
+{
+    if (currentRequestsNumber != 0)
+        typesToCheck[type] = currentRequestsNumber;
     for (unsigned int i = requestQueue.size() ; i > 0 ; i--) {
         RequestParameters temp = requestQueue.dequeue();
-        if (temp.type != GetImage) requestQueue.enqueue(temp);
+        if (temp.type != type) requestQueue.enqueue(temp);
+    }
+}
+
+void Requester::removeRequestWithUrl(const QString& url)
+{
+    if (currentRequestsNumber != 0)
+        urlsTocheck[url] = currentRequestsNumber;
+    for (unsigned int i = requestQueue.size() ; i > 0 ; i--) {
+        RequestParameters temp = requestQueue.dequeue();
+        if (temp.url != url) requestQueue.enqueue(temp);
     }
 }
 
@@ -455,6 +495,18 @@ void const Requester::getGuilds(Callback callback)
         "",
         "",
         GetGuilds,
+        false});
+}
+void const Requester::getGuildMember(Callback callback, const Snowflake& guildId, const Snowflake& userId)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/guilds/" + guildId + "/members/" + userId,
+        "",        
+        "",
+        "",
+        "",
+        GetGuildMember,
         false});
 }
 

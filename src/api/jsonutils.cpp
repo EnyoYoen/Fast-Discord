@@ -561,7 +561,6 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
     Application *application = new Application;
     User *author = new User;
     MessageActivity *activity = new MessageActivity;
-    GuildMessageMember *member = new GuildMessageMember;
     Channel *thread = new Channel;
     MessageInteraction *interaction = new MessageInteraction;
     Call *call = new Call;
@@ -569,7 +568,6 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
     unmarshal<Application>(jsonObj, "application", &application);
     unmarshal<User>(jsonObj, "author", &author);
     unmarshal<MessageActivity>(jsonObj, "activity", &activity);
-    unmarshal<GuildMessageMember>(jsonObj, "member", &member);
     unmarshal<Channel>(jsonObj, "thread", &thread);
     unmarshal<MessageInteraction>(jsonObj, "interaction", &interaction);
     unmarshal<Call>(jsonObj, "call", &call);
@@ -578,7 +576,6 @@ Message *getPartialMessage(QJsonObject jsonObj, const QString& key)
         *author,
         application,
         activity,
-        member,
         nullptr,
         thread,
         interaction,
@@ -622,7 +619,6 @@ void unmarshal<Message>(const QJsonObject& jsonObj, Message **object)
     Application *application = new Application;
     User *author = new User;
     MessageActivity *activity = new MessageActivity;
-    GuildMessageMember *member = new GuildMessageMember;
     Channel *thread = new Channel;
     MessageInteraction *interaction = new MessageInteraction;
     Call *call = new Call;
@@ -630,7 +626,6 @@ void unmarshal<Message>(const QJsonObject& jsonObj, Message **object)
     unmarshal<Application>(jsonObj, "application", &application);
     unmarshal<User>(jsonObj, "author", &author);
     unmarshal<MessageActivity>(jsonObj, "activity", &activity);
-    unmarshal<GuildMessageMember>(jsonObj, "member", &member);
     unmarshal<Channel>(jsonObj, "thread", &thread);
     unmarshal<MessageInteraction>(jsonObj, "interaction", &interaction);
     unmarshal<Call>(jsonObj, "call", &call);
@@ -639,7 +634,6 @@ void unmarshal<Message>(const QJsonObject& jsonObj, Message **object)
         *author,
         application,
         activity,
-        member,
         getPartialMessage(jsonObj, "referenced_message"),
         thread,
         interaction,
@@ -964,7 +958,6 @@ void unmarshal<Guild>(const QJsonObject& jsonObj, Guild **object)
         welcomeScreen,
         getStringsFromJson(jsonObj["guild_features"].toArray()),
         unmarshalMultiple<VoiceState>(jsonObj["voice_states"].toArray()),
-        unmarshalMultiple<GuildMember>(jsonObj["members"].toArray()),
         unmarshalMultiple<Channel>(jsonObj["channels"].toArray()),
         unmarshalMultiple<Channel>(jsonObj["threads"].toArray()),
         nullptr,

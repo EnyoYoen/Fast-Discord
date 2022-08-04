@@ -9,6 +9,109 @@
 
 namespace Ui {
 
+class SendMessageButton : public Widget
+{
+    Q_OBJECT
+public:
+    SendMessageButton(QWidget *parent)
+        : Widget(parent)
+    {
+        QHBoxLayout *layout = new QHBoxLayout(this);
+        iconContainer = new Widget(this);
+        iconContainer->setFixedSize(Settings::scale(20), Settings::scale(22));
+        layout->setContentsMargins(0, 0, 0, 0);
+        QPixmap img("res/images/svg/send-message-icon.svg");
+        QPainter qp(&img);
+        qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveMuted]);
+        qp.end();
+        iconContainer->setPixmap(img);
+        layout->addWidget(iconContainer, 0, Qt::AlignCenter);
+        this->setFixedSize(Settings::scale(44), Settings::scale(44));
+        this->setCursor(Qt::CursorShape::ForbiddenCursor);
+    }
+
+    void lock(bool lockedp)
+    {
+        if (locked != lockedp) {
+            locked = lockedp;
+            if (locked) {
+                QPixmap img("res/images/svg/send-message-icon.svg");
+                QPainter qp(&img);
+                qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+                qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveMuted]);
+                qp.end();
+                iconContainer->setPixmap(img);
+                this->setCursor(Qt::CursorShape::ForbiddenCursor);
+            } else {
+                QPixmap img("res/images/svg/send-message-icon.svg");
+                QPainter qp(&img);
+                qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+                qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
+                qp.end();
+                iconContainer->setPixmap(img);
+                this->setCursor(Qt::CursorShape::PointingHandCursor);
+            }
+        }
+    }
+
+signals:
+    void clicked();
+
+private:
+    void mouseReleaseEvent(QMouseEvent *)
+    {
+        if (!locked) {
+            QPixmap img("res/images/svg/send-message-icon.svg");
+            QPainter qp(&img);
+            qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
+            qp.end();
+            iconContainer->setPixmap(img);
+            emit clicked();
+        }
+    }
+
+    void mousePressEvent(QMouseEvent *)
+    {
+        if (!locked) {
+            QPixmap img("res/images/svg/send-message-icon.svg");
+            QPainter qp(&img);
+            qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveActive]);
+            qp.end();
+            iconContainer->setPixmap(img);
+        }
+    }
+
+    void enterEvent(QEvent *)
+    {
+        if (!locked) {
+            QPixmap img("res/images/svg/send-message-icon.svg");
+            QPainter qp(&img);
+            qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
+            qp.end();
+            iconContainer->setPixmap(img);
+        }
+    }
+
+    void leaveEvent(QEvent *)
+    {
+        if (!locked) {
+            QPixmap img("res/images/svg/send-message-icon.svg");
+            QPainter qp(&img);
+            qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
+            qp.end();
+            iconContainer->setPixmap(img);
+        }
+    }
+
+    Widget *iconContainer;
+    bool locked = true;
+};
+
 RightColumn::RightColumn(Api::RessourceManager *rmp, QWidget *parent)
     : Widget(parent)
 {
@@ -76,7 +179,8 @@ void const RightColumn::setUserTyping(const Api::User *user)
 
 void RightColumn::clean()
 {
-    rm->requester->removeImageRequests();
+    rm->requester->removeRequests(Api::RequestTypes::GetImage);
+    rm->requester->removeRequests(Api::RequestTypes::GetGuildMember);
 
     if (messagesLayout != nullptr) {
         messagesLayout->removeItem(messagesLayout->itemAt(1));
@@ -115,7 +219,8 @@ void RightColumn::openPrivateChannel(const QString& channelName, const Api::Snow
 void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& channelName, int type, const QVector<Api::Snowflake>& recipientIds)
 {
     if (type != Api::GuildVoice) {
-        rm->requester->removeImageRequests();
+        rm->requester->removeRequests(Api::RequestTypes::GetImage);
+        rm->requester->removeRequests(Api::RequestTypes::GetGuildMember);
         messageArea->clear();
         if (inputBox != nullptr)
             inputBox->deleteLater();
@@ -164,6 +269,32 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         inputLayout->addWidget(fileLabel);
         inputLayout->setContentsMargins(Settings::scale(16), 0, Settings::scale(16), 0);
         inputLayout->setSpacing(0);
+
+        if (Settings::showSendMessageButton) {
+            SendMessageButton *sendButton = new SendMessageButton(inputBox);
+            Widget *separator = new Widget(inputBox);
+            separator->setBackgroundColor(Settings::BackgroundModifierAccent);
+            separator->setFixedSize(1, 28);
+            inputLayout->addSpacing(8);
+            inputLayout->addWidget(separator);
+            inputLayout->addWidget(sendButton);
+
+            QObject::connect(sendButton, &SendMessageButton::clicked, [this, textInput](){
+                QString content = textInput->toPlainText().trimmed();
+                this->sendMessage(content);
+                if (!content.isEmpty()) {
+                    textInput->clear();
+                }
+            });
+
+            QObject::connect(textInput, &MessageTextInput::textChanged, [this, textInput, sendButton](){
+                QString content = textInput->toPlainText();
+                if (content.isEmpty())
+                    sendButton->lock(true);
+                else
+                    sendButton->lock(false);
+            });
+        }
 
         // Style the input box
         inputBox->setFixedHeight(Settings::scale(44));
@@ -309,3 +440,4 @@ void RightColumn::updateTheme()
 
 } // namespace Ui
 
+#include "rightcolumn.moc"

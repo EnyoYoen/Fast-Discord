@@ -96,6 +96,11 @@ public:
         VoiceActivity,
         PushToTalk
     };
+    enum class RoleColors : quint8 {
+        InName,
+        NextToName,
+        NotShown
+    };
 
     // Has to be called before using settings
     static void initSettings(Api::RessourceManager *rm, QString token);
@@ -103,7 +108,6 @@ public:
     
     static void setTheme(Theme theme);
     static void setSaturation(int saturation);
-    static void applySaturationToCustom(bool applyToCustom);
 
 
     static QMap<ColorEnum, QColor> colors;
@@ -118,12 +122,14 @@ public:
     static int messageGroupSpace;
     static int lastMessageGroupSpace;
     static AnimateStickers animateStickers;
+    static RoleColors roleColors;
     static bool reducedMotion;
     static bool playGifs;
     static bool animatedEmoji;
     static bool showSendMessageButton;
     static bool playbackAndTtsCommand;
     static bool compactModeEnabled;
+    static bool customColorSaturation;
 
     static VoiceInputMode voiceInputMode;
     static int inputSensitivity;

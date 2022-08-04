@@ -22,6 +22,7 @@ public:
 
     void getGuilds(Callback callback);
     void getGuildMembers(Callback callback, Snowflake channelId);
+    void getGuildMember(Callback callback, const Snowflake& guildId, const Snowflake& userId);
     void getGuildChannel(Callback callback, const Snowflake& guildId, const Snowflake& id);
     void getGuildChannels(Callback callback, const Snowflake& id);
     void getPrivateChannel(Callback callback, const Snowflake& id);
@@ -74,6 +75,8 @@ private:
     QVector<Presence *>       presences;
 
     QVector<Snowflake> openedDMChannels;
+    QMap<Snowflake, QVector<GuildMember *>> guildsMembers;
+    QMap<Snowflake, QMap<QString, qint32>>  groupsCount;
     QMap<Snowflake, QMap<Snowflake, QVector<QVector<int>>>> openedGuildsChannels;
     //   ^ guild ID  ^ channels  ^ channel ID  ^ indexes of members that we have
 

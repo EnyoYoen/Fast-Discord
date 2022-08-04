@@ -24,6 +24,7 @@ typedef std::function<void(void *)> Callback;
 enum RequestTypes {
     // We need the response data
     GetGuilds,
+    GetGuildMember,
     GetGuildChannels,
     GetPrivateChannels,
     GetMessages,
@@ -80,6 +81,16 @@ struct RequestParameters
         };
     }
 
+    bool operator==(const RequestParameters& other) const {
+        return (url == other.url
+            && postDatas == other.postDatas
+            && customRequest == other.customRequest
+            && fileName == other.fileName
+            && outputFile == other.outputFile
+            && type == other.type
+            && json == other.json);
+    }
+
     Callback callback;
     const QString url;
     const QString postDatas;
@@ -98,6 +109,55 @@ enum RequestMethods {
     Patch
 };
 
+template <typename K, typename V>
+class Map {
+public:
+    Map() {
+
+    }
+
+    V& operator[](const K& key)
+    {
+        for (int i = 0 ; i < keys.size() ; i++) {
+            if (key == keys[i])
+                return values[i];
+        }
+
+        keys.append(key);
+        values.append(V());
+        return values[values.size() - 1];
+    }
+
+    int size()
+    {
+        return keys.size();
+    }
+
+    bool contains(const K& key)
+    {
+        for (int i = 0 ; i < keys.size() ; i++) {
+            if (key == keys[i]) 
+                return true;
+        }
+        return false;
+    }
+
+    void remove(const K& key)
+    {
+        for (int i = 0 ; i < keys.size() ; i++) {
+            if (key == keys[i]) {
+                keys.remove(i);
+                values.remove(i);
+                break;
+            }
+        }
+    }
+
+private:
+    QVector<K> keys;
+    QVector<V> values;
+};
+
 // Class to request the API
 class Requester : public QObject
 {
@@ -108,10 +168,12 @@ public:
 
     // Function that request the API
     void requestApi(const RequestParameters& parameters);
-    void removeImageRequests();
+    void removeRequests(RequestTypes type);
+    void removeRequestWithUrl(const QString& url);
 
     // Functions that request the API to retrieve data
     void const getGuilds(Callback callback);
+    void const getGuildMember(Callback callback, const Snowflake& guildId, const Snowflake& userId);
     void const getGuildChannels(Callback callback, const Snowflake& id);
     void const getPrivateChannels(Callback callback);
     void const getMessages(Callback callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit);
@@ -169,15 +231,17 @@ private:
     QWaitCondition requestWaiter;               // The loop waits when there is no request
     QWaitCondition finishWaiter;                // The loop waits when there is no request
     QThread *loop;                              // Request loop
+    QMap<QString, int> urlsTocheck;
+    QMap<RequestTypes, int> typesToCheck;
+    Map<RequestParameters, QVector<Callback>> requestsCallbacks;
     QString token;                              // Authorization token
     QString emailToken;
     double rateLimitEnd;                        // Unix time that represents the moment of the end of the rate limit
-    unsigned int requestsToCheck;               // The number of requests that we have to check when we need to remove
-                                                // callbacks for image requests
     int currentRequestsNumber;                  // The number of requests that are processed at the moment
     bool stopped;                               // Used to stop the request loop
 
     // The function that contains the request loop
+    void callCallbacks(const RequestParameters& parameters, void *data);
     void RequestLoop();
 };
 

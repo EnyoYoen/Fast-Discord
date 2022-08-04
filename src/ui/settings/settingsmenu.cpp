@@ -7,6 +7,7 @@
 #include "ui/settings/authorizedapps.h"
 #include "ui/settings/connections.h"
 #include "ui/settings/appearance.h"
+#include "ui/settings/accessibility.h"
 #include "ui/mainwindow.h"
 
 namespace Ui {
@@ -27,16 +28,24 @@ SettingsMenu::SettingsMenu(Api::RessourceManager *rmp, QWidget *parent)
     closeLayout->addWidget(new QWidget(closeContainer));
 
     scrollMenu = new ScrollMenu(this);
+    menu = new MyAccount(rm, this);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(scrollMenu);
-    layout->addWidget(new MyAccount(rm, this));
+    layout->addWidget(menu);
     layout->addWidget(closeContainer);
     
     QObject::connect(close, &CloseButton::clicked, [this](){emit closeClicked();});
     QObject::connect(scrollMenu, &ScrollMenu::buttonClicked, [this](MenuButton::ButtonType type){
-        if (menu != nullptr) {
+        if (menu != nullptr && (type == MenuButton::ButtonType::MyAccount
+                             || type == MenuButton::ButtonType::UserProfile
+                             || type == MenuButton::ButtonType::PrivacySafety
+                             || type == MenuButton::ButtonType::AuthorizedApps
+                             || type == MenuButton::ButtonType::Connections
+                             || type == MenuButton::ButtonType::Appearance
+                             || type == MenuButton::ButtonType::Accessibility)) {
             menu->deleteLater();
+            menu = nullptr;
         }
 
         switch (type) {
@@ -57,6 +66,9 @@ SettingsMenu::SettingsMenu(Api::RessourceManager *rmp, QWidget *parent)
                 break;
             case MenuButton::ButtonType::Appearance:
                 menu = new Appearance(rm, this);
+                break;
+            case MenuButton::ButtonType::Accessibility:
+                menu = new Accessibility(rm, this);
                 break;
         }
 

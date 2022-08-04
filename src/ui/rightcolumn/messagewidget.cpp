@@ -274,6 +274,59 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         username->setTextInteractionFlags(Qt::TextSelectableByMouse);
         username->setCursor(QCursor(Qt::PointingHandCursor));
         username->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name() + "; background-color: none");
+        if (Settings::roleColors != Settings::RoleColors::NotShown) {
+            Api::Snowflake channelId = ref->channelId;
+            Api::Snowflake authorId = ref->author.id;
+            rm->getGuilds([this, channelId, authorId, replyLayout](void *guildsPtr){
+                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                Api::Snowflake guildId = 0;
+                for (int i = 0 ; i < guilds.size() ; i++) {
+                    QVector<Api::Channel *> channels = guilds[i]->channels;
+                    for (int j = 0 ; j < channels.size() ; j++) {
+                        if (channelId == channels[j]->id) guildId = guilds[i]->id;
+                    }
+                }
+                if (guildId != 0) {
+                    rm->getGuildMember([this, guilds, guildId, replyLayout](void *guildMemberPtr){
+                        QVector<Api::Snowflake> rolesIds = reinterpret_cast<Api::GuildMember *>(guildMemberPtr)->roles;
+                        for (int i = 0 ; i < guilds.size() ; i++) {
+                            if (guilds[i]->id == guildId) {
+                                QVector<Api::Role *> guildRoles = guilds[i]->roles;
+                                Api::Role *highestRole = nullptr;
+                                for (int j = 0 ; j < guildRoles.size() ; j++) {
+                                    for (int k = 0 ; k < rolesIds.size() ; k++) {
+                                        if (guildRoles[j]->id == QString::number(rolesIds[k].value) && (highestRole == nullptr || highestRole->position < guildRoles[j]->position))
+                                            highestRole = guildRoles[j];
+                                    }
+                                }
+                                if (highestRole) {
+                                    qint32 colorInt = highestRole->color;
+                                    QColor color((colorInt & 0x00FF0000) >> 16, (colorInt & 0x0000FF00) >> 8, (colorInt & 0x000000FF));
+                                    if (Settings::roleColors == Settings::RoleColors::NextToName) {
+                                        Widget *colorNameContainer = new Widget(this);
+                                        colorNameContainer->setBackgroundColor(Settings::BackgroundSecondaryAlt);
+                                        colorNameContainer->setBorderRadius(Settings::scale(5));
+                                        colorNameContainer->setFixedSize(Settings::scale(18), Settings::scale(18));
+                                        Widget *colorName = new Widget(colorNameContainer);
+                                        colorName->setBackgroundColor(QColor::fromHsv(color.hue(), color.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), color.value()));
+                                        colorName->setBorderColor(Settings::Black);
+                                        colorName->setBorderSize(Settings::scale(2));
+                                        colorName->setBorderRadius(Settings::scale(6));
+                                        colorName->setFixedSize(Settings::scale(12), Settings::scale(12));
+                                        colorName->move(Settings::scale(3), Settings::scale(3));
+                                        replyLayout->addWidget(colorNameContainer);
+                                        replyLayout->addSpacing(Settings::scale(4));
+                                    } else {
+                                        username->setStyleSheet("color:" + QColor::fromHsv(color.hue(), color.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), color.value()).name() + "; background-color: none");
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }, guildId, authorId);
+                }
+            });
+        }
 
         replyContent = new Label(ref->content.replace('\n', "  "), nullptr);
         replyContent->setFont(font);
@@ -321,8 +374,61 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         name->setFont(font);
         name->setTextInteractionFlags(Qt::TextSelectableByMouse);
         name->setCursor(QCursor(Qt::PointingHandCursor));
-        name->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name() + "; background-color: none");
         name->setCursor(QCursor(Qt::IBeamCursor));
+        name->setStyleSheet("color:" + Settings::colors[Settings::HeaderPrimary].name() + "; background-color: none");
+        if (Settings::roleColors != Settings::RoleColors::NotShown) {
+            Api::Snowflake channelId = message->channelId;
+            Api::Snowflake authorId = message->author.id;
+            rm->getGuilds([this, channelId, authorId, infosLayout](void *guildsPtr){
+                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                Api::Snowflake guildId = 0;
+                for (int i = 0 ; i < guilds.size() ; i++) {
+                    QVector<Api::Channel *> channels = guilds[i]->channels;
+                    for (int j = 0 ; j < channels.size() ; j++) {
+                        if (channelId == channels[j]->id) guildId = guilds[i]->id;
+                    }
+                }
+                if (guildId != 0) {
+                    rm->getGuildMember([this, guilds, guildId, infosLayout](void *guildMemberPtr){
+                        QVector<Api::Snowflake> rolesIds = reinterpret_cast<Api::GuildMember *>(guildMemberPtr)->roles;
+                        for (int i = 0 ; i < guilds.size() ; i++) {
+                            if (guilds[i]->id == guildId) {
+                                QVector<Api::Role *> guildRoles = guilds[i]->roles;
+                                Api::Role *highestRole = nullptr;
+                                for (int j = 0 ; j < guildRoles.size() ; j++) {
+                                    for (int k = 0 ; k < rolesIds.size() ; k++) {
+                                        if (guildRoles[j]->id == QString::number(rolesIds[k].value) && (highestRole == nullptr || highestRole->position < guildRoles[j]->position))
+                                            highestRole = guildRoles[j];
+                                    }
+                                }
+                                if (highestRole) {
+                                    qint32 colorInt = highestRole->color;
+                                    QColor color((colorInt & 0x00FF0000) >> 16, (colorInt & 0x0000FF00) >> 8, (colorInt & 0x000000FF));
+                                    if (Settings::roleColors == Settings::RoleColors::NextToName) {
+                                        Widget *colorNameContainer = new Widget(this);
+                                        colorNameContainer->setBackgroundColor(Settings::BackgroundSecondaryAlt);
+                                        colorNameContainer->setBorderRadius(Settings::scale(5));
+                                        colorNameContainer->setFixedSize(Settings::scale(20), Settings::scale(20));
+                                        Widget *colorName = new Widget(colorNameContainer);
+                                        colorName->setBackgroundColor(QColor::fromHsv(color.hue(), color.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), color.value()));
+                                        colorName->setBorderColor(Settings::Black);
+                                        colorName->setBorderSize(Settings::scale(2));
+                                        colorName->setBorderRadius(Settings::scale(7));
+                                        colorName->setFixedSize(Settings::scale(14), Settings::scale(14));
+                                        colorName->move(Settings::scale(3), Settings::scale(3));
+                                        infosLayout->addWidget(colorNameContainer);
+                                        infosLayout->addSpacing(Settings::scale(4));
+                                    } else {
+                                        name->setStyleSheet("color:" + QColor::fromHsv(color.hue(), color.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), color.value()).name() + "; background-color: none");
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }, guildId, authorId);
+                }
+            });
+        }
         date = new Label(processTimestamp(dateTime), messageInfos);
         font.setPixelSize(Settings::scale(Settings::fontScaling - 4));
         date->setTextColor(Settings::TextMuted);

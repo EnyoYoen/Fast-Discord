@@ -51,7 +51,6 @@ struct Guild
     WelcomeScreen            *welcomeScreen;
     QVector<QString>          guildFeatures;
     QVector<VoiceState *>     voiceStates;
-    QVector<GuildMember *>    members;
     QVector<Channel *>        channels;
     QVector<Channel *>        threads;
     void                     *presences; // TODO

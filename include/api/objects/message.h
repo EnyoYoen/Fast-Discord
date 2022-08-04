@@ -70,7 +70,7 @@ struct MessageInteraction
     GuildMember *member;
     QString      name;
     Snowflake    id;
-    qint32          type;
+    qint32       type;
 };
 
 struct SelectOption
@@ -120,7 +120,6 @@ struct Message
     {
         delete application;
         delete activity;
-        delete member;
         delete referencedMessage;
         delete thread;
         delete interaction;
@@ -129,7 +128,6 @@ struct Message
     User                         author;
     Application                 *application;
     MessageActivity             *activity;
-    GuildMessageMember          *member;
     Message                     *referencedMessage;
     Channel                     *thread;
     MessageInteraction          *interaction;

@@ -11,6 +11,7 @@ class MemberWidget : public Widget
     Q_OBJECT
 public:
     MemberWidget(Api::RessourceManager *rm, Api::User *user, QColor color, QWidget *parent);
+    ~MemberWidget();
     void setStatus(const QString& status);
 
     Api::User *user;
@@ -27,6 +28,7 @@ private:
     void setIcon(const QString& iconFileName);
 
     Api::RessourceManager *rm;
+    QString avatarUrl;
 
     QHBoxLayout         *mainLayout;
     RoundedImage        *icon;

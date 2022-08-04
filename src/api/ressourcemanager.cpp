@@ -178,7 +178,6 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
     } else if (eventName == "CHANNEL_UNREAD_UPDATE") {
         emit unreadUpdateReceived(Snowflake(data["guild_id"].toVariant().toULongLong()));
     } else if (eventName == "MESSAGE_CREATE") {
-        // We received a message
         Api::Message *message;
         Api::unmarshal<Api::Message>(data.toObject(), &message);
         if (messages.find(message->channelId) != messages.end())
@@ -191,6 +190,23 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
     } else if (eventName == "GUILD_MEMBER_LIST_UPDATE") {
         Api::GuildMemberGateway *members;
         Api::unmarshal<Api::GuildMemberGateway>(data.toObject(), &members);
+
+        for (int i = 0 ; i < members->structs.size() ; i++) {
+            if (members->ops[i] == Api::GuildMemberOp::Sync) {
+                Api::GuildMemberSync *sync = reinterpret_cast<Api::GuildMemberSync *>(members->structs[i]);
+                for (int j = 0 ; j < sync->groupsMembers.size() ; j++) {
+                    guildsMembers[members->guildId].append(sync->groupsMembers.values()[j]);
+                }
+                groupsCount[members->guildId] = sync->groupsCount;
+            } else if (members->ops[i] == Api::GuildMemberOp::Update) {
+
+            } else if (members->ops[i] == Api::GuildMemberOp::Delete) {
+
+            } else {
+
+            }
+        }
+
         emit memberUpdateReceived(*members);
     }
 }
@@ -241,6 +257,30 @@ void RessourceManager::getGuildMembers(Callback callback, Snowflake channelId)
             gw->sendGuildChannelOpened(channels, it.key(), false, false, false);
             break;
         }
+    }
+}
+
+void RessourceManager::getGuildMember(Callback callback, const Snowflake& guildId, const Snowflake& userId)
+{
+    if (guildsMembers.keys().contains(guildId)) {
+        QVector<Api::GuildMember *> members = guildsMembers[guildId];
+        int index = -1;
+        for (int i = 0 ; i < members.size() ; i++) {
+            if (members[i]->user->id == userId) index = i;
+        }
+        if (index != -1) {
+            callback(reinterpret_cast<void *>(members[index]));
+        } else {
+            requester->getGuildMember([this, callback, guildId, userId](void *guildMemberPtr){
+                guildsMembers[guildId].append(reinterpret_cast<GuildMember *>(guildMemberPtr));
+                callback(guildMemberPtr);
+            }, guildId, userId);
+        }
+    } else {
+        requester->getGuildMember([this, callback, guildId, userId](void *guildMemberPtr){
+            guildsMembers[guildId].append(reinterpret_cast<GuildMember *>(guildMemberPtr));
+            callback(guildMemberPtr);
+        }, guildId, userId);
     }
 }
 
