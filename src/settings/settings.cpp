@@ -181,7 +181,6 @@ void Settings::initSettings(Api::RessourceManager *rm, QString tokenp)
 
 
     });
-
 }
 
 void Settings::saveSettings()
@@ -204,6 +203,32 @@ void Settings::saveSettings()
     settings.setValue("scaleFactor"          , newScaleFactor);
     settings.setValue("customColorSaturation", customColorSaturation);
     settings.endGroup();
+}
+
+void Settings::changeToken(QString oldToken, QString newToken)
+{
+    QSettings settings("Fast-Discord", "config");
+
+    settings.beginGroup("Accounts");
+    QStringList keys = settings.allKeys();
+    for (int i = 0 ; i < keys.size() ; i++) {
+        if (settings.value(keys[i]) == oldToken) {
+            settings.setValue(keys[i], newToken);
+            break;
+        }
+    }
+    settings.endGroup();
+    
+    settings.beginGroup(newToken);
+    QSettings oldSettings("Fast-Discord", "config");
+    oldSettings.beginGroup(oldToken);
+    keys = oldSettings.allKeys();
+    for (int i = 0 ; i < keys.size() ; i++) {
+        settings.setValue(keys[i], oldSettings.value(keys[i]));
+    }
+    oldSettings.endGroup();
+    settings.endGroup();
+    settings.remove(oldToken);
 }
 
 void Settings::setTheme(Settings::Theme themep)

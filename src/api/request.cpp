@@ -34,8 +34,12 @@ Requester::~Requester()
 {
     // Stop the request loop
     stopped = true;
-    loop->wait();
+    disconnect(reply, &QNetworkReply::finished, this, &Requester::readReply);
+    reply->deleteLater();
+    finishWaiter.wakeAll();
     requestWaiter.wakeAll();
+    loop->wait();
+    loop->deleteLater();
 }
 
 void const Requester::writeFile()
@@ -48,6 +52,8 @@ void const Requester::writeFile()
 
 void Requester::readReply()
 {
+    finishWaiter.wakeOne();
+    
     RequestParameters parameters = requestQueue.dequeue();
     
     bool returnAfter = false;
@@ -88,7 +94,9 @@ void Requester::readReply()
 
     QByteArray ba = reply->readAll();
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-    if (statusCode.toInt() == 429) { // We are rate limited
+    if (statusCode.toInt() == 401 || statusCode.toInt() == 403) {
+        emit invalidToken();
+    } else if (statusCode.toInt() == 429) { // We are rate limited
         // Set the end of the rate limit
         rateLimitEnd = QJsonDocument::fromJson(ba)["retry_after"].toDouble();
     } else {
@@ -331,7 +339,6 @@ void Requester::readReply()
         }
         currentRequestsNumber--;
     }
-    finishWaiter.wakeOne();
 }
 
 void Requester::RequestLoop()
@@ -424,7 +431,7 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *
             break;
     }
 
-    connect(reply, SIGNAL(finished()), this, SLOT(readReply()));
+    connect(reply, &QNetworkReply::finished, this, &Requester::readReply);
     if (requestQueue.front().type == GetFile)
         connect(reply, SIGNAL(readyRead()), this, SLOT(writeFile()));
 }

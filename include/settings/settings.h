@@ -105,6 +105,7 @@ public:
     // Has to be called before using settings
     static void initSettings(Api::RessourceManager *rm, QString token);
     static void saveSettings();
+    static void changeToken(QString oldToken, QString newToken);
     
     static void setTheme(Theme theme);
     static void setSaturation(int saturation);

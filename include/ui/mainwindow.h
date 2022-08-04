@@ -27,6 +27,7 @@ signals:
     void clientAndSettingsReceived();
 
 private slots:
+    void reinit();
     void openSettingsMenu();
     void closeSettingsMenu();
 
@@ -37,13 +38,14 @@ private:
     QString const getAccountToken();
 
     //All the widget that need to be accessed from different functions
-    QHBoxLayout  *mainLayout;
-    LeftColumn   *leftColumn;
-    MiddleColumn *middleColumn;
-    RightColumn  *rightColumn;
-    SettingsMenu *settings;
+    QHBoxLayout  *mainLayout = nullptr;
+    LeftColumn   *leftColumn = nullptr;
+    MiddleColumn *middleColumn = nullptr;
+    RightColumn  *rightColumn = nullptr;
+    SettingsMenu *settings = nullptr;
 
-    Api::RessourceManager *rm;           // Manage all the data we receive
+    Api::RessourceManager *rm = nullptr; // Manage all the data we receive
+    QString token;
 };
 
 } // namespace Ui

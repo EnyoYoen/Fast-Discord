@@ -213,6 +213,7 @@ public:
 
 signals:
     void requestEmit(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);
+    void invalidToken();
 
 private slots:
     void doRequest(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);
