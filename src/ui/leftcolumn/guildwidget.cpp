@@ -89,7 +89,7 @@ void GuildWidget::enterEvent(QEvent *)
     if (!clicked) {
         icon->setActive();
     }
-    if (pill->height() != Settings::scale(20)) pill->setFixedHeight(Settings::scale(20));
+    if (pill->height() != Settings::scale(40)) pill->setFixedHeight(Settings::scale(20));
 }
 
 void GuildWidget::leaveEvent(QEvent *)

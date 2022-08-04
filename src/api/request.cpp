@@ -49,23 +49,33 @@ void const Requester::writeFile()
 void Requester::readReply()
 {
     RequestParameters parameters = requestQueue.dequeue();
-    if (typesToCheck.size() != 0) {
-        if (typesToCheck.contains((RequestTypes)parameters.type)) {
-            typesToCheck[(RequestTypes)parameters.type]--;
-            if (typesToCheck[(RequestTypes)parameters.type] <= 0)
-                typesToCheck.remove((RequestTypes)parameters.type);
-            return;
+    
+    bool returnAfter = false;
+    if (typesToCheck.contains((RequestTypes)parameters.type))
+        returnAfter = true;
+    if (urlsTocheck.contains(parameters.url))
+        returnAfter = true;
+
+    if (urlsTocheck.size() > 0) {
+        QList<QString> urls = urlsTocheck.keys();
+        int size = urlsTocheck.size();
+        for (int i = 0 ; i < size ; i++) {
+            urlsTocheck[urls[i]]--;
+            if (urlsTocheck[urls[i]] <= 0)
+                urlsTocheck.remove(urls[i]);
         }
     }
-    if (urlsTocheck.size() != 0) {
-        qDebug() << urlsTocheck.keys() << parameters.url;
-        if (urlsTocheck.contains(parameters.url)) {
-            urlsTocheck[parameters.url]--;
-            if (urlsTocheck[parameters.url] <= 0)
-                urlsTocheck.remove(parameters.url);
-            return;
+    if (typesToCheck.size() > 0) {
+        QList<Api::RequestTypes> types = typesToCheck.keys();
+        int size = typesToCheck.size();
+        for (int i = 0 ; i < size ; i++) {
+            typesToCheck[types[i]]--;
+            if (typesToCheck[types[i]] <= 0)
+                typesToCheck.remove(types[i]);
         }
-    } 
+    }
+    if (returnAfter) return;
+
     if (parameters.outputFile != "" && parameters.type == GetImage) {
         QDir dir("cache/");
         if (!dir.exists()) dir.mkpath(".");
@@ -75,8 +85,8 @@ void Requester::readReply()
         file.write(reply->readAll());
         file.close();
     }
-    QByteArray ba = reply->readAll();
 
+    QByteArray ba = reply->readAll();
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     if (statusCode.toInt() == 429) { // We are rate limited
         // Set the end of the rate limit

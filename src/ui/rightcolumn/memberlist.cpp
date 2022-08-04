@@ -12,6 +12,7 @@ namespace Ui {
 MemberList::MemberList(Api::RessourceManager *rmp, const QVector<Api::Snowflake>& recipientIds, QWidget *parent)
     : QScrollArea()
 {
+    guildId = 0;
     emitScrollBarLow = true;
     shown = false;
     rm = rmp;
@@ -107,6 +108,7 @@ void MemberList::setMembers(Api::GuildMemberGateway members)
 {
     for (int i = 0 ; i < members.structs.size() ; i++) {
         if (members.ops[i] == Api::GuildMemberOp::Sync) {
+            guildId = members.guildId;
             rm->getGuilds([members, i, this](void *guildsPtr){
                 QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
                 for (int i = 0 ; i < guilds.size() ; i++) {
@@ -196,106 +198,110 @@ void MemberList::setMembers(Api::GuildMemberGateway members)
 
                 this->verticalScrollBar()->setValue(0);
             });
-        } else if (members.ops[i] == Api::GuildMemberOp::Update) {
-            Api::GuildMemberUpdate *update = reinterpret_cast<Api::GuildMemberUpdate *>(members.structs[i]);
-            QLayoutItem *item = layout->itemAt(update->index);
-            layout->removeItem(item);
-            item->widget()->deleteLater();
+        } else {
+            if (members.guildId != guildId) return;
 
-            if (update->memberOrGroup->member) {
-                Api::GuildMember *member = reinterpret_cast<Api::GuildMember *>(update->memberOrGroup->content);
-                rm->getGuilds([this, update, members, member](void *guildsPtr){
-                    QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
-                    QVector<Api::Snowflake> rolesIds = member->roles;
-                    for (int i = 0 ; i < guilds.size() ; i++) {
-                        if (guilds[i]->id == members.guildId) {
-                            QVector<Api::Role *> guildRoles = guilds[i]->roles;
-                            Api::Role *highestRole = nullptr;
-                            for (int j = 0 ; j < guildRoles.size() ; j++) {
-                                for (int k = 0 ; k < rolesIds.size() ; k++) {
-                                    if (guildRoles[j]->id == QString::number(rolesIds[k].value) && (highestRole == nullptr || highestRole->position < guildRoles[j]->position))
-                                        highestRole = guildRoles[j];
+            if (members.ops[i] == Api::GuildMemberOp::Update) {
+                Api::GuildMemberUpdate *update = reinterpret_cast<Api::GuildMemberUpdate *>(members.structs[i]);
+                QLayoutItem *item = layout->itemAt(update->index);
+                layout->removeItem(item);
+                item->widget()->deleteLater();
+
+                if (update->memberOrGroup->member) {
+                    Api::GuildMember *member = reinterpret_cast<Api::GuildMember *>(update->memberOrGroup->content);
+                    rm->getGuilds([this, update, members, member](void *guildsPtr){
+                        QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                        QVector<Api::Snowflake> rolesIds = member->roles;
+                        for (int i = 0 ; i < guilds.size() ; i++) {
+                            if (guilds[i]->id == members.guildId) {
+                                QVector<Api::Role *> guildRoles = guilds[i]->roles;
+                                Api::Role *highestRole = nullptr;
+                                for (int j = 0 ; j < guildRoles.size() ; j++) {
+                                    for (int k = 0 ; k < rolesIds.size() ; k++) {
+                                        if (guildRoles[j]->id == QString::number(rolesIds[k].value) && (highestRole == nullptr || highestRole->position < guildRoles[j]->position))
+                                            highestRole = guildRoles[j];
+                                    }
                                 }
+                                if (highestRole) {
+                                    qint32 colorInt = highestRole->color;
+                                    QColor colorTmp((colorInt & 0x00FF0000) >> 16, (colorInt & 0x0000FF00) >> 8, (colorInt & 0x000000FF));
+                                    MemberWidget *memberWidget = new MemberWidget(rm, member->user, (members.guildId == 0 ? QColor() : QColor::fromHsv(colorTmp.hue(), colorTmp.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), colorTmp.value())), this);
+                                    memberWidget->setStatus(member->presence->status);
+                                    layout->insertWidget(update->index, memberWidget);
+                                }
+                                break;
                             }
-                            if (highestRole) {
-                                qint32 colorInt = highestRole->color;
-                                QColor colorTmp((colorInt & 0x00FF0000) >> 16, (colorInt & 0x0000FF00) >> 8, (colorInt & 0x000000FF));
-                                MemberWidget *memberWidget = new MemberWidget(rm, member->user, (members.guildId == 0 ? QColor() : QColor::fromHsv(colorTmp.hue(), colorTmp.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), colorTmp.value())), this);
-                                memberWidget->setStatus(member->presence->status);
-                                layout->insertWidget(update->index, memberWidget);
-                            }
+                        }
+                    });
+                } else {
+                    Api::GuildGroup *group = reinterpret_cast<Api::GuildGroup *>(update->memberOrGroup->content);
+
+                    QColor color;
+                    bool found = false;
+                    for (int i = 0 ; i < roles.size() ; i++) {
+                        if (group->id == roles[i]->id) {
+                            color = QColor((roles[i]->color & 0x00FF0000) >> 16, (roles[i]->color & 0x0000FF00) >> 8, roles[i]->color & 0x000000FF);
+                            color = QColor::fromHsv(color.hue(), color.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), color.value());
+                            layout->insertWidget(update->index, createTitle(roles[i]->name.toUpper() + " - " + QString::number(group->count)), 0, Qt::AlignLeft);
+                            found = true;
                             break;
                         }
                     }
-                });
-            } else {
-                Api::GuildGroup *group = reinterpret_cast<Api::GuildGroup *>(update->memberOrGroup->content);
-
-                QColor color;
-                bool found = false;
-                for (int i = 0 ; i < roles.size() ; i++) {
-                    if (group->id == roles[i]->id) {
-                        color = QColor((roles[i]->color & 0x00FF0000) >> 16, (roles[i]->color & 0x0000FF00) >> 8, roles[i]->color & 0x000000FF);
-                        color = QColor::fromHsv(color.hue(), color.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), color.value());
-                        layout->insertWidget(update->index, createTitle(roles[i]->name.toUpper() + " - " + QString::number(group->count)), 0, Qt::AlignLeft);
-                        found = true;
-                        break;
+                    if (!found) {
+                        layout->insertWidget(update->index, createTitle(group->id.toUpper() + " - " + QString::number(group->count)), 0, Qt::AlignLeft);
                     }
                 }
-                if (!found) {
-                    layout->insertWidget(update->index, createTitle(group->id.toUpper() + " - " + QString::number(group->count)), 0, Qt::AlignLeft);
-                }
-            }
-        } else if (members.ops[i] == Api::GuildMemberOp::Delete) {
-            Api::GuildMemberDelete *deletes = reinterpret_cast<Api::GuildMemberDelete *>(members.structs[i]);
-            QLayoutItem *item = layout->itemAt(deletes->index);
-            layout->removeItem(item);
-            item->widget()->deleteLater();
-        } else if (members.ops[i] == Api::GuildMemberOp::Insert) {
-            Api::GuildMemberInsert *insert = reinterpret_cast<Api::GuildMemberInsert *>(members.structs[i]);
+            } else if (members.ops[i] == Api::GuildMemberOp::Delete) {
+                Api::GuildMemberDelete *deletes = reinterpret_cast<Api::GuildMemberDelete *>(members.structs[i]);
+                QLayoutItem *item = layout->itemAt(deletes->index);
+                layout->removeItem(item);
+                item->widget()->deleteLater();
+            } else if (members.ops[i] == Api::GuildMemberOp::Insert) {
+                Api::GuildMemberInsert *insert = reinterpret_cast<Api::GuildMemberInsert *>(members.structs[i]);
 
-            if (insert->memberOrGroup->member) {
-                Api::GuildMember *member = reinterpret_cast<Api::GuildMember *>(insert->memberOrGroup->content);
-                rm->getGuilds([this, insert, members, member](void *guildsPtr){
-                    QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
-                    QVector<Api::Snowflake> rolesIds = member->roles;
-                    for (int i = 0 ; i < guilds.size() ; i++) {
-                        if (guilds[i]->id == members.guildId) {
-                            QVector<Api::Role *> guildRoles = guilds[i]->roles;
-                            Api::Role *highestRole = nullptr;
-                            for (int j = 0 ; j < guildRoles.size() ; j++) {
-                                for (int k = 0 ; k < rolesIds.size() ; k++) {
-                                    if (guildRoles[j]->id == QString::number(rolesIds[k].value) && (highestRole == nullptr || highestRole->position < guildRoles[j]->position))
-                                        highestRole = guildRoles[j];
+                if (insert->memberOrGroup->member) {
+                    Api::GuildMember *member = reinterpret_cast<Api::GuildMember *>(insert->memberOrGroup->content);
+                    rm->getGuilds([this, insert, members, member](void *guildsPtr){
+                        QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                        QVector<Api::Snowflake> rolesIds = member->roles;
+                        for (int i = 0 ; i < guilds.size() ; i++) {
+                            if (guilds[i]->id == members.guildId) {
+                                QVector<Api::Role *> guildRoles = guilds[i]->roles;
+                                Api::Role *highestRole = nullptr;
+                                for (int j = 0 ; j < guildRoles.size() ; j++) {
+                                    for (int k = 0 ; k < rolesIds.size() ; k++) {
+                                        if (guildRoles[j]->id == QString::number(rolesIds[k].value) && (highestRole == nullptr || highestRole->position < guildRoles[j]->position))
+                                            highestRole = guildRoles[j];
+                                    }
                                 }
+                                if (highestRole) {
+                                    qint32 colorInt = highestRole->color;
+                                    QColor colorTmp((colorInt & 0x00FF0000) >> 16, (colorInt & 0x0000FF00) >> 8, (colorInt & 0x000000FF));
+                                    MemberWidget *memberWidget = new MemberWidget(rm, member->user, (members.guildId == 0 ? QColor() : QColor::fromHsv(colorTmp.hue(), colorTmp.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), colorTmp.value())), this);
+                                    memberWidget->setStatus(member->presence->status);
+                                    layout->insertWidget(insert->index, memberWidget);
+                                }
+                                break;
                             }
-                            if (highestRole) {
-                                qint32 colorInt = highestRole->color;
-                                QColor colorTmp((colorInt & 0x00FF0000) >> 16, (colorInt & 0x0000FF00) >> 8, (colorInt & 0x000000FF));
-                                MemberWidget *memberWidget = new MemberWidget(rm, member->user, (members.guildId == 0 ? QColor() : QColor::fromHsv(colorTmp.hue(), colorTmp.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), colorTmp.value())), this);
-                                memberWidget->setStatus(member->presence->status);
-                                layout->insertWidget(insert->index, memberWidget);
-                            }
+                        }
+                    });
+                } else {
+                    Api::GuildGroup *group = reinterpret_cast<Api::GuildGroup *>(insert->memberOrGroup->content);
+
+                    QColor color;
+                    bool found = false;
+                    for (int i = 0 ; i < roles.size() ; i++) {
+                        if (group->id == roles[i]->id) {
+                            color = QColor((roles[i]->color & 0x00FF0000) >> 16, (roles[i]->color & 0x0000FF00) >> 8, roles[i]->color & 0x000000FF);
+                            color = QColor::fromHsv(color.hue(), color.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), color.value());
+                            layout->insertWidget(insert->index, createTitle(roles[i]->name.toUpper() + " - " + QString::number(group->count)), 0, Qt::AlignLeft);
+                            found = true;
                             break;
                         }
                     }
-                });
-            } else {
-                Api::GuildGroup *group = reinterpret_cast<Api::GuildGroup *>(insert->memberOrGroup->content);
-
-                QColor color;
-                bool found = false;
-                for (int i = 0 ; i < roles.size() ; i++) {
-                    if (group->id == roles[i]->id) {
-                        color = QColor((roles[i]->color & 0x00FF0000) >> 16, (roles[i]->color & 0x0000FF00) >> 8, roles[i]->color & 0x000000FF);
-                        color = QColor::fromHsv(color.hue(), color.saturation() * (Settings::customColorSaturation ? Settings::saturation : 1.0f), color.value());
-                        layout->insertWidget(insert->index, createTitle(roles[i]->name.toUpper() + " - " + QString::number(group->count)), 0, Qt::AlignLeft);
-                        found = true;
-                        break;
+                    if (!found) {
+                        layout->insertWidget(insert->index, createTitle(group->id.toUpper() + " - " + QString::number(group->count)), 0, Qt::AlignLeft);
                     }
-                }
-                if (!found) {
-                    layout->insertWidget(insert->index, createTitle(group->id.toUpper() + " - " + QString::number(group->count)), 0, Qt::AlignLeft);
                 }
             }
         }

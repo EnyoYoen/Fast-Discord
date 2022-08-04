@@ -32,6 +32,7 @@ private:
     QVector<Api::Role *> roles;
     QList<QString> groupsIds;
     Api::RessourceManager *rm;
+    Api::Snowflake guildId;
     int nMembers;
     int actualNMembers;
     int tempScrollBarValue;

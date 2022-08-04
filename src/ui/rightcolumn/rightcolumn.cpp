@@ -221,6 +221,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
     if (type != Api::GuildVoice) {
         rm->requester->removeRequests(Api::RequestTypes::GetImage);
         rm->requester->removeRequests(Api::RequestTypes::GetGuildMember);
+        //rm->requester->removeRequests(Api::RequestTypes::GetMessages);
         messageArea->clear();
         if (inputBox != nullptr)
             inputBox->deleteLater();
@@ -333,7 +334,9 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         if (type != Api::DM) {
             rm->getGuildMembers([](void *){}, channelId);
             
-            if (memberList) memberList->deleteLater();
+            if (memberList) {
+                memberList->deleteLater();
+            }
             memberList = new MemberList(rm, recipientIds, messagesInputContainer);
             layoutContainer->addWidget(memberList);
 

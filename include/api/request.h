@@ -171,7 +171,6 @@ public:
     void removeRequests(RequestTypes type);
     void removeRequestWithUrl(const QString& url);
 
-    // Functions that request the API to retrieve data
     void const getGuilds(Callback callback);
     void const getGuildMember(Callback callback, const Snowflake& guildId, const Snowflake& userId);
     void const getGuildChannels(Callback callback, const Snowflake& id);
@@ -187,7 +186,6 @@ public:
     void const getAuthorizedApp(Callback callback);
     void const getConnections(Callback callback);
     
-    // Functions that request the API to change data
     void const changeUsername(Callback callback, const QString& username, const QString& discriminator, const QString& password);
     void const changeEmail(Callback callback, QString email, QString password);
     void const changePassword(Callback callback, QString oldPassword, QString newPassword);
@@ -199,7 +197,6 @@ public:
     void const setSettingsProto(Callback callback, QString settings);
     void const setConsent(Callback callback, QString grant, QString revoke);
 
-    // Functions that request the API to send data
     void const setStatus(const QString& status);
     void const sendTyping(const Snowflake& channelId);
     void const sendVerifyCode(Callback callback, QString verifyCode);
