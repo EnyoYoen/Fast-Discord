@@ -20,7 +20,7 @@ public:
         pressed = false;
         QVBoxLayout *layout = new QVBoxLayout(this);
         icon = new Widget(this);
-        icon->setPixmap(QPixmap("res/images/svg/check-icon.svg"));
+        icon->setPixmap(QPixmap(":check-icon.svg"));
         icon->hide();
         layout->addWidget(icon, 0, Qt::AlignCenter);
     }

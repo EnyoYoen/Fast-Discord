@@ -16,12 +16,12 @@ SwitchButton::SwitchButton(bool statep)
     checkIcon = new Widget(this);
     checkIcon->setFixedSize(Settings::scale(20), Settings::scale(20));
     checkIcon->move(Settings::scale(17), Settings::scale(2));
-    checkIcon->setImage("res/images/svg/switch-check-icon.svg");
+    checkIcon->setImage(":switch-check-icon.svg");
 
     crossIcon = new Widget(this);
     crossIcon->setFixedSize(Settings::scale(20), Settings::scale(20));
     crossIcon->move(Settings::scale(3), Settings::scale(2));
-    crossIcon->setImage("res/images/svg/switch-cross-icon.svg");
+    crossIcon->setImage(":switch-cross-icon.svg");
 
     if (state) {
         iconBackground->move(Settings::scale(17), Settings::scale(2));

@@ -249,7 +249,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         QHBoxLayout *replyLayout = new QHBoxLayout(reply);
 
         Widget *replyIcon = new Widget(reply);
-        replyIcon->setImage("res/images/png/reply.png");
+        replyIcon->setImage(":reply.png");
         replyIcon->setFixedSize(Settings::scale(68), Settings::scale(22));
         replyLayout->addWidget(replyIcon);
 
@@ -257,7 +257,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
             // Get the icon of the message
             if (ref->author.avatar.isNull()) {
                 // Use an asset if the user doesn't have an icon
-                replyLayout->addWidget(new RoundedImage("res/images/png/user-icon-asset0.png", Settings::scale(16), Settings::scale(16), Settings::scale(8), reply));
+                replyLayout->addWidget(new RoundedImage(":user-icon-asset0.png", Settings::scale(16), Settings::scale(16), Settings::scale(8), reply));
             } else {
                 // Request the avatar
                 QString avatarFileName = ref->author.avatar + (ref->author.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
@@ -354,7 +354,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         // Get the icon of the message
         if (avatarId.isNull()) {
             // Use an asset if the user doesn't have an icon
-            avatar = new RoundedImage("res/images/png/user-icon-asset0.png", Settings::scale(40), Settings::scale(40), Settings::scale(20), iconContainer);
+            avatar = new RoundedImage(":user-icon-asset0.png", Settings::scale(40), Settings::scale(40), Settings::scale(20), iconContainer);
             iconLayout->addWidget(avatar);
             iconLayout->setAlignment(avatar, Qt::AlignTop | Qt::AlignHCenter);
         } else {
@@ -575,7 +575,7 @@ void MessageWidget::iconMessage(const Api::Message *message, const QString &text
     timestampLabel->setFont(font);
 
     icon->setFixedWidth(Settings::scale(44));
-    icon->setPixmap(QPixmap("res/images/svg/" + iconName));
+    icon->setPixmap(QPixmap(":" + iconName));
 
     textLabel->setTextColor(Settings::ChannelIcon);
     textLabel->setCursor(QCursor(Qt::IBeamCursor));
@@ -694,7 +694,7 @@ void MessageWidget::userPremiumGuildSubscriptionMessage(const Api::Message *mess
 void MessageWidget::guildMemberJoinMessage(const Api::Message *message)
 {
     int randInt = rand() % 39;
-    QFile messageFile("res/text/welcome-messages.txt");
+    QFile messageFile(":welcome-messages.txt");
     messageFile.open(QIODevice::ReadOnly);
     for (int i = 0 ; i < randInt ; i++) {
         messageFile.readLine();

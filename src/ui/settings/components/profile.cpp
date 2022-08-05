@@ -267,7 +267,7 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
     Widget *image = new Widget(icon);
     image->setFixedSize(Settings::scale(48), Settings::scale(48));
     image->move(Settings::scale(8), Settings::scale(8));
-    image->setPixmap(QPixmap("res/images/png/pen.png").scaled(Settings::scale(48), Settings::scale(48)));
+    image->setPixmap(QPixmap(":pen.png").scaled(Settings::scale(48), Settings::scale(48)));
 
     Widget *activity = new Widget(activityContainer);
     activity->setBackgroundColor(Settings::BackgroundFloating);
@@ -322,7 +322,7 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
     avatarBorders->setBorderRadius(Settings::scale(47));
 
     if (client.avatar.isNull()) {
-        avatar = new RoundedImage("res/images/png/user-icon-asset0.png", Settings::scale(80), Settings::scale(80), Settings::scale(40), container);
+        avatar = new RoundedImage(":user-icon-asset0.png", Settings::scale(80), Settings::scale(80), Settings::scale(40), container);
     } else {
         avatar = new RoundedImage(Settings::scale(80), Settings::scale(80), Settings::scale(40), container);
         QString channelIconFileName = client.id + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
@@ -342,7 +342,7 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
     Widget *imageUploadIcon = new Widget(imageUpload);
     imageUploadIcon->setFixedSize(Settings::scale(18), Settings::scale(18));
     imageUploadIcon->setBackgroundColor(Settings::BackgroundFloating);
-    imageUploadIcon->setPixmap(QPixmap("res/images/svg/add-file-icon.svg"));
+    imageUploadIcon->setPixmap(QPixmap(":add-file-icon.svg"));
     imageUploadIcon->move(Settings::scale(5), Settings::scale(5));
 
     ImageHoverWidget *avatarHover = new ImageHoverWidget("CHANGE\nAVATAR", avatar);

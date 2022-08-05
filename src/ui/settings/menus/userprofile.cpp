@@ -119,7 +119,7 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     customColorTitle->setTextColor(Settings::HeaderSecondary);
     customColor = new ColorLabel(customColorContainer);
     Widget *colorIcon = new Widget(customColor);
-    colorIcon->setPixmap(QPixmap("res/images/svg/grab-color-icon.svg").scaled(Settings::scale(14), Settings::scale(14)));
+    colorIcon->setPixmap(QPixmap(":grab-color-icon.svg").scaled(Settings::scale(14), Settings::scale(14)));
     colorIcon->move(Settings::scale(50), 0);
     customColorLayout->addWidget(customColor);
     customColorLayout->addWidget(customColorTitle, 0, Qt::AlignHCenter);
@@ -191,7 +191,7 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     bannerTitleText->setFont(font);
     bannerTitleText->setTextColor(Settings::HeaderSecondary);
     QLabel *bannerTitleIcon = new QLabel(bannerTitle);
-    bannerTitleIcon->setPixmap(QPixmap("res/images/svg/nitro-icon.svg").scaled(Settings::scale(16), Settings::scale(16)));
+    bannerTitleIcon->setPixmap(QPixmap(":nitro-icon.svg").scaled(Settings::scale(16), Settings::scale(16)));
     bannerTitleLayout->addWidget(bannerTitleText);
     bannerTitleLayout->addWidget(bannerTitleIcon);
     bannerTitleLayout->addStretch(1);
@@ -526,7 +526,7 @@ void UserProfile::profileChanged()
                 aboutTextEdit->setPlainText(client.bio);
 
                 profile->setAvatar(client.banner, (client.banner != 0 ? QString::number(client.bannerColor, 16) : defaultBannerColor.name()));
-                profile->setAvatar((client.avatar.isNull() ? "res/images/png/user-icon-asset0.png" : client.avatar + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png")), QString());
+                profile->setAvatar((client.avatar.isNull() ? ":user-icon-asset0.png" : client.avatar + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png")), QString());
 
                 this->modified = false;
                 unsaved->deleteLater();

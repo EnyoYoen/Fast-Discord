@@ -36,7 +36,6 @@ jobs:
           cp $GITHUB_WORKSPACE/libs/64/bin/opus.dll .
           cp $GITHUB_WORKSPACE/libs/64/bin/libcrypto-1_1-x64.dll .
           cp $GITHUB_WORKSPACE/libs/64/bin/libssl-1_1-x64.dll .
-          cp -r ../res .
 
       - name: Upload Executable
         uses: actions/upload-artifact@v2

@@ -26,7 +26,7 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, QWidget *parent)
         QString channelIconFileName;
         if (client->avatar.isNull()) {
             // Use an asset if the user doesn't have an icon
-            channelIconFileName = "res/images/png/user-icon-asset0.png";
+            channelIconFileName = ":user-icon-asset0.png";
 
             avatar = new RoundedImage(channelIconFileName, Settings::scale(32), Settings::scale(32), Settings::scale(16), this);
         } else {

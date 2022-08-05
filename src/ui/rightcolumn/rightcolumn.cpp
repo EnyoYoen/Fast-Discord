@@ -20,7 +20,7 @@ public:
         iconContainer = new Widget(this);
         iconContainer->setFixedSize(Settings::scale(20), Settings::scale(22));
         layout->setContentsMargins(0, 0, 0, 0);
-        QPixmap img("res/images/svg/send-message-icon.svg");
+        QPixmap img(":send-message-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveMuted]);
@@ -36,7 +36,7 @@ public:
         if (locked != lockedp) {
             locked = lockedp;
             if (locked) {
-                QPixmap img("res/images/svg/send-message-icon.svg");
+                QPixmap img(":send-message-icon.svg");
                 QPainter qp(&img);
                 qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
                 qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveMuted]);
@@ -44,7 +44,7 @@ public:
                 iconContainer->setPixmap(img);
                 this->setCursor(Qt::CursorShape::ForbiddenCursor);
             } else {
-                QPixmap img("res/images/svg/send-message-icon.svg");
+                QPixmap img(":send-message-icon.svg");
                 QPainter qp(&img);
                 qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
                 qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -62,7 +62,7 @@ private:
     void mouseReleaseEvent(QMouseEvent *)
     {
         if (!locked) {
-            QPixmap img("res/images/svg/send-message-icon.svg");
+            QPixmap img(":send-message-icon.svg");
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
             qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -75,7 +75,7 @@ private:
     void mousePressEvent(QMouseEvent *)
     {
         if (!locked) {
-            QPixmap img("res/images/svg/send-message-icon.svg");
+            QPixmap img(":send-message-icon.svg");
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
             qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveActive]);
@@ -87,7 +87,7 @@ private:
     void enterEvent(QEvent *)
     {
         if (!locked) {
-            QPixmap img("res/images/svg/send-message-icon.svg");
+            QPixmap img(":send-message-icon.svg");
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
             qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
@@ -99,7 +99,7 @@ private:
     void leaveEvent(QEvent *)
     {
         if (!locked) {
-            QPixmap img("res/images/svg/send-message-icon.svg");
+            QPixmap img(":send-message-icon.svg");
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
             qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -259,7 +259,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         FileUploadButton *uploadButton = new FileUploadButton(inputBox);
         
         fileLabel = new QLabel(inputBox);
-        QPixmap pix("res/images/svg/archive-icon.svg");
+        QPixmap pix(":archive-icon.svg");
         fileLabel->setPixmap(pix.scaled(Settings::scale(18), Settings::scale(24), Qt::KeepAspectRatio));
         fileLabel->setFixedSize(Settings::scale(18), Settings::scale(24));
         fileLabel->hide();

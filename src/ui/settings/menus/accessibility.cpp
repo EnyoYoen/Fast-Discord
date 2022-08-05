@@ -466,7 +466,7 @@ Widget *Accessibility::createAvatar(QString status)
 {
     Widget *iconContainer = new Widget(this);
     iconContainer->setFixedSize(32, 32);
-    RoundedImage *icon = new RoundedImage("res/images/png/user-icon-asset0.png", Settings::scale(32), Settings::scale(32), Settings::scale(16), iconContainer);
+    RoundedImage *icon = new RoundedImage(":user-icon-asset0.png", Settings::scale(32), Settings::scale(32), Settings::scale(16), iconContainer);
 
     Widget *statusBackground = new Widget(iconContainer);
     statusBackground->setFixedSize(Settings::scale(16), Settings::scale(16));

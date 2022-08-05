@@ -11,7 +11,7 @@ namespace Ui {
 FileUploadButton::FileUploadButton(QWidget *parent)
     : QLabel(parent)
 {
-    QPixmap img("res/images/svg/attach-button-icon.svg");
+    QPixmap img(":attach-button-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -23,7 +23,7 @@ FileUploadButton::FileUploadButton(QWidget *parent)
 
 void FileUploadButton::mouseReleaseEvent(QMouseEvent *)
 {
-    QPixmap img("res/images/svg/attach-button-icon.svg");
+    QPixmap img(":attach-button-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -42,7 +42,7 @@ void FileUploadButton::mouseReleaseEvent(QMouseEvent *)
 
 void FileUploadButton::enterEvent(QEvent *)
 {
-    QPixmap img("res/images/svg/attach-button-icon.svg");
+    QPixmap img(":attach-button-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
@@ -52,7 +52,7 @@ void FileUploadButton::enterEvent(QEvent *)
 
 void FileUploadButton::leaveEvent(QEvent *)
 {
-    QPixmap img("res/images/svg/attach-button-icon.svg");
+    QPixmap img(":attach-button-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);

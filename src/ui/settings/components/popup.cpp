@@ -18,7 +18,7 @@ public:
     PopUpCloseButton(QWidget *parent) : Widget(parent)
     {
         this->setFixedSize(Settings::scale(24), Settings::scale(24));
-        this->setPixmap(QPixmap("res/images/svg/close-settings-icon.svg"));
+        this->setPixmap(QPixmap(":close-settings-icon.svg"));
     }
 
 signals:
@@ -32,7 +32,7 @@ private:
     }
     void enterEvent(QEvent *) override
     {
-        QPixmap img("res/images/svg/close-settings-icon.svg");
+        QPixmap img(":close-settings-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(),QColor(220, 221, 222));
@@ -41,7 +41,7 @@ private:
     }
     void leaveEvent(QEvent *) override
     {
-        QPixmap img("res/images/svg/close-settings-icon.svg");
+        QPixmap img(":close-settings-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(),QColor(185, 187, 190));

@@ -14,7 +14,7 @@ UserMenuButton::UserMenuButton(int typep, QWidget *parent)
     blocked = false;
 
     // Determine the icon to use
-    QString iconName = "res/images/svg/";
+    QString iconName = ":";
     switch (type) {
         case Mute:
             iconName += "mute";
@@ -47,7 +47,7 @@ void UserMenuButton::setClicked(bool active)
             blocked = active;
         } else {
             QString prefix = (active ? "un" : "");
-            QPixmap img("res/images/svg/" + prefix + "mute-icon.svg");
+            QPixmap img(":" + prefix + "mute-icon.svg");
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
             qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -65,7 +65,7 @@ void UserMenuButton::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
         if (!blocked) {
             // Change the icon if not blocked
-            QString iconName = "res/images/svg/";
+            QString iconName = ":";
             switch (type) {
                 case Mute:
                     iconName += clicked ? "mute" : "unmute";
@@ -98,7 +98,7 @@ void UserMenuButton::mouseReleaseEvent(QMouseEvent *event)
 void UserMenuButton::enterEvent(QEvent *)
 {
     this->setBackgroundColor(Settings::BackgroundModifierSelected);
-    QString iconName = "res/images/svg/";
+    QString iconName = ":";
     switch (type) {
         case Mute:
             iconName += clicked ? "unmute" : "mute";
@@ -120,7 +120,7 @@ void UserMenuButton::enterEvent(QEvent *)
 }
 
 void UserMenuButton::leaveEvent(QEvent *) {
-    QString iconName = "res/images/svg/";
+    QString iconName = ":";
     switch (type) {
         case Mute:
             iconName += clicked ? "unmute" : "mute";

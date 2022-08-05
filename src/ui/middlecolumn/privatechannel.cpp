@@ -37,7 +37,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             QString avatar = dmUser->avatar;
             if (avatar.isNull()) {
                 // Use an asset if the other user doesn't have an icon
-                channelIconFileName = "res/images/png/user-icon-asset0.png";
+                channelIconFileName = ":user-icon-asset0.png";
 
                 // Create the icon
                 icon = new RoundedImage(channelIconFileName, Settings::scale(32), Settings::scale(32), Settings::scale(16), this);
@@ -131,7 +131,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
         QString channelIcon = privateChannel.icon;
         if (channelIcon.isNull()) {
             // Use an asset if there is none
-            channelIconFileName = "res/images/png/group-icon-asset1.png";
+            channelIconFileName = ":group-icon-asset1.png";
 
             // Create the icon
             icon = new RoundedImage(channelIconFileName, Settings::scale(32), Settings::scale(32), Settings::scale(16), this);

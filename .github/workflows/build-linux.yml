@@ -34,7 +34,6 @@ jobs:
           cmake --build . --parallel $(nproc)
           mkdir build
           mv Fast-Discord build
-          cp -r res build
 
       - name: Upload Executable
         uses: actions/upload-artifact@v2

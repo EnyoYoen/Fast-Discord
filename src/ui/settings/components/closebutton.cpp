@@ -23,7 +23,7 @@ CloseButton::CloseButton(QWidget *parent)
     icon = new Widget(iconContainer);
     icon->move(Settings::scale(7), Settings::scale(7));
     icon->setFixedSize(Settings::scale(18), Settings::scale(18));
-    QPixmap img("res/images/svg/close-settings-icon.svg");
+    QPixmap img(":close-settings-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -65,7 +65,7 @@ void CloseButton::mouseReleaseEvent(QMouseEvent *event)
     pressed = false;
     text->setTextColor(Settings::InteractiveNormal);
     iconContainer->setBorderColor(Settings::InteractiveNormal);
-    QPixmap img("res/images/svg/close-settings-icon.svg");
+    QPixmap img(":close-settings-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -81,7 +81,7 @@ void CloseButton::mousePressEvent(QMouseEvent *event)
     pressed = true;
     text->setTextColor(Settings::InteractiveActive);
     iconContainer->setBorderColor(Settings::InteractiveActive);
-    QPixmap img("res/images/svg/close-settings-icon.svg");
+    QPixmap img(":close-settings-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveActive]);
@@ -94,7 +94,7 @@ void CloseButton::enterEvent(QEvent *)
     if (!pressed) {
         text->setTextColor(Settings::InteractiveHover);
         iconContainer->setBorderColor(Settings::InteractiveHover);
-        QPixmap img("res/images/svg/close-settings-icon.svg");
+        QPixmap img(":close-settings-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
@@ -108,7 +108,7 @@ void CloseButton::leaveEvent(QEvent *)
     if (!pressed) {
         text->setTextColor(Settings::InteractiveNormal);
         iconContainer->setBorderColor(Settings::InteractiveNormal);
-        QPixmap img("res/images/svg/close-settings-icon.svg");
+        QPixmap img(":close-settings-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);

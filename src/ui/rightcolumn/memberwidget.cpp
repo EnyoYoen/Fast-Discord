@@ -22,7 +22,7 @@ MemberWidget::MemberWidget(Api::RessourceManager *rmp, Api::User *userp, QColor 
     
     QString avatar = user->avatar;
     if (avatar.isNull()) {
-        QString channelIconFileName = "res/images/png/user-icon-asset0.png";
+        QString channelIconFileName = ":user-icon-asset0.png";
         icon = new RoundedImage(channelIconFileName, Settings::scale(32), Settings::scale(32), Settings::scale(16), this);
         icon->move(Settings::scale(8), Settings::scale(6));
     } else {

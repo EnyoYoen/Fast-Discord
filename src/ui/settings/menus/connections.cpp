@@ -20,7 +20,7 @@ public:
         this->setFixedSize(Settings::scale(48), Settings::scale(48));
         this->setBorderRadius(Settings::scale(5));
         this->setBackgroundColor(Settings::BackgroundSecondary);
-        this->setImage("res/images/svg/" + type + "-icon.svg");
+        this->setImage(":" + type + "-icon.svg");
     }
 
     static QMap<QString, QString> names;
@@ -66,7 +66,7 @@ public:
         rm = rmp;
         this->setFixedSize(Settings::scale(16), Settings::scale(16));
         this->setBackgroundColor(Settings::BackgroundSecondaryAlt);
-        QPixmap img("res/images/svg/close-icon.svg");
+        QPixmap img(":close-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -83,7 +83,7 @@ private:
 
     void mouseReleaseEvent(QMouseEvent *event)
     {
-        QPixmap img("res/images/svg/close-icon.svg");
+        QPixmap img(":close-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -95,7 +95,7 @@ private:
     void mousePressEvent(QMouseEvent *event)
     {
         pressed = true;
-        QPixmap img("res/images/svg/close-icon.svg");
+        QPixmap img(":close-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveActive]);
@@ -106,7 +106,7 @@ private:
     void enterEvent(QEvent *)
     {
         if (!pressed) {
-            QPixmap img("res/images/svg/close-icon.svg");
+            QPixmap img(":close-icon.svg");
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
             qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveHover]);
@@ -118,7 +118,7 @@ private:
     void leaveEvent(QEvent *)
     {
         if (!pressed) {
-            QPixmap img("res/images/svg/close-icon.svg");
+            QPixmap img(":close-icon.svg");
             QPainter qp(&img);
             qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
             qp.fillRect(img.rect(), Settings::colors[Settings::InteractiveNormal]);
@@ -152,7 +152,7 @@ public:
 
         Widget *icon = new Widget(header);
         icon->setFixedSize(Settings::scale(32), Settings::scale(32));
-        icon->setImage("res/images/svg/" + connection->type + "-icon.svg");
+        icon->setImage(":" + connection->type + "-icon.svg");
         
         Widget *nameContainer = new Widget(header);
         nameContainer->setFixedHeight(Settings::scale(32));
@@ -335,7 +335,7 @@ void Connections::empty()
     
     Widget *image = new Widget(noConnections);
     image->setFixedSize(Settings::scale(262), Settings::scale(226));
-    image->setImage("res/images/svg/no-connections-icon.svg");
+    image->setImage(":no-connections-icon.svg");
 
     noConnectionsLayout->addWidget(image, 0, Qt::AlignHCenter);
     noConnectionsLayout->addSpacing(Settings::scale(40));

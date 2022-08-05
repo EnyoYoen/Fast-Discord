@@ -172,7 +172,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                               
         RoundedImage *avatar;
         if (client.avatar.isNull()) {
-            avatar = new RoundedImage("res/images/png/user-icon-asset0.png", Settings::scale(80), Settings::scale(80), Settings::scale(40), profile);
+            avatar = new RoundedImage(":user-icon-asset0.png", Settings::scale(80), Settings::scale(80), Settings::scale(40), profile);
         } else {
             avatar = new RoundedImage(Settings::scale(80), Settings::scale(80), Settings::scale(40), profile);
             QString channelIconFileName = client.id + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png");

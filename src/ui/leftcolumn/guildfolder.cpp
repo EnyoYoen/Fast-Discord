@@ -37,7 +37,7 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
     openedContent->setBorderRadius(Settings::scale(16));
     openedContent->setBackgroundColor(QColor((color & 0x00FF0000) >> 16, (color & 0x0000FF00) >> 8, color & 0x000000FF, 101));
 
-    QPixmap img("res/images/svg/folder-icon.svg");
+    QPixmap img(":folder-icon.svg");
     QPainter qp(&img);
     qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
     qp.fillRect(img.rect(),QColor(color));

@@ -28,7 +28,7 @@ HomeButton::HomeButton(QWidget *parent)
     image->setFixedSize(Settings::scale(48), Settings::scale(48));
     image->setBackgroundColor(Settings::BrandExperiment);
     image->setBorderRadius(Settings::scale(16));
-    image->setImage("res/images/svg/home-icon.svg");
+    image->setImage(":home-icon.svg");
 }
 
 void HomeButton::mouseReleaseEvent(QMouseEvent *event)
@@ -44,7 +44,7 @@ void HomeButton::unclicked()
     // Reset the stylesheet of this widget if currently clicked
     if (clic) {
         clic = false;
-        QPixmap img("res/images/svg/home-icon.svg");
+        QPixmap img(":home-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(QRect(img.rect().topLeft(), QSize(Settings::scale(img.rect().width()), Settings::scale(img.rect().height()))), QColor(220, 221, 222));
@@ -60,7 +60,7 @@ void HomeButton::mousePressEvent(QMouseEvent *)
 {
     // Widget clicked : change the stylesheet
     if (!clic) {
-        QPixmap img("res/images/svg/home-icon.svg");
+        QPixmap img(":home-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(),Qt::white);
@@ -77,7 +77,7 @@ void HomeButton::enterEvent(QEvent *)
 {
     // Mouse hover : change the stylesheet
     if (!clic) {
-        QPixmap img("res/images/svg/home-icon.svg");
+        QPixmap img(":home-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(),Qt::white);
@@ -93,7 +93,7 @@ void HomeButton::leaveEvent(QEvent *)
 {
     // Reset the stylesheet if not clicked
     if (!clic) {
-        QPixmap img("res/images/svg/home-icon.svg");
+        QPixmap img(":home-icon.svg");
         QPainter qp(&img);
         qp.setCompositionMode(QPainter::CompositionMode_SourceIn);
         qp.fillRect(img.rect(),QColor(220, 221, 222));

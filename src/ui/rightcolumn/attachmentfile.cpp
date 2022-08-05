@@ -16,7 +16,7 @@ AttachmentFile::AttachmentFile(Api::Requester *requester, const Api::Attachment 
     QWidget *infos = new QWidget(container);
     QVBoxLayout *infosLayout = new QVBoxLayout(infos);
 
-    QPixmap pix("res/images/svg/archive-icon.svg");
+    QPixmap pix(":archive-icon.svg");
     QLabel *image = new QLabel(container);
     image->setPixmap(pix.scaled(Settings::scale(30), Settings::scale(40), Qt::KeepAspectRatio));
     image->setFixedSize(Settings::scale(30), Settings::scale(40));

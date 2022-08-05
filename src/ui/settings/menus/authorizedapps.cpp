@@ -90,7 +90,7 @@ public:
 
             Widget *checkmark = new Widget(permission);
             checkmark->setFixedSize(18, 18);
-            checkmark->setImage("res/images/svg/checkmark-icon.svg");
+            checkmark->setImage(":checkmark-icon.svg");
 
             Label *permissionDesc = new Label(scopesStrings.contains(scopes[i]) ? AuthorizedApp::scopesStrings[scopes[i]] : scopes[i], nullptr);
             permissionDesc->setTextColor(Settings::TextNormal);
@@ -244,7 +244,7 @@ void AuthorizedApps::empty()
     
     Widget *image = new Widget(noApps);
     image->setFixedSize(Settings::scale(438), Settings::scale(270));
-    image->setImage("res/images/svg/no-app-icon.svg");
+    image->setImage(":no-app-icon.svg");
 
     noAppsLayout->addWidget(image, 0, Qt::AlignHCenter);
     noAppsLayout->addSpacing(Settings::scale(40));

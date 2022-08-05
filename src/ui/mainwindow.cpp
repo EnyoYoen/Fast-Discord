@@ -23,7 +23,7 @@ MainWindow::MainWindow() : Widget(nullptr)
     // Style the window
     // this->setWindowFlags(Qt::CustomizeWindowHint); Soon
     this->setGeometry(0, 0, 940, 728);
-    QFontDatabase::addApplicationFont("res/fonts/whitney.otf");
+    QFontDatabase::addApplicationFont(":whitney.otf");
 
     // Get account token from accounts list
     token = getAccountToken();
@@ -52,7 +52,7 @@ MainWindow::MainWindow() : Widget(nullptr)
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    this->setWindowIcon(QIcon("res/images/png/icon.png"));
+    this->setWindowIcon(QIcon(":icon.png"));
     this->setBackgroundColor(Settings::BackgroundPrimary);
 
     // Connect signals to slots of the columns
@@ -142,7 +142,7 @@ void MainWindow::reinit()
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    this->setWindowIcon(QIcon("res/images/png/icon.png"));
+    this->setWindowIcon(QIcon(":icon.png"));
     this->setBackgroundColor(Settings::BackgroundPrimary);
 
     // Connect signals to slots of the columns
@@ -180,7 +180,7 @@ void const MainWindow::addAccountInConfig(QSettings *settings, const QMap<QStrin
 QMap<QString, QString> const MainWindow::getNewAccount() {
     QDialog dlg(nullptr);
     dlg.setWindowTitle(tr("Add new account"));
-    dlg.setWindowIcon(QIcon("res/images/png/icon.png"));
+    dlg.setWindowIcon(QIcon(":icon.png"));
 
     QLineEdit *ledit1 = new QLineEdit(&dlg);
     QLineEdit *ledit2 = new QLineEdit(&dlg);

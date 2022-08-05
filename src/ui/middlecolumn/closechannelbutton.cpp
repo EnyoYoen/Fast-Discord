@@ -10,7 +10,7 @@ CloseChannelButton::CloseChannelButton(QWidget *parent)
     : Widget(parent)
 {
     this->setFixedSize(Settings::scale(16), Settings::scale(38));
-    this->setPixmap(QPixmap("res/images/svg/close-icon.svg"));
+    this->setPixmap(QPixmap(":close-icon.svg"));
 }
 
 void CloseChannelButton::mouseReleaseEvent(QMouseEvent *event)

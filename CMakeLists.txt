@@ -154,6 +154,7 @@ set(HEADERS
     "include/ui/rightcolumn/messagewidget.h"
 )
 
+qt5_add_resources(SOURCES res.qrc)
 add_executable(Fast-Discord ${SOURCES} ${HEADERS})
 
 if (WIN32)

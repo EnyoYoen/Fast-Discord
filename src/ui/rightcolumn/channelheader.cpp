@@ -65,7 +65,7 @@ void ChannelHeader::openChannel(const QString& channelName, int channelType)
         iconName += number;
     }
     iconName += ".svg";
-    icon->setPixmap(QPixmap("res/images/svg/" + iconName));
+    icon->setPixmap(QPixmap(":" + iconName));
     icon->setFixedSize(Settings::scale(24), Settings::scale(24));
 
     name = new Label((channelType == Api::GroupDM ? channelName : channelName.mid(1)), nullptr);

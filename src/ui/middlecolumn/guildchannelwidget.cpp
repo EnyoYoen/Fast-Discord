@@ -40,7 +40,7 @@ GuildChannelWidget::GuildChannelWidget(const Api::Channel& guildChannel, QWidget
         iconNumber = "0";
         break;
     }
-    iconName = "res/images/svg/guild-channel-icon" + iconNumber + ".svg";
+    iconName = ":guild-channel-icon" + iconNumber + ".svg";
 
     if (type == Api::GuildCategory) {
         hoverColor = clickedColor = Settings::None;
