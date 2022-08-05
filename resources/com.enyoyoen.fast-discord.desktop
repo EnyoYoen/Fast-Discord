@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Fast-Discord
+Comment=A new Discord client made in C++ and Qt
+Exec=fast-discord
+Icon=fast-discord
+Terminal=false
+Categories=Network;InstantMessaging;
