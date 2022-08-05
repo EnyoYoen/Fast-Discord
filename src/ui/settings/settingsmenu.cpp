@@ -1,13 +1,13 @@
 #include "ui/settings/settingsmenu.h"
 
-#include "ui/settings/closebutton.h"
-#include "ui/settings/myaccount.h"
-#include "ui/settings/userprofile.h"
-#include "ui/settings/privacysafety.h"
-#include "ui/settings/authorizedapps.h"
-#include "ui/settings/connections.h"
-#include "ui/settings/appearance.h"
-#include "ui/settings/accessibility.h"
+#include "ui/settings/components/closebutton.h"
+#include "ui/settings/menus/myaccount.h"
+#include "ui/settings/menus/userprofile.h"
+#include "ui/settings/menus/privacysafety.h"
+#include "ui/settings/menus/authorizedapps.h"
+#include "ui/settings/menus/connections.h"
+#include "ui/settings/menus/appearance.h"
+#include "ui/settings/menus/accessibility.h"
 #include "ui/mainwindow.h"
 
 namespace Ui {

@@ -1,4 +1,4 @@
-#include "ui/settings/divider.h"
+#include "ui/settings/components/divider.h"
 
 #include "settings/settings.h"
 

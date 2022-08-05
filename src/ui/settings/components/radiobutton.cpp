@@ -1,4 +1,4 @@
-#include "ui/settings/radiobutton.h"
+#include "ui/settings/components/radiobutton.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>

@@ -1,4 +1,4 @@
-#include "ui/settings/slider.h"
+#include "ui/settings/components/slider.h"
 
 #include <QFont>
 #include <QStackedLayout>

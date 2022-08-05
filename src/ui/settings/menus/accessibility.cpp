@@ -1,11 +1,11 @@
-#include "ui/settings/accessibility.h"
+#include "ui/settings/menus/accessibility.h"
 
 #include "ui/common/roundedimage.h"
 #include "ui/common/statusicon.h"
-#include "ui/settings/slider.h"
-#include "ui/settings/settingsbutton.h"
-#include "ui/settings/radiobutton.h"
-#include "ui/settings/switchbutton.h"
+#include "ui/settings/components/slider.h"
+#include "ui/settings/components/settingsbutton.h"
+#include "ui/settings/components/radiobutton.h"
+#include "ui/settings/components/switchbutton.h"
 #include "ui/settings/settingsmenu.h"
 #include "ui/rightcolumn/messagewidget.h"
 

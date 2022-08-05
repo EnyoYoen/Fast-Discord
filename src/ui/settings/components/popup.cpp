@@ -1,6 +1,6 @@
-#include "ui/settings/popup.h"
+#include "ui/settings/components/popup.h"
 
-#include "ui/settings/settingsbutton.h"
+#include "ui/settings/components/settingsbutton.h"
 
 #include <QLabel>
 #include <QHBoxLayout>

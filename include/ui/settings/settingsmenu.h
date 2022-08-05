@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ui/common/basicwidgets.h"
-#include "ui/settings/scrollmenu.h"
+#include "ui/settings/components/scrollmenu.h"
 #include "api/ressourcemanager.h"
 
 #include <QWidget>

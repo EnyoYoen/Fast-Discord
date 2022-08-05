@@ -1,7 +1,7 @@
-#include "ui/settings/authorizedapps.h"
+#include "ui/settings/menus/authorizedapps.h"
 
 #include "ui/common/roundedimage.h"
-#include "ui/settings/settingsbutton.h"
+#include "ui/settings/components/settingsbutton.h"
 
 namespace Ui {
 

@@ -1,8 +1,8 @@
-#include "ui/settings/profile.h"
+#include "ui/settings/components/profile.h"
 
-#include "ui/settings/divider.h"
-#include "ui/settings/popup.h"
-#include "ui/settings/selectimagebutton.h"
+#include "ui/settings/components/divider.h"
+#include "ui/settings/components/popup.h"
+#include "ui/settings/components/selectimagebutton.h"
 
 #include <QVBoxLayout>
 #include <QPixmap>

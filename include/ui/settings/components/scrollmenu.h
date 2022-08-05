@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ui/common/basicwidgets.h"
-#include "ui/settings/menubutton.h"
+#include "ui/settings/components/menubutton.h"
 
 #include "QScrollArea"
 

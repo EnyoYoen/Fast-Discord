@@ -1,4 +1,4 @@
-#include "ui/settings/settingsinput.h"
+#include "ui/settings/components/settingsinput.h"
 
 #include <QVBoxLayout>
 

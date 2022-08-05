@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ui/common/basicwidgets.h"
-#include "ui/settings/switchbutton.h"
+#include "ui/settings/components/switchbutton.h"
 #include "api/ressourcemanager.h"
 #include "api/objects/optional.h"
 

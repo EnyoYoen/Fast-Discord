@@ -1,11 +1,11 @@
-#include "ui/settings/myaccount.h"
+#include "ui/settings/menus/myaccount.h"
 
 #include "ui/common/basicwidgets.h"
 #include "ui/common/roundedimage.h"
-#include "ui/settings/settingsbutton.h"
-#include "ui/settings/settingsinput.h"
-#include "ui/settings/popup.h"
-#include "ui/settings/divider.h"
+#include "ui/settings/components/settingsbutton.h"
+#include "ui/settings/components/settingsinput.h"
+#include "ui/settings/components/popup.h"
+#include "ui/settings/components/divider.h"
 #include "api/objects/client.h"
 #include "api/objects/error.h"
 

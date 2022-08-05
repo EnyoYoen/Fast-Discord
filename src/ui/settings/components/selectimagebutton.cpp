@@ -1,4 +1,4 @@
-#include "ui/settings/selectimagebutton.h"
+#include "ui/settings/components/selectimagebutton.h"
 
 namespace Ui {
 

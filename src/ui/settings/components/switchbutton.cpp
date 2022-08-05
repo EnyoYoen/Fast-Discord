@@ -1,4 +1,4 @@
-#include "ui/settings/switchbutton.h"
+#include "ui/settings/components/switchbutton.h"
 
 #include <QDebug>
 

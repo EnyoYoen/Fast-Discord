@@ -1,9 +1,9 @@
-#include "ui/settings/userprofile.h"
+#include "ui/settings/menus/userprofile.h"
 
-#include "ui/settings/divider.h"
-#include "ui/settings/settingsbutton.h"
-#include "ui/settings/popup.h"
-#include "ui/settings/selectimagebutton.h"
+#include "ui/settings/components/divider.h"
+#include "ui/settings/components/settingsbutton.h"
+#include "ui/settings/components/popup.h"
+#include "ui/settings/components/selectimagebutton.h"
 
 #include <QTextEdit>
 #include <QColorDialog>

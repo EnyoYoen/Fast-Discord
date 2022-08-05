@@ -1,4 +1,4 @@
-#include "ui/settings/closebutton.h"
+#include "ui/settings/components/closebutton.h"
 
 #include <QVBoxLayout>
 #include <QPainter>

@@ -1,6 +1,6 @@
-#include "ui/settings/scrollmenu.h"
+#include "ui/settings/components/scrollmenu.h"
 
-#include "ui/settings/menubutton.h"
+#include "ui/settings/components/menubutton.h"
 
 #include <QVBoxLayout>
 

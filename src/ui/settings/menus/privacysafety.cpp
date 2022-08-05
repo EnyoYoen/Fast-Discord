@@ -1,8 +1,8 @@
-#include "ui/settings/privacysafety.h"
+#include "ui/settings/menus/privacysafety.h"
 
-#include "ui/settings/radiobutton.h"
-#include "ui/settings/settingsbutton.h"
-#include "ui/settings/popup.h"
+#include "ui/settings/components/radiobutton.h"
+#include "ui/settings/components/settingsbutton.h"
+#include "ui/settings/components/popup.h"
 
 namespace Ui {
 

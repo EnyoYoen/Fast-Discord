@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui/settings/profile.h"
+#include "ui/settings/components/profile.h"
 #include "api/ressourcemanager.h"
 
 #include <QLabel>

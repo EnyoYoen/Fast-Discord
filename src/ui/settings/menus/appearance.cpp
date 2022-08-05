@@ -1,10 +1,10 @@
-#include "ui/settings/appearance.h"
+#include "ui/settings/menus/appearance.h"
 
-#include "ui/settings/slider.h"
-#include "ui/settings/radiobutton.h"
-#include "ui/settings/switchbutton.h"
+#include "ui/settings/components/slider.h"
+#include "ui/settings/components/radiobutton.h"
+#include "ui/settings/components/switchbutton.h"
+#include "ui/settings/components/popup.h"
 #include "ui/settings/settingsmenu.h"
-#include "ui/settings/popup.h"
 #include "ui/rightcolumn/messagearea.h"
 
 #include <QScrollBar>

@@ -1,8 +1,8 @@
-#include "ui/settings/connections.h"
+#include "ui/settings/menus/connections.h"
 
 #include "ui/common/basicwidgets.h"
-#include "ui/settings/switchbutton.h"
-#include "ui/settings/popup.h"
+#include "ui/settings/components/switchbutton.h"
+#include "ui/settings/components/popup.h"
 #include "api/objects/connection.h"
 
 #include <QPainter>

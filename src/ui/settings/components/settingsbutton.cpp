@@ -1,4 +1,4 @@
-#include "ui/settings/settingsbutton.h"
+#include "ui/settings/components/settingsbutton.h"
 
 #include <QHBoxLayout>
 #include <QFontMetrics>
