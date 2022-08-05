@@ -52,6 +52,7 @@ void const Requester::writeFile()
 
 void Requester::readReply()
 {
+    currentRequestsNumber--;
     finishWaiter.wakeOne();
     
     RequestParameters parameters = requestQueue.dequeue();
@@ -337,7 +338,6 @@ void Requester::readReply()
                     break;
                 }
         }
-        currentRequestsNumber--;
     }
 }
 
