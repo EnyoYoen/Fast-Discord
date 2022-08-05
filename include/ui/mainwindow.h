@@ -22,12 +22,15 @@ public:
     ~MainWindow();
 
     void updateTheme();
+    bool logout;
 
 signals:
     void clientAndSettingsReceived();
 
-private slots:
+public slots:
     void reinit();
+
+private slots:
     void openSettingsMenu();
     void closeSettingsMenu();
 

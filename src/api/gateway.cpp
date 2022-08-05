@@ -52,6 +52,7 @@ void const Gateway::closeHandler()
 {
     // Reconnect when the connection is closed
     if (connected) {
+        if (client.closeCode() == QWebSocketProtocol::CloseCodeGoingAway) return;
         connected = false;
         client.open(QUrl(url + "?v=9&encoding=json"));
     }

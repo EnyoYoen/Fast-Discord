@@ -32,7 +32,7 @@ ScrollMenu::ScrollMenu(QWidget *parent)
     buttons.append(new MenuButton(MenuButton::ButtonType::ActivityStatus, scrollWidget, false));
     buttons.append(new MenuButton(MenuButton::ButtonType::WhatsNew, scrollWidget, false));
     buttons.append(new MenuButton(MenuButton::ButtonType::HypeSquad, scrollWidget, false));
-    buttons.append(new MenuButton(MenuButton::ButtonType::LogOut, scrollWidget, false));
+    buttons.append(new MenuButton(MenuButton::ButtonType::LogOut, scrollWidget, true));
 
     actualType = MenuButton::ButtonType::MyAccount;
     buttons[0]->setBackgroundColor(Settings::BackgroundModifierSelected);

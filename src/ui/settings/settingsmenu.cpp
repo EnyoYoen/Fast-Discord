@@ -1,6 +1,7 @@
 #include "ui/settings/settingsmenu.h"
 
 #include "ui/settings/components/closebutton.h"
+#include "ui/settings/components/popup.h"
 #include "ui/settings/menus/myaccount.h"
 #include "ui/settings/menus/userprofile.h"
 #include "ui/settings/menus/privacysafety.h"
@@ -69,6 +70,22 @@ SettingsMenu::SettingsMenu(Api::RessourceManager *rmp, QWidget *parent)
                 break;
             case MenuButton::ButtonType::Accessibility:
                 menu = new Accessibility(rm, this);
+                break;
+            case MenuButton::ButtonType::LogOut:
+                {
+                    QWidget *parentWidget = this;
+                    while (parentWidget->parent()) parentWidget = (Widget *)parentWidget->parent();
+                    PopUp *logOutPopUp = new PopUp(new Widget(), 440, 200, QString(), "Log Out", false, false, "Are you sure tou want to log out?", "Cancel", "Log Out", true, true, parentWidget->size(), parentWidget);
+                    QObject::connect(logOutPopUp, &PopUp::cancelled, [logOutPopUp](){logOutPopUp->deleteLater();});
+                    QObject::connect(logOutPopUp, &PopUp::done, [this, logOutPopUp](){
+                        logOutPopUp->deleteLater();
+                        MainWindow *mainWindow = reinterpret_cast<MainWindow *>(this->parentWidget());
+                        mainWindow->logout = true;
+                        mainWindow->reinit();
+                    });
+                    break;
+                }
+            default:
                 break;
         }
 

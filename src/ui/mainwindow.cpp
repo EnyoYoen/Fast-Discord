@@ -18,6 +18,8 @@ namespace Ui {
 
 MainWindow::MainWindow() : Widget(nullptr)
 {
+    logout = false;
+
     // Style the window
     // this->setWindowFlags(Qt::CustomizeWindowHint); Soon
     this->setGeometry(0, 0, 940, 728);
@@ -77,84 +79,92 @@ MainWindow::MainWindow() : Widget(nullptr)
 
 void MainWindow::reinit()
 {
-    bool ok;
-    QString newToken = QInputDialog::getText(this, "Re-enter your Discord token", "New Token", QLineEdit::Normal, QString(), &ok);
-    if (ok && !newToken.isEmpty()) {
-        if (rm) {
-            delete rm;
-            rm = nullptr;
-        }
-        if (mainLayout) {
-            delete mainLayout;
-            mainLayout = nullptr;
-        }
-        if (leftColumn) {
-            delete leftColumn;
-            leftColumn = nullptr;
-        }
-        if (middleColumn) {
-            delete middleColumn;
-            middleColumn = nullptr;
-        }
-        if (rightColumn) {
-            delete rightColumn;
-            rightColumn = nullptr;
-        }
-        if (settings) {
-            delete settings;
-            settings = nullptr;
-        }
+    QString newToken;
+    if (!logout) {
+        bool ok;
+        QString newToken = QInputDialog::getText(this, "Re-enter your Discord token", "New Token", QLineEdit::Normal, QString(), &ok);
+        if (!ok || newToken.isEmpty()) reinit();
+    }
 
+    if (mainLayout) {
+        delete mainLayout;
+        mainLayout = nullptr;
+    }
+    if (leftColumn) {
+        delete leftColumn;
+        leftColumn = nullptr;
+    }
+    if (middleColumn) {
+        delete middleColumn;
+        middleColumn = nullptr;
+    }
+    if (rightColumn) {
+        delete rightColumn;
+        rightColumn = nullptr;
+    }
+    if (settings) {
+        delete settings;
+        settings = nullptr;
+    }
+    if (rm) {
+        delete rm;
+        rm = nullptr;
+    }
+
+    if (logout) {
+        logout = false;
+        token = getAccountToken();
+    } else {
         Settings::changeToken(token, newToken);
         token = newToken;
-
-        rm = new Api::RessourceManager(token);
-        
-        QObject::connect(rm->requester, &Api::Requester::invalidToken, this, &MainWindow::reinit);  
-
-        Settings::initSettings(rm, token);
-
-        // Create all the widgets
-        mainLayout = new QHBoxLayout(this);
-        leftColumn = new LeftColumn(rm, this);
-        middleColumn = new MiddleColumn(rm, this);
-        rightColumn = new RightColumn(rm, this);
-        settings = new SettingsMenu(rm, this);
-        settings->hide();
-
-        // Add the column to the layout
-        mainLayout->addWidget(leftColumn);
-        mainLayout->addWidget(middleColumn);
-        mainLayout->addWidget(rightColumn);
-
-        // Style the layout
-        mainLayout->setSpacing(0);
-        mainLayout->setContentsMargins(0, 0, 0, 0);
-
-        this->setWindowIcon(QIcon("res/images/png/icon.png"));
-        this->setBackgroundColor(Settings::BackgroundPrimary);
-
-        // Connect signals to slots of the columns
-        QObject::connect(leftColumn, &LeftColumn::guildClicked, middleColumn, &MiddleColumn::openGuild);
-        QObject::connect(leftColumn, &LeftColumn::homeButtonClicked, middleColumn, &MiddleColumn::displayPrivateChannels);
-        QObject::connect(leftColumn, &LeftColumn::cleanRightColumn, rightColumn, &RightColumn::clean);
-        QObject::connect(middleColumn, &MiddleColumn::guildChannelClicked, rightColumn, &RightColumn::openGuildChannel);
-        QObject::connect(middleColumn, &MiddleColumn::privateChannelClicked, rightColumn, &RightColumn::openPrivateChannel);
-        QObject::connect(middleColumn, &MiddleColumn::voiceChannelClicked, rm, &Api::RessourceManager::call);
-        QObject::connect(middleColumn, &MiddleColumn::parametersClicked, this, &MainWindow::openSettingsMenu);
-        QObject::connect(rightColumn, &RightColumn::messageAdded, middleColumn, &MiddleColumn::putChannelFirst);
-        QObject::connect(settings, &SettingsMenu::closeClicked, this, &MainWindow::closeSettingsMenu);
-        QObject::connect(rm, &Api::RessourceManager::unreadUpdateReceived, leftColumn, &LeftColumn::setUnreadGuild);
-        QObject::connect(rm, &Api::RessourceManager::messageReceived, rightColumn, &RightColumn::addMessage);
-        QObject::connect(rm, &Api::RessourceManager::presenceReceived, middleColumn, &MiddleColumn::updatePresence);
-        QObject::connect(rm, &Api::RessourceManager::guildsReceived, leftColumn, &LeftColumn::displayGuilds);
-        QObject::connect(rm, &Api::RessourceManager::presencesReceived, middleColumn, &MiddleColumn::setPresences);
-        QObject::connect(rm, &Api::RessourceManager::privateChannelsReceived, middleColumn, &MiddleColumn::setPrivateChannels);
-        QObject::connect(rm, &Api::RessourceManager::channelCreated, middleColumn, &MiddleColumn::createChannel);
-        QObject::connect(rm, &Api::RessourceManager::channelUpdated, middleColumn, &MiddleColumn::updateChannel);
-        QObject::connect(rm, &Api::RessourceManager::channelDeleted, middleColumn, &MiddleColumn::deleteChannel);
-        QObject::connect(rm, &Api::RessourceManager::memberUpdateReceived, rightColumn, &RightColumn::setMembers);
     }
+
+    rm = new Api::RessourceManager(token);
+    
+    QObject::connect(rm->requester, &Api::Requester::invalidToken, this, &MainWindow::reinit);  
+
+    Settings::initSettings(rm, token);
+
+    // Create all the widgets
+    mainLayout = new QHBoxLayout(this);
+    leftColumn = new LeftColumn(rm, this);
+    middleColumn = new MiddleColumn(rm, this);
+    rightColumn = new RightColumn(rm, this);
+    settings = new SettingsMenu(rm, this);
+    settings->hide();
+
+    // Add the column to the layout
+    mainLayout->addWidget(leftColumn);
+    mainLayout->addWidget(middleColumn);
+    mainLayout->addWidget(rightColumn);
+
+    // Style the layout
+    mainLayout->setSpacing(0);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    this->setWindowIcon(QIcon("res/images/png/icon.png"));
+    this->setBackgroundColor(Settings::BackgroundPrimary);
+
+    // Connect signals to slots of the columns
+    QObject::connect(leftColumn, &LeftColumn::guildClicked, middleColumn, &MiddleColumn::openGuild);
+    QObject::connect(leftColumn, &LeftColumn::homeButtonClicked, middleColumn, &MiddleColumn::displayPrivateChannels);
+    QObject::connect(leftColumn, &LeftColumn::cleanRightColumn, rightColumn, &RightColumn::clean);
+    QObject::connect(middleColumn, &MiddleColumn::guildChannelClicked, rightColumn, &RightColumn::openGuildChannel);
+    QObject::connect(middleColumn, &MiddleColumn::privateChannelClicked, rightColumn, &RightColumn::openPrivateChannel);
+    QObject::connect(middleColumn, &MiddleColumn::voiceChannelClicked, rm, &Api::RessourceManager::call);
+    QObject::connect(middleColumn, &MiddleColumn::parametersClicked, this, &MainWindow::openSettingsMenu);
+    QObject::connect(rightColumn, &RightColumn::messageAdded, middleColumn, &MiddleColumn::putChannelFirst);
+    QObject::connect(settings, &SettingsMenu::closeClicked, this, &MainWindow::closeSettingsMenu);
+    QObject::connect(rm, &Api::RessourceManager::unreadUpdateReceived, leftColumn, &LeftColumn::setUnreadGuild);
+    QObject::connect(rm, &Api::RessourceManager::messageReceived, rightColumn, &RightColumn::addMessage);
+    QObject::connect(rm, &Api::RessourceManager::presenceReceived, middleColumn, &MiddleColumn::updatePresence);
+    QObject::connect(rm, &Api::RessourceManager::guildsReceived, leftColumn, &LeftColumn::displayGuilds);
+    QObject::connect(rm, &Api::RessourceManager::presencesReceived, middleColumn, &MiddleColumn::setPresences);
+    QObject::connect(rm, &Api::RessourceManager::privateChannelsReceived, middleColumn, &MiddleColumn::setPrivateChannels);
+    QObject::connect(rm, &Api::RessourceManager::channelCreated, middleColumn, &MiddleColumn::createChannel);
+    QObject::connect(rm, &Api::RessourceManager::channelUpdated, middleColumn, &MiddleColumn::updateChannel);
+    QObject::connect(rm, &Api::RessourceManager::channelDeleted, middleColumn, &MiddleColumn::deleteChannel);
+    QObject::connect(rm, &Api::RessourceManager::memberUpdateReceived, rightColumn, &RightColumn::setMembers);
 }
 
 void const MainWindow::addAccountInConfig(QSettings *settings, const QMap<QString, QString> accountMap) {

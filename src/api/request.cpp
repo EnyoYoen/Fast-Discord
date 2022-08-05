@@ -346,6 +346,7 @@ void Requester::RequestLoop()
     while (!stopped) {
         if (requestQueue.size() > currentRequestsNumber) {
             do {
+                if (requestQueue.isEmpty()) break;
                 RequestParameters parameters = requestQueue.front();
                 currentRequestsNumber++;
 
