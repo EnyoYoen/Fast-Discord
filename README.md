@@ -40,7 +40,7 @@ Open one of the request and search for the Authorization header in Request Heade
 Copy the token next to "Authorization"
 ## Build and Run
 ### Dependencies
-- Qt5 (Widgets, Network, WebSockets, Multimedia)
+- Qt5 (Widgets, Network, WebSockets, Multimedia, WebEngine)
 - Pthread
 - Opus
 - Sodium

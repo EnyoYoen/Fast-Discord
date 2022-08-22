@@ -1,5 +1,3 @@
-#pragma once
-
 #include "ui/rightcolumn/memberwidget.h" 
 
 namespace Ui {

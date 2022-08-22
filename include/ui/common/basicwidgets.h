@@ -3,6 +3,7 @@
 #include "settings/settings.h"
 
 #include <QWidget>
+#include <QLabel>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPen>
@@ -15,6 +16,7 @@ private:\
 	QImage img;\
 	QPixmap pm;\
 	QColor bgc = Settings::colors[Settings::None];\
+	QColor bdc = Settings::colors[Settings::None];\
 	Settings::ColorEnum bg = Settings::None;\
 	Settings::ColorEnum bd = Settings::None;\
 	QRect imgCoords;\
@@ -58,6 +60,11 @@ public:\
 	void setBorderColor(Settings::ColorEnum color)\
 	{\
 		bd = color;\
+		update();\
+	}\
+	void setBorderColor(QColor color)\
+	{\
+		bdc = color;\
 		update();\
 	}\
 	void setBorderSize(int border)\
@@ -139,7 +146,7 @@ protected:\
 		}\
 \
 		if (bdt) {\
-			QPen pen(Settings::colors[bd]);\
+			QPen pen((bdc == Settings::colors[Settings::None] ? Settings::colors[bd] : bdc));\
 			pen.setWidth(bdt);\
 			p.setPen(pen);\
 			p.drawLine(brtl, bdt/2, w - brtr, bdt/2);\
@@ -147,7 +154,7 @@ protected:\
 			p.drawArc(w-2*brtr, bdt/2, 2*brtr-bdt/2, 2*brtr, 45*16, 45*16);\
 		}\
 		if (bdl) {\
-			QPen pen(Settings::colors[bd]);\
+			QPen pen((bdc == Settings::colors[Settings::None] ? Settings::colors[bd] : bdc));\
 			pen.setWidth(bdl);\
 			p.setPen(pen);\
 			p.drawLine(bdt/2, brtl, bdt/2, h-brbl);\
@@ -155,7 +162,7 @@ protected:\
 			p.drawArc(bdt/2, h-2*brbl, 2*brbl, 2*brbl-bdt/2, 180*16, 45*16);\
 		}\
 		if (bdb) {\
-			QPen pen(Settings::colors[bd]);\
+			QPen pen((bdc == Settings::colors[Settings::None] ? Settings::colors[bd] : bdc));\
 			pen.setWidth(bdb);\
 			p.setPen(pen);\
 			p.drawLine(brbl, h-bdt/2, w - brbr, h-bdt/2);\
@@ -163,7 +170,7 @@ protected:\
 			p.drawArc(w-2*brbr, h-2*brbr, 2*brbr-bdt/2, 2*brbr-bdt/2, 270*16, 45*16);\
 		}\
 		if (bdr) {\
-			QPen pen(Settings::colors[bd]);\
+			QPen pen((bdc == Settings::colors[Settings::None] ? Settings::colors[bd] : bdc));\
 			pen.setWidth(bdr);\
 			p.setPen(pen);\
 			p.drawLine(w-bdt/2, brtr, w-bdt/2, h-brbr);\

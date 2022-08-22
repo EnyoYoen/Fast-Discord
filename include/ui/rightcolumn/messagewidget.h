@@ -43,6 +43,10 @@ private:
     void addImage(const QString& filename, int width, int height);
     QString const processTime(const QTime& time);
     QString const processTimestamp(const QDateTime& dateTime);
+    QString const getHashFileName(const QString& url);
+    void const createReply(Api::Message *ref);
+    Widget *createEmbed(Api::Embed *embed);
+    Widget *createEmbedField(Api::EmbedField *embedField);
 
     QString hoveredTimestamp;
     RoundedImage *avatar = nullptr;

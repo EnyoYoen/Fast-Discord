@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.1.0)
 project(
     Fast-Discord
     VERSION 0.0.1
@@ -66,6 +66,7 @@ set(SOURCES
     "src/ui/rightcolumn/downloadbutton.cpp"
     "src/ui/rightcolumn/downloadlink.cpp"
     "src/ui/rightcolumn/fileuploadbutton.cpp"
+    "src/ui/rightcolumn/link.cpp"
     "src/ui/rightcolumn/rightcolumn.cpp"
     "src/ui/rightcolumn/markdownlabel.cpp"
     "src/ui/rightcolumn/memberlist.cpp"
@@ -144,6 +145,7 @@ set(HEADERS
     "include/ui/rightcolumn/downloadbutton.h"
     "include/ui/rightcolumn/downloadlink.h"
     "include/ui/rightcolumn/fileuploadbutton.h"
+    "include/ui/rightcolumn/link.h"
     "include/ui/rightcolumn/rightcolumn.h"
     "include/ui/rightcolumn/markdownlabel.h"
     "include/ui/rightcolumn/memberlist.h"
