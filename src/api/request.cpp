@@ -95,7 +95,7 @@ void Requester::readReply()
 
     QByteArray ba = reply->readAll();
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-    if (statusCode.toInt() == 401 || statusCode.toInt() == 403) {
+    if (statusCode.toInt() == 401) {
         emit invalidToken();
     } else if (statusCode.toInt() == 429) { // We are rate limited
         // Set the end of the rate limit
