@@ -181,6 +181,7 @@ void RightColumn::clean()
 {
     rm->requester->removeRequests(Api::RequestTypes::GetImage);
     rm->requester->removeRequests(Api::RequestTypes::GetGuildMember);
+    rm->requester->removeRequests(Api::RequestTypes::GetUser);
 
     if (messagesLayout != nullptr) {
         messagesLayout->removeItem(messagesLayout->itemAt(1));
@@ -221,6 +222,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
     if (type != Api::GuildVoice) {
         rm->requester->removeRequests(Api::RequestTypes::GetImage);
         rm->requester->removeRequests(Api::RequestTypes::GetGuildMember);
+        rm->requester->removeRequests(Api::RequestTypes::GetUser);
         //rm->requester->removeRequests(Api::RequestTypes::GetMessages);
         messageArea->clear();
         if (inputBox != nullptr)

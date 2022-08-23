@@ -6,11 +6,160 @@
 
 namespace Ui {
 
+QString monthFromNumber(int num)
+{
+    switch (num) {
+        case 1:
+            return "January";
+        case 2:
+            return "February";
+        case 3:
+            return "March";
+        case 4:
+            return "April";
+        case 5:
+            return "May";
+        case 6:
+            return "June";
+        case 7:
+            return "July";
+        case 8:
+            return "August";
+        case 9:
+            return "September";
+        case 10:
+            return "October";
+        case 11:
+            return "November";
+        case 12:
+            return "December";
+        default:
+            return "";
+    }
+}
+
+QString dayFromNumber(int num)
+{
+    switch (num) {
+        case 1:
+            return "Monday";
+        case 2:
+            return "Tuesday";
+        case 3:
+            return "Wednesday";
+        case 4:
+            return "Thursday";
+        case 5:
+            return "Friday";
+        case 6:
+            return "Saturday";
+        case 7:
+            return "Sunday";
+        default:
+            return "";
+    }
+}
+
+QString processTime(QTime time, bool shortTime)
+{
+    return QString::number((time.hour() > 12 ? time.hour() - 12 : time.hour())) + ":"
+        + QString((time.minute() < 10 ? "0" : "")) + QString::number(time.minute())
+        + (shortTime ? "" : ":" + QString((time.second() < 10 ? "0" : "")) + QString::number(time.second()))
+        + (time.hour() > 12 ? " PM" : " AM");
+}
+
+QString processDate(QDate date, bool shortDate)
+{
+    return (shortDate ? QString::number(date.month()) + "/" : monthFromNumber(date.month()) + " ")
+        + QString::number(date.day()) + (shortDate ? "/" : ", ") + QString::number(date.year());
+}
+
+QString processTimestamp(QDateTime timestamp, char format)
+{
+    QString processed;
+    switch (format) {
+        case 't':
+            processed = processTime(timestamp.time(), true);
+            break;
+        case 'T':
+            processed = processTime(timestamp.time(), false);
+            break;
+        case 'd':
+            processed = processDate(timestamp.date(), true);
+            break;
+        case 'D':
+            processed = processDate(timestamp.date(), false);
+            break;
+        case 'f':
+            processed = processDate(timestamp.date(), false) + " at " + processTime(timestamp.time(), true);
+            break;
+        case 'F':
+            processed = dayFromNumber(timestamp.date().dayOfWeek()) + ", " + processDate(timestamp.date(), false) + " at " + processTime(timestamp.time(), true);
+            break;
+        case 'R':
+        {
+            QDateTime current = QDateTime::currentDateTime();
+            bool past = timestamp < current;
+            if (!past)
+                processed += "in ";
+            int yearDiff = (past ? current.date().year() - timestamp.date().year() : timestamp.date().year() - current.date().year());
+            int monthDiff = timestamp.date().month() - current.date().month();
+            monthDiff = (monthDiff < 0 ? -monthDiff : monthDiff);
+            if (yearDiff != 0 && !(yearDiff == 1 && monthDiff < 6)) {
+                if (yearDiff == 1)
+                    processed += (past ? "last year" : "next year");
+                else
+                    processed += QString::number(yearDiff) + " years";
+            } else {
+                int dayDiff = timestamp.date().day() - current.date().day();
+                dayDiff = (dayDiff < 0 ? -dayDiff : dayDiff);
+                if (monthDiff != 0 && !(monthDiff == 1 && dayDiff < 15)) {
+                    if (monthDiff == 1)
+                        processed += (past ? "last month" : "next month");
+                    else
+                        processed += QString::number(monthDiff) + " months";
+                } else {
+                    int hourDiff = timestamp.time().hour() - current.time().hour();
+                    hourDiff = (hourDiff < 0 ? -hourDiff : hourDiff);
+                    if (dayDiff != 0 && !(dayDiff == 1 && hourDiff < 12)) {
+                        if (dayDiff == 1)
+                            processed += (past ? "last day" : "next day");
+                        else
+                            processed += QString::number(dayDiff) + " days";
+                    } else {
+                        int minuteDiff = timestamp.time().minute() - current.time().minute();
+                        minuteDiff = (minuteDiff < 0 ? -minuteDiff : minuteDiff);
+                        if (hourDiff != 0 && !(hourDiff == 1 && minuteDiff < 12)) {
+                            if (hourDiff == 1)
+                                processed += (past ? "last hour" : "next hour");
+                            else
+                                processed += QString::number(hourDiff) + " hours";
+                        } else {
+                            int secondDiff = timestamp.time().second() - current.time().second();
+                            secondDiff = (secondDiff < 0 ? -secondDiff : secondDiff);
+                            if (secondDiff != 0) {
+                                processed += QString::number(secondDiff) + (secondDiff > 1 ? " seconds" : "second");
+                            } else {
+                                processed = "now";
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (past)
+                processed += " ago";
+            break;
+        }
+    }
+    return processed;
+}
+
 MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, QWidget *parent)
     : QLabel(parent)
 {
     if (!content.isNull() && !content.isEmpty()) {
-        QString html = "<html>";
+        html = "<html>";
         bool block = false, firstCharFound = false;
         int boldEnd = 0, italicStarEnd = 0, italicUnderscoreEnd = 0, underlineEnd = 0
             , barredEnd = 0, simpleCodeBlockEnd = 0, multiCodeBlockEnd = 0;
@@ -46,7 +195,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                 } else if (content[i] == '`') {
                     if (i + 2 < content.size() && content[i + 1] == '`' && content[i + 2] == '`') {
                         if ((multiCodeBlockEnd = content.indexOf("```", i + 1)) != -1) {
-                            html += "<div>";
+                            html += "<code>";
                             i += 2;
                             block = true;
                             special = true;
@@ -126,7 +275,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                 simpleCodeBlockEnd = 0;
                 special = true;
             } else if (multiCodeBlockEnd == i) {
-                html += "</div>";
+                html += "</code>";
                 multiCodeBlockEnd = 0;
                 i += 2;
                 special = true;
@@ -142,13 +291,44 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                 } else if (content[i] == ' ' && !firstCharFound) {
                     html += "&nbsp;";
                 } else if (content[i] == '<') {
-                    int emojiNameEnd = content.indexOf(':', i + 2);
-                    int emojiIdEnd = content.indexOf('>', i + 1);
-                    if (content[i + 1] == ':' && emojiNameEnd != -1 && emojiIdEnd != -1 && emojiIdEnd < content.indexOf("\n") && emojiNameEnd < emojiIdEnd) {
-                        QString fileName = content.mid(emojiNameEnd + 1, emojiIdEnd - emojiNameEnd - 1) + ".webp";
-                        //html += "<img src=\"cache/" + fileName + "\">";
-                        //rm->getImage([this](void *){}, "https://cdn.discordapp.com/emojis/" + fileName, fileName);
-                        i += emojiIdEnd - i;
+                    int specialIdEnd = content.indexOf('>', i + 1);
+                    int newLineIndex = content.indexOf("\n", i + 1);
+                    if (specialIdEnd != -1 && (specialIdEnd < newLineIndex || newLineIndex == -1)) {
+                        QStringList specialTokens = content.mid(i + 1, specialIdEnd - i - 1).split(':');
+                        int specialNameEnd = content.indexOf(':', i + 3);
+                        if (specialTokens.size() == 3) {
+                            if (specialTokens[0].isEmpty() || specialTokens[0][0] == 'a') { // emoji
+                                QString fileName = specialTokens[2] + ".webp";
+                                html += "<img src=\"cache/" + fileName + "\" height=\"" + QString::number(Settings::scale(20)) + "\" width=\"" + QString::number(Settings::scale(20)) + "\">";
+                                rm->getImage([this](void *){this->update();}, "https://cdn.discordapp.com/emojis/" + fileName, fileName);
+                            } else if (specialTokens[0][0] == 't') { // timestamp
+                                html += processTimestamp(QDateTime::fromSecsSinceEpoch(specialTokens[1].toInt()).toLocalTime(), specialTokens[2][0].toLatin1());
+                            }
+                        } else {
+                            if (specialTokens[0][0] == '#') { // channel
+                                block = true;
+                                rm->getGuilds([=](void *guildsPtr){
+                                    Api::Snowflake channelId = Api::Snowflake(content.mid(i + 2, specialIdEnd - i - 2).toULongLong());
+                                    QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                                    for (int i = 0 ; i < guilds.size() ; i++) {
+                                        for (int j = 0 ; j < guilds[i]->channels.size() ; j++) {
+                                            if (channelId == guilds[i]->channels[j]->id)
+                                                html += "<span class=\"highlight\">#" + guilds[i]->channels[j]->name + "</span>";
+                                        }
+                                    }
+                                });
+                            } else if (specialTokens[0][0] == '@') { // user
+                                block = true;
+                                int userIndex = html.size();
+                                int savedOffset = usernamesOffset;
+                                rm->getUser([=](void *userPtr){
+                                    html.insert(userIndex + usernamesOffset - savedOffset, "<span class=\"highlight\">@" + reinterpret_cast<Api::User *>(userPtr)->username + "</span>");
+                                    usernamesOffset += reinterpret_cast<Api::User *>(userPtr)->username.size() + 32;
+                                    if (finished) this->setText(html);
+                                }, specialTokens[0].mid(1).toULongLong());
+                            }
+                        }
+                        i += specialIdEnd - i;
                     } else {
                         html += "&lt;";
                         firstCharFound = true;
@@ -169,17 +349,24 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
             }
         }
         if (block) {
-            html.insert(6, "<style>"
-                    "*{color:" + Settings::colors[Settings::TextNormal].name() + ";}"
-                    "span{"
-                      "background-color:" + Settings::colors[Settings::InteractiveMuted].name() + ";"
-                      "border-radius:2px;"
-                    "}"
-                    "code,div{"
-                      "background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + ";"
-                      "margin-bottom:0px;"
-                    "}"
-                    "</style>");
+            QString style = "<style>"
+                "*{color:" + Settings::colors[Settings::TextNormal].name() + ";}"
+                "span{"
+                    "background-color:" + Settings::colors[Settings::InteractiveMuted].name() + ";"
+                    "border-radius:" + QString::number(Settings::scale(2)) + "px;"
+                "}"
+                "code{"
+                    "background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + ";"
+                    "margin-bottom:0px;"
+                "}"
+                ".highlight{"
+                    "background-color: hsl(235, calc(" + QString::number(Settings::saturation) + "*85.6%), 64.7%);"
+                    "color:" + Settings::colors[Settings::BrandExperiment200].name() + ";"
+                    "border-radius:" + QString::number(Settings::scale(3)) + "px;"
+                    "padding: 0 " + QString::number(Settings::scale(2)) + "px;"
+                "}"
+                "</style>";
+            html.insert(html.size(), style);
         }
         html += "</html>";
 
@@ -193,6 +380,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
         this->setCursor(QCursor(Qt::IBeamCursor));
         this->setStyleSheet("background-color:" + Settings::colors[Settings::BackgroundPrimary].name()
          + ";color:" + Settings::colors[Settings::InteractiveHover].name());
+        finished = true;
     }
 }
 

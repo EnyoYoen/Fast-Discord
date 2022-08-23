@@ -53,6 +53,7 @@ public:
         ButtonOutlineDangerBorderActive,
         InfoDangerForeground,
         BrandExperiment,
+        BrandExperiment200,
         BrandExperiment560,
         BrandExperiment600,
         StatusOffline,

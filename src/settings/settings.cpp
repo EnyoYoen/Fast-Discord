@@ -161,6 +161,7 @@ void Settings::initSettings(Api::RessourceManager *rm, QString tokenp)
     colors[StatusIdle]         = QColor::fromHsl(38, (int)(saturation * 255), (int)(0.541 * 255));
     colors[StatusDND]          = QColor::fromHsl(359, (int)(saturation * 255), (int)(0.594 * 255));
     colors[BrandExperiment]    = QColor::fromHsl(235, (int)(0.856 * saturation * 255), (int)(0.647 * 255));
+    colors[BrandExperiment200] = QColor::fromHsl(236, (int)(0.833 * saturation * 255), (int)(0.929 * 255));
     colors[BrandExperiment560] = QColor::fromHsl(235, (int)(0.514 * saturation * 255), (int)(0.524 * 255));
     colors[BrandExperiment600] = QColor::fromHsl(235, (int)(0.467 * saturation * 255), (int)(0.441 * 255));
     colors[UnsavedBackground]  = QColor(32, 34, 37, 229);
