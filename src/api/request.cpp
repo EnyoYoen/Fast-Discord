@@ -53,9 +53,8 @@ void const Requester::writeFile()
 void Requester::readReply()
 {
     currentRequestsNumber--;
-    finishWaiter.wakeOne();
     
-    RequestParameters parameters = requestQueue.dequeue();
+    RequestParametersNoCb parameters = requestQueue.dequeue();
     
     bool returnAfter = false;
     if (typesToCheck.contains((RequestTypes)parameters.type))
@@ -81,7 +80,10 @@ void Requester::readReply()
                 typesToCheck.remove(types[i]);
         }
     }
-    if (returnAfter) return;
+    if (returnAfter) {
+        finishWaiter.wakeOne();
+        return;
+    }
 
     if (parameters.outputFile != "" && parameters.type == GetImage) {
         QDir dir("cache/");
@@ -339,6 +341,7 @@ void Requester::readReply()
                 }
         }
     }
+    finishWaiter.wakeOne();
 }
 
 void Requester::RequestLoop()
@@ -347,7 +350,7 @@ void Requester::RequestLoop()
         if (requestQueue.size() > currentRequestsNumber) {
             do {
                 if (requestQueue.isEmpty()) break;
-                RequestParameters parameters = requestQueue.front();
+                RequestParametersNoCb parameters = requestQueue.front();
                 currentRequestsNumber++;
 
                 if (rateLimitEnd > 0) {
@@ -439,14 +442,23 @@ void Requester::doRequest(int requestType, QNetworkRequest request, QByteArray *
 
 void Requester::requestApi(const RequestParameters &parameters)
 {
-    if (!requestsCallbacks.contains(parameters)) {
-        requestQueue.enqueue(parameters);
+    RequestParametersNoCb newParams{
+        parameters.url,
+        parameters.postDatas,
+        parameters.customRequest,
+        parameters.fileName,
+        parameters.outputFile,
+        parameters.type,
+        parameters.json,
+    };
+    if (!requestsCallbacks.contains(newParams)) {
+        requestQueue.enqueue(newParams);
     }
-    requestsCallbacks[parameters].append(parameters.callback);
+    requestsCallbacks[newParams].append(parameters.callback);
     requestWaiter.wakeAll();
 }
 
-void Requester::callCallbacks(const RequestParameters& parameters, void *data)
+void Requester::callCallbacks(const RequestParametersNoCb& parameters, void *data)
 {
     QVector<Callback> callbacks = requestsCallbacks[parameters];
     requestsCallbacks.remove(parameters);
@@ -459,8 +471,8 @@ void Requester::removeRequests(RequestTypes type)
 {
     if (currentRequestsNumber != 0)
         typesToCheck[type] = currentRequestsNumber;
-    for (unsigned int i = requestQueue.size() ; i > 0 ; i--) {
-        RequestParameters temp = requestQueue.dequeue();
+    for (int i = requestQueue.size() ; i > currentRequestsNumber ; i--) {
+        RequestParametersNoCb temp = requestQueue.dequeue();
         if (temp.type != type) requestQueue.enqueue(temp);
     }
 }
@@ -469,8 +481,8 @@ void Requester::removeRequestWithUrl(const QString& url)
 {
     if (currentRequestsNumber != 0)
         urlsTocheck[url] = currentRequestsNumber;
-    for (unsigned int i = requestQueue.size() ; i > 0 ; i--) {
-        RequestParameters temp = requestQueue.dequeue();
+    for (int i = requestQueue.size() ; i > currentRequestsNumber ; i--) {
+        RequestParametersNoCb temp = requestQueue.dequeue();
         if (temp.url != url) requestQueue.enqueue(temp);
     }
 }

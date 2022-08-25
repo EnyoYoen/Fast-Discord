@@ -204,8 +204,10 @@ void MemberList::setMembers(Api::GuildMemberGateway members)
             if (members.ops[i] == Api::GuildMemberOp::Update) {
                 Api::GuildMemberUpdate *update = reinterpret_cast<Api::GuildMemberUpdate *>(members.structs[i]);
                 QLayoutItem *item = layout->itemAt(update->index);
-                layout->removeItem(item);
-                item->widget()->deleteLater();
+                if (item != nullptr) {
+                    layout->removeItem(item);
+                    item->widget()->deleteLater();
+                }
 
                 if (update->memberOrGroup->member) {
                     Api::GuildMember *member = reinterpret_cast<Api::GuildMember *>(update->memberOrGroup->content);
@@ -254,8 +256,10 @@ void MemberList::setMembers(Api::GuildMemberGateway members)
             } else if (members.ops[i] == Api::GuildMemberOp::Delete) {
                 Api::GuildMemberDelete *deletes = reinterpret_cast<Api::GuildMemberDelete *>(members.structs[i]);
                 QLayoutItem *item = layout->itemAt(deletes->index);
-                layout->removeItem(item);
-                item->widget()->deleteLater();
+                if (item != nullptr) {
+                    layout->removeItem(item);
+                    item->widget()->deleteLater();
+                }
             } else if (members.ops[i] == Api::GuildMemberOp::Insert) {
                 Api::GuildMemberInsert *insert = reinterpret_cast<Api::GuildMemberInsert *>(members.structs[i]);
 

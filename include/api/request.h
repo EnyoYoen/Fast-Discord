@@ -67,10 +67,21 @@ enum RequestTypes {
 
 struct RequestParameters
 {
-    RequestParameters operator=(RequestParameters other)
+    Callback callback;
+    const QString url;
+    const QString postDatas;
+    const QString customRequest;
+    const QString fileName;
+    const QString outputFile;
+    int type;
+    bool json;
+};
+
+struct RequestParametersNoCb
+{
+    RequestParametersNoCb operator=(RequestParametersNoCb other)
     {
-        return RequestParameters {
-            other.callback,
+        return RequestParametersNoCb {
             other.url,
             other.postDatas,
             other.customRequest,
@@ -81,7 +92,7 @@ struct RequestParameters
         };
     }
 
-    bool operator==(const RequestParameters& other) const {
+    bool operator==(const RequestParametersNoCb& other) const {
         return (url == other.url
             && postDatas == other.postDatas
             && customRequest == other.customRequest
@@ -91,7 +102,6 @@ struct RequestParameters
             && json == other.json);
     }
 
-    Callback callback;
     const QString url;
     const QString postDatas;
     const QString customRequest;
@@ -153,7 +163,6 @@ public:
         }
     }
 
-private:
     QVector<K> keys;
     QVector<V> values;
 };
@@ -223,7 +232,7 @@ private slots:
 private:
     QNetworkAccessManager netManager;
     QNetworkReply *reply;
-    QQueue<RequestParameters> requestQueue;     // Queue of request parameters
+    QQueue<RequestParametersNoCb> requestQueue;     // Queue of request parameters
     QMutex finishLock;
     QMutex requestLock;
     QWaitCondition requestWaiter;               // The loop waits when there is no request
@@ -231,7 +240,7 @@ private:
     QThread *loop;                              // Request loop
     QMap<QString, int> urlsTocheck;
     QMap<RequestTypes, int> typesToCheck;
-    Map<RequestParameters, QVector<Callback>> requestsCallbacks;
+    Map<RequestParametersNoCb, QVector<Callback>> requestsCallbacks;
     QString token;                              // Authorization token
     QString emailToken;
     double rateLimitEnd;                        // Unix time that represents the moment of the end of the rate limit
@@ -239,7 +248,7 @@ private:
     bool stopped;                               // Used to stop the request loop
 
     // The function that contains the request loop
-    void callCallbacks(const RequestParameters& parameters, void *data);
+    void callCallbacks(const RequestParametersNoCb& parameters, void *data);
     void RequestLoop();
 };
 
