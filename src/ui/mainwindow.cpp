@@ -84,7 +84,10 @@ void MainWindow::reinit()
         bool ok;
         QString newToken = QInputDialog::getText(this, "Re-enter your Discord token", "New Token", QLineEdit::Normal, QString(), &ok);
         if (!ok || newToken.isEmpty()) reinit();
-        else exit(0);
+        else {
+            Settings::changeToken(token, newToken);
+            exit(0);
+        }
     }
 
     if (mainLayout) {

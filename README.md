@@ -33,13 +33,13 @@ You can compile Fast-Discord if it is not available for your operating system or
 Go to https://discord.com/login without logging in  
 Press Ctrl+Shift+I to open the Web Developer Tools  
 Go to the Network tab  
-![](doc/images/Network-tab.png)
+![](doc/images/Network-tab.png)  
 Press XHR  
-![](doc/images/XHR.png)
+![](doc/images/XHR.png)  
 Now log in : network requests should appear  
-![](doc/images/Requests.png)
+![](doc/images/Requests.png)  
 Open one of the request and search for the Authorization header in Request Headers (If it is not here, open an other request)  
-![](doc/images/Authorization.png)
+![](doc/images/Authorization.png)  
 Copy the token next to "Authorization"
 ## Build and Run
 ### Dependencies
