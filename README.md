@@ -14,7 +14,10 @@
 
 This project is really huge and requires a lot of time so any help is welcome, from the smallest syntax correction to major changes.
 ## Download
-You can get Fast-Discord in the artifacts of the latest workflow in the [Actions](https://github.com/EnyoYoen/Fast-Discord/actions) tab if you are connected to your GitHub account.
+- [Windows](https://nightly.link/EnyoYoen/Fast-Discord/workflows/build-windows/main/Fast-Discord%20-%20Windows%20x64.zip)
+- [MacOs](https://nightly.link/EnyoYoen/Fast-Discord/workflows/build-macos/main/Fast-Discord%20-%20MacOs%20x64.zip)
+- [Linux](https://nightly.link/EnyoYoen/Fast-Discord/workflows/build-linux/main/Fast-Discord%20-%20Linux%20x64.zip)  
+
 For Linux and MacOs, you need to install some dependencies :
 - Debian / Ubuntu : 
 ```shell
