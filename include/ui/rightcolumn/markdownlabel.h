@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/common/basicwidgets.h"
 #include "api/ressourcemanager.h"
 
 #include <QLabel>
@@ -9,7 +10,7 @@ namespace Ui {
 class MarkdownLabel : public QLabel
 {
 public:
-    MarkdownLabel(const QString& content, Api::RessourceManager *rm, QWidget *parent);
+    MarkdownLabel(const QString& content, Settings::ColorEnum color, Api::RessourceManager *rm, QWidget *parent);
 
 private:
     QString html;

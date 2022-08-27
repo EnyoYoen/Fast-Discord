@@ -104,7 +104,7 @@ void MessageWidget::updateFont()
     if (replyContent != nullptr) {
         username->setFont(font);
         replyContent->setFont(font);
-        replyContent->setFixedSize(QFontMetrics(font).horizontalAdvance(replyContent->text), Settings::scale(18));
+        //replyContent->setFixedSize(QFontMetrics(font).horizontalAdvance(replyContent->text), Settings::scale(18));
     }
     
     font.setPixelSize(Settings::scale(Settings::fontScaling - 4));
@@ -316,12 +316,11 @@ void const MessageWidget::createReply(Api::Message *ref)
         });
     }
 
-    replyContent = new Label(ref->content.replace('\n', "  "), nullptr);
+    replyContent = new MarkdownLabel(ref->content.replace('\n', "  "), Settings::InteractiveNormal, rm, nullptr);
     replyContent->setFont(font);
     replyContent->setFixedSize(QFontMetrics(font).horizontalAdvance(ref->content), Settings::scale(18));
     replyContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     replyContent->setCursor(QCursor(Qt::PointingHandCursor));
-    replyContent->setTextColor(Settings::InteractiveNormal);
 
     replyLayout->addWidget(username);
     replyLayout->addWidget(replyContent);
@@ -342,8 +341,7 @@ Widget *MessageWidget::createEmbedField(Api::EmbedField *embedField)
     Label *fieldName = new Label(embedField->name, embedFieldWidget);
     fieldName->setFixedSize(Settings::scale(QFontMetrics(font).horizontalAdvance(embedField->name)), Settings::scale(20 * (embedField->name.count('\n') + 1)));
 
-    Label *fieldValue = new Label(embedField->value, embedFieldWidget);
-    fieldName->setFixedSize(Settings::scale(QFontMetrics(font).horizontalAdvance(embedField->value)), Settings::scale(15 * (embedField->value.count('\n') + 1)));
+    MarkdownLabel *fieldValue = new MarkdownLabel(embedField->value, Settings::InteractiveHover, rm, embedFieldWidget);
 
     embedFieldLayout->addWidget(fieldName);
     embedFieldLayout->addWidget(fieldValue);
@@ -409,9 +407,7 @@ Widget *MessageWidget::createEmbed(Api::Embed *embed)
     if (!embed->title.isNull()) {
         font.setPixelSize(Settings::scale(Settings::fontScaling));
         if (embed->url.isNull()) {
-            Label *title = new Label(embed->title, embedContent);
-            title->setTextColor(Settings::HeaderPrimary);
-            title->setFixedSize(Settings::scale(QFontMetrics(font).horizontalAdvance(embed->title)), Settings::scale(20 * (embed->title.count('\n') + 1)));
+            MarkdownLabel *title = new MarkdownLabel(embed->title, Settings::HeaderPrimary, rm, embedContent);
             contentLayout->addWidget(title);
         } else {
             Link *titleLink = new Link(embed->title, embed->url, Settings::scale(Settings::fontScaling - 3), Settings::Link, embedContent);
@@ -422,9 +418,7 @@ Widget *MessageWidget::createEmbed(Api::Embed *embed)
 
     if (!embed->description.isNull()) {
         font.setPixelSize(Settings::scale(Settings::fontScaling - 3));
-        Label *description = new Label(embed->description, embedContent);
-        description->setTextColor(Settings::TextNormal);
-        description->setFixedSize(Settings::scale(QFontMetrics(font).horizontalAdvance(embed->description)), Settings::scale(20 * (embed->description.count('\n') + 1)));
+        MarkdownLabel *description = new MarkdownLabel(embed->description, Settings::TextNormal, rm, embedContent);
         contentLayout->addWidget(description);
     }
 
@@ -707,7 +701,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
     // Create and style the content label
     content = nullptr;
     if (!message->content.isNull() && !message->content.isEmpty()) {
-        content = new MarkdownLabel(message->content, rm, this);
+        content = new MarkdownLabel(message->content, Settings::InteractiveHover, rm, this);
         if (Settings::compactModeEnabled) {
             compactLayout->addWidget(content, 1);
         } else {

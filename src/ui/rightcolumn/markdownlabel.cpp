@@ -1,7 +1,5 @@
 #include "ui/rightcolumn/markdownlabel.h"
 
-#include "ui/common/basicwidgets.h"
-
 #include <QFontMetrics>
 
 namespace Ui {
@@ -155,7 +153,7 @@ QString processTimestamp(QDateTime timestamp, char format)
     return processed;
 }
 
-MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, QWidget *parent)
+MarkdownLabel::MarkdownLabel(const QString& content, Settings::ColorEnum color, Api::RessourceManager *rm, QWidget *parent)
     : QLabel(parent)
 {
     if (!content.isNull() && !content.isEmpty()) {
@@ -203,7 +201,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                             multiCodeBlockEnd = 0;
                         }
                     } else {
-                        if ((simpleCodeBlockEnd = content.indexOf('`', i + 1)) != -1 && simpleCodeBlockEnd < content.indexOf('\n', i + 1)) {
+                        if ((simpleCodeBlockEnd = content.indexOf('`', i + 1)) != -1) {
                             html += "<code>";
                             block = true;
                             special = true;
@@ -213,7 +211,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                     }
                 } else if (content[i] == '_') {
                     if (i + 1 < content.size() && content[i + 1] == '_') {
-                        if (underlineEnd == 0 && (underlineEnd = content.indexOf("__", i + 2)) != -1 && underlineEnd < content.indexOf('\n', i + 2)) {
+                        if (underlineEnd == 0 && (underlineEnd = content.indexOf("__", i + 2)) != -1) {
                             html += "<u>";
                             i++;
                             special = true;
@@ -222,9 +220,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                         }
                     } else {
                         if (italicUnderscoreEnd == 0 && italicStarEnd == 0
-                            && (italicUnderscoreEnd = content.indexOf('_', i + 1)) != -1 && italicUnderscoreEnd < content.indexOf('\n', i + 1)
-                            && (content[italicUnderscoreEnd + 1] < '0' || (content[italicUnderscoreEnd + 1] > '9' && content[italicUnderscoreEnd + 1] < 'A')
-                            || (content[italicUnderscoreEnd + 1] > 'Z' && content[italicUnderscoreEnd + 1] < 'a') || content[italicUnderscoreEnd + 1] > 'z')) {
+                            && (italicUnderscoreEnd = content.indexOf('_', i + 1)) != -1) {
                                 html += "<i>";
                                 special = true;
                         } else {
@@ -237,7 +233,8 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                             int end = 0;
                             if (boldEnd == 0 && italicStarEnd == 0 && italicUnderscoreEnd == 0
                                     && (end = content.indexOf("***", i + 3)) != -1
-                                    && end < content.indexOf('\n', i + 3)) {
+                                    && end < content.indexOf('\n', i + 3)
+                                    && !content[i + 3].isSpace()) {
                                 boldEnd = end;
                                 italicStarEnd = end + 2;
                                 html += "<i><b>";
@@ -245,7 +242,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                                 special = true;
                             }
                         } else {
-                            if (boldEnd == 0 && (boldEnd = content.indexOf("**", i + 2)) != -1 && boldEnd < content.indexOf('\n', i + 2)) {
+                            if (boldEnd == 0 && (boldEnd = content.indexOf("**", i + 2)) != -1 && !content[i + 2].isSpace()) {
                                 html += "<b>";
                                 i++;
                                 special = true;
@@ -254,7 +251,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                             }
                         }
                     } else {
-                        if (italicStarEnd == 0 && (italicStarEnd = content.indexOf('*', i + 1)) != -1 && italicStarEnd < content.indexOf('\n', i + 1)) {
+                        if (italicStarEnd == 0 && (italicStarEnd = content.indexOf('*', i + 1)) != -1 && !content[i + 1].isSpace() && content[i + 1] != '\n') {
                             html += "<i>";
                             special = true;
                         } else {
@@ -262,7 +259,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                         }
                     }
                 } else if (i + 1 < content.size() && content[i] == '~' && content[i + 1] == '~') {
-                    if (barredEnd == 0 && (barredEnd = content.indexOf("~~", i + 2)) != -1 && barredEnd < content.indexOf('\n', i + 2)) {
+                    if (barredEnd == 0 && (barredEnd = content.indexOf("~~", i + 2)) != -1) {
                         html += "<strike>";
                         i++;
                         special = true;
@@ -326,6 +323,8 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
                                     usernamesOffset += reinterpret_cast<Api::User *>(userPtr)->username.size() + 32;
                                     if (finished) this->setText(html);
                                 }, specialTokens[0].mid(1).toULongLong());
+                            } else {
+                                html += content.mid(i + 1, specialIdEnd - i - 1);
                             }
                         }
                         i += specialIdEnd - i;
@@ -378,8 +377,7 @@ MarkdownLabel::MarkdownLabel(const QString& content, Api::RessourceManager *rm, 
         this->setWordWrap(true);
         this->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
         this->setCursor(QCursor(Qt::IBeamCursor));
-        this->setStyleSheet("background-color:" + Settings::colors[Settings::BackgroundPrimary].name()
-         + ";color:" + Settings::colors[Settings::InteractiveHover].name());
+        this->setStyleSheet("color:" + Settings::colors[color].name());
         finished = true;
     }
 }

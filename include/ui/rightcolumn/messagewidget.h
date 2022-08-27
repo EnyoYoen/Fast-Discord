@@ -56,11 +56,11 @@ private:
     Label *timestampLabel = nullptr;
     Label *textLabel = nullptr;
     Label *date = nullptr;
-    Label *replyContent = nullptr;
     Widget *mainMessage = nullptr;
     Widget *reply = nullptr;
     Widget *iconContainer = nullptr;
     MarkdownLabel *content = nullptr;
+    MarkdownLabel *replyContent = nullptr;
     QVBoxLayout *dataLayout = nullptr;
     int heightp = 0;
     bool isFirst;
