@@ -202,6 +202,8 @@ void RightColumn::clean()
 
 void RightColumn::openGuildChannel(const QString& channelName, const Api::Snowflake& guildId, const Api::Snowflake& id)
 {
+    currentOpenedGuild = guildId;
+    currentChannelName = channelName;
     rm->getGuildChannel([&](void *channel){
         openChannel(id, "#" + channelName, reinterpret_cast<Api::Channel *>(channel)->type, 
             QVector<Api::Snowflake>());
@@ -210,6 +212,8 @@ void RightColumn::openGuildChannel(const QString& channelName, const Api::Snowfl
 
 void RightColumn::openPrivateChannel(const QString& channelName, const Api::Snowflake& id)
 {
+    currentOpenedGuild = Api::Snowflake(0);
+    currentChannelName = channelName;
     rm->getPrivateChannel([&](void *channel){
         int type = reinterpret_cast<Api::PrivateChannel *>(channel)->type;
         openChannel(id, (type == Api::DM ? "@" : "") + channelName, reinterpret_cast<Api::PrivateChannel *>(channel)->type, 
@@ -432,15 +436,18 @@ void RightColumn::setMembers(Api::GuildMemberGateway members)
 
 void RightColumn::updateTheme()
 {
-    if (memberList) {
-        memberList->setStyleSheet("* {background-color:" + Settings::colors[Settings::BackgroundSecondary].name() + "; border: none;}"
-                        "QScrollBar::handle:vertical {border: none; border-radius: " + QString::number(Settings::scale(2)) + "px; background-color: " + Settings::colors[Settings::BackgroundTertiary].name() + ";}"
-                        "QScrollBar:vertical {border: none; background-color: " + Settings::colors[Settings::BackgroundSecondary].name() + "; border-radius: " + QString::number(Settings::scale(2)) + "px; width: " + QString::number(Settings::scale(4)) + "px;}"
-                        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {border:none; background: none; height: 0;}"
-                        "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
-                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
+    if (currentOpenedGuild == 0) {
+        rm->getPrivateChannel([this](void *channel){
+            int type = reinterpret_cast<Api::PrivateChannel *>(channel)->type;
+            openChannel(currentOpenedChannel, (type == Api::DM ? "@" : "") + currentChannelName, reinterpret_cast<Api::PrivateChannel *>(channel)->type, 
+                reinterpret_cast<Api::PrivateChannel *>(channel)->recipientIds);
+        }, currentOpenedChannel);
+    } else {
+        rm->getGuildChannel([this](void *channel){
+            openChannel(currentOpenedChannel, "#" + currentChannelName, reinterpret_cast<Api::Channel *>(channel)->type, 
+                QVector<Api::Snowflake>());
+        }, currentOpenedGuild, currentOpenedChannel);
     }
-    messageArea->updateTheme();
 }
 
 } // namespace Ui

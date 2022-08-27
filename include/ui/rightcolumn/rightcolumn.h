@@ -65,6 +65,8 @@ private:
     QString filePath;
 
     Api::Snowflake currentOpenedChannel; // Current channel ID
+    Api::Snowflake currentOpenedGuild;   // Current guild ID
+    QString currentChannelName;          // Current channel name
     long typingTimestamp;                // The timestamp of the start of the typing
 };
 

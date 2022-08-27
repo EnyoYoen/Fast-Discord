@@ -199,6 +199,14 @@ Appearance::Appearance(Api::RessourceManager *rm, QWidget *parent)
         Settings::compactModeEnabled = (index == 1);
         Settings::saveSettings();
 
+        messageArea->updateTheme();
+
+        QWidget *parentWidget = this;
+        while (parentWidget->parent()) parentWidget = (Widget *)parentWidget->parent();
+        parentWidget->update();
+
+        reinterpret_cast<SettingsMenu *>(this->parent())->updateTheme();
+
         if (index == 0)
             rm->requester->setSettingsProto([](void *){}, "MjsiCgoIT05fQ0xJQ0tKAggBUgIIAVoCCAFiAggBagIIAXICCAF6AIIBAggBigEAmgECCAKiAQCqAQIIAQ==");
         else
