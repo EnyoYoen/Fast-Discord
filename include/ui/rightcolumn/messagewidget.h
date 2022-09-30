@@ -47,6 +47,8 @@ private:
     void const createReply(Api::Message *ref);
     Widget *createEmbed(Api::Embed *embed);
     Widget *createEmbedField(Api::EmbedField *embedField);
+    Widget *createReaction(const Api::Reaction& reaction);
+    Widget *createReactions(QVector<Api::Reaction *> reactions);
 
     QString hoveredTimestamp;
     RoundedImage *avatar = nullptr;

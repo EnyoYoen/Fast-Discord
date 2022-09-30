@@ -514,6 +514,52 @@ Widget *MessageWidget::createEmbed(Api::Embed *embed)
     return embedWidget;
 }
 
+Widget *MessageWidget::createReaction(const Api::Reaction& reaction)
+{
+    Widget *reactionContainer = new Widget();
+    reactionContainer->setFixedHeight(Settings::scale(20));
+    reactionContainer->setContentsMargins(Settings::scale(2), Settings::scale(6), Settings::scale(2), Settings::scale(6));
+    reactionContainer->setBorderRadius(Settings::scale(8));
+    reactionContainer->setBackgroundColor(Settings::BackgroundTertiary);
+    QHBoxLayout *reactionsLayout = new QHBoxLayout(reactionContainer);
+    reactionsLayout->setContentsMargins(0, 0, 0, 0);
+    reactionsLayout->setSpacing(Settings::scale(6));
+
+    Label *emoji = new Label(reactionContainer);
+    emoji->setFixedSize(Settings::scale(16), Settings::scale(16));
+    if (reaction.emoji.id.value) {
+        rm->getImage([emoji](void *fileName){
+            emoji->setImage(*reinterpret_cast<QString *>(fileName));
+        }, "https://cdn.discordapp.com/emojis/" + reaction.emoji.id, QString::number(reaction.emoji.id.value));
+    } else {
+        emoji->setText(reaction.emoji.name);
+    }
+
+    QFont font;
+    font.setPixelSize(Settings::scale(Settings::fontScaling - 2));
+    font.setFamily("whitney");
+    Label *count = new Label(QString::number(reaction.count), reactionContainer);
+    count->setFixedSize(QFontMetrics(font).horizontalAdvance(QString::number(reaction.count)), Settings::scale(Settings::fontScaling - 2));
+    count->setTextColor(Settings::InteractiveNormal);
+
+    reactionsLayout->addWidget(emoji, 0, Qt::AlignVCenter);
+    reactionsLayout->addWidget(count, 0, Qt::AlignVCenter);
+
+    return reactionContainer;
+}
+
+Widget *MessageWidget::createReactions(QVector<Api::Reaction *> reactions)
+{
+    Widget *reactionsContainer = new Widget();
+    QHBoxLayout *reactionsLayout = new QHBoxLayout(reactionsContainer);
+    reactionsLayout->setContentsMargins(0, 0, 0, 0);
+    reactionsLayout->setSpacing(Settings::scale(4));
+    for (int i = 0 ; i < reactions.size() ; i++)
+        reactionsLayout->addWidget(createReaction(*reactions[i]));
+    reactionsLayout->addStretch();
+    return reactionsContainer;
+}
+
 void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBefore)
 {
     // Create the main widgets
@@ -749,6 +795,9 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
             dataLayout->addSpacing(8);
         }
     }
+
+    if (!message->reactions.isEmpty())
+        dataLayout->addWidget(createReactions(message->reactions));
 
     mainMessage->setMinimumHeight(Settings::scale(heightp));
 
