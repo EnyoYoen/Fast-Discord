@@ -314,6 +314,7 @@ void unmarshal<Emoji>(const QJsonObject& jsonObj, Emoji **object)
     User *user = new User;
 
     unmarshal<User>(jsonObj, "user", &user);
+    if (jsonObj["user"].isUndefined()) user = nullptr;
 
     *object = new Emoji {
         user,

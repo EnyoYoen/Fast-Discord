@@ -62,7 +62,9 @@ enum RequestTypes {
     HarvestData,
     DeleteAuthorizedApp,
     SetConnection,
-    RemoveConnection
+    RemoveConnection,
+    AddReaction,
+    DeleteReaction
 };
 
 struct RequestParameters
@@ -219,6 +221,8 @@ public:
     void const deleteAuthorizedApp(const Snowflake& appId);
     void const setConnection(QString type, QString id, int visibility);
     void const removeConnection(QString type, QString id);
+    void const addReaction(Callback callback, const Snowflake& channelId, const Snowflake& messageId, const Snowflake& reactionId, const QString& reactionName);
+    void const deleteReaction(Callback callback, const Snowflake& channelId, const Snowflake& messageId, const Snowflake& reactionId, const QString& reactionName);
 
 signals:
     void requestEmit(int requestType, QNetworkRequest request, QByteArray *query, QHttpMultiPart *multiPart);

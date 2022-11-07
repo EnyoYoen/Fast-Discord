@@ -97,6 +97,7 @@ void Requester::readReply()
 
     QByteArray ba = reply->readAll();
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+    if (parameters.type == AddReaction || parameters.type == DeleteReaction) qDebug() << ba << statusCode.toInt();
     if (statusCode.toInt() == 401) {
         emit invalidToken();
     } else if (statusCode.toInt() == 429) { // We are rate limited
@@ -975,6 +976,34 @@ void const Requester::removeConnection(QString type, QString id)
         "",
         "",
         RemoveConnection,
+        false});
+}
+
+void const Requester::addReaction(Callback callback, const Snowflake& channelId, const Snowflake& messageId, const Snowflake& reactionId, const QString& reactionName)
+{
+    qDebug() << ("https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId + "/reactions/" + QUrl::toPercentEncoding(reactionId.value == 0 ? reactionName : (reactionName + ":" + reactionId)) + "/%40me");
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId + "/reactions/" + QUrl::toPercentEncoding(reactionId.value == 0 ? reactionName : (reactionName + ":" + reactionId)) + "/%40me",
+        "",
+        "PUT",
+        "",
+        "",
+        AddReaction,
+        false});
+}
+
+void const Requester::deleteReaction(Callback callback, const Snowflake& channelId, const Snowflake& messageId, const Snowflake& reactionId, const QString& reactionName)
+{
+    qDebug() << ("https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId + "/reactions/" + QUrl::toPercentEncoding(reactionId.value == 0 ? reactionName : (reactionName + ":" + reactionId)) + "/%40me");
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId + "/reactions/" + QUrl::toPercentEncoding(reactionId.value == 0 ? reactionName : (reactionName + ":" + reactionId)) + "/%40me",
+        "",
+        "DELETE",
+        "",
+        "",
+        DeleteReaction,
         false});
 }
 

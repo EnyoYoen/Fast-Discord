@@ -208,6 +208,39 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
         }
 
         emit memberUpdateReceived(*members);
+    } else if (eventName == "MESSAGE_REACTION_ADD") {
+        Api::GuildMember *member = nullptr;
+        Api::Emoji *emoji = nullptr;
+        unmarshal<Api::GuildMember>(data, "member", &member);
+        unmarshal<Api::Emoji>(data, "emoji", &emoji);
+        emit reactionAdded(data["user_id"].toVariant().toULongLong(),
+                           data["channel_id"].toVariant().toULongLong(),
+                           data["message_id"].toVariant().toULongLong(),
+                           data["guild_id"].toVariant().toULongLong(),
+                           member,
+                           emoji);
+    } else if (eventName == "MESSAGE_REACTION_REMOVE") {
+        Api::Emoji *emoji = nullptr;
+        unmarshal<Api::Emoji>(data, "emoji", &emoji);
+        emit reactionRemoved(data["user_id"].toVariant().toULongLong(),
+                             data["channel_id"].toVariant().toULongLong(),
+                             data["message_id"].toVariant().toULongLong(),
+                             data["guild_id"].toVariant().toULongLong(),
+                             emoji);
+    } else if (eventName == "MESSAGE_REACTION_REMOVE_ALL") {
+        emit reactionRemoved(0,
+                             data["channel_id"].toVariant().toULongLong(),
+                             data["message_id"].toVariant().toULongLong(),
+                             data["guild_id"].toVariant().toULongLong(),
+                             nullptr);
+    } else if (eventName == "MESSAGE_REACTION_REMOVE_ALL") {
+        Api::Emoji *emoji = nullptr;
+        unmarshal<Api::Emoji>(data, "emoji", &emoji);
+        emit reactionRemoved(0,
+                             data["channel_id"].toVariant().toULongLong(),
+                             data["message_id"].toVariant().toULongLong(),
+                             data["guild_id"].toVariant().toULongLong(),
+                             emoji);
     }
 }
 

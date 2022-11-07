@@ -75,6 +75,8 @@ MainWindow::MainWindow() : Widget(nullptr)
     QObject::connect(rm, &Api::RessourceManager::channelUpdated, middleColumn, &MiddleColumn::updateChannel);
     QObject::connect(rm, &Api::RessourceManager::channelDeleted, middleColumn, &MiddleColumn::deleteChannel);
     QObject::connect(rm, &Api::RessourceManager::memberUpdateReceived, rightColumn, &RightColumn::setMembers);
+    QObject::connect(rm, &Api::RessourceManager::reactionAdded, rightColumn, &RightColumn::addReaction);
+    QObject::connect(rm, &Api::RessourceManager::reactionRemoved, rightColumn, &RightColumn::removeReaction);
 }
 
 void MainWindow::reinit()
@@ -169,6 +171,8 @@ void MainWindow::reinit()
     QObject::connect(rm, &Api::RessourceManager::channelUpdated, middleColumn, &MiddleColumn::updateChannel);
     QObject::connect(rm, &Api::RessourceManager::channelDeleted, middleColumn, &MiddleColumn::deleteChannel);
     QObject::connect(rm, &Api::RessourceManager::memberUpdateReceived, rightColumn, &RightColumn::setMembers);
+    QObject::connect(rm, &Api::RessourceManager::reactionAdded, rightColumn, &RightColumn::addReaction);
+    QObject::connect(rm, &Api::RessourceManager::reactionRemoved, rightColumn, &RightColumn::removeReaction);
 }
 
 void const MainWindow::addAccountInConfig(QSettings *settings, const QMap<QString, QString> accountMap) {

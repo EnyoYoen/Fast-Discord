@@ -100,7 +100,8 @@ void Settings::initSettings(Api::RessourceManager *rm, QString tokenp)
         {Link,                                QColor::fromHsl(197, (int)(saturation * 255), (int)(0.478 * 255))},
         {Error,                               QColor::fromHsl(359, (int)(0.82 * saturation * 255), (int)(0.739 * 255))},
         {SettingsButtonTextColor,             QColor(255, 255, 255)},
-        {SliderBackground,                    QColor::fromHsl(217, (int)(0.076 * saturation * 255), (int)(0.335 * 255))}
+        {SliderBackground,                    QColor::fromHsl(217, (int)(0.076 * saturation * 255), (int)(0.335 * 255))},
+        {ReactionBorder,                      QColor::fromRgb(255, 255, 255, 51)}
     };
     lightColors = {
         {None,                                QColor(0, 0, 0, 0)},
@@ -149,7 +150,8 @@ void Settings::initSettings(Api::RessourceManager *rm, QString tokenp)
         {Link,                                QColor::fromHsl(212, (int)(saturation * 255), (int)(0.439 * 255))},
         {Error,                               QColor::fromHsl(359, (int)(0.563 * saturation * 255), (int)(0.404 * 255))},
         {SettingsButtonTextColor,             QColor(116, 127, 141)},
-        {SliderBackground,                    QColor::fromHsl(210, (int)(0.029 * saturation * 255), (int)(0.867 * 255))}
+        {SliderBackground,                    QColor::fromHsl(210, (int)(0.029 * saturation * 255), (int)(0.867 * 255))},
+        {ReactionBorder,                      QColor::fromRgb(0, 0, 0, 51)}
     };
     colors = darkColors;
     colors[White]              = QColor(255, 255, 255);

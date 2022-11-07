@@ -2,6 +2,7 @@
 
 #include "ui/common/roundedimage.h"
 #include "ui/rightcolumn/markdownlabel.h"
+#include "ui/rightcolumn/reaction.h"
 #include "api/ressourcemanager.h"
 #include "api/objects/message.h"
 
@@ -17,11 +18,15 @@ class MessageWidget : public Widget
 public:
     MessageWidget(Api::RessourceManager *rm, const Api::Message *message, bool isFirst, bool separatorBefore, QWidget *parent);
 
+    void addReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, Api::GuildMember* member, Api::Emoji *emoji);
+    void removeReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, Api::Emoji *emoji);
+
     void updateSpacing();
     void updateFont();
     void updateTheme();
 
     Api::RessourceManager *rm; // To request the API
+    Api::Snowflake id;
 
 private:
     void iconMessage(const Api::Message *message, const QString &text, const QString& iconName);
@@ -47,10 +52,10 @@ private:
     void const createReply(Api::Message *ref);
     Widget *createEmbed(Api::Embed *embed);
     Widget *createEmbedField(Api::EmbedField *embedField);
-    Widget *createReaction(const Api::Reaction& reaction);
-    Widget *createReactions(QVector<Api::Reaction *> reactions);
+    Widget *createReactions(QVector<Api::Reaction *> reactions, const Api::Snowflake& channelId, const Api::Snowflake& messageId);
 
     QString hoveredTimestamp;
+    QVector<Reaction *> reactions;
     RoundedImage *avatar = nullptr;
     RoundedImage *replyAvatar = nullptr;
     QLabel *name = nullptr;
@@ -64,6 +69,7 @@ private:
     MarkdownLabel *content = nullptr;
     MarkdownLabel *replyContent = nullptr;
     QVBoxLayout *dataLayout = nullptr;
+    QHBoxLayout *reactionsLayout = nullptr;
     int heightp = 0;
     bool isFirst;
     bool separatorBefore;

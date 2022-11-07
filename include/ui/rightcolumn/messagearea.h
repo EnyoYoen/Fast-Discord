@@ -31,6 +31,9 @@ public:
     void setMessages(const QVector<Api::Message *>& messages);
     void addMessage(const Api::Message *newMessage, const Api::Message *lastMessage);
     void clear();
+
+    void addReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, Api::GuildMember *member, Api::Emoji *emoji);
+    void removeReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, Api::Emoji *emoji);
     
     void updateMessagesFont();
     void updateMessagesSpacing();

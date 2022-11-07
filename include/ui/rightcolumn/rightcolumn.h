@@ -38,6 +38,8 @@ public slots:
     void openPrivateChannel(const QString& channelName, const Api::Snowflake& id);
     void const addMessage(const Api::Message& message);
     void setMembers(Api::GuildMemberGateway members);
+    void addReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, const Api::Snowflake& guildId, Api::GuildMember* member, Api::Emoji* emoji);
+    void removeReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, const Api::Snowflake& guildId, Api::Emoji* emoji);
 
 private slots:
     void const setMessages(const QVector<Api::Message *>& messages);

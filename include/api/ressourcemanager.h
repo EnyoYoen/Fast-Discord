@@ -61,6 +61,8 @@ signals:
     void channelCreated(const Api::Channel *, const Api::PrivateChannel *);
     void channelUpdated(const Api::Channel *, const Api::PrivateChannel *);
     void channelDeleted(const Api::Snowflake&, const Api::Snowflake&, int);
+    void reactionAdded(const Api::Snowflake&, const Api::Snowflake&, const Api::Snowflake&, const Api::Snowflake&, Api::GuildMember*, Api::Emoji*);
+    void reactionRemoved(const Api::Snowflake&, const Api::Snowflake&, const Api::Snowflake&, const Api::Snowflake&, Api::Emoji*);
 
 private:
     void gatewayDispatchHandler(QString& eventName, json& data);

@@ -434,6 +434,19 @@ void RightColumn::setMembers(Api::GuildMemberGateway members)
     if (memberList) memberList->setMembers(members);
 }
 
+void RightColumn::addReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, const Api::Snowflake& guildId, Api::GuildMember* member, Api::Emoji* emoji)
+{
+    if (guildId == currentOpenedGuild && channelId == currentOpenedChannel)
+        messageArea->addReaction(userId, channelId, messageId, member, emoji);
+}
+
+void RightColumn::removeReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, const Api::Snowflake& guildId, Api::Emoji* emoji)
+{
+    if (guildId == currentOpenedGuild && channelId == currentOpenedChannel) {
+        messageArea->removeReaction(userId, channelId, messageId, emoji);
+    }
+}
+
 void RightColumn::updateTheme()
 {
     if (currentOpenedGuild == 0) {

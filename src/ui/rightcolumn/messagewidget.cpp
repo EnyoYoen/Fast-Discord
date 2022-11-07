@@ -18,6 +18,7 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message *mes
 {
     // Attributes initialization
     rm = rmp;
+    id = message->id;
     isFirst = isFirstp;
     separatorBefore = separatorBeforep;
 
@@ -65,6 +66,53 @@ MessageWidget::MessageWidget(Api::RessourceManager *rmp, const Api::Message *mes
         case Api::Reply:
         default:
             defaultMessage(message, separatorBefore);
+    }
+}
+
+void MessageWidget::addReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, Api::GuildMember* member, Api::Emoji *emoji)
+{
+    bool found = false;
+    for (Reaction *reaction : reactions) {
+        if (reaction->reaction.emoji.id == emoji->id) {
+            rm->getClient([this, userId, reaction](void *clientPtr){
+                reaction->addReaction(reinterpret_cast<Api::Client *>(clientPtr)->id == userId);
+            });
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        rm->getClient([this, userId, channelId, messageId, emoji](void *clientPtr){
+            Reaction *reaction = new Reaction(rm, Api::Reaction{*emoji, 1, reinterpret_cast<Api::Client *>(clientPtr)->id == userId}, channelId, messageId, this);
+            reactions.append(reaction);
+            if (!reactionsLayout) {
+                Widget *reactionsContainer = new Widget();
+                reactionsLayout = new QHBoxLayout(reactionsContainer);
+                reactionsLayout->setContentsMargins(0, 0, 0, 0);
+                reactionsLayout->setSpacing(Settings::scale(4));
+                reactionsLayout->addStretch();
+                dataLayout->addWidget(reactionsContainer);
+            }
+            reactionsLayout->insertWidget(reactionsLayout->count()-1, reaction);
+        });
+    }
+}
+
+void MessageWidget::removeReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, Api::Emoji *emoji)
+{
+    if (emoji == nullptr) {
+        for (Reaction *reaction : reactions) {
+            reaction->removeReaction(false, true);
+        }
+    } else {
+        for (Reaction *reaction : reactions) {
+            if (reaction->reaction.emoji.id == emoji->id) {
+                rm->getClient([this, userId, reaction](void *clientPtr){
+                    reaction->removeReaction(reinterpret_cast<Api::Client *>(clientPtr)->id == userId, userId == 0);
+                });
+                break;
+            }
+        }
     }
 }
 
@@ -514,48 +562,17 @@ Widget *MessageWidget::createEmbed(Api::Embed *embed)
     return embedWidget;
 }
 
-Widget *MessageWidget::createReaction(const Api::Reaction& reaction)
-{
-    Widget *reactionContainer = new Widget();
-    reactionContainer->setFixedHeight(Settings::scale(20));
-    reactionContainer->setContentsMargins(Settings::scale(2), Settings::scale(6), Settings::scale(2), Settings::scale(6));
-    reactionContainer->setBorderRadius(Settings::scale(8));
-    reactionContainer->setBackgroundColor(Settings::BackgroundTertiary);
-    QHBoxLayout *reactionsLayout = new QHBoxLayout(reactionContainer);
-    reactionsLayout->setContentsMargins(0, 0, 0, 0);
-    reactionsLayout->setSpacing(Settings::scale(6));
-
-    Label *emoji = new Label(reactionContainer);
-    emoji->setFixedSize(Settings::scale(16), Settings::scale(16));
-    if (reaction.emoji.id.value) {
-        rm->getImage([emoji](void *fileName){
-            emoji->setImage(*reinterpret_cast<QString *>(fileName));
-        }, "https://cdn.discordapp.com/emojis/" + reaction.emoji.id, QString::number(reaction.emoji.id.value));
-    } else {
-        emoji->setText(reaction.emoji.name);
-    }
-
-    QFont font;
-    font.setPixelSize(Settings::scale(Settings::fontScaling - 2));
-    font.setFamily("whitney");
-    Label *count = new Label(QString::number(reaction.count), reactionContainer);
-    count->setFixedSize(QFontMetrics(font).horizontalAdvance(QString::number(reaction.count)), Settings::scale(Settings::fontScaling - 2));
-    count->setTextColor(Settings::InteractiveNormal);
-
-    reactionsLayout->addWidget(emoji, 0, Qt::AlignVCenter);
-    reactionsLayout->addWidget(count, 0, Qt::AlignVCenter);
-
-    return reactionContainer;
-}
-
-Widget *MessageWidget::createReactions(QVector<Api::Reaction *> reactions)
+Widget *MessageWidget::createReactions(QVector<Api::Reaction *> reactionsObjects, const Api::Snowflake& channelId, const Api::Snowflake& messageId)
 {
     Widget *reactionsContainer = new Widget();
-    QHBoxLayout *reactionsLayout = new QHBoxLayout(reactionsContainer);
+    reactionsLayout = new QHBoxLayout(reactionsContainer);
     reactionsLayout->setContentsMargins(0, 0, 0, 0);
     reactionsLayout->setSpacing(Settings::scale(4));
-    for (int i = 0 ; i < reactions.size() ; i++)
-        reactionsLayout->addWidget(createReaction(*reactions[i]));
+    for (int i = 0 ; i < reactionsObjects.size() ; i++) {
+        Reaction *reaction = new Reaction(rm, *reactionsObjects[i], channelId, messageId, reactionsContainer);
+        reactions.append(reaction);
+        reactionsLayout->addWidget(reaction);
+    }
     reactionsLayout->addStretch();
     return reactionsContainer;
 }
@@ -797,7 +814,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
     }
 
     if (!message->reactions.isEmpty())
-        dataLayout->addWidget(createReactions(message->reactions));
+        dataLayout->addWidget(createReactions(message->reactions, message->channelId, message->id));
 
     mainMessage->setMinimumHeight(Settings::scale(heightp));
 

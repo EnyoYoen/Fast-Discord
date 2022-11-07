@@ -118,6 +118,26 @@ void MessageArea::addMessages(const QVector<Api::Message *>& messages)
     }
 }
 
+void MessageArea::addReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, Api::GuildMember *member, Api::Emoji *emoji)
+{
+    for (MessageWidget *message : messages) {
+        if (message->id == messageId) {
+            message->addReaction(userId, channelId, messageId, member, emoji);
+            break;
+        }
+    }
+}
+
+void MessageArea::removeReaction(const Api::Snowflake& userId, const Api::Snowflake& channelId, const Api::Snowflake& messageId, Api::Emoji *emoji)
+{
+    for (MessageWidget *message : messages) {
+        if (message->id == messageId) {
+            message->removeReaction(userId, channelId, messageId, emoji);
+            break;
+        }
+    }
+}
+
 void MessageArea::updateMessagesFont()
 {
     for (int i = 0 ; i < messages.size() ; i++) {

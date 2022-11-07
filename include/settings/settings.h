@@ -78,6 +78,7 @@ public:
         FileSizeColor,
         SliderBackground,
         SliderBorder,
+        ReactionBorder
     };
     enum class MessageDisplay : quint8 {
         Cozy,

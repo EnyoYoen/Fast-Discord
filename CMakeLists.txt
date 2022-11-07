@@ -75,6 +75,7 @@ set(SOURCES
     "src/ui/rightcolumn/messageseparator.cpp"
     "src/ui/rightcolumn/messagetextinput.cpp"
     "src/ui/rightcolumn/messagewidget.cpp"
+    "src/ui/rightcolumn/reaction.cpp"
 )
 
 set(HEADERS
@@ -154,6 +155,7 @@ set(HEADERS
     "include/ui/rightcolumn/messageseparator.h"
     "include/ui/rightcolumn/messagetextinput.h"
     "include/ui/rightcolumn/messagewidget.h"
+    "include/ui/rightcolumn/reaction.h"
 )
 
 qt5_add_resources(SOURCES res.qrc)
