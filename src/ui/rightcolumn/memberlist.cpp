@@ -28,14 +28,14 @@ MemberList::MemberList(Api::RessourceManager *rmp, const QVector<Api::Snowflake>
 
         layout->addWidget(createTitle("MEMBERS - " + QString::number(nMembers)), 0, Qt::AlignLeft);
 
-        rm->getClient([this](void *clientPtr){
-            Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
+        rm->getClient([this](Api::CallbackStruct cb){
+            Api::Client *client = reinterpret_cast<Api::Client *>(cb.data);
             Api::User user{client->username, client->discriminator, client->avatar, client->banner, client->locale, client->email, client->id, client->accentColor, client->flags, client->purchasedFlags, client->publicFlags, (optbool)Optional::None, (optbool)Optional::None, (optbool)Optional::None, (optbool)Optional::None};
             userReceiver(reinterpret_cast<void *>(new Api::User(user)));
         });
 
         for (int i = 0 ; i < recipientIds.size() ; i++) {
-            rm->getUser([this](void *userPtr){userReceiver(userPtr);}, recipientIds[i]);
+            rm->getUser([this](Api::CallbackStruct cb){userReceiver(cb.data);}, recipientIds[i]);
         }
 
         layout->addStretch(1);
@@ -109,8 +109,8 @@ void MemberList::setMembers(Api::GuildMemberGateway members)
     for (int i = 0 ; i < members.structs.size() ; i++) {
         if (members.ops[i] == Api::GuildMemberOp::Sync) {
             guildId = members.guildId;
-            rm->getGuilds([members, i, this](void *guildsPtr){
-                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+            rm->getGuilds([members, i, this](Api::CallbackStruct cb){
+                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
                 for (int i = 0 ; i < guilds.size() ; i++) {
                     if (guilds[i]->id == members.guildId) {
                         roles = guilds[i]->roles;
@@ -166,8 +166,8 @@ void MemberList::setMembers(Api::GuildMemberGateway members)
                         QColor colorTmp = color;
                         if (!color.isValid()) {
                             Api::GuildMember *member = groupMembers[j];
-                            rm->getGuilds([members, member, &colorTmp](void *guildsPtr){
-                                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                            rm->getGuilds([members, member, &colorTmp](Api::CallbackStruct cb){
+                                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
                                 QVector<Api::Snowflake> rolesIds = member->roles;
                                 for (int i = 0 ; i < guilds.size() ; i++) {
                                     if (guilds[i]->id == members.guildId) {
@@ -211,8 +211,8 @@ void MemberList::setMembers(Api::GuildMemberGateway members)
 
                 if (update->memberOrGroup->member) {
                     Api::GuildMember *member = reinterpret_cast<Api::GuildMember *>(update->memberOrGroup->content);
-                    rm->getGuilds([this, update, members, member](void *guildsPtr){
-                        QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                    rm->getGuilds([this, update, members, member](Api::CallbackStruct cb){
+                        QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
                         QVector<Api::Snowflake> rolesIds = member->roles;
                         for (int i = 0 ; i < guilds.size() ; i++) {
                             if (guilds[i]->id == members.guildId) {
@@ -265,8 +265,8 @@ void MemberList::setMembers(Api::GuildMemberGateway members)
 
                 if (insert->memberOrGroup->member) {
                     Api::GuildMember *member = reinterpret_cast<Api::GuildMember *>(insert->memberOrGroup->content);
-                    rm->getGuilds([this, insert, members, member](void *guildsPtr){
-                        QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                    rm->getGuilds([this, insert, members, member](Api::CallbackStruct cb){
+                        QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
                         QVector<Api::Snowflake> rolesIds = member->roles;
                         for (int i = 0 ; i < guilds.size() ; i++) {
                             if (guilds[i]->id == members.guildId) {

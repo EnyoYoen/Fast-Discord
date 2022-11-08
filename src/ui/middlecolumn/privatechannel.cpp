@@ -24,7 +24,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
     int channelType = privateChannel.type;
 
     if (channelType == Api::DM) {
-        rm->getUser([&](void *user){
+        rm->getUser([&](Api::CallbackStruct cb){
             subtext = new Label(this);
             subtext->move(Settings::scale(52), Settings::scale(24));
             QFont font;
@@ -33,7 +33,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             subtext->setFont(font);
             subtext->setTextColor(Settings::ChannelsDefault);
 
-            Api::User *dmUser = static_cast<Api::User *>(user);
+            Api::User *dmUser = static_cast<Api::User *>(cb.data);
             QString avatar = dmUser->avatar;
             if (avatar.isNull()) {
                 // Use an asset if the other user doesn't have an icon
@@ -48,7 +48,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 
                 // Request the icon image
                 channelIconFileName = dmUser->id + (avatar.indexOf("a_") == 0 ? ".gif" : ".png");
-                rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + dmUser->id + "/" + avatar, channelIconFileName);
+                rm->getImage([this](Api::CallbackStruct cb) {this->setIcon(*static_cast<QString *>(cb.data));}, "https://cdn.discordapp.com/avatars/" + dmUser->id + "/" + avatar, channelIconFileName);
             }
 
             // Set the background of the status icon
@@ -117,7 +117,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
             } else {
                 // Get the name of the other users if there is more than one person
                 for (unsigned int i = 0 ; i < nMembers ; i++)
-                    rm->getUser([this](void *u){this->userReceiver(u);}, privateChannel.recipientIds[i]);
+                    rm->getUser([this](Api::CallbackStruct cb){this->userReceiver(cb.data);}, privateChannel.recipientIds[i]);
             }
         } else {
             name = new Label(channelName, this);
@@ -142,7 +142,7 @@ PrivateChannelWidget::PrivateChannelWidget(Api::RessourceManager *rmp, const Api
 
             // Request the icon image
             channelIconFileName = channelIcon + ".png";
-            rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/channel-icons/" + privateChannel.id + "/" + channelIconFileName, channelIconFileName);
+            rm->getImage([this](Api::CallbackStruct cb) {this->setIcon(*static_cast<QString *>(cb.data));}, "https://cdn.discordapp.com/channel-icons/" + privateChannel.id + "/" + channelIconFileName, channelIconFileName);
         }
 
         // Style the subtext

@@ -37,7 +37,7 @@ void DownloadButton::mouseReleaseEvent(QMouseEvent *)
     downloadsFolder = QFileDialog::getExistingDirectory(this, "Download", downloadsFolder) + "/";
 
     if (downloadsFolder != "/")
-        requester->getFile(url, downloadsFolder + url.right(url.size() - url.lastIndexOf('/')));
+        requester->getFile([](Api::CallbackStruct cb){}, url, downloadsFolder + url.right(url.size() - url.lastIndexOf('/')));
 }
 
 void DownloadButton::enterEvent(QEvent *)

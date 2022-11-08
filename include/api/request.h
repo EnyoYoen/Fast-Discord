@@ -19,8 +19,6 @@
 
 namespace Api {
 
-typedef std::function<void(void *)> Callback;
-
 enum RequestTypes {
     // We need the response data
     GetGuilds,
@@ -66,6 +64,34 @@ enum RequestTypes {
     AddReaction,
     DeleteReaction
 };
+
+struct RequestError
+{
+    // Type flags
+    enum class ErrorType {
+        None    = 0,
+        Http    = 1,
+        Discord = 2
+    };
+
+    // Should always verify the type of the error before accessing data
+    ErrorType type;
+    QString message;
+    int httpCode; 
+    int apiCode;
+
+    RequestError() : type(ErrorType::None) {}
+};
+
+struct CallbackStruct
+{
+    RequestError error;
+    void *data;
+
+    CallbackStruct(void *datap) : data(datap) {}
+};
+
+typedef std::function<void(CallbackStruct)> Callback;
 
 struct RequestParameters
 {
@@ -178,7 +204,6 @@ public:
     ~Requester();
 
     // Function that request the API
-    void requestApi(const RequestParameters& parameters);
     void removeRequests(RequestTypes type);
     void removeRequestWithUrl(const QString& url);
 
@@ -189,9 +214,10 @@ public:
     void const getMessages(Callback callback, const Snowflake& channelId, const Snowflake& beforeId, unsigned int limit);
     void const getClient(Callback callback);
     void const getClientSettings(Callback callback);
+    void const getWsUrl(Callback callback);
     void const getImage(Callback callback, const QString& url, const QString& fileName);
     void const getUser(Callback callback, const Snowflake& userId);
-    void const getFile(const QString& url, const QString& filename);
+    void const getFile(Callback callback, const QString& url, const QString& filename);
     void const getConsent(Callback callback);
     void const getHarvest(Callback callback);
     void const getAuthorizedApp(Callback callback);
@@ -208,19 +234,19 @@ public:
     void const setSettingsProto(Callback callback, QString settings);
     void const setConsent(Callback callback, QString grant, QString revoke);
 
-    void const setStatus(const QString& status);
-    void const sendTyping(const Snowflake& channelId);
+    void const setStatus(Callback callback, const QString& status);
+    void const sendTyping(Callback callback, const Snowflake& channelId);
     void const sendVerifyCode(Callback callback, QString verifyCode);
-    void const sendVerificationEmail();
-    void const harvestData();
-    void const sendMessage(const QString& content, const Snowflake& channelId);
-    void const sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath);
-    void const deleteMessage(const Snowflake& channelId, const Snowflake& messageId);
-    void const pinMessage(const Snowflake& channelId, const Snowflake& messageId);
-    void const unpinMessage(const Snowflake& channelId, const Snowflake& messageId);
-    void const deleteAuthorizedApp(const Snowflake& appId);
-    void const setConnection(QString type, QString id, int visibility);
-    void const removeConnection(QString type, QString id);
+    void const sendVerificationEmail(Callback callback);
+    void const harvestData(Callback callback);
+    void const sendMessage(Callback callback, const QString& content, const Snowflake& channelId);
+    void const sendMessageWithFile(Callback callback, const QString& content, const Snowflake& channelId, const QString& filePath);
+    void const deleteMessage(Callback callback, const Snowflake& channelId, const Snowflake& messageId);
+    void const pinMessage(Callback callback, const Snowflake& channelId, const Snowflake& messageId);
+    void const unpinMessage(Callback callback, const Snowflake& channelId, const Snowflake& messageId);
+    void const deleteAuthorizedApp(Callback callback, const Snowflake& appId);
+    void const setConnection(Callback callback, QString type, QString id, int visibility);
+    void const removeConnection(Callback callback, QString type, QString id);
     void const addReaction(Callback callback, const Snowflake& channelId, const Snowflake& messageId, const Snowflake& reactionId, const QString& reactionName);
     void const deleteReaction(Callback callback, const Snowflake& channelId, const Snowflake& messageId, const Snowflake& reactionId, const QString& reactionName);
 
@@ -251,7 +277,7 @@ private:
     int currentRequestsNumber;                  // The number of requests that are processed at the moment
     bool stopped;                               // Used to stop the request loop
 
-    // The function that contains the request loop
+    void requestApi(const RequestParameters& parameters);
     void callCallbacks(const RequestParametersNoCb& parameters, void *data);
     void RequestLoop();
 };

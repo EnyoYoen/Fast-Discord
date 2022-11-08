@@ -124,8 +124,8 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     customColorLayout->addWidget(customColor);
     customColorLayout->addWidget(customColorTitle, 0, Qt::AlignHCenter);
     
-    rm->getClient([this](void *clientPtr){
-        Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
+    rm->getClient([this](Api::CallbackStruct cb){
+        Api::Client *client = reinterpret_cast<Api::Client *>(cb.data);
 
         bannerColor = "#" + QString::number(client->bannerColor, Settings::scale(16));
         avatarFile = client->avatar;
@@ -144,8 +144,8 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
             defaultColor->setColor("#000");
         } else {
             QString channelIconFileName = client->id + (client->avatar.indexOf("a_") == 0 ? ".gif" : ".png");
-            rm->getImage([this](void *imageFileName){
-                QImage img(*reinterpret_cast<QString *>(imageFileName));
+            rm->getImage([this](Api::CallbackStruct cb){
+                QImage img(*reinterpret_cast<QString *>(cb.data));
                 int count = 0;
                 int r = 0, g = 0, b = 0;
                 for (int i = 0 ; i < img.width() ; i++) {
@@ -205,8 +205,8 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     QHBoxLayout *bannerButtonsLayout = new QHBoxLayout(bannerButtons);
     bannerButtonsLayout->setSpacing(Settings::scale(4));
     bannerButtonsLayout->setContentsMargins(0, 0, 0, 0);
-    rm->getClient([bannerButtons, bannerButtonsLayout, this](void *clientPtr){
-        Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
+    rm->getClient([bannerButtons, bannerButtonsLayout, this](Api::CallbackStruct cb){
+        Api::Client *client = reinterpret_cast<Api::Client *>(cb.data);
         if (client->purchasedFlags) {
             SettingsButton *changeBanner = new SettingsButton(SettingsButton::Type::Normal, "Change Banner", bannerButtons);
             bannerButtonsLayout->addWidget(changeBanner);
@@ -313,9 +313,9 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     charCount->setFixedSize(Settings::scale(25), Settings::scale(16));
     charCount->setTextColor(Settings::TextNormal);
     charCount->setBackgroundColor(Settings::BackgroundTertiary);
-    rm->getClient([charCount, this](void *clientPtr){
-        aboutTextEdit->setText(reinterpret_cast<Api::Client *>(clientPtr)->bio);
-        charCount->setText(QString::number(190 - reinterpret_cast<Api::Client *>(clientPtr)->bio.length()));
+    rm->getClient([charCount, this](Api::CallbackStruct cb){
+        aboutTextEdit->setText(reinterpret_cast<Api::Client *>(cb.data)->bio);
+        charCount->setText(QString::number(190 - reinterpret_cast<Api::Client *>(cb.data)->bio.length()));
     });
     charCount->setFont(font);
     charCount->setTextColor(Settings::TextNormal);
@@ -377,8 +377,8 @@ UserProfile::UserProfile(Api::RessourceManager *rmp, QWidget *parent)
     previewTitle->setTextColor(Settings::HeaderSecondary);
     previewLayout->addWidget(previewTitle);
 
-    rm->getClient([rmp, preview, previewLayout, this](void *clientPtr){
-        profile = new Profile(rmp, *reinterpret_cast<Api::Client *>(clientPtr), preview);
+    rm->getClient([rmp, preview, previewLayout, this](Api::CallbackStruct cb){
+        profile = new Profile(rmp, *reinterpret_cast<Api::Client *>(cb.data), preview);
         QObject::connect(profile, &Profile::bannerChanged, [this](QString banner){
             bannerFile = banner;
             profileChanged();
@@ -506,8 +506,8 @@ void UserProfile::profileChanged()
         this->layout->addWidget(unsaved);
 
         QObject::connect(reset, &SettingsButton::clicked, [this, unsaved](){
-            rm->getClient([this, unsaved](void *clientPtr){
-                Api::Client client = *reinterpret_cast<Api::Client *>(clientPtr);
+            rm->getClient([this, unsaved](Api::CallbackStruct cb){
+                Api::Client client = *reinterpret_cast<Api::Client *>(cb.data);
 
                 if (client.bannerColor != 0) {
                     customColor->setClicked();
@@ -534,8 +534,8 @@ void UserProfile::profileChanged()
         });
 
         QObject::connect(save, &SettingsButton::clicked, [this, unsaved](){
-            rm->getClient([this, unsaved](void *clientPtr){
-                Api::Client client = *reinterpret_cast<Api::Client *>(clientPtr);
+            rm->getClient([this, unsaved](Api::CallbackStruct cb){
+                Api::Client client = *reinterpret_cast<Api::Client *>(cb.data);
 
                 bool modified = false;
                 QString data = "{";
@@ -569,12 +569,12 @@ void UserProfile::profileChanged()
 
                 data += "}";
 
-                rm->requester->changeClient([this, unsaved](void *errorsPtr){
-                    if (errorsPtr == nullptr) {
+                rm->requester->changeClient([this, unsaved](Api::CallbackStruct cb){
+                    if (cb.data == nullptr) {
                         this->modified = false;
                         unsaved->deleteLater();
                     } else {
-                        QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
+                        QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(cb.data);
 
                         Widget *container = new Widget(nullptr);
                         QHBoxLayout *layout = new QHBoxLayout(container);

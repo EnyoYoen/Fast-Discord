@@ -297,16 +297,16 @@ MarkdownLabel::MarkdownLabel(const QString& content, Settings::ColorEnum color, 
                             if (specialTokens[0].isEmpty() || specialTokens[0][0] == 'a') { // emoji
                                 QString fileName = specialTokens[2] + ".webp";
                                 html += "<img src=\"cache/" + fileName + "\" height=\"" + QString::number(Settings::scale(20)) + "\" width=\"" + QString::number(Settings::scale(20)) + "\">";
-                                rm->getImage([this](void *){this->update();}, "https://cdn.discordapp.com/emojis/" + fileName, fileName);
+                                rm->getImage([this](Api::CallbackStruct cb){this->update();}, "https://cdn.discordapp.com/emojis/" + fileName, fileName);
                             } else if (specialTokens[0][0] == 't') { // timestamp
                                 html += processTimestamp(QDateTime::fromSecsSinceEpoch(specialTokens[1].toInt()).toLocalTime(), specialTokens[2][0].toLatin1());
                             }
                         } else {
                             if (specialTokens[0][0] == '#') { // channel
                                 block = true;
-                                rm->getGuilds([=](void *guildsPtr){
+                                rm->getGuilds([=](Api::CallbackStruct cb){
                                     Api::Snowflake channelId = Api::Snowflake(content.mid(i + 2, specialIdEnd - i - 2).toULongLong());
-                                    QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                                    QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
                                     for (int i = 0 ; i < guilds.size() ; i++) {
                                         for (int j = 0 ; j < guilds[i]->channels.size() ; j++) {
                                             if (channelId == guilds[i]->channels[j]->id)
@@ -318,9 +318,9 @@ MarkdownLabel::MarkdownLabel(const QString& content, Settings::ColorEnum color, 
                                 block = true;
                                 int userIndex = html.size();
                                 int savedOffset = usernamesOffset;
-                                rm->getUser([=](void *userPtr){
-                                    html.insert(userIndex + usernamesOffset - savedOffset, "<span class=\"highlight\">@" + reinterpret_cast<Api::User *>(userPtr)->username + "</span>");
-                                    usernamesOffset += reinterpret_cast<Api::User *>(userPtr)->username.size() + 32;
+                                rm->getUser([=](Api::CallbackStruct cb){
+                                    html.insert(userIndex + usernamesOffset - savedOffset, "<span class=\"highlight\">@" + reinterpret_cast<Api::User *>(cb.data)->username + "</span>");
+                                    usernamesOffset += reinterpret_cast<Api::User *>(cb.data)->username.size() + 32;
                                     if (finished) this->setText(html);
                                 }, specialTokens[0].mid(1).toULongLong());
                             } else {

@@ -94,8 +94,8 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
     banner->setFixedWidth(Settings::scale(300));
     if (!client.banner.isNull()) {
         banner->setFixedHeight(Settings::scale(120));
-        rm->getImage([this](void *imageFileName){
-            banner->setPixmap(QPixmap(*reinterpret_cast<QString *>(imageFileName)).scaledToWidth(300));
+        rm->getImage([this](Api::CallbackStruct cb){
+            banner->setPixmap(QPixmap(*reinterpret_cast<QString *>(cb.data)).scaledToWidth(300));
         }, "https://cdn.discordapp.com/banners/" + client.id + "/" + client.banner + ".png?size=600", client.banner);
     } else if (client.bannerColor != 0) {
         banner->setFixedHeight(Settings::scale(60));
@@ -105,8 +105,8 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
             banner->setBackgroundColor(QColor(0, 0, 0));
         } else {
             QString channelIconFileName = client.id + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
-            rm->getImage([this](void *imageFileName){
-                QImage img(*reinterpret_cast<QString *>(imageFileName));
+            rm->getImage([this](Api::CallbackStruct cb){
+                QImage img(*reinterpret_cast<QString *>(cb.data));
                 int count = 0;
                 int r = 0, g = 0, b = 0;
                 for (int i = 0 ; i < img.width() ; i++) {
@@ -326,8 +326,8 @@ Profile::Profile(Api::RessourceManager *rm, Api::Client client, QWidget *parent)
     } else {
         avatar = new RoundedImage(Settings::scale(80), Settings::scale(80), Settings::scale(40), container);
         QString channelIconFileName = client.id + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
-        rm->getImage([this](void *imageFileName){
-            avatar->setImage(*reinterpret_cast<QString *>(imageFileName));
+        rm->getImage([this](Api::CallbackStruct cb){
+            avatar->setImage(*reinterpret_cast<QString *>(cb.data));
         }, "https://cdn.discordapp.com/avatars/" + client.id + "/" + client.avatar, channelIconFileName);
     }
     avatar->move(Settings::scale(23), client.banner.isNull() ? Settings::scale(23) : Settings::scale(83));

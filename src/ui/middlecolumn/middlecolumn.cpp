@@ -43,8 +43,8 @@ MiddleColumn::MiddleColumn(Api::RessourceManager *rmp, QWidget *parent)
 
 void MiddleColumn::setPresences(const QVector<Api::Presence *>& presences)
 {
-    rm->getPrivateChannels([&](const void *channelsPtr){
-        const QVector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const QVector<Api::PrivateChannel *> *>(channelsPtr);
+    rm->getPrivateChannels([&](Api::CallbackStruct cb){
+        const QVector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const QVector<Api::PrivateChannel *> *>(cb.data);
         for (int i = 0 ; i < presences.size() ; i++) {
             bool found = false;
             for (int j = 0 ; j < privateChannels->size() ; j++) {
@@ -62,8 +62,8 @@ void MiddleColumn::setPresences(const QVector<Api::Presence *>& presences)
 
 void MiddleColumn::updatePresence(const Api::Presence& presence)
 {
-    rm->getPrivateChannels([&](const void *channelsPtr){
-        const QVector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const QVector<Api::PrivateChannel *> *>(channelsPtr);
+    rm->getPrivateChannels([&](Api::CallbackStruct cb){
+        const QVector<Api::PrivateChannel *> *privateChannels = reinterpret_cast<const QVector<Api::PrivateChannel *> *>(cb.data);
         for (int i = 0 ; i < privateChannels->size() ; i++) {
             if ((*privateChannels)[i]->type == Api::DM && ((*privateChannels)[i]->recipientIds)[0] == presence.user->id
              && privateChannelWidgets.size() > 0) {
@@ -200,8 +200,8 @@ void MiddleColumn::clicGuildChannel(const Api::Snowflake& id)
                 }
                 emit voiceChannelClicked(openedGuildId, id, userMenu->deaf ? true : userMenu->deaf, userMenu->muted);
                 callChannel = id;
-                rm->getGuilds([this, name](void *guildsPtr){
-                    QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                rm->getGuilds([this, name](Api::CallbackStruct cb){
+                    QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
                     for (int i = 0 ; i < guilds.size() ; i++) {
                         if (guilds[i]->id == openedGuildId)
                             callWidget->call(name, guilds[i]->name);
@@ -259,7 +259,7 @@ void MiddleColumn::openGuild(const Api::Snowflake& guildId)
     openedGuildId = guildId;
 
     // Request the channels of the guild
-    rm->getGuildChannels([this](const void *channels) {emit guildChannelsReceived(*reinterpret_cast<const QVector<Api::Channel *> *>(channels));}, guildId);
+    rm->getGuildChannels([this](Api::CallbackStruct cb) {emit guildChannelsReceived(*reinterpret_cast<const QVector<Api::Channel *> *>(cb.data));}, guildId);
 }
 
 void MiddleColumn::updateChannel(const Api::Channel *channel, const Api::PrivateChannel *privateChannel)

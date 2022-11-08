@@ -184,7 +184,7 @@ public:
             PopUp *popUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(210), QString(), "DISCONNECT " + connection->type.toUpper(), true, false, "Disconnecting your account might remove you from servers\nyou joined via this account.", "Cancel", "Disconnect", true, true, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             QObject::connect(popUp, &PopUp::done, [popUp, connection, rm, this](){
-                rm->requester->removeConnection(connection->type, connection->id);
+                rm->requester->removeConnection([](Api::CallbackStruct cb){}, connection->type, connection->id);
                 emit removed();
                 popUp->deleteLater();
                 this->deleteLater();
@@ -214,7 +214,7 @@ public:
 
         SwitchButton *switchButton = new SwitchButton(connection->visibility);
         QObject::connect(switchButton, &SwitchButton::clicked, [rm, connection](bool state){
-            rm->requester->setConnection(connection->type, connection->id, (int)state);
+            rm->requester->setConnection([](Api::CallbackStruct cb){}, connection->type, connection->id, (int)state);
         });
 
         switchLayout->addWidget(description);
@@ -295,8 +295,8 @@ Connections::Connections(Api::RessourceManager *rmp, QWidget *parent)
     layout->addWidget(accountList);
     layout->addSpacing(Settings::scale(20));
 
-    rm->requester->getConnections([container, this](void *connectionsPtr){
-        QVector<Api::Connection *> connections = *reinterpret_cast<QVector<Api::Connection *> *>(connectionsPtr);
+    rm->requester->getConnections([container, this](Api::CallbackStruct cb){
+        QVector<Api::Connection *> connections = *reinterpret_cast<QVector<Api::Connection *> *>(cb.data);
         if (connections.size() == 0) {
             layout->addStretch(1);
             empty();

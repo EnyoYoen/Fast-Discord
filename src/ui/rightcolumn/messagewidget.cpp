@@ -74,16 +74,16 @@ void MessageWidget::addReaction(const Api::Snowflake& userId, const Api::Snowfla
     bool found = false;
     for (Reaction *reaction : reactions) {
         if (reaction->reaction.emoji.id == emoji->id) {
-            rm->getClient([this, userId, reaction](void *clientPtr){
-                reaction->addReaction(reinterpret_cast<Api::Client *>(clientPtr)->id == userId);
+            rm->getClient([this, userId, reaction](Api::CallbackStruct cb){
+                reaction->addReaction(reinterpret_cast<Api::Client *>(cb.data)->id == userId);
             });
             found = true;
             break;
         }
     }
     if (!found) {
-        rm->getClient([this, userId, channelId, messageId, emoji](void *clientPtr){
-            Reaction *reaction = new Reaction(rm, Api::Reaction{*emoji, 1, reinterpret_cast<Api::Client *>(clientPtr)->id == userId}, channelId, messageId, this);
+        rm->getClient([this, userId, channelId, messageId, emoji](Api::CallbackStruct cb){
+            Reaction *reaction = new Reaction(rm, Api::Reaction{*emoji, 1, reinterpret_cast<Api::Client *>(cb.data)->id == userId}, channelId, messageId, this);
             reactions.append(reaction);
             if (!reactionsLayout) {
                 Widget *reactionsContainer = new Widget();
@@ -107,8 +107,8 @@ void MessageWidget::removeReaction(const Api::Snowflake& userId, const Api::Snow
     } else {
         for (Reaction *reaction : reactions) {
             if (reaction->reaction.emoji.id == emoji->id) {
-                rm->getClient([this, userId, reaction](void *clientPtr){
-                    reaction->removeReaction(reinterpret_cast<Api::Client *>(clientPtr)->id == userId, userId == 0);
+                rm->getClient([this, userId, reaction](Api::CallbackStruct cb){
+                    reaction->removeReaction(reinterpret_cast<Api::Client *>(cb.data)->id == userId, userId == 0);
                 });
                 break;
             }
@@ -295,7 +295,7 @@ void const MessageWidget::createReply(Api::Message *ref)
             QString avatarFileName = ref->author.avatar + (ref->author.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
             replyAvatar = new RoundedImage(Settings::scale(16), Settings::scale(16), Settings::scale(8), reply);
             replyLayout->addWidget(replyAvatar);
-            rm->getImage([this](void *avatarFileName) {this->setReplyAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + ref->author.id + "/" + avatarFileName, avatarFileName);
+            rm->getImage([this](Api::CallbackStruct cb) {this->setReplyAvatar(*reinterpret_cast<QString *>(cb.data));}, "https://cdn.discordapp.com/avatars/" + ref->author.id + "/" + avatarFileName, avatarFileName);
         }
     }
     
@@ -313,8 +313,8 @@ void const MessageWidget::createReply(Api::Message *ref)
     if (Settings::roleColors != Settings::RoleColors::NotShown) {
         Api::Snowflake channelId = ref->channelId;
         Api::Snowflake authorId = ref->author.id;
-        rm->getGuilds([this, channelId, authorId, replyLayout](void *guildsPtr){
-            QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+        rm->getGuilds([this, channelId, authorId, replyLayout](Api::CallbackStruct cb){
+            QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
             Api::Snowflake guildId = 0;
             for (int i = 0 ; i < guilds.size() ; i++) {
                 QVector<Api::Channel *> channels = guilds[i]->channels;
@@ -323,8 +323,8 @@ void const MessageWidget::createReply(Api::Message *ref)
                 }
             }
             if (guildId != 0) {
-                rm->getGuildMember([this, guilds, guildId, replyLayout](void *guildMemberPtr){
-                    QVector<Api::Snowflake> rolesIds = reinterpret_cast<Api::GuildMember *>(guildMemberPtr)->roles;
+                rm->getGuildMember([this, guilds, guildId, replyLayout](Api::CallbackStruct cb){
+                    QVector<Api::Snowflake> rolesIds = reinterpret_cast<Api::GuildMember *>(cb.data)->roles;
                     for (int i = 0 ; i < guilds.size() ; i++) {
                         if (guilds[i]->id == guildId) {
                             QVector<Api::Role *> guildRoles = guilds[i]->roles;
@@ -434,7 +434,7 @@ Widget *MessageWidget::createEmbed(Api::Embed *embed)
             RoundedImage *authorAvatar = new RoundedImage(Settings::scale(24), Settings::scale(24), Settings::scale(12), author);
             authorLayout->addWidget(authorAvatar);
             authorLayout->addSpacing(8);
-            rm->getImage([authorAvatar](void *avatarFileName){authorAvatar->setRoundedImage(*reinterpret_cast<QString *>(avatarFileName));}, embed->author->iconUrl, getHashFileName(embed->author->iconUrl));
+            rm->getImage([authorAvatar](Api::CallbackStruct cb){authorAvatar->setRoundedImage(*reinterpret_cast<QString *>(cb.data));}, embed->author->iconUrl, getHashFileName(embed->author->iconUrl));
         }
 
         if (embed->author->url.isNull()) {
@@ -500,13 +500,13 @@ Widget *MessageWidget::createEmbed(Api::Embed *embed)
 
     if (embed->image != nullptr && !embed->image->url.isNull()) {
         Widget *image = new Widget(embedContent);
-        rm->getImage([image](void *imageName){image->setImage(*reinterpret_cast<QString *>(imageName));}, embed->image->url, getHashFileName(embed->image->url));
+        rm->getImage([image](Api::CallbackStruct cb){image->setImage(*reinterpret_cast<QString *>(cb.data));}, embed->image->url, getHashFileName(embed->image->url));
         contentLayout->addWidget(image);
     }
 
     if (embed->video != nullptr && !embed->video->url.isNull()) {
         Widget *video = new Widget(embedContent);
-        rm->getImage([video](void *videoName){video->setMovie(new QMovie(*reinterpret_cast<QString *>(videoName)), true);}, embed->video->url, getHashFileName(embed->video->url));
+        rm->getImage([video](Api::CallbackStruct cb){video->setMovie(new QMovie(*reinterpret_cast<QString *>(cb.data)), true);}, embed->video->url, getHashFileName(embed->video->url));
         contentLayout->addWidget(video);
     }
 
@@ -518,7 +518,7 @@ Widget *MessageWidget::createEmbed(Api::Embed *embed)
         thumbnailContainerLayout->setContentsMargins(0, Settings::scale(8), 0, 0);
         Widget *thumbnail = new Widget(thumbnailContainer);
         thumbnailContainerLayout->addWidget(thumbnail);
-        rm->getImage([thumbnail](void *thumbnailName){thumbnail->setImage(*reinterpret_cast<QString *>(thumbnailName));}, embed->thumbnail->url, getHashFileName(embed->thumbnail->url));
+        rm->getImage([thumbnail](Api::CallbackStruct cb){thumbnail->setImage(*reinterpret_cast<QString *>(cb.data));}, embed->thumbnail->url, getHashFileName(embed->thumbnail->url));
         embedNoFooterLayout->addWidget(thumbnail);
     }
     
@@ -534,7 +534,7 @@ Widget *MessageWidget::createEmbed(Api::Embed *embed)
             RoundedImage *footerIcon = new RoundedImage(Settings::scale(20), Settings::scale(20), Settings::scale(10), footer);
             footerLayout->addWidget(footerIcon);
             footerLayout->addSpacing(8);
-            rm->getImage([footerIcon](void *iconFileName){footerIcon->setRoundedImage(*reinterpret_cast<QString *>(iconFileName));}, embed->footer->iconUrl, getHashFileName(embed->footer->iconUrl));
+            rm->getImage([footerIcon](Api::CallbackStruct cb){footerIcon->setRoundedImage(*reinterpret_cast<QString *>(cb.data));}, embed->footer->iconUrl, getHashFileName(embed->footer->iconUrl));
         }
 
         Label *footerText = new Label(embed->footer->text, footer);
@@ -624,7 +624,7 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
             avatar = new RoundedImage(Settings::scale(40), Settings::scale(40), Settings::scale(20), iconContainer);
             iconLayout->addWidget(avatar);
             iconLayout->setAlignment(avatar, Qt::AlignTop | Qt::AlignHCenter);
-            rm->getImage([this](void *avatarFileName) {this->setAvatar(*reinterpret_cast<QString *>(avatarFileName));}, "https://cdn.discordapp.com/avatars/" + author.id + "/" + avatarFileName, avatarFileName);
+            rm->getImage([this](Api::CallbackStruct cb) {this->setAvatar(*reinterpret_cast<QString *>(cb.data));}, "https://cdn.discordapp.com/avatars/" + author.id + "/" + avatarFileName, avatarFileName);
         }
 
         // Widget to show some infos of the message
@@ -640,8 +640,8 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
         if (Settings::roleColors != Settings::RoleColors::NotShown) {
             Api::Snowflake channelId = message->channelId;
             Api::Snowflake authorId = message->author.id;
-            rm->getGuilds([this, channelId, authorId, infosLayout](void *guildsPtr){
-                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+            rm->getGuilds([this, channelId, authorId, infosLayout](Api::CallbackStruct cb){
+                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
                 Api::Snowflake guildId = 0;
                 for (int i = 0 ; i < guilds.size() ; i++) {
                     QVector<Api::Channel *> channels = guilds[i]->channels;
@@ -650,8 +650,8 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
                     }
                 }
                 if (guildId != 0) {
-                    rm->getGuildMember([this, guilds, guildId, infosLayout](void *guildMemberPtr){
-                        QVector<Api::Snowflake> rolesIds = reinterpret_cast<Api::GuildMember *>(guildMemberPtr)->roles;
+                    rm->getGuildMember([this, guilds, guildId, infosLayout](Api::CallbackStruct cb){
+                        QVector<Api::Snowflake> rolesIds = reinterpret_cast<Api::GuildMember *>(cb.data)->roles;
                         for (int i = 0 ; i < guilds.size() ; i++) {
                             if (guilds[i]->id == guildId) {
                                 QVector<Api::Role *> guildRoles = guilds[i]->roles;
@@ -794,8 +794,8 @@ void MessageWidget::defaultMessage(const Api::Message *message, bool separatorBe
                     heightp += attachment->height / (attachment->height / 400);
                 else 
                     heightp += attachment->height;
-                rm->getImage([this, attachment](void *filename) {
-                    this->addImage(*reinterpret_cast<QString *>(filename), attachment->width, attachment->height);
+                rm->getImage([this, attachment](Api::CallbackStruct cb) {
+                    this->addImage(*reinterpret_cast<QString *>(cb.data), attachment->width, attachment->height);
                 }, attachment->proxyUrl, filename);
             } else {
                 dataLayout->addWidget(new AttachmentFile(rm->requester, attachment, data));
@@ -884,11 +884,11 @@ void MessageWidget::recipientMessage(const Api::Message *message)
 
 void MessageWidget::callMessage(const Api::Message *message)
 {
-    rm->getClient([message, this](void *clientPtr){
+    rm->getClient([message, this](Api::CallbackStruct cb) {
 
     QString phoneName;
     QString text;
-    Api::Snowflake clientId = reinterpret_cast<Api::Client *>(clientPtr)->id;
+    Api::Snowflake clientId = reinterpret_cast<Api::Client *>(cb.data)->id;
     QDateTime dateTime = QDateTime::fromString(message->timestamp, Qt::ISODate).toLocalTime();
 
     QVector<Api::Snowflake> participants = message->call->participants;

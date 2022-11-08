@@ -62,8 +62,8 @@ Accessibility::Accessibility(Api::RessourceManager *rm, QWidget *parent)
     messageContainer->setBorderRadius(Settings::scale(4));
     QHBoxLayout *messageLayout = new QHBoxLayout(messageContainer);
     messageLayout->setContentsMargins(Settings::scale(8), Settings::scale(8), Settings::scale(8), Settings::scale(8));
-    rm->getClient([rm, messageLayout, messageContainer](void *clientPtr){
-            Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
+    rm->getClient([rm, messageLayout, messageContainer](Api::CallbackStruct cb){
+            Api::Client *client = reinterpret_cast<Api::Client *>(cb.data);
             Api::User author{client->username, client->discriminator, client->avatar, client->banner, client->locale, client->email, client->id, client->accentColor, client->flags, client->purchasedFlags, client->publicFlags, 0, 0, 2, 2};
             messageLayout->addWidget(new MessageWidget(rm, new Api::Message{author, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, QVector<Api::Reaction *>(), QVector<Api::Embed *>(), QVector<Api::User *>(), QVector<Api::Attachment *>(), QVector<Api::ChannelMention *>(), QVector<QString>(), QVector<Api::MessageComponent *>(), QVector<Api::StickerItem *>(), QVector<Api::Sticker *>(), 
                 "links will look like this https://discord.com/accessibility", QDateTime::currentDateTime().toString(Qt::DateFormat::ISODate), QString(), QString(), 0, 0, 0, 0, 0, 0, author.publicFlags, Api::MessageType::Default, 0, false, false, false}, true, false, messageContainer));

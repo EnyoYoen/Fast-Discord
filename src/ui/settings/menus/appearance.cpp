@@ -74,8 +74,8 @@ Appearance::Appearance(Api::RessourceManager *rm, QWidget *parent)
     stackLayout->addWidget(messageArea);
 
     messageArea->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-    rm->getClient([messageArea](void *clientPtr){
-        Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
+    rm->getClient([messageArea](Api::CallbackStruct cb){
+        Api::Client *client = reinterpret_cast<Api::Client *>(cb.data);
         Api::User author{client->username, client->discriminator, client->avatar, client->banner, client->locale, client->email, client->id, client->accentColor, client->flags, client->purchasedFlags, client->publicFlags, 0, 0, 2, 2};
         messageArea->setMessages(QVector<Api::Message *>{
             new Api::Message{author, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, QVector<Api::Reaction *>(), QVector<Api::Embed *>(), QVector<Api::User *>(), QVector<Api::Attachment *>(), QVector<Api::ChannelMention *>(), QVector<QString>(), QVector<Api::MessageComponent *>(), QVector<Api::StickerItem *>(), QVector<Api::Sticker *>(), 
@@ -110,7 +110,7 @@ Appearance::Appearance(Api::RessourceManager *rm, QWidget *parent)
         if (index != 2) {
             QString actualTheme;
             actualTheme = (index == 0 ? "dark" : "light");
-            rm->requester->setSettings([](void *){}, "{\"theme\":\"" + actualTheme + "\"}");
+            rm->requester->setSettings([](Api::CallbackStruct cb){}, "{\"theme\":\"" + actualTheme + "\"}");
         }
 
         if (index == 0) Settings::setTheme(Settings::Theme::Dark);
@@ -134,8 +134,8 @@ Appearance::Appearance(Api::RessourceManager *rm, QWidget *parent)
                             "QScrollBar:left-arrow:vertical, QScrollBar::right-arrow:vertical {background: none;}"
                             "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {background: none;}");
 
-        rm->getClient([messageArea](void *clientPtr){
-            Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
+        rm->getClient([messageArea](Api::CallbackStruct cb){
+            Api::Client *client = reinterpret_cast<Api::Client *>(cb.data);
             Api::User author{client->username, client->discriminator, client->avatar, client->banner, client->locale, client->email, client->id, client->accentColor, client->flags, client->purchasedFlags, client->publicFlags, 0, 0, 2, 2};
             messageArea->clear();
             messageArea->setMessages(QVector<Api::Message *>{
@@ -208,12 +208,12 @@ Appearance::Appearance(Api::RessourceManager *rm, QWidget *parent)
         reinterpret_cast<SettingsMenu *>(this->parent())->updateTheme();
 
         if (index == 0)
-            rm->requester->setSettingsProto([](void *){}, "MjsiCgoIT05fQ0xJQ0tKAggBUgIIAVoCCAFiAggBagIIAXICCAF6AIIBAggBigEAmgECCAKiAQCqAQIIAQ==");
+            rm->requester->setSettingsProto([](Api::CallbackStruct cb){}, "MjsiCgoIT05fQ0xJQ0tKAggBUgIIAVoCCAFiAggBagIIAXICCAF6AIIBAggBigEAmgECCAKiAQCqAQIIAQ==");
         else
-            rm->requester->setSettingsProto([](void *){}, "Mj0iCgoIT05fQ0xJQ0tKAggBUgIIAVoCCAFiAggBagIIAXICCAF6AIIBAggBigECCAGaAQIIAqIBAKoBAggB");
+            rm->requester->setSettingsProto([](Api::CallbackStruct cb){}, "Mj0iCgoIT05fQ0xJQ0tKAggBUgIIAVoCCAFiAggBagIIAXICCAF6AIIBAggBigECCAGaAQIIAqIBAKoBAggB");
 
-        rm->getClient([messageArea](void *clientPtr){
-            Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
+        rm->getClient([messageArea](Api::CallbackStruct cb){
+            Api::Client *client = reinterpret_cast<Api::Client *>(cb.data);
             Api::User author{client->username, client->discriminator, client->avatar, client->banner, client->locale, client->email, client->id, client->accentColor, client->flags, client->purchasedFlags, client->publicFlags, 0, 0, 2, 2};
             messageArea->clear();
             messageArea->setMessages(QVector<Api::Message *>{

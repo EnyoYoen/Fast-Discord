@@ -26,7 +26,7 @@ MemberWidget::MemberWidget(Api::RessourceManager *rmp, Api::User *userp, QColor 
     } else {
         icon = new RoundedImage(Settings::scale(32), Settings::scale(32), Settings::scale(16), this);
         avatarUrl = "https://cdn.discordapp.com/avatars/" + user->id + "/" + avatar;
-        rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, avatarUrl, user->id + (avatar.indexOf("a_") == 0 ? ".gif" : ".png"));
+        rm->getImage([this](Api::CallbackStruct cb) {this->setIcon(*static_cast<QString *>(cb.data));}, avatarUrl, user->id + (avatar.indexOf("a_") == 0 ? ".gif" : ".png"));
     }
 
     statusBackground = new Widget(this);

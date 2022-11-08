@@ -23,8 +23,8 @@ public:
         headerLayout->setSpacing(Settings::scale(10));
 
         RoundedImage *avatar = new RoundedImage(Settings::scale(32), Settings::scale(32), Settings::scale(16), header);
-        rm->getImage([avatar](void *imageFileName){
-            avatar->setRoundedImage(*reinterpret_cast<QString *>(imageFileName));
+        rm->getImage([avatar](Api::CallbackStruct cb){
+            avatar->setRoundedImage(*reinterpret_cast<QString *>(cb.data));
         }, "https://cdn.discordapp.com/app-icons/" + app->application->id + "/" + app->application->icon + ".webp", app->application->id + ".webp");
 
         QFont font;
@@ -39,7 +39,7 @@ public:
         deauthorize = new SettingsButton(SettingsButton::Type::Critical, "Deauthorize", header);
         deauthorize->hide();
         QObject::connect(deauthorize, &SettingsButton::clicked, [rm, app, this](){
-            rm->requester->deleteAuthorizedApp(app->id);
+            rm->requester->deleteAuthorizedApp([](Api::CallbackStruct cb){}, app->id);
             emit deleted();
             this->deleteLater();
         });
@@ -206,8 +206,8 @@ AuthorizedApps::AuthorizedApps(Api::RessourceManager *rmp, QWidget *parent)
     layout->addWidget(description);
     layout->addSpacing(Settings::scale(32));
 
-    rm->requester->getAuthorizedApp([this](void *appsPtr){
-        QVector<Api::AuthorizedApp *> apps = *reinterpret_cast<QVector<Api::AuthorizedApp *> *>(appsPtr);
+    rm->requester->getAuthorizedApp([this](Api::CallbackStruct cb){
+        QVector<Api::AuthorizedApp *> apps = *reinterpret_cast<QVector<Api::AuthorizedApp *> *>(cb.data);
         if (apps.isEmpty()) {
             empty();
             layout->addStretch(1);

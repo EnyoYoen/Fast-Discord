@@ -16,8 +16,8 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, QWidget *parent)
     deaf = false;
     muted = false;
 
-    rm->getClient([this](void *clientPtr){
-        Api::Client *client = reinterpret_cast<Api::Client *>(clientPtr);
+    rm->getClient([this](Api::CallbackStruct cb){
+        Api::Client *client = reinterpret_cast<Api::Client *>(cb.data);
 
         // Create the layout
         QHBoxLayout *layout = new QHBoxLayout(this);
@@ -34,7 +34,7 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, QWidget *parent)
 
             // Request the icon
             channelIconFileName = client->id + (client->avatar.indexOf("a_") == 0 ? ".gif" : ".png");
-            rm->getImage([this](void *iconFileName) {this->setIcon(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/avatars/" + client->id + "/" + client->avatar, channelIconFileName);
+            rm->getImage([this](Api::CallbackStruct cb) {this->setIcon(*static_cast<QString *>(cb.data));}, "https://cdn.discordapp.com/avatars/" + client->id + "/" + client->avatar, channelIconFileName);
         }
 
         // Set the background of the status icon
@@ -51,8 +51,8 @@ UserMenu::UserMenu(Api::RessourceManager *rmp, QWidget *parent)
         statusIcon->setBorderRadius(Settings::scale(5));
         statusIcon->move(Settings::scale(31), Settings::scale(32));
         statusIcon->show();
-        rm->getClientSettings([&](void *settingsPtr){
-            QString status = reinterpret_cast<Api::ClientSettings *>(settingsPtr)->status;
+        rm->getClientSettings([&](Api::CallbackStruct cb){
+            QString status = reinterpret_cast<Api::ClientSettings *>(cb.data)->status;
             if (status == "online") statusIcon->setBackgroundColor(Settings::StatusOnline);
             else if (status == "idle") statusIcon->setBackgroundColor(Settings::StatusIdle);
             else if (status == "dnd") statusIcon->setBackgroundColor(Settings::StatusDND);

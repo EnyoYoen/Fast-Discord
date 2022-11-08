@@ -177,10 +177,10 @@ void Settings::initSettings(Api::RessourceManager *rm, QString tokenp)
     theme = Theme::Dark;
     actualTheme = Theme::Dark;
 
-    rm->getClientSettings([](void *settingsPtr){
+    rm->getClientSettings([](Api::CallbackStruct cb){
 
 
-        Api::ClientSettings *settings = reinterpret_cast<Api::ClientSettings *>(settingsPtr);        
+        Api::ClientSettings *settings = reinterpret_cast<Api::ClientSettings *>(cb.data);        
 
 
     });

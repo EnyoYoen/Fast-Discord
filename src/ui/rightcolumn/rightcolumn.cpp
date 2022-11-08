@@ -204,8 +204,8 @@ void RightColumn::openGuildChannel(const QString& channelName, const Api::Snowfl
 {
     currentOpenedGuild = guildId;
     currentChannelName = channelName;
-    rm->getGuildChannel([&](void *channel){
-        openChannel(id, "#" + channelName, reinterpret_cast<Api::Channel *>(channel)->type, 
+    rm->getGuildChannel([&](Api::CallbackStruct cb){
+        openChannel(id, "#" + channelName, reinterpret_cast<Api::Channel *>(cb.data)->type, 
             QVector<Api::Snowflake>());
     }, guildId, id);
 }
@@ -214,10 +214,10 @@ void RightColumn::openPrivateChannel(const QString& channelName, const Api::Snow
 {
     currentOpenedGuild = Api::Snowflake(0);
     currentChannelName = channelName;
-    rm->getPrivateChannel([&](void *channel){
-        int type = reinterpret_cast<Api::PrivateChannel *>(channel)->type;
-        openChannel(id, (type == Api::DM ? "@" : "") + channelName, reinterpret_cast<Api::PrivateChannel *>(channel)->type, 
-            reinterpret_cast<Api::PrivateChannel *>(channel)->recipientIds);
+    rm->getPrivateChannel([&](Api::CallbackStruct cb){
+        int type = reinterpret_cast<Api::PrivateChannel *>(cb.data)->type;
+        openChannel(id, (type == Api::DM ? "@" : "") + channelName, reinterpret_cast<Api::PrivateChannel *>(cb.data)->type, 
+            reinterpret_cast<Api::PrivateChannel *>(cb.data)->recipientIds);
     }, id);
 }
 
@@ -248,10 +248,10 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         if (!rm->hasMessages(channelId)) {
             Widget *messageAreaPlaceholder = new Widget(messagesContainer);
             messagesLayout->addWidget(messageAreaPlaceholder);
-            rm->getMessages([this](void *messages) {emit messagesReceived(*static_cast<QVector<Api::Message *> *>(messages));}, channelId, 50, false);
+            rm->getMessages([this](Api::CallbackStruct cb) {emit messagesReceived(*static_cast<QVector<Api::Message *> *>(cb.data));}, channelId, 50, false);
         } else {
-            rm->getMessages([this](void *messagePtr) {
-                QVector<Api::Message *> messages = *reinterpret_cast<QVector<Api::Message *> *>(messagePtr);
+            rm->getMessages([this](Api::CallbackStruct cb) {
+                QVector<Api::Message *> messages = *reinterpret_cast<QVector<Api::Message *> *>(cb.data);
                 messageArea->setMessages(messages);
             }, channelId, 50, false);
         }
@@ -338,7 +338,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
         layoutContainer->setSpacing(0);
         layoutContainer->addWidget(messagesInputContainer);
         if (type != Api::DM) {
-            rm->getGuildMembers([](void *){}, channelId);
+            rm->getGuildMembers([](Api::CallbackStruct cb){}, channelId);
             
             if (memberList) {
                 memberList->deleteLater();
@@ -347,7 +347,7 @@ void RightColumn::openChannel(const Api::Snowflake& channelId, const QString& ch
             layoutContainer->addWidget(memberList);
 
             QObject::connect(memberList, &MemberList::loadMoreMembers, [this](){
-                rm->getGuildMembers([](void *){}, currentOpenedChannel);
+                rm->getGuildMembers([](Api::CallbackStruct cb){}, currentOpenedChannel);
             });
         }
 
@@ -373,8 +373,8 @@ void const RightColumn::addMessage(const Api::Message& message)
     // Add the message if it belongs to this channels
     if (message.channelId == currentOpenedChannel) {
         Api::Message *messagep = const_cast<Api::Message *>(&message);
-        rm->getMessages([this, messagep](void *messagePtr) {
-            QVector<Api::Message *> channelMessages = *reinterpret_cast<QVector<Api::Message *> *>(messagePtr);
+        rm->getMessages([this, messagep](Api::CallbackStruct cb) {
+            QVector<Api::Message *> channelMessages = *reinterpret_cast<QVector<Api::Message *> *>(cb.data);
             messageArea->addMessage(messagep, channelMessages[1]);
         }, currentOpenedChannel, 1, false);
         emit messageAdded(currentOpenedChannel);
@@ -392,14 +392,14 @@ void RightColumn::userTyping(const json& data)
         typingTimestamp = data["timestamp"].toInt(-1);
 
         // Get the user that is typing
-        rm->getUser([this](void *user) {emit userTypingReceived(static_cast<Api::User *>(user));}, Api::Snowflake(data["user_id"].toVariant().toULongLong()));
+        rm->getUser([this](Api::CallbackStruct cb) {emit userTypingReceived(static_cast<Api::User *>(cb.data));}, Api::Snowflake(data["user_id"].toVariant().toULongLong()));
     }
 }
 
 void const RightColumn::sendTyping()
 {
     // Send typing to the API
-    rm->requester->sendTyping(currentOpenedChannel);
+    rm->requester->sendTyping([](Api::CallbackStruct cb){}, currentOpenedChannel);
 }
 
 void const RightColumn::sendMessage(const QString& content)
@@ -407,9 +407,9 @@ void const RightColumn::sendMessage(const QString& content)
     if (!content.isEmpty() || !filePath.isNull()) {
         // Send a new message to the API and add it to the opened channel
         if (filePath.isNull()) {
-            rm->requester->sendMessage(content, currentOpenedChannel);
+            rm->requester->sendMessage([](Api::CallbackStruct cb){}, content, currentOpenedChannel);
         } else {
-            rm->requester->sendMessageWithFile(content, currentOpenedChannel, filePath);
+            rm->requester->sendMessageWithFile([](Api::CallbackStruct cb){}, content, currentOpenedChannel, filePath);
             filePath.clear();
             fileLabel->hide();
         }
@@ -418,8 +418,8 @@ void const RightColumn::sendMessage(const QString& content)
 
 void const RightColumn::loadMoreMessages()
 {
-   rm->getMessages([this](void *messages){
-       emit moreMessagesReceived(*static_cast<QVector<Api::Message *> *>(messages));
+   rm->getMessages([this](Api::CallbackStruct cb){
+       emit moreMessagesReceived(*static_cast<QVector<Api::Message *> *>(cb.data));
    }, currentOpenedChannel, 50, true);
 }
 
@@ -450,14 +450,14 @@ void RightColumn::removeReaction(const Api::Snowflake& userId, const Api::Snowfl
 void RightColumn::updateTheme()
 {
     if (currentOpenedGuild == 0) {
-        rm->getPrivateChannel([this](void *channel){
-            int type = reinterpret_cast<Api::PrivateChannel *>(channel)->type;
-            openChannel(currentOpenedChannel, (type == Api::DM ? "@" : "") + currentChannelName, reinterpret_cast<Api::PrivateChannel *>(channel)->type, 
-                reinterpret_cast<Api::PrivateChannel *>(channel)->recipientIds);
+        rm->getPrivateChannel([this](Api::CallbackStruct cb){
+            int type = reinterpret_cast<Api::PrivateChannel *>(cb.data)->type;
+            openChannel(currentOpenedChannel, (type == Api::DM ? "@" : "") + currentChannelName, reinterpret_cast<Api::PrivateChannel *>(cb.data)->type, 
+                reinterpret_cast<Api::PrivateChannel *>(cb.data)->recipientIds);
         }, currentOpenedChannel);
     } else {
-        rm->getGuildChannel([this](void *channel){
-            openChannel(currentOpenedChannel, "#" + currentChannelName, reinterpret_cast<Api::Channel *>(channel)->type, 
+        rm->getGuildChannel([this](Api::CallbackStruct cb){
+            openChannel(currentOpenedChannel, "#" + currentChannelName, reinterpret_cast<Api::Channel *>(cb.data)->type, 
                 QVector<Api::Snowflake>());
         }, currentOpenedGuild, currentOpenedChannel);
     }

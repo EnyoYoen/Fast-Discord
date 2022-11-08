@@ -111,7 +111,7 @@ GuildIcon::GuildIcon(Api::RessourceManager *rm, const Api::Snowflake& guildId, Q
         guildIconFileName += ".png";
         if (!QFile::exists("cache/" + guildIconFileName)) {
             icon = new RoundedImage(small ? Settings::scale(16) : Settings::scale(48), small ? Settings::scale(16) : Settings::scale(48), small ? Settings::scale(8) : Settings::scale(24), this);
-            rm->getImage([this](void *iconFileName) {emit iconRecieved(*static_cast<QString *>(iconFileName));}, "https://cdn.discordapp.com/icons/" + guildId + "/" + guildIconFileName, guildIconFileName);
+            rm->getImage([this](Api::CallbackStruct cb) {emit iconRecieved(*static_cast<QString *>(cb.data));}, "https://cdn.discordapp.com/icons/" + guildId + "/" + guildIconFileName, guildIconFileName);
         } else {
             guildIconFileName = "cache/" + guildIconFileName;
 

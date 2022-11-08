@@ -42,8 +42,8 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
     layout->addWidget(safeDMDescription);
     layout->addSpacing(Settings::scale(8));
 
-    rm->getClientSettings([this, layout](void *settingsPtr){
-        Api::ClientSettings *settings = reinterpret_cast<Api::ClientSettings *>(settingsPtr);
+    rm->getClientSettings([this, layout](Api::CallbackStruct cb){
+        Api::ClientSettings *settings = reinterpret_cast<Api::ClientSettings *>(cb.data);
 
         QVector<RadioParameters> radioParameters;
         radioParameters.append(RadioParameters{"Keep me safe", "Scan direct messages from everyone.", Settings::RadioBarGreen});
@@ -58,7 +58,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                 settings = "MjFKAggBUgIIAVoCCAFiAggBagIIAXICCAF6AIIBAggBigEAmgECCAGiAQIIAaoBAggB";
             else
                 settings = "Mi9KAggBUgIIAVoCCAFiAggBagIIAXICCAF6AIIBAggBigEAmgEAogECCAGqAQIIAQ==";
-            rm->requester->setSettingsProto([](void *){}, settings);
+            rm->requester->setSettingsProto([](Api::CallbackStruct cb){}, settings);
         });
 
         layout->addWidget(safeDMRadio);
@@ -67,14 +67,14 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
         layout->addSpacing(Settings::scale(8));
         layout->addWidget(createSection(std::function<void(bool)>([this](bool active){
             if (active)
-                rm->requester->setSettings([](void *){}, "{\"default_guilds_restricted\":false,\"resticted_guilds\":[]}");
+                rm->requester->setSettings([](Api::CallbackStruct cb){}, "{\"default_guilds_restricted\":false,\"resticted_guilds\":[]}");
             else
-                rm->getGuilds([this](void *guildsPtr){
-                    QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+                rm->getGuilds([this](Api::CallbackStruct cb){
+                    QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
                     QString settings("{\"default_guilds_restricted\":true,\"resticted_guilds\":[");
                     for (int i = 0 ; i < guilds.size() ; i++)
                         settings += guilds[i]->id + (i + 1 == guilds.size() ? "]}" : ",");
-                    rm->requester->setSettings([](void *){}, settings);
+                    rm->requester->setSettings([](Api::CallbackStruct cb){}, settings);
                 });
         }), "Allow direct messages from server members", 
             "This setting is applied when you join a new server. It does not apply retroactively to your existing servers.", (optbool)settings->defaultGuildsRestricted, SectionType::None));
@@ -85,7 +85,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                 settings = "MjFKAggBUgIIAVoCCAFiAggBagIIAXICCAF6AIIBAggBigEAmgECCAKiAQIIAaoBAggB";
             else
                 settings = "Mi9KAggBUgIIAVoCCAFiAggBagIIAXICCAF6AIIBAggBigEAmgECCAKiAQCqAQIIAQ==";
-            rm->requester->setSettingsProto([](void *){}, settings);
+            rm->requester->setSettingsProto([](Api::CallbackStruct cb){}, settings);
         }), "Allow access to age-restricted servers on iOS", 
             "After joining on desktop, view your servers for people 18+ on iOS devices.", (optbool)settings->viewNsfwGuilds, SectionType::None));
         layout->addSpacing(Settings::scale(60));
@@ -103,7 +103,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                 mutualFriendsSwitch->setState(true);
                 mutualGuildsSwitch->setState(true);
             }
-            rm->requester->setSettings([](void *){}, "{\"friend_source_flags\":{"
+            rm->requester->setSettings([](Api::CallbackStruct cb){}, "{\"friend_source_flags\":{"
                 "\"all\":" + QString(all ? "true," : "false,") +
                 "\"mutual_friends\":" + QString(mutualFriends ? "true," : "false,") +
                 "\"mutual_guilds\":" + QString(mutualGuilds ? "true}}" : "false}}")
@@ -119,7 +119,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                 all = true;
                 allSwitch->setState(true);
             }
-            rm->requester->setSettings([](void *){}, "{\"friend_source_flags\":{"
+            rm->requester->setSettings([](Api::CallbackStruct cb){}, "{\"friend_source_flags\":{"
                 "\"all\":" + QString(all ? "true," : "false,") +
                 "\"mutual_friends\":" + QString(mutualFriends ? "true," : "false,") +
                 "\"mutual_guilds\":" + QString(mutualGuilds ? "true}}" : "false}}")
@@ -135,7 +135,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                 all = true;
                 allSwitch->setState(true);
             }
-            rm->requester->setSettings([](void *){}, "{\"friend_source_flags\":{"
+            rm->requester->setSettings([](Api::CallbackStruct cb){}, "{\"friend_source_flags\":{"
                 "\"all\":" + QString(all ? "true," : "false,") +
                 "\"mutual_friends\":" + QString(mutualFriends ? "true," : "false,") +
                 "\"mutual_guilds\":" + QString(mutualGuilds ? "true}}" : "false}}")
@@ -151,7 +151,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                 settings = "QhYKAggBQgIIAUoCCAFSAggBWgIIDmIA";
             else
                 settings = "QhQKAEICCAFKAggBUgIIAVoCCA5iAA==";
-            rm->requester->setSettingsProto([](void *){}, settings);
+            rm->requester->setSettingsProto([](Api::CallbackStruct cb){}, settings);
         }), "Allow friends to join your game.", 
             "This setting allow friends to join your game without sending a request.", (optbool)Optional::None, SectionType::None));
         layout->addSpacing(Settings::scale(20));
@@ -161,28 +161,28 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                 settings = "QhoKAggBEgIIAUICCAFKAggBUgIIAVoCCA5iAA==";
             else
                 settings = "QhgKAggBEgBCAggBSgIIAVICCAFaAggOYgA=";
-            rm->requester->setSettingsProto([](void *){}, settings);
+            rm->requester->setSettingsProto([](Api::CallbackStruct cb){}, settings);
         }), "Allow voice channel participants to join your game.", 
             "This setting allow people that are in the same voice channel as you to join your game without sending a request.\nThis feature only works in non-community servers.", (optbool)Optional::None, SectionType::None));
         layout->addSpacing(Settings::scale(60));
 
-        rm->requester->getConsent([layout, settings, this](void *dataPtr){
-            QJsonDocument data = *reinterpret_cast<QJsonDocument *>(dataPtr);
+        rm->requester->getConsent([layout, settings, this](Api::CallbackStruct cb){
+            QJsonDocument data = *reinterpret_cast<QJsonDocument *>(cb.data);
 
             layout->addWidget(createTitle("HOW WE USE YOUR DATA"));  
             layout->addSpacing(Settings::scale(8));
             layout->addWidget(createSection(std::function<void(bool)>([this](bool active){
                 if (active)
-                    rm->requester->setConsent([](void *){}, "\"usage_statistics\"", QString());
+                    rm->requester->setConsent([](Api::CallbackStruct cb){}, "\"usage_statistics\"", QString());
                 else
-                    rm->requester->setConsent([](void *){}, QString(), "\"usage_statistics\"");
+                    rm->requester->setConsent([](Api::CallbackStruct cb){}, QString(), "\"usage_statistics\"");
             }), "Use data to improve Discord", "This setting allows us to use and process information about how you navigate and use Discord for analytical\npurposes. For example, it allows us to include you in new feature experiments we test.\n Learn more at https://support.discord.com/hc/en-us/articles/360004109911", data["personalization"]["consented"].toInt(), SectionType::None));
             layout->addSpacing(Settings::scale(20));
             layout->addWidget(createSection(std::function<void(bool)>([this](bool active){
                 if (active)
-                    rm->requester->setConsent([](void *){}, "\"personalization\"", QString());
+                    rm->requester->setConsent([](Api::CallbackStruct cb){}, "\"personalization\"", QString());
                 else
-                    rm->requester->setConsent([](void *){}, QString(), "\"personalization\"");
+                    rm->requester->setConsent([](Api::CallbackStruct cb){}, QString(), "\"personalization\"");
             }), "Use data to customize my Discord experience", "This setting allows us to use information, such as who you talk to and what games you play, to customize Discord\nfor you. Learn more at https://support.discord.com/hc/en-us/articles/360004109911", data["usage_statistics"]["consented"].toInt(), SectionType::None));
             layout->addSpacing(Settings::scale(20));
             layout->addWidget(createSection(std::function<void(bool)>([this](bool active){
@@ -191,7 +191,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                     settings = "QhwKAggBEgIIATgBQgIIAUoCCAFSAggBWgIIDmIA";
                 else
                     settings = "QhoKAggBEgIIAUICCAFKAggBUgIIAVoCCA5iAA==";
-                rm->requester->setSettingsProto([](void *){}, settings);
+                rm->requester->setSettingsProto([](Api::CallbackStruct cb){}, settings);
             }), "Allow Discord to track screen reader usage", "This setting allows us to record when you use a screen reader while using Discord so that we can improve\naccessibility. Learn more at https://support.discord.com/hc/en-us/articles/360035966492", settings->allowAccessibilityDetection, SectionType::None));
             layout->addSpacing(Settings::scale(20));
             layout->addWidget(createSection(std::function<void(bool)>([this](bool active){}), "Use data to make Discord work", "We need to store and process some data in order to provide you the basic Discord service, such as your messages,\nwhat servers you're in and you Direct Messages. By using Discord, you allow us to provide this basic service. You\ncan stop this by Disabling or Deleting your account (in the My Account menu).", (optbool)Optional::None, SectionType::None));
@@ -202,8 +202,8 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
             font.setPixelSize(Settings::scale(12));
             font.setFamily("whitney");
             
-            rm->requester->getHarvest([layout, font, this](void *dataPtr){
-                QJsonDocument data = *reinterpret_cast<QJsonDocument *>(dataPtr);
+            rm->requester->getHarvest([layout, font, this](Api::CallbackStruct cb){
+                QJsonDocument data = *reinterpret_cast<QJsonDocument *>(cb.data);
                 
                 if (data["created_at"].isUndefined() || (QDateTime::fromString(data["created_at"].toString(), Qt::ISODate).addMonths(1).toLocalTime() < QDateTime::currentDateTime())) {
                     SettingsButton *requestButton = new SettingsButton(SettingsButton::Type::NormalOutlined, "Request Data", container);
@@ -213,7 +213,7 @@ PrivacySafety::PrivacySafety(Api::RessourceManager *rmp, QWidget *parent)
                         PopUp *popUp = new PopUp(new Widget(nullptr), 440, 206, QString(), "Submit Data Request", false, false, "It may take us up to 30 days to collect your data. We will send you an email to the address you registered with when to package is ready.", "I've changed my mind", "Request My Data", true, true, parentWidget->size(), parentWidget);
                         QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
                         QObject::connect(popUp, &PopUp::done, [font, parentWidget, requestButton, popUp, layout, this](){
-                            rm->requester->harvestData();
+                            rm->requester->harvestData([](Api::CallbackStruct cb){});
 
                             Widget *requestData = new Widget(nullptr);
                             requestData->setFixedHeight(Settings::scale(62));

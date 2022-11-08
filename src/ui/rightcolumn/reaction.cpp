@@ -32,8 +32,8 @@ Reaction::Reaction(Api::RessourceManager *rmp, const Api::Reaction& reactionp, c
     Label *emoji = new Label(this);
     emoji->setFixedSize(Settings::scale(16), Settings::scale(16));
     if (reaction.emoji.id.value) {
-        rm->getImage([emoji](void *fileName){
-            emoji->setImage(*reinterpret_cast<QString *>(fileName));
+        rm->getImage([emoji](Api::CallbackStruct cb){
+            emoji->setImage(*reinterpret_cast<QString *>(cb.data));
         }, "https://cdn.discordapp.com/emojis/" + reaction.emoji.id, QString::number(reaction.emoji.id.value));
     } else {
         emoji->setText(reaction.emoji.name);
@@ -53,9 +53,9 @@ Reaction::Reaction(Api::RessourceManager *rmp, const Api::Reaction& reactionp, c
 void Reaction::mouseReleaseEvent(QMouseEvent *event)
 {
     if (active)
-        rm->requester->deleteReaction([](void *){}, channelId, messageId, reaction.emoji.id, reaction.emoji.name);
+        rm->requester->deleteReaction([](Api::CallbackStruct cb){}, channelId, messageId, reaction.emoji.id, reaction.emoji.name);
     else
-        rm->requester->addReaction([](void *){}, channelId, messageId, reaction.emoji.id, reaction.emoji.name);
+        rm->requester->addReaction([](Api::CallbackStruct cb){}, channelId, messageId, reaction.emoji.id, reaction.emoji.name);
 }
 
 void Reaction::enterEvent(QEvent *)

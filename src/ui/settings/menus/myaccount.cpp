@@ -93,16 +93,16 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
     profile->setFixedHeight(Settings::scale(408));
     profile->setBorderRadius(Settings::scale(8));
     profile->setBackgroundColor(Settings::BackgroundTertiary);
-    rm->getClient([this, profile](void *clientPtr){
-        Api::Client client = *reinterpret_cast<Api::Client *>(clientPtr);
+    rm->getClient([this, profile](Api::CallbackStruct cb){
+        Api::Client client = *reinterpret_cast<Api::Client *>(cb.data);
     
         Widget *banner = new Widget(profile);
         banner->setBorderRadius(Settings::scale(8), Settings::scale(8), 0, 0);
         banner->setFixedSize(Settings::scale(660), Settings::scale(100));
         
         if (!client.banner.isNull()) {
-            rm->getImage([this, banner](void *imageFileName){
-                banner->setPixmap(QPixmap(*reinterpret_cast<QString *>(imageFileName)).scaledToWidth(660));
+            rm->getImage([this, banner](Api::CallbackStruct cb){
+                banner->setPixmap(QPixmap(*reinterpret_cast<QString *>(cb.data)).scaledToWidth(660));
             }, "https://cdn.discordapp.com/banners/" + client.id + "/" + client.banner + ".png?size=600", client.banner);
         } else if (client.bannerColor != 0) {
             profile->setBackgroundColor(Settings::BackgroundTertiary);
@@ -112,8 +112,8 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 banner->setBackgroundColor(Settings::Black);
             } else {
                 QString channelIconFileName = client.id + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
-                rm->getImage([banner](void *imageFileName){
-                    QImage img(*reinterpret_cast<QString *>(imageFileName));
+                rm->getImage([banner](Api::CallbackStruct cb){
+                    QImage img(*reinterpret_cast<QString *>(cb.data));
                     int count = 0;
                     int r = 0, g = 0, b = 0;
                     for (int i = 0 ; i < img.width() ; i++) {
@@ -176,8 +176,8 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         } else {
             avatar = new RoundedImage(Settings::scale(80), Settings::scale(80), Settings::scale(40), profile);
             QString channelIconFileName = client.id + (client.avatar.indexOf("a_") == 0 ? ".gif" : ".png");
-            rm->getImage([avatar](void *imageFileName){
-                avatar->setRoundedImage(*reinterpret_cast<QString *>(imageFileName));
+            rm->getImage([avatar](Api::CallbackStruct cb){
+                avatar->setRoundedImage(*reinterpret_cast<QString *>(cb.data));
             }, "https://cdn.discordapp.com/avatars/" + client.id + "/" + client.avatar, channelIconFileName);
         }
         avatar->move(Settings::scale(23), Settings::scale(83));
@@ -195,8 +195,8 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         statusIcon->setFixedSize(Settings::scale(16), Settings::scale(16));
         statusIcon->setBorderRadius(Settings::scale(8));
         statusIcon->move(Settings::scale(80), Settings::scale(142));
-        rm->getClientSettings([statusIcon](void *settingsPtr){
-            QString status = reinterpret_cast<Api::ClientSettings *>(settingsPtr)->status;
+        rm->getClientSettings([statusIcon](Api::CallbackStruct cb){
+            QString status = reinterpret_cast<Api::ClientSettings *>(cb.data)->status;
             if (status == "online") statusIcon->setBackgroundColor(Settings::StatusOnline);
             else if (status == "idle") statusIcon->setBackgroundColor(Settings::StatusIdle);
             else if (status == "dnd") statusIcon->setBackgroundColor(Settings::StatusDND);
@@ -345,11 +345,11 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 password->setText("CURRENT PASSWORD");
                 password->setFixedSize(QFontMetrics(QFont()).horizontalAdvance("CURRENT PASSWORD"), Settings::scale(16));
                 password->setTextColor(Settings::HeaderSecondary);
-                rm->requester->changeUsername([this, popUp, username, password](void *errorsPtr){
-                    if (errorsPtr == nullptr) {
+                rm->requester->changeUsername([this, popUp, username, password](Api::CallbackStruct cb){
+                    if (cb.data == nullptr) {
                         popUp->deleteLater();
                     } else {
-                        QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
+                        QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(cb.data);
                         for (int i = 0 ; i < errors.size() ; i++) {
                             if (errors[i]->intCode == 0 || errors[i]->intCode == 1) {
                                 username->setText("USERNAME - " + errors[i]->message);
@@ -398,7 +398,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
             PopUp *popUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(306), QString(), "Verify email address", true, true, "<div style=\"text-align: center\">We'll need to verify your old email address, <b>" + client.email + "</b> in order to change it. <a style=\"color: #00AFF4; text-decoration: none;\" href=\"https://support.discord.com/hc/en-us/requests/new\">Lost access to your email? Go to https://support.discord.com/hc/en-us/requests/new.</a></div>", "Cancel", "Send Verification Code", true, false, parentWidget->size(), parentWidget);
             QObject::connect(popUp, &PopUp::cancelled, [popUp](){popUp->deleteLater();});
             QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget](){
-                rm->requester->sendVerificationEmail();
+                rm->requester->sendVerificationEmail([](Api::CallbackStruct cb){});
                 popUp->deleteLater();
 
                 QFont font;
@@ -424,8 +424,8 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 QObject::connect(codePopUp, &PopUp::done, [this, parentWidget, codePopUp, codeInput, code](){
                     code->setText("VERIFICATION CODE");
                     code->setTextColor(Settings::HeaderSecondary);
-                    rm->requester->sendVerifyCode([this, parentWidget, codePopUp, codeInput, code](void *errorPtr){
-                        if (errorPtr == nullptr) {
+                    rm->requester->sendVerifyCode([this, parentWidget, codePopUp, codeInput, code](Api::CallbackStruct cb){
+                        if (cb.data == nullptr) {
                             codePopUp->deleteLater();
 
                             QFont font;
@@ -473,11 +473,11 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                                 email->setTextColor(Settings::HeaderSecondary);
                                 password->setText("CURRENT PASSWORD");
                                 password->setTextColor(Settings::HeaderSecondary);
-                                rm->requester->changeEmail([this, emailPopUp, email, password](void *errorsPtr){
-                                    if (errorsPtr == nullptr) {
+                                rm->requester->changeEmail([this, emailPopUp, email, password](Api::CallbackStruct cb){
+                                    if (cb.data == nullptr) {
                                         emailPopUp->deleteLater();
                                     } else {
-                                        QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
+                                        QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(cb.data);
                                         for (int i = 0 ; i < errors.size() ; i++) {
                                             if (errors[i]->intCode == 0) {
                                                 email->setText("EMAIL - " + errors[i]->message);
@@ -491,7 +491,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                                 }, emailInput->input->text(), passwordInput->input->text());
                             });
                         } else {
-                            code->setText("USERNAME - " + reinterpret_cast<Api::Error *>(errorPtr)->message);
+                            code->setText("USERNAME - " + reinterpret_cast<Api::Error *>(cb.data)->message);
                             code->setTextColor(Settings::Error);
                         }
                     }, codeInput->input->text());
@@ -593,11 +593,11 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                 QObject::connect(popUp, &PopUp::done, [this, popUp, password, input](){
                     password->setText("PASSWORD");
                     password->setTextColor(Settings::HeaderSecondary);
-                    rm->requester->removePhone([popUp, password](void *errorPtr){
-                        if (errorPtr == nullptr) {
+                    rm->requester->removePhone([popUp, password](Api::CallbackStruct cb){
+                        if (cb.data == nullptr) {
                             popUp->deleteLater();
                         } else {
-                            password->setText("CURRENT PASSWORD - " + reinterpret_cast<Api::Error *>(errorPtr)->message);
+                            password->setText("CURRENT PASSWORD - " + reinterpret_cast<Api::Error *>(cb.data)->message);
                             password->setTextColor(Settings::Error);
                         }
                     }, input->input->text());
@@ -721,11 +721,11 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                     confirm->setText("CONFIRM NEW PASSWORD - Passwords do not match!");
                     confirm->setTextColor(Settings::Error);
                 } else {
-                    rm->requester->changePassword([popUp, current, newPassword](void *errorsPtr){
-                        if (errorsPtr == nullptr) {
+                    rm->requester->changePassword([popUp, current, newPassword](Api::CallbackStruct cb){
+                        if (cb.data == nullptr) {
                             popUp->deleteLater();
                         } else {
-                            QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(errorsPtr);
+                            QVector<Api::Error *> errors = *reinterpret_cast<QVector<Api::Error *> *>(cb.data);
                             for (int i = 0 ; i < errors.size() ; i++) {
                                 if (errors[i]->intCode == 0) {
                                     current->setText("CURRENT PASSWORD - " + errors[i]->message);
@@ -763,10 +763,10 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
     SettingsButton *disableAccount = new SettingsButton(SettingsButton::Type::Important, "Disable Account", accountButtons);
     SettingsButton *deleteAccount = new SettingsButton(SettingsButton::Type::Critical, "Delete Account", accountButtons);
     QObject::connect(disableAccount, &SettingsButton::clicked, [this](){
-        rm->getClient([this](void *clientPtr){
-            Api::Client client = *reinterpret_cast<Api::Client *>(clientPtr);
-            rm->getGuilds([this, client](void *guildsPtr){
-                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+        rm->getClient([this](Api::CallbackStruct cb){
+            Api::Client client = *reinterpret_cast<Api::Client *>(cb.data);
+            rm->getGuilds([this, client](Api::CallbackStruct cb){
+                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
                 bool owner = false;
                 for (int i = 0 ; i < guilds.size() ; i++) {
                     if (guilds[i]->ownerId == client.id) {
@@ -801,8 +801,8 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                     QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget, password, input](){
                         password->setText("PASSWORD");
                         password->setTextColor(Settings::HeaderSecondary);
-                        rm->requester->disableAccount([this, popUp, parentWidget, password](void *errorPtr){
-                            if (errorPtr == nullptr) {
+                        rm->requester->disableAccount([this, popUp, parentWidget, password](Api::CallbackStruct cb){
+                            if (cb.data == nullptr) {
                                 popUp->deleteLater();
 
                                 PopUp *closePopUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(200), QString(), QString(), true, false, "Your account has been disabled successfully, Fast-Discord will now exit.", QString(), QString(), false, false, parentWidget->size(), parentWidget);
@@ -811,7 +811,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                                     exit(0);
                                 });
                             } else {
-                                password->setText("PASSWORD - " + reinterpret_cast<Api::Error *>(errorPtr)->message);
+                                password->setText("PASSWORD - " + reinterpret_cast<Api::Error *>(cb.data)->message);
                                 password->setTextColor(Settings::Error);
                             }
                         }, input->input->text());
@@ -822,10 +822,10 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
         
     });
     QObject::connect(deleteAccount, &SettingsButton::clicked, [this](){
-        rm->getClient([this](void *clientPtr){
-            Api::Client client = *reinterpret_cast<Api::Client *>(clientPtr);
-            rm->getGuilds([this, client](void *guildsPtr){
-                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(guildsPtr);
+        rm->getClient([this](Api::CallbackStruct cb){
+            Api::Client client = *reinterpret_cast<Api::Client *>(cb.data);
+            rm->getGuilds([this, client](Api::CallbackStruct cb){
+                QVector<Api::Guild *> guilds = *reinterpret_cast<QVector<Api::Guild *> *>(cb.data);
                 bool owner = false;
                 for (int i = 0 ; i < guilds.size() ; i++) {
                     if (guilds[i]->ownerId == client.id) {
@@ -860,8 +860,8 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                     QObject::connect(popUp, &PopUp::done, [this, popUp, parentWidget, password, input](){
                         password->setText("CURRENT PASSWORD");
                         password->setTextColor(Settings::HeaderSecondary);
-                        rm->requester->deleteAccount([this, popUp, parentWidget, password](void *errorPtr){
-                            if (errorPtr == nullptr) {
+                        rm->requester->deleteAccount([this, popUp, parentWidget, password](Api::CallbackStruct cb){
+                            if (cb.data == nullptr) {
                                 popUp->deleteLater();
 
                                 PopUp *closePopUp = new PopUp(new Widget(nullptr), Settings::scale(440), Settings::scale(200), QString(), QString(), true, false, "Your account has been deleted successfully, Fast-Discord will now exit.", QString(), QString(), false, false, parentWidget->size(), parentWidget);
@@ -870,7 +870,7 @@ MyAccount::MyAccount(Api::RessourceManager *rmp, QWidget *parent)
                                     exit(0);
                                 });
                             } else {
-                                password->setText("PASSWORD - " + reinterpret_cast<Api::Error *>(errorPtr)->message);
+                                password->setText("PASSWORD - " + reinterpret_cast<Api::Error *>(cb.data)->message);
                                 password->setTextColor(Settings::Error);
                             }
                         }, input->input->text());

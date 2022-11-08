@@ -48,9 +48,9 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
 
 void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
 {
-    rm->getClientSettings([this, guilds](void *clientPtr) {
-        const QVector<QString>& positions = reinterpret_cast<Api::ClientSettings *>(clientPtr)->guildPositions;
-        const QVector<Api::GuildFolder *>& folders = reinterpret_cast<Api::ClientSettings *>(clientPtr)->guildFolders;
+    rm->getClientSettings([this, guilds](Api::CallbackStruct cb) {
+        const QVector<QString>& positions = reinterpret_cast<Api::ClientSettings *>(cb.data)->guildPositions;
+        const QVector<Api::GuildFolder *>& folders = reinterpret_cast<Api::ClientSettings *>(cb.data)->guildFolders;
 
         unsigned int widgetCounter = 0;
         for (int i = 0 ; i < folders.size() ; i++) {

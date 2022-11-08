@@ -595,6 +595,20 @@ void const Requester::getClientSettings(Callback callback)
         false});
 }
 
+void const Requester::getWsUrl(Callback callback)
+{
+    requestApi({
+        callback,
+        "https://discord.com/api/v9/gateway",
+        "",
+        "",
+        "",
+        "",
+        GetWsUrl,
+        false
+    });
+}
+
 void const Requester::getUser(Callback callback, const Snowflake& userId)
 {
     requestApi({
@@ -662,7 +676,7 @@ void const Requester::getConnections(Callback callback)
 
 // Functions that request the API to send data
 
-void const Requester::setStatus(const QString& status)
+void const Requester::setStatus(Callback callback, const QString& status)
 {
     requestApi({
         nullptr,
@@ -675,7 +689,7 @@ void const Requester::setStatus(const QString& status)
         false});
 }
 
-void const Requester::sendTyping(const Snowflake& channelId)
+void const Requester::sendTyping(Callback callback, const Snowflake& channelId)
 {
     requestApi({
         nullptr,
@@ -688,7 +702,7 @@ void const Requester::sendTyping(const Snowflake& channelId)
         false});
 }
 
-void const Requester::sendMessage(const QString& content, const Snowflake& channelId)
+void const Requester::sendMessage(Callback callback, const QString& content, const Snowflake& channelId)
 {
     const_cast<QString&>(content).replace('\n', "\\n").replace('\t', "\\t").replace('\r', "\\r")
         .replace('\v', "\\v").replace('\f', "\\f").replace('\b', "\\b").replace('\a', "\\a");
@@ -703,7 +717,7 @@ void const Requester::sendMessage(const QString& content, const Snowflake& chann
         true});
 }
 
-void const Requester::sendMessageWithFile(const QString& content, const Snowflake& channelId, const QString& filePath)
+void const Requester::sendMessageWithFile(Callback callback, const QString& content, const Snowflake& channelId, const QString& filePath)
 {
     const_cast<QString&>(content).replace('\n', "\\n").replace('\t', "\\t").replace('\r', "\\r")
         .replace('\v', "\\v").replace('\f', "\\f").replace('\b', "\\b").replace('\a', "\\a");
@@ -718,7 +732,7 @@ void const Requester::sendMessageWithFile(const QString& content, const Snowflak
         false});
 }
 
-void const Requester::deleteMessage(const Snowflake& channelId, const Snowflake& messageId)
+void const Requester::deleteMessage(Callback callback, const Snowflake& channelId, const Snowflake& messageId)
 {
     requestApi({
         nullptr,
@@ -731,7 +745,7 @@ void const Requester::deleteMessage(const Snowflake& channelId, const Snowflake&
         false});
 }
 
-void const Requester::pinMessage(const Snowflake& channelId, const Snowflake& messageId)
+void const Requester::pinMessage(Callback callback, const Snowflake& channelId, const Snowflake& messageId)
 {
     requestApi({
         nullptr,
@@ -744,7 +758,7 @@ void const Requester::pinMessage(const Snowflake& channelId, const Snowflake& me
         false});
 }
 
-void const Requester::unpinMessage(const Snowflake& channelId, const Snowflake& messageId)
+void const Requester::unpinMessage(Callback callback, const Snowflake& channelId, const Snowflake& messageId)
 {
     requestApi({
         nullptr,
@@ -757,7 +771,7 @@ void const Requester::unpinMessage(const Snowflake& channelId, const Snowflake& 
         false});
 }
 
-void const Requester::getFile(const QString& url, const QString& filename)
+void const Requester::getFile(Callback callback, const QString& url, const QString& filename)
 {
     requestApi({
         nullptr,
@@ -823,7 +837,7 @@ void const Requester::removePhone(Callback callback, QString password)
         true});
 }
 
-void const Requester::sendVerificationEmail()
+void const Requester::sendVerificationEmail(Callback callback)
 {
     requestApi({
         nullptr,
@@ -875,7 +889,7 @@ void const Requester::deleteAccount(Callback callback, QString password)
         true});
 }
 
-void const Requester::deleteAuthorizedApp(const Snowflake& appId)
+void const Requester::deleteAuthorizedApp(Callback callback, const Snowflake& appId)
 {
     requestApi({
         nullptr,
@@ -901,7 +915,7 @@ void const Requester::changeClient(Callback callback, QString json)
         true});
 }
 
-void const Requester::harvestData()
+void const Requester::harvestData(Callback callback)
 {
     requestApi({
         nullptr,
@@ -953,7 +967,7 @@ void const Requester::setConsent(Callback callback, QString grant, QString revok
         true});
 }
 
-void const Requester::setConnection(QString type, QString id, int visibility)
+void const Requester::setConnection(Callback callback, QString type, QString id, int visibility)
 {
     requestApi({
         nullptr,
@@ -966,7 +980,7 @@ void const Requester::setConnection(QString type, QString id, int visibility)
         true});
 }
 
-void const Requester::removeConnection(QString type, QString id)
+void const Requester::removeConnection(Callback callback, QString type, QString id)
 {
     requestApi({
         nullptr,

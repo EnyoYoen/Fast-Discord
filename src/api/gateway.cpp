@@ -17,19 +17,11 @@ Gateway::Gateway(Api::Requester *requester, const QString& tokenp)
     token = tokenp;
 
     // Getting the websocket URL
-    requester->requestApi({
-        [this](void *urlp) {
-            url = *static_cast<QString *>(urlp);
+    requester->getWsUrl(
+        [this](CallbackStruct cb) {
+            url = *static_cast<QString *>(cb.data);
             this->start();
-        },
-        "https://discord.com/api/v9/gateway",
-        "",
-        "",
-        "",
-        "",
-        GetWsUrl,
-        false
-    });
+        });
 }
 
 // Set the handlers and connect

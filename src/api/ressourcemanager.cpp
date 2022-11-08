@@ -304,15 +304,15 @@ void RessourceManager::getGuildMember(Callback callback, const Snowflake& guildI
         if (index != -1) {
             callback(reinterpret_cast<void *>(members[index]));
         } else {
-            requester->getGuildMember([this, callback, guildId, userId](void *guildMemberPtr){
-                guildsMembers[guildId].append(reinterpret_cast<GuildMember *>(guildMemberPtr));
-                callback(guildMemberPtr);
+            requester->getGuildMember([this, callback, guildId, userId](CallbackStruct cb){
+                guildsMembers[guildId].append(reinterpret_cast<GuildMember *>(cb.data));
+                callback(cb);
             }, guildId, userId);
         }
     } else {
-        requester->getGuildMember([this, callback, guildId, userId](void *guildMemberPtr){
-            guildsMembers[guildId].append(reinterpret_cast<GuildMember *>(guildMemberPtr));
-            callback(guildMemberPtr);
+        requester->getGuildMember([this, callback, guildId, userId](CallbackStruct cb){
+            guildsMembers[guildId].append(reinterpret_cast<GuildMember *>(cb.data));
+            callback(cb);
         }, guildId, userId);
     }
 }
@@ -320,19 +320,19 @@ void RessourceManager::getGuildMember(Callback callback, const Snowflake& guildI
 void RessourceManager::getGuilds(Callback callback)
 {
     if (guilds.empty())
-        requester->getGuilds([&, callback](void *guildsPtr) {
-            guilds = *reinterpret_cast<QVector<Guild *> *>(guildsPtr);
-            callback(guildsPtr);
+        requester->getGuilds([&, callback](CallbackStruct cb) {
+            guilds = *reinterpret_cast<QVector<Guild *> *>(cb.data);
+            callback(cb);
         });
     else
-        callback(reinterpret_cast<void *>(&guilds));
+        callback(CallbackStruct(reinterpret_cast<void *>(&guilds)));
 }
 
 void RessourceManager::getGuildChannels(Callback callback, const Snowflake& id)
 {
-    requester->getGuildChannels([&, callback](void *guildChannelsPtr) {
-        guildsChannels[id] = *reinterpret_cast<QVector<Channel *> *>(guildChannelsPtr);
-        callback(guildChannelsPtr);
+    requester->getGuildChannels([&, callback](CallbackStruct cb) {
+        guildsChannels[id] = *reinterpret_cast<QVector<Channel *> *>(cb.data);
+        callback(cb);
     }, id);
 }
 
@@ -341,9 +341,9 @@ void RessourceManager::getGuildChannel(Callback callback, const Snowflake& guild
     openedGuildsChannels[guildId][id];
 
     if (guildsChannels.find(guildId) == guildsChannels.end()) {
-        requester->getGuildChannels([&, callback](void *guildChannelsPtr) {
-            guildsChannels[guildId] = *reinterpret_cast<QVector<Channel *> *>(guildChannelsPtr);
-            callback(guildChannelsPtr);
+        requester->getGuildChannels([&, callback](CallbackStruct cb) {
+            guildsChannels[guildId] = *reinterpret_cast<QVector<Channel *> *>(cb.data);
+            callback(cb);
         }, guildId);
     } else {
         for (int i = 0 ; i < guildsChannels[guildId].size() ; i++) {
@@ -355,25 +355,25 @@ void RessourceManager::getGuildChannel(Callback callback, const Snowflake& guild
 void RessourceManager::getPrivateChannel(Callback callback, const Snowflake& id)
 {
     if (privateChannels.empty()) {
-        requester->getPrivateChannels([&, callback](void *privateChannelsPtr) {
-            privateChannels = *reinterpret_cast<QVector<PrivateChannel *> *>(privateChannelsPtr);
+        requester->getPrivateChannels([&, callback](CallbackStruct cb) {
+            privateChannels = *reinterpret_cast<QVector<PrivateChannel *> *>(cb.data);
             for (int i = 0 ; i < privateChannels.size() ; i++) {
-                if (privateChannels[i]->id == id) callback(reinterpret_cast<void *>(privateChannels[i]));
+                if (privateChannels[i]->id == id) callback(CallbackStruct(reinterpret_cast<void *>(privateChannels[i])));
             }
         });
         return;
     }
     for (int i = 0 ; i < privateChannels.size() ; i++) {
-        if (privateChannels[i]->id == id) callback(reinterpret_cast<void *>(privateChannels[i]));
+        if (privateChannels[i]->id == id) callback(CallbackStruct(reinterpret_cast<void *>(privateChannels[i])));
     }
 }
 
 void RessourceManager::getPrivateChannels(Callback callback)
 {
     if (privateChannels.empty())
-        requester->getPrivateChannels([&, callback](void *privateChannelsPtr) {
-            privateChannels = *reinterpret_cast<QVector<PrivateChannel *> *>(privateChannelsPtr);
-            callback(privateChannelsPtr);
+        requester->getPrivateChannels([&, callback](CallbackStruct cb) {
+            privateChannels = *reinterpret_cast<QVector<PrivateChannel *> *>(cb.data);
+            callback(cb);
         });
     else
         callback(reinterpret_cast<void *>(&privateChannels));
@@ -383,27 +383,27 @@ void RessourceManager::getMessages(Callback callback, const Snowflake& channelId
 {
     if (newMessages) {
         if (messages[channelId].size() >= 50)
-            requester->getMessages([&, callback](void *messagesPtr) {
-                QVector<Message *> messagesVector = *reinterpret_cast<QVector<Message *> *>(messagesPtr);
+            requester->getMessages([&, callback](CallbackStruct cb) {
+                QVector<Message *> messagesVector = *reinterpret_cast<QVector<Message *> *>(cb.data);
                 if (messagesVector.size() > 0) {
                     for (int i = 0 ; i < messagesVector.size() ; i++)
                         messages[channelId].push_back(messagesVector[i]);
-                    callback(messagesPtr);
+                    callback(cb);
                 }
             }, channelId, messages[channelId].back()->id, limit);
     } else if (messages.find(channelId) == messages.end() || messages[channelId].size() == 0) {
-        requester->getMessages([&, callback](void *messagesPtr) {
-            messages[channelId] = *reinterpret_cast<QVector<Message *> *>(messagesPtr);
-            callback(messagesPtr);
+        requester->getMessages([&, callback](CallbackStruct cb) {
+            messages[channelId] = *reinterpret_cast<QVector<Message *> *>(cb.data);
+            callback(cb);
         }, channelId, 0, limit);
     } else if (messages[channelId].size() < 50) {
         callback(reinterpret_cast<void *>(&messages[channelId]));
     } else if (messages[channelId].size() < limit) {
-        requester->getMessages([&, callback](void *messagesPtr) {
-            QVector<Message *> messagesVector = *reinterpret_cast<QVector<Message *> *>(messagesPtr);
+        requester->getMessages([&, callback](CallbackStruct cb) {
+            QVector<Message *> messagesVector = *reinterpret_cast<QVector<Message *> *>(cb.data);
             for (int i = 0 ; i < messagesVector.size() ; i++)
                 messages[channelId].push_back(messagesVector[i]);
-            callback(reinterpret_cast<void *>(&messages[channelId]));
+            callback(CallbackStruct(reinterpret_cast<void *>(&messages[channelId])));
         }, channelId, messages[channelId].back()->id, limit - messages[channelId].size());
     } else {
         callback(reinterpret_cast<void *>(&messages[channelId]));
@@ -413,24 +413,23 @@ void RessourceManager::getMessages(Callback callback, const Snowflake& channelId
 void RessourceManager::getClient(Callback callback)
 {
     if (client == nullptr)
-        requester->getClient([&, callback](void *clientPtr) {
-            client = reinterpret_cast<Client *>(clientPtr);
-
-            callback(clientPtr);
+        requester->getClient([&, callback](CallbackStruct cb) {
+            client = reinterpret_cast<Client *>(cb.data);
+            callback(cb);
         });
     else
-        callback(reinterpret_cast<void *>(client));
+        callback(CallbackStruct(reinterpret_cast<void *>(client)));
 }
 
 void RessourceManager::getClientSettings(Callback callback)
 {
     if (clientSettings == nullptr)
-        requester->getClientSettings([&, callback](void *clientSettingsPtr) {
-            clientSettings = reinterpret_cast<ClientSettings *>(clientSettingsPtr);
-            callback(clientSettingsPtr);
+        requester->getClientSettings([&, callback](CallbackStruct cb) {
+            clientSettings = reinterpret_cast<ClientSettings *>(cb.data);
+            callback(cb);
        });
     else
-        callback(reinterpret_cast<void *>(clientSettings));
+        callback(CallbackStruct(reinterpret_cast<void *>(clientSettings)));
 }
 
 void RessourceManager::getImage(Callback callback, const QString& url, const QString& fileName)
@@ -439,7 +438,7 @@ void RessourceManager::getImage(Callback callback, const QString& url, const QSt
         requester->getImage(callback, url, fileName);}
     else {
         QString path = "cache/" + fileName;
-        callback(reinterpret_cast<void *>(const_cast<QString *>(&path)));
+        callback(CallbackStruct(reinterpret_cast<void *>(const_cast<QString *>(&path))));
     }
 }
 
@@ -451,9 +450,9 @@ void RessourceManager::getUser(Callback callback, const Snowflake& userId)
             return;
         }
     }
-    requester->getUser([&, callback](void *userPtr) {
-       users.push_back(reinterpret_cast<User *>(userPtr));
-       callback(userPtr);
+    requester->getUser([&, callback](CallbackStruct cb) {
+       users.push_back(reinterpret_cast<User *>(cb.data));
+       callback(cb);
    }, userId);
 }
 
