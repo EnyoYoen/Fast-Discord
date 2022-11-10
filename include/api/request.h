@@ -13,6 +13,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QBoxLayout>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
@@ -68,19 +70,41 @@ enum RequestTypes {
 struct RequestError
 {
     // Type flags
-    enum class ErrorType {
+    enum ErrorType {
         None    = 0,
         Http    = 1,
         Discord = 2
     };
 
     // Should always verify the type of the error before accessing data
-    ErrorType type;
     QString message;
-    int httpCode; 
-    int apiCode;
+    qint32 httpCode; 
+    qint32 apiCode;
+    qint32 type;
 
-    RequestError() : type(ErrorType::None) {}
+    RequestError() : type(None) {}
+    RequestError(QVariant statusCode, QByteArray rawData) {
+        type = None;
+
+        int http = statusCode.toInt();
+        if (http != 200 && http != 201 && http != 204) {
+            type |= Http;
+            httpCode = http;
+        }
+
+        QJsonObject jsonObj = QJsonDocument::fromJson(rawData).object();
+        if (jsonObj.contains("code") && jsonObj.contains("message")) {
+            type |= Discord;
+            apiCode = jsonObj["code"].toInt();
+            message = jsonObj["message"].toString();
+        }
+    }
+
+    QString str() {
+        return QString("RequestError: ")
+         + ((type & ErrorType::Http) ? QString::number(httpCode) + " " : QString(" "))
+         + ((type & ErrorType::Discord) ? QString::number(apiCode) + " " + message : QString());
+    }
 };
 
 struct CallbackStruct
@@ -89,6 +113,7 @@ struct CallbackStruct
     void *data;
 
     CallbackStruct(void *datap) : data(datap) {}
+    CallbackStruct(RequestError errorp, void *datap) : error(errorp), data(datap) {}
 };
 
 typedef std::function<void(CallbackStruct)> Callback;
@@ -278,7 +303,7 @@ private:
     bool stopped;                               // Used to stop the request loop
 
     void requestApi(const RequestParameters& parameters);
-    void callCallbacks(const RequestParametersNoCb& parameters, void *data);
+    void callCallbacks(const RequestParametersNoCb& parameters, CallbackStruct cb);
     void RequestLoop();
 };
 

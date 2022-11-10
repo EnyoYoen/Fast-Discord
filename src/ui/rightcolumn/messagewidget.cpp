@@ -73,7 +73,7 @@ void MessageWidget::addReaction(const Api::Snowflake& userId, const Api::Snowfla
 {
     bool found = false;
     for (Reaction *reaction : reactions) {
-        if (reaction->reaction.emoji.id == emoji->id) {
+        if (reaction->reaction.emoji.id == emoji->id && reaction->reaction.emoji.name == emoji->name) {
             rm->getClient([this, userId, reaction](Api::CallbackStruct cb){
                 reaction->addReaction(reinterpret_cast<Api::Client *>(cb.data)->id == userId);
             });
@@ -104,11 +104,15 @@ void MessageWidget::removeReaction(const Api::Snowflake& userId, const Api::Snow
         for (Reaction *reaction : reactions) {
             reaction->removeReaction(false, true);
         }
+        reactions.clear();
     } else {
-        for (Reaction *reaction : reactions) {
-            if (reaction->reaction.emoji.id == emoji->id) {
-                rm->getClient([this, userId, reaction](Api::CallbackStruct cb){
-                    reaction->removeReaction(reinterpret_cast<Api::Client *>(cb.data)->id == userId, userId == 0);
+        for (int i = 0 ; i < reactions.size() ; i++) {
+            //qDebug() << reactions[i]->reaction.emoji.id.value << emoji->id.value << reactions[i]->reaction.emoji.name << emoji->name;
+            if (reactions[i]->reaction.emoji.id == emoji->id && reactions[i]->reaction.emoji.name == emoji->name) {
+                rm->getClient([this, userId, i](Api::CallbackStruct cb){
+                    if (reactions[i]->removeReaction(reinterpret_cast<Api::Client *>(cb.data)->id == userId, userId == 0)) {
+                        reactions.remove(i);
+                    }
                 });
                 break;
             }

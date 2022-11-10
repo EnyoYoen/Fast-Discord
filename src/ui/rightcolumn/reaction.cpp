@@ -84,11 +84,11 @@ void Reaction::addReaction(bool me)
     countLabel->setText(QString::number(++count));
 }
 
-void Reaction::removeReaction(bool me, bool all)
+bool Reaction::removeReaction(bool me, bool all)
 {
     if (all || count == 1) {
         this->deleteLater();
-        return;
+        return true;
     }
         
     if (me) {
@@ -98,6 +98,7 @@ void Reaction::removeReaction(bool me, bool all)
         active = false;
     }
     countLabel->setText(QString::number(--count));
+    return false;
 }
 
 } // namespace Ui

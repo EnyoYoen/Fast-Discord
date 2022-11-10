@@ -14,7 +14,7 @@ public:
     Reaction(Api::RessourceManager *rm, const Api::Reaction& reaction, const Api::Snowflake& channelId, const Api::Snowflake& messageId, QWidget *parent);
 
     void addReaction(bool me);
-    void removeReaction(bool me, bool all);
+    bool removeReaction(bool me, bool all);
     
     Api::Reaction reaction;
 

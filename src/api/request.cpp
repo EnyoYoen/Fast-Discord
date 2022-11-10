@@ -4,7 +4,6 @@
 #include "api/ressourcemanager.h"
 #include "api/objects/connection.h"
 
-#include <QJsonDocument>
 #include <QDir>
 #include <QUrlQuery>
 #include <QMimeDatabase>
@@ -96,78 +95,80 @@ void Requester::readReply()
     }
 
     QByteArray ba = reply->readAll();
-    QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-    if (parameters.type == AddReaction || parameters.type == DeleteReaction) qDebug() << ba << statusCode.toInt();
-    if (statusCode.toInt() == 401) {
-        emit invalidToken();
-    } else if (statusCode.toInt() == 429) { // We are rate limited
-        // Set the end of the rate limit
-        rateLimitEnd = QJsonDocument::fromJson(ba)["retry_after"].toDouble();
+    RequestError error(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute), ba);
+    if (error.type != RequestError::None) {
+        qDebug() << error.str();
+        if (error.httpCode == 401) {
+            emit invalidToken();
+        } else if (error.httpCode == 429) { // We are rate limited
+            // Set the end of the rate limit
+            rateLimitEnd = QJsonDocument::fromJson(ba)["retry_after"].toDouble();
+        } 
     } else {
         switch (parameters.type) {
             case GetUser:
                 {
                     User *user;
                     unmarshal<User>(QJsonDocument::fromJson(ba).object(), &user);
-                    callCallbacks(parameters, reinterpret_cast<void *>(user));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(user)));
                     break;
                 }
             case GetGuilds:
                 {
                     QVector<Guild *> guilds = unmarshalMultiple<Guild>(QJsonDocument::fromJson(ba).array());
-                    callCallbacks(parameters, reinterpret_cast<void *>(&guilds));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&guilds)));
                     break;
                 }
             case GetGuildMember:
                 {
                     GuildMember *guildMember;
                     unmarshal<GuildMember>(QJsonDocument::fromJson(ba).object(), &guildMember);
-                    callCallbacks(parameters, reinterpret_cast<void *>(guildMember));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(guildMember)));
                     break;
                 }
             case GetGuildChannels:
                 {
                     QVector<Channel *> channels = unmarshalMultiple<Channel>(QJsonDocument::fromJson(ba).array());
-                    callCallbacks(parameters, reinterpret_cast<void *>(&channels));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&channels)));
                     break;
                 }
             case GetPrivateChannels:
                 {
                     QVector<Channel *> privateChannels = unmarshalMultiple<Channel>(QJsonDocument::fromJson(ba).array());
-                    callCallbacks(parameters, reinterpret_cast<void *>(&privateChannels));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&privateChannels)));
                     break;
                 }
             case GetMessages:
                 {
                     QVector<Message *> messages = unmarshalMultiple<Message>(QJsonDocument::fromJson(ba).array());
-                    callCallbacks(parameters, reinterpret_cast<void *>(&messages));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&messages)));
                     break;
                 }
             case GetClient:
                 {
                     Client *client;
                     unmarshal<Client>(QJsonDocument::fromJson(ba).object(), &client);
-                    callCallbacks(parameters, reinterpret_cast<void *>(client));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(client)));
                     break;
                 }
             case GetClientSettings:
                 {
                     ClientSettings *clientSettings;
                     unmarshal<ClientSettings>(QJsonDocument::fromJson(ba).object(), &clientSettings);
-                    callCallbacks(parameters, reinterpret_cast<void *>(clientSettings));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(clientSettings)));
                     break;
                 }
             case GetWsUrl:
                 {
                     QJsonValue jsonUrl = QJsonDocument::fromJson(ba)["url"];
                     QString url = jsonUrl.toString();
-                    callCallbacks(parameters, reinterpret_cast<void *>(&url));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&url)));
                     break;
                 }
             case GetImage:
                 {
                     QString imageFileName = parameters.outputFile;
-                    callCallbacks(parameters, reinterpret_cast<void *>(&imageFileName));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&imageFileName)));
                     break;
                 }
             case ChangeUsername:
@@ -181,24 +182,24 @@ void Requester::readReply()
                         callCallbacks(parameters, nullptr);
                     } else {
                         QVector<Error *> errors;
-                        Error *error;
+                        Error *errorApi;
                         QJsonObject errorsJson = doc["errors"].toObject();
                         if (!errorsJson["discriminator"].isNull()) {
-                            unmarshal<Error>(errorsJson["discriminator"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 0;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["discriminator"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 0;
+                            errors.append(new Error(*errorApi));
                         }
                         if (!errorsJson["username"].isNull()) {
-                            unmarshal<Error>(errorsJson["username"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 1;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["username"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 1;
+                            errors.append(new Error(*errorApi));
                         }
                         if (!errorsJson["password"].isNull()) {
-                            unmarshal<Error>(errorsJson["password"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 2;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["password"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 2;
+                            errors.append(new Error(*errorApi));
                         }                            
-                        callCallbacks(parameters, reinterpret_cast<void *>(&errors));
+                        callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&errors)));
                     }
                     break;
                 }
@@ -213,19 +214,19 @@ void Requester::readReply()
                         callCallbacks(parameters, nullptr);
                     } else {
                         QVector<Error *> errors;
-                        Error *error;
+                        Error *errorApi;
                         QJsonObject errorsJson = doc["errors"].toObject();
                         if (!errorsJson["email"].isNull()) {
-                            unmarshal<Error>(errorsJson["email"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 0;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["email"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 0;
+                            errors.append(new Error(*errorApi));
                         }
                         if (!errorsJson["password"].isNull()) {
-                            unmarshal<Error>(errorsJson["password"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 1;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["password"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 1;
+                            errors.append(new Error(*errorApi));
                         }                            
-                        callCallbacks(parameters, reinterpret_cast<void *>(&errors));
+                        callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&errors)));
                     }
                     break;
                 }
@@ -240,19 +241,19 @@ void Requester::readReply()
                         callCallbacks(parameters, nullptr);
                     } else {
                         QVector<Error *> errors;
-                        Error *error;
+                        Error *errorApi;
                         QJsonObject errorsJson = doc["errors"].toObject();
                         if (!errorsJson["password"].isNull()) {
-                            unmarshal<Error>(errorsJson["password"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 0;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["password"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 0;
+                            errors.append(new Error(*errorApi));
                         }   
                         if (!errorsJson["new_password"].isNull()) {
-                            unmarshal<Error>(errorsJson["new_password"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 1;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["new_password"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 1;
+                            errors.append(new Error(*errorApi));
                         }                         
-                        callCallbacks(parameters, reinterpret_cast<void *>(&errors));
+                        callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&errors)));
                     }
                     break;
                 }
@@ -296,48 +297,48 @@ void Requester::readReply()
                         callCallbacks(parameters, nullptr);
                     } else {
                         QVector<Error *> errors;
-                        Error *error;
+                        Error *errorApi;
                         QJsonObject errorsJson = doc["errors"].toObject();
                         if (!errorsJson["avatar"].isNull()) {
-                            unmarshal<Error>(errorsJson["avatar"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 0;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["avatar"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 0;
+                            errors.append(new Error(*errorApi));
                         }
                         if (!errorsJson["accent_color"].isNull()) {
-                            unmarshal<Error>(errorsJson["accent_color"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 1;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["accent_color"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 1;
+                            errors.append(new Error(*errorApi));
                         }
                         if (!errorsJson["banner"].isNull()) {
-                            unmarshal<Error>(errorsJson["banner"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 2;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["banner"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 2;
+                            errors.append(new Error(*errorApi));
                         }
                         if (!errorsJson["bio"].isNull()) {
-                            unmarshal<Error>(errorsJson["bio"].toObject()["_errors"].toArray()[0].toObject(), &error);
-                            error->intCode = 3;
-                            errors.append(new Error(*error));
+                            unmarshal<Error>(errorsJson["bio"].toObject()["_errors"].toArray()[0].toObject(), &errorApi);
+                            errorApi->intCode = 3;
+                            errors.append(new Error(*errorApi));
                         }
-                        callCallbacks(parameters, reinterpret_cast<void *>(&errors));
+                        callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&errors)));
                     }
                     break;
                 }
             case GetConsent:
             case GetHarvest:
                 {
-                    callCallbacks(parameters, reinterpret_cast<void *>(new QJsonDocument(QJsonDocument::fromJson(ba))));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(new QJsonDocument(QJsonDocument::fromJson(ba)))));
                     break;
                 }
             case GetAuthorizedApp:
                 {
                     QVector<AuthorizedApp *> apps = unmarshalMultiple<AuthorizedApp>(QJsonDocument::fromJson(ba).array());
-                    callCallbacks(parameters, reinterpret_cast<void *>(&apps));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&apps)));
                     break;
                 }
             case GetConnections:
                 {
                     QVector<Connection *> connections = unmarshalMultiple<Connection>(QJsonDocument::fromJson(ba).array());
-                    callCallbacks(parameters, reinterpret_cast<void *>(&connections));
+                    callCallbacks(parameters, CallbackStruct(error, reinterpret_cast<void *>(&connections)));
                     break;
                 }
         }
@@ -459,12 +460,12 @@ void Requester::requestApi(const RequestParameters &parameters)
     requestWaiter.wakeAll();
 }
 
-void Requester::callCallbacks(const RequestParametersNoCb& parameters, void *data)
+void Requester::callCallbacks(const RequestParametersNoCb& parameters, CallbackStruct cbs)
 {
     QVector<Callback> callbacks = requestsCallbacks[parameters];
     requestsCallbacks.remove(parameters);
-    for (int i = 0 ; i < callbacks.size() ; i++) {
-        callbacks[i](data);
+    for (Callback cb : callbacks) {
+        cb(CallbackStruct(cbs.data));
     }
 }
 
@@ -995,7 +996,6 @@ void const Requester::removeConnection(Callback callback, QString type, QString 
 
 void const Requester::addReaction(Callback callback, const Snowflake& channelId, const Snowflake& messageId, const Snowflake& reactionId, const QString& reactionName)
 {
-    qDebug() << ("https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId + "/reactions/" + QUrl::toPercentEncoding(reactionId.value == 0 ? reactionName : (reactionName + ":" + reactionId)) + "/%40me");
     requestApi({
         callback,
         "https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId + "/reactions/" + QUrl::toPercentEncoding(reactionId.value == 0 ? reactionName : (reactionName + ":" + reactionId)) + "/%40me",
@@ -1009,7 +1009,6 @@ void const Requester::addReaction(Callback callback, const Snowflake& channelId,
 
 void const Requester::deleteReaction(Callback callback, const Snowflake& channelId, const Snowflake& messageId, const Snowflake& reactionId, const QString& reactionName)
 {
-    qDebug() << ("https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId + "/reactions/" + QUrl::toPercentEncoding(reactionId.value == 0 ? reactionName : (reactionName + ":" + reactionId)) + "/%40me");
     requestApi({
         callback,
         "https://discord.com/api/v9/channels/" + channelId + "/messages/" + messageId + "/reactions/" + QUrl::toPercentEncoding(reactionId.value == 0 ? reactionName : (reactionName + ":" + reactionId)) + "/%40me",
