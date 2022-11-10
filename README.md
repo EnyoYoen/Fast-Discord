@@ -19,7 +19,11 @@ This project is really huge and requires a lot of time so any help is welcome, f
 - [Linux](https://nightly.link/EnyoYoen/Fast-Discord/workflows/build-linux/main/Fast-Discord%20-%20Linux%20x64.zip)  
 
 For Linux and MacOs, you need to install some dependencies :
-- Debian / Ubuntu : 
+- Debian 11 or Ubuntu 21.04 or later : 
+```shell
+$ sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtmultimedia5-dev libqt5networkauth5-dev libqt5svg5-dev libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
+```
+- Previous versions of Debian or Ubuntu:
 ```shell
 $ sudo apt-get install qt5-default qtmultimedia5-dev libqt5networkauth5-dev libqt5svg5-dev libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
 ```
@@ -49,7 +53,12 @@ Copy the token next to "Authorization"
 - Sodium
 
 ### Install the dependencies
-**On Debian / Ubuntu :**
+**On Debian 11 or Ubuntu 21.04 or later**
+```shell
+$ sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtmultimedia5-dev libqt5networkauth5-dev libqt5svg5-dev libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
+```
+
+**On previous versions of Debian or Ubuntu**
 ```shell
 $ sudo apt-get install qt5-default qtmultimedia5-dev libqt5networkauth5-dev libqt5svg5-dev libqt5websockets5-dev libpthread-stubs0-dev libopus-dev libsodium-dev
 ```
