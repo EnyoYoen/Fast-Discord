@@ -27,6 +27,9 @@ signals:
 public slots:
     void displayGuilds(const QVector<Api::Guild *>& guilds);
     void setUnreadGuild(const Api::Snowflake& guildId);
+    void addGuild(const Api::GuildGateway *guild);
+    void updateGuild(const Api::Guild *guild);
+    void deleteGuild(const Api::Guild *guild);
 
 private slots:
     void clicHomeButton();

@@ -42,6 +42,7 @@ public slots:
     void createChannel(const Api::Channel *channel, const Api::PrivateChannel *privateChannel);
     void deleteChannel(const Api::Snowflake& id, const Api::Snowflake& guildId, int type);
     void putChannelFirst(const Api::Snowflake& id);
+    void closeGuild(const Api::Guild *guild);
 
 private slots:
     void setGuildChannels(const QVector<Api::Channel *>& channels);

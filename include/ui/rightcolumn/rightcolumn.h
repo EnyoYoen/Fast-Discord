@@ -34,6 +34,7 @@ signals:
 
 public slots:
     void clean();
+    void closeGuild(const Api::Guild *);
     void openGuildChannel(const QString& channelName, const Api::Snowflake& guildId, const Api::Snowflake& id);
     void openPrivateChannel(const QString& channelName, const Api::Snowflake& id);
     void const addMessage(const Api::Message& message);

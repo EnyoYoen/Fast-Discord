@@ -961,7 +961,6 @@ void unmarshal<Guild>(const QJsonObject& jsonObj, Guild **object)
         unmarshalMultiple<VoiceState>(jsonObj["voice_states"].toArray()),
         unmarshalMultiple<Channel>(jsonObj["channels"].toArray()),
         unmarshalMultiple<Channel>(jsonObj["threads"].toArray()),
-        nullptr,
         unmarshalMultiple<Role>(jsonObj["roles"].toArray()),
         unmarshalMultiple<StageInstance>(jsonObj["stage_instances"].toArray()),
         unmarshalMultiple<Sticker>(jsonObj["stickers"].toArray()),
@@ -1011,6 +1010,20 @@ void unmarshal<Guild>(const QJsonObject& jsonObj, Guild **object)
         (optbool)jsonObj["lazy"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
         (optbool)jsonObj["unavailable"].isNull() ? (optbool)jsonObj[""].toBool() : (optbool)Optional::None,
         jsonObj["premium_progress_bar_enabled"].toBool()
+    };
+}
+
+template <>
+void unmarshal<GuildGateway>(const QJsonObject& jsonObj, GuildGateway **object)
+{
+    Guild *guild = new Guild;
+
+    unmarshal<Guild>(jsonObj, &guild);
+
+    *object = new GuildGateway {
+        guild,
+        unmarshalMultiple<GuildMember>(jsonObj["members"].toArray()),
+        unmarshalMultiple<Presence>(jsonObj["presences"].toArray()),
     };
 }
 
@@ -1233,7 +1246,6 @@ void unmarshal<Presence>(const QJsonObject& jsonObj, Presence **object)
 
         getString(jsonObj, "status"),
 
-        jsonObj["user_id"].toVariant().toULongLong(),
         jsonObj["guild_id"].toVariant().toULongLong()
     };
 }

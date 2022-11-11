@@ -53,7 +53,6 @@ struct Guild
     QVector<VoiceState *>     voiceStates;
     QVector<Channel *>        channels;
     QVector<Channel *>        threads;
-    void                     *presences; // TODO
     QVector<Role *>           roles;
     QVector<StageInstance *>  stageInstances;
     QVector<Sticker *>        stickers;
@@ -99,6 +98,18 @@ struct Guild
     optbool                   lazy;
     optbool                   unavailable;
     bool                      premiumProgressBarEnabled;
+};
+
+struct GuildGateway
+{
+    ~GuildGateway()
+    {
+        delete guild;
+    }
+
+    Guild                   *guild;
+    QVector<GuildMember *>   members;
+    QVector<Presence *>      presences;
 };
 
 } // namespace Api

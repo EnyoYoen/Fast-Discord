@@ -8,9 +8,10 @@
 
 namespace Ui {
 
-GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guildFolder, const QVector<Api::Guild *>& guilds, QWidget *parent)
+GuildFolder::GuildFolder(Api::RessourceManager *rmp, const Api::GuildFolder *guildFolder, const QVector<Api::Guild *>& guilds, QWidget *parent)
     : Widget(parent)
 {
+    rm = rmp;
     int color = guildFolder->color;
     guildIds = guildFolder->guildIds;
 
@@ -22,7 +23,7 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
     closedContent->setFixedSize(Settings::scale(48), Settings::scale(48));
     closedContent->setBorderRadius(Settings::scale(16));
     closedContent->setBackgroundColor(QColor((color & 0x00FF0000) >> 16, (color & 0x0000FF00) >> 8, color & 0x000000FF, 101));
-    QGridLayout *contentLayout = new QGridLayout(closedContent);
+    contentLayout = new QGridLayout(closedContent);
     contentLayout->setContentsMargins(6, 6, 0, 0);
     contentLayout->setSpacing(0);
 
@@ -46,7 +47,7 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
     closeButton->setPixmap(img);
     closeButton->setFixedSize(Settings::scale(72), Settings::scale(48));
 
-    QVBoxLayout *openedLayout = new QVBoxLayout(openedContent);
+    openedLayout = new QVBoxLayout(openedContent);
     openedLayout->setSpacing(Settings::scale(10));
     openedLayout->setContentsMargins(0, 0, 0, Settings::scale(10));
     openedLayout->addWidget(closeButton);
@@ -60,7 +61,9 @@ GuildFolder::GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guil
         guildWidgets.push_back(guildWidget);
 
         if (i < 4) {
-            contentLayout->addWidget(new GuildIcon(rm, actualGuild.id, actualGuild.name, actualGuild.icon, closedContent, this), (i < 2 ? 0 : 1), i%2);
+            GuildIcon *icon = new GuildIcon(rm, actualGuild.id, actualGuild.name, actualGuild.icon, true, closedContent);
+            guildsIcon.append(icon);
+            contentLayout->addWidget(icon, (i < 2 ? 0 : 1), i%2);
         }
     }
 
@@ -121,17 +124,81 @@ void GuildFolder::unclickedExcept(const Api::Snowflake& id)
     }
 }
 
-void GuildFolder::setUnread(const Api::Snowflake& id)
+bool GuildFolder::setUnread(const Api::Snowflake& id)
 {
     unread = true;
     if (!clicked) 
         pill->setFixedHeight(8);
     
     for (int i = 0 ; i < guildWidgets.size() ; i++) {
-        if (guildWidgets[i]->id == id)
+        if (guildWidgets[i]->id == id) {
             guildWidgets[i]->setUnread(true);
+            return true;
+        }
     }
 
+    return false;
+}
+
+bool GuildFolder::updateGuild(const Api::Guild *guild)
+{
+    for (int i = 0 ; i < guildWidgets.size() ; i++) {
+        if (guildWidgets[i]->id == guild->id) {
+            GuildWidget *newGuild = new GuildWidget(rm, *guild, this);
+            guildWidgets[i]->deleteLater();
+            guildWidgets.replace(i, newGuild);
+            openedLayout->insertWidget(i+1, newGuild);
+            QObject::connect(newGuild, &GuildWidget::leftClicked, this, &GuildFolder::propagateGuildClic);
+
+            if (i < 4) {
+                GuildIcon *newIcon = new GuildIcon(rm, guild->id, guild->name, guild->icon, true, closedContent);
+                guildsIcon[i]->deleteLater();
+                guildsIcon.replace(i, newIcon);
+                contentLayout->addWidget(newIcon, (i < 2 ? 0 : 1), i%2);
+            }
+
+            return true;
+        }
+    }
+    return false;
+}
+
+bool GuildFolder::deleteGuild(const Api::Snowflake& id)
+{
+    for (int i = 0 ; i < guildWidgets.size() ; i++) {
+        if (guildWidgets[i]->id == id) {
+            if (guildWidgets.size() == 1) {
+                return true;
+            } else {
+                int c = 0;
+                for (GuildWidget *guildWidget : guildWidgets) {
+                    if (guildWidget->unreadMessages) c++;
+                }
+
+                GuildWidget *widget = guildWidgets[i];
+                if (widget->clicked || widget->unreadMessages) {
+                    if ((clicked && widget->clicked) || !clicked) {
+                        if (unread) {
+                            if (widget->unreadMessages && c == 1)
+                                pill->setFixedHeight(0);
+                            else
+                                pill->setFixedHeight(8);
+                        } else {
+                            pill->setFixedHeight(0);
+                        }
+                    }
+                }
+
+                widget->deleteLater();
+                guildsIcon[i]->deleteLater();
+                guildWidgets.remove(i);
+                guildsIcon.remove(i);
+
+                return false;
+            }
+        }
+    }
+    return false;
 }
 
 void GuildFolder::propagateGuildClic(const Api::Snowflake& id)

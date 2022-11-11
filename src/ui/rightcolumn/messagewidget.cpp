@@ -843,7 +843,7 @@ void MessageWidget::iconMessage(const Api::Message *message, const QString &text
     QLabel *icon = new QLabel(this);
     textLabel = new Label(text, this);
     textLabel->setFixedSize(QFontMetrics(font).horizontalAdvance(text), Settings::scale(22));
-    textLabel->setFlags(Qt::AlignVCenter);
+    textLabel->setFlags(Qt::AlignTop);
     textLabel->setFont(font);
 
     font.setPixelSize(Settings::scale(Settings::fontScaling - 4));
@@ -860,7 +860,7 @@ void MessageWidget::iconMessage(const Api::Message *message, const QString &text
 
     layout->addSpacing(Settings::scale(28));
     layout->addWidget(icon);
-    layout->addWidget(textLabel, 0, Qt::AlignmentFlag::AlignBottom);
+    layout->addWidget(textLabel, 0, Qt::AlignmentFlag::AlignTop);
     layout->addSpacing(Settings::scale(4));
     layout->addWidget(timestampLabel);
     layout->addStretch(1);

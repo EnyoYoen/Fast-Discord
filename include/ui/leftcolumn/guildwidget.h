@@ -24,6 +24,8 @@ public:
     void setUnread(bool unread);
 
     Api::Snowflake id; // The id of the guild
+    bool           clicked;
+    bool           unreadMessages;
 
 signals:
     void leftClicked(const Api::Snowflake&);
@@ -41,8 +43,6 @@ private:
     QHBoxLayout *layout;
     GuildIcon   *icon;  
     GuildPill   *pill;
-    bool         clicked;  // If the widget is clicked
-    bool         unreadMessages;
 };
 
 } // namespace Ui

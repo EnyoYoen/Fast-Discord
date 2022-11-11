@@ -16,7 +16,9 @@ public:
     GuildFolder(Api::RessourceManager *rm, const Api::GuildFolder *guildFolder, const QVector<Api::Guild *>& guilds, QWidget *parent);
     void unclicked();
     void unclickedExcept(const Api::Snowflake& id);
-    void setUnread(const Api::Snowflake& id);
+    bool setUnread(const Api::Snowflake& id);
+    bool updateGuild(const Api::Guild *guild);
+    bool deleteGuild(const Api::Snowflake& id);
 
     QVector<Api::Snowflake> guildIds;
 
@@ -30,11 +32,15 @@ private:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
+    
+    Api::RessourceManager *rm; // To request the API
 
     GuildPill *pill;
     Widget *closedContent;
     Widget *openedContent;
     Widget *closeButton;
+    QVBoxLayout *openedLayout;
+    QGridLayout *contentLayout;
 
     QVector<GuildWidget *> guildWidgets;
     QVector<Widget *> guildsIcon;

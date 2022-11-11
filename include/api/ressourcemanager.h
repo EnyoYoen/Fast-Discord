@@ -58,6 +58,9 @@ signals:
     void presenceReceived(const Api::Presence&);
     void messageReceived(const Api::Message&);
     void memberUpdateReceived(const Api::GuildMemberGateway&);
+    void guildCreated(const Api::GuildGateway *);
+    void guildUpdated(const Api::Guild *);
+    void guildDeleted(const Api::Guild *);
     void channelCreated(const Api::Channel *, const Api::PrivateChannel *);
     void channelUpdated(const Api::Channel *, const Api::PrivateChannel *);
     void channelDeleted(const Api::Snowflake&, const Api::Snowflake&, int);

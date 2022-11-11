@@ -48,7 +48,7 @@ void MiddleColumn::setPresences(const QVector<Api::Presence *>& presences)
         for (int i = 0 ; i < presences.size() ; i++) {
             bool found = false;
             for (int j = 0 ; j < privateChannels->size() ; j++) {
-                if ((*privateChannels)[j]->type == Api::DM && ((*privateChannels)[j]->recipientIds)[0] == presences[i]->userId
+                if ((*privateChannels)[j]->type == Api::DM && ((*privateChannels)[j]->recipientIds)[0] == presences[i]->user->id
                  && privateChannelWidgets.size() > 0) {
                     privateChannelWidgets[j]->setStatus(presences[i]->status);
                     found = true;
@@ -104,7 +104,9 @@ void MiddleColumn::setPrivateChannels(const QVector<Api::PrivateChannel *>& priv
 
 void MiddleColumn::setGuildChannels(const QVector<Api::Channel *>& channels)
 {
-    // Clear the whannels
+    // Clear the channels
+    for (GuildChannelWidget *widget : guildChannelWidgets)
+        widget->deleteLater();
     guildChannelWidgets.clear();
     channelList->takeWidget();
 
@@ -323,6 +325,16 @@ void MiddleColumn::putChannelFirst(const Api::Snowflake& id)
             }
         }
         displayPrivateChannels();
+    }
+}
+
+void MiddleColumn::closeGuild(const Api::Guild *guild)
+{
+    if (guild->id == openedGuildId) {
+        for (GuildChannelWidget *widget : guildChannelWidgets)
+            widget->deleteLater();
+        guildChannelWidgets.clear();
+        channelList->takeWidget();
     }
 }
 

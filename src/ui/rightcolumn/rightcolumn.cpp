@@ -200,6 +200,11 @@ void RightColumn::clean()
     header->close();
 }
 
+void RightColumn::closeGuild(const Api::Guild *)
+{
+    clean();
+}
+
 void RightColumn::openGuildChannel(const QString& channelName, const Api::Snowflake& guildId, const Api::Snowflake& id)
 {
     currentOpenedGuild = guildId;
@@ -375,7 +380,7 @@ void const RightColumn::addMessage(const Api::Message& message)
         Api::Message *messagep = const_cast<Api::Message *>(&message);
         rm->getMessages([this, messagep](Api::CallbackStruct cb) {
             QVector<Api::Message *> channelMessages = *reinterpret_cast<QVector<Api::Message *> *>(cb.data);
-            messageArea->addMessage(messagep, channelMessages[1]);
+            messageArea->addMessage(messagep, (channelMessages.size() > 1 ? channelMessages[1] : nullptr));
         }, currentOpenedChannel, 1, false);
         emit messageAdded(currentOpenedChannel);
     }

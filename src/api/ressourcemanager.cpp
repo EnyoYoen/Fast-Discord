@@ -64,6 +64,29 @@ void RessourceManager::gatewayDispatchHandler(QString& eventName, json& data)
     } else if (eventName == "READY_SUPPLEMENTAL") {
         presences = Api::unmarshalMultiple<Api::Presence>(data["merged_presences"]["friends"].toArray());
         emit presencesReceived(presences);
+    } else if (eventName == "GUILD_CREATE") {
+        Api::GuildGateway *guild;
+        Api::unmarshal<Api::GuildGateway>(data.toObject(), &guild);
+        guilds.append(guild->guild);
+        emit guildCreated(guild);
+    } else if (eventName == "GUILD_UPDATE") {
+        Api::Guild *guild;
+        Api::unmarshal<Api::Guild>(data.toObject(), &guild);
+        for (int i = 0 ; i < guilds.size() ; i++) {
+            if (guilds[i]->id == guild->id) {
+                guilds.replace(i, guild);
+            }
+        }
+        emit guildUpdated(guild);
+    } else if (eventName == "GUILD_DELETE") {
+        Api::Guild *guild;
+        Api::unmarshal<Api::Guild>(data.toObject(), &guild);
+        for (int i = 0 ; i < guilds.size() ; i++) {
+            if (guilds[i]->id == guild->id) {
+                guilds.remove(i);
+            }
+        }
+        emit guildDeleted(guild);
     } else if (eventName == "CHANNEL_CREATE") {
         Api::Channel *channel;
         Api::unmarshal<Api::Channel>(data.toObject(), &channel);

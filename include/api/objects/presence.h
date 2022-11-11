@@ -91,7 +91,6 @@ struct Presence
     ClientStatus        *clientStatus;
     QVector<Activity *>  activities;
     QString              status;
-    Snowflake            userId;
     Snowflake            guildId;
 };
 

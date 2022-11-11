@@ -46,11 +46,12 @@ LeftColumn::LeftColumn(Api::RessourceManager *rmp, QWidget *parent)
     QObject::connect(homeButton, &HomeButton::clicked, this, &LeftColumn::clicHomeButton);
 }
 
-void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
+void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guildsp)
 {
-    rm->getClientSettings([this, guilds](Api::CallbackStruct cb) {
+    rm->getClientSettings([this, guildsp](Api::CallbackStruct cb) {
+        QVector<Api::Guild *> guilds = QVector<Api::Guild *>(guildsp); 
         const QVector<QString>& positions = reinterpret_cast<Api::ClientSettings *>(cb.data)->guildPositions;
-        const QVector<Api::GuildFolder *>& folders = reinterpret_cast<Api::ClientSettings *>(cb.data)->guildFolders;
+        QVector<Api::GuildFolder *> folders = reinterpret_cast<Api::ClientSettings *>(cb.data)->guildFolders;
 
         unsigned int widgetCounter = 0;
         for (int i = 0 ; i < folders.size() ; i++) {
@@ -59,16 +60,13 @@ void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
             for (int j = 0 ; j < folder->guildIds.size() ; j++) {
                 for (int k = 0 ; k < guilds.size() ; k++) {
                     if (folder->guildIds[j] == guilds[k]->id) {
-                        if (folder->intId == 0 && folder->strId.isNull()) {
-                            GuildWidget *guildWidget = new GuildWidget(rm, *guilds[k], this);
-                            guildWidgets.push_back(guildWidget);
-                            layout->insertWidget(widgetCounter + 3, guildWidget);
-                            QObject::connect(guildWidget, &GuildWidget::leftClicked, this, &LeftColumn::clicGuild);
-                            widgetCounter++;
-                            break;
-                        } else {
+                        if (folder->intId != 0 || !folder->strId.isNull()) {
                             folderGuilds.push_back(guilds[k]);
+                        } else {
+                            break;
                         }
+                        guilds.remove(k);
+                        k--;
                     }
                 }
             }
@@ -81,11 +79,11 @@ void LeftColumn::displayGuilds(const QVector<Api::Guild *>& guilds)
             }
         }
         
-        if (folders.empty() && !guilds.empty()) {
+        if (!guilds.empty()) {
             for (int i = 0 ; i < guilds.size() ; i++) {
                 GuildWidget *guildWidget = new GuildWidget(rm, *guilds[i], this);
                 guildWidgets.push_back(guildWidget);
-                layout->insertWidget(i + 3, guildWidget);
+                layout->insertWidget(layout->count() - 1, guildWidget);
                 QObject::connect(guildWidget, &GuildWidget::leftClicked, this, &LeftColumn::clicGuild);
             }
         }
@@ -139,18 +137,64 @@ void LeftColumn::clicGuild(const Api::Snowflake& guildId)
 
 void LeftColumn::setUnreadGuild(const Api::Snowflake& guildId)
 {
+    for (GuildWidget *guildWidget : guildWidgets) {
+        if (guildWidget->id == guildId) {
+            guildWidget->setUnread(true);
+            return;
+        }
+    }
+
+    for (GuildFolder *guildFolder : guildFolders) {
+        if (guildFolder->setUnread(guildId))
+            return;
+    }
+}
+
+void LeftColumn::addGuild(const Api::GuildGateway *guild)
+{
+    GuildWidget *guildWidget = new GuildWidget(rm, *guild->guild, this);
+    guildWidgets.push_back(guildWidget);
+    layout->insertWidget(layout->count() - 1, guildWidget);
+    QObject::connect(guildWidget, &GuildWidget::leftClicked, this, &LeftColumn::clicGuild);
+}
+
+void LeftColumn::updateGuild(const Api::Guild *guild)
+{
     for (int i = 0 ; i < guildWidgets.size() ; i++) {
-        if (guildWidgets[i]->id == guildId) {
-            guildWidgets[i]->setUnread(true);
+        if (guildWidgets[i]->id == guild->id) {
+            GuildWidget *newGuild = new GuildWidget(rm, *guild, this);
+            guildWidgets[i]->deleteLater();
+            guildWidgets.replace(i, newGuild);
+            layout->insertWidget(i + 3, newGuild);
+            QObject::connect(newGuild, &GuildWidget::leftClicked, this, &LeftColumn::clicGuild);
+            return;
+        }
+    }
+
+    for (GuildFolder *folder : guildFolders) {
+        if (folder->updateGuild(guild))
+            return;
+    }
+
+}
+
+void LeftColumn::deleteGuild(const Api::Guild *guild)
+{
+    for (int i = 0 ; i < guildWidgets.size() ; i++) {
+        if (guildWidgets[i]->id == guild->id) {
+            guildWidgets[i]->deleteLater();
+            guildWidgets.remove(i);
             return;
         }
     }
 
     for (int i = 0 ; i < guildFolders.size() ; i++) {
-        QVector<Api::Snowflake> guildIds = guildFolders[i]->guildIds;
-        for (int j = 0 ; j < guildIds.size() ; j++) {
-            if (guildIds[j] == guildId) {
-                guildFolders[i]->setUnread(guildId);
+        for (Api::Snowflake id : guildFolders[i]->guildIds) {
+            if (id == guild->id) {
+                if (guildFolders[i]->deleteGuild(guild->id)) {
+                    guildFolders[i]->deleteLater();
+                    guildFolders.remove(i);
+                }
                 return;
             }
         }
