@@ -98,7 +98,7 @@ void Requester::readReply()
     RequestError error(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute), ba);
     if (error.type != RequestError::None) {
         qDebug() << error.str();
-        if (error.httpCode == 401) {
+        if (error.httpCode == 401 && error.type & RequestError::Discord) {
             emit invalidToken();
         } else if (error.httpCode == 429) { // We are rate limited
             // Set the end of the rate limit
