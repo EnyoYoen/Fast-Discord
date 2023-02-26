@@ -1,3 +1,4 @@
+# ⚠ This project is discontinued due to lack of time, use it at your own risk ⚠
 
 ![Fast-Discord logo](doc/images/Fast-Discord-Logo.png)  
 *Thanks to [Sour Dani](https://github.com/dangreene0) for the logo*
@@ -12,11 +13,10 @@
  - [Coding conventions](#coding-conventions)
  - [License](#license)
 
-This project is really huge and requires a lot of time so any help is welcome, from the smallest syntax correction to major changes.
-## Download
-- [Windows](https://nightly.link/EnyoYoen/Fast-Discord/workflows/build-windows/main/Fast-Discord%20-%20Windows%20x64.zip)
-- [MacOs](https://nightly.link/EnyoYoen/Fast-Discord/workflows/build-macos/main/Fast-Discord%20-%20MacOs%20x64.zip)
-- [Linux](https://nightly.link/EnyoYoen/Fast-Discord/workflows/build-linux/main/Fast-Discord%20-%20Linux%20x64.zip)  
+## Download **Removed**
+- Windows
+- MacOs
+- Linux
 
 For Linux and MacOs, you need to install some dependencies :
 - Debian 11 or Ubuntu 21.04 or later : 
